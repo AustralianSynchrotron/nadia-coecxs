@@ -209,7 +209,7 @@ class Complex_2D{
   /**
    * Get the norm of this Complex_2D: @f $     $ @f.
    * 
-   * @return @f $\sqrt{ \Sum_{x,y}{ \mathrm{|C(x,y)|^2} }  } $ @f.
+   * @return @f $ \sqrt{ \sum_{x,y}{ \mathrm{|C(x,y)|^2} }  } $ @f.
    * @todo Check that this still works. This is not really useful, maybe I
    * should get ride of it.
    */
