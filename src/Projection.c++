@@ -226,9 +226,9 @@ void Projection::project_support(Complex_2D * c){
 }
 
 
-inline bool Projection::is_support(int x, int y){
+/**inline bool Projection::is_support(int x, int y){
   return (support[x][y]==0) ? true : false;
-}
+  }**/
 
 void Projection::project_intensity(Complex_2D * c){
   fft->perform_forward_fft(c);      

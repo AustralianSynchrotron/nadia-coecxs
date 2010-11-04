@@ -28,7 +28,7 @@ using namespace std;
 
 int main(void){
 
-  ProfilerStart("profiler.prof");
+  //  ProfilerStart("profiler.prof");
 
   //define some constants which will be used in the code:
 
@@ -43,13 +43,13 @@ int main(void){
   const static char * support_file_name = "image_files/support_2.tiff";
 
   //number of hybrid input-out iterations to perform.
-  const int hio_iterations = 200;
+  const int hio_iterations = 800;
   
   //number of error reduction iterations to perform after the HIO.
-  const int er_iterations = 0;
+  const int er_iterations = 100;
 
   //output the current image ever "output_iterations"
-  const int output_iterations = 20;
+  const int output_iterations = 40;
 
 
   /*******  get the diffraction data from file and read into an array *****/
@@ -206,7 +206,7 @@ int main(void){
   delete[] autoc;
   delete[] data;
 
-  ProfilerStop();
+  // ProfilerStop();
 
   return 0;
 }

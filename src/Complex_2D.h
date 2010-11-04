@@ -1,18 +1,6 @@
 #ifndef COMPLEX_2D_H
 #define COMPLEX_2D_H
 
-/**
- * @file
- * @author  Nadia Davidson 
- *
- * @section DESCRIPTION
- *
- * This class represents a 2D complex field. Setter and getter methods
- * are provided along with some other useful functions. Complex_2D
- * objects are used in the CDI reconstruction to represent the ESW
- * in a single plane.
- */
-
 
 #include <math.h>
 
@@ -25,6 +13,19 @@
 #define PHASE 3
 #define MAG_SQ 4
 
+
+/**
+ * @file Complex_2D.h
+ * @class Complex_2D
+ * @author  Nadia Davidson 
+ *
+ * @breif A 2-dimensional array of complex numbers 
+ *
+ * This class represents a 2D complex field. Setter and getter methods
+ * are provided along with some other useful functions. Complex_2D
+ * objects are used in the CDI reconstruction to represent the ESW
+ * in a single plane.
+ */
 class Complex_2D{
   
   double *** array;
