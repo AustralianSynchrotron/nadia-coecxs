@@ -20,36 +20,45 @@
 #include "io.h"
 #include "Complex_2D.h"
 #include "Projection.h"
+#include "Config.h"
 //#include "FourierT.h"
-#include <google/profiler.h>
+//#include <google/profiler.h>
 
 using namespace std;
 
 
 int main(void){
 
-  //  ProfilerStart("profiler.prof");
+  Config c("my.in");
+
+  //ProfilerStart("profiler.prof");
 
   //define some constants which will be used in the code:
 
   //the data file name
-  const static char * data_file_name = "image_files/test_dat.tif";
+  string data_file_name = c.getString("data_file_name");
 
   //the approx. level of background noise in the image
-  const double noise_level = 30;
+  double noise_level = c.getDouble("noise_level");
 
   //the file which provides the support (pixels with the value 0
   //are considered as outside the object)
-  const static char * support_file_name = "image_files/support_2.tiff";
+  string support_file_name = c.getString("support_file_name");
+  cout << "value:"<<support_file_name<<"-"<<endl;
 
   //number of hybrid input-out iterations to perform.
-  const int hio_iterations = 800;
+  const int hio_iterations = 200;
   
   //number of error reduction iterations to perform after the HIO.
-  const int er_iterations = 100;
+  const int er_iterations = 0;
 
   //output the current image ever "output_iterations"
-  const int output_iterations = 40;
+  int output_iterations = c.getDouble("output_iterations");
+
+  if(c.getStatus()==FAILURE){
+    cout << "Problem reading the configuration file. Exiting" <<endl;
+    exit(0);
+  }
 
 
   /*******  get the diffraction data from file and read into an array *****/
@@ -206,7 +215,7 @@ int main(void){
   delete[] autoc;
   delete[] data;
 
-  // ProfilerStop();
+  //ProfilerStop();
 
   return 0;
 }

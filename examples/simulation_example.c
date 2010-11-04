@@ -93,7 +93,7 @@ int main(void){
   }
 
   //write the output to file
-  write_ppm("sim_intensity.ppm", n_x, n_y, intensity,true);
+  write_ppm("sim_intensity.ppm", n_x, n_y, intensity);
 
 
   /******** get the support from file ****************************/

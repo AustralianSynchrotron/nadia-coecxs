@@ -1,8 +1,9 @@
-
+CXS_ROOT = $(HOME)/cxs/cxs_software
+HDF_ROOT = $(HOME)/hdf4.2.5-cygwin-szip
 
 CXX      = g++
-CXXFLAGS = -O3 -g -Wall -fno-exceptions -fPIC $(ROOTCFLAGS)
-#CXXFLAGS = -O4 -g -Wall -fno-exceptions -funroll-loops -fPIC $(ROOTCFLAGS)
+CXXFLAGS = -O3 -g -Wall -fno-exceptions # -mno-cygwin
+
 
 LD       = gcc
 LDFLAGS  = #-fno-stack-protector -fno-stack-protector-all

@@ -194,8 +194,8 @@ class anonomous_array{
 /***************************************************************/
 int write_ppm(string file_name, int nx, int ny, double ** data, bool log_scale){
 
-  const int pixel_maximum = 1000;
-    
+  const int largest_pixel_value = pow(2,16)-1; //16 bit
+  
    //find the maximum value of the image
    double array_maximum = 0;
    for(int i=0; i < nx ; ++i){
@@ -204,10 +204,17 @@ int write_ppm(string file_name, int nx, int ny, double ** data, bool log_scale){
 	 array_maximum = data[i][j];
      }
    }
-   
-   double scale_factor = pixel_maximum/array_maximum;
-   if(log_scale)
-     scale_factor = pixel_maximum/log10(array_maximum*10);
+
+   double scale_factor=1;
+   int pixel_maximum=array_maximum;
+   if(array_maximum > largest_pixel_value){
+     scale_factor = largest_pixel_value/array_maximum;
+     pixel_maximum= largest_pixel_value;
+   }
+   if(log_scale){
+     scale_factor = largest_pixel_value/log10(array_maximum*10);
+     pixel_maximum= largest_pixel_value;
+   }
 
    //cout << "array_maximum="<<array_maximum<<endl;
    //cout << "scale="<<scale_factor<<endl;
@@ -238,10 +245,6 @@ int write_ppm(string file_name, int nx, int ny, double ** data, bool log_scale){
        }
        else
 	 new_file << (uint) (scale_factor*(data[i][j])) << " ";
-       
-       //if((uint) pixel_maximum*(data[i][j]/array_maximum)!=0)
-       //cout << (uint) (pixel_maximum*(data[i][j]/array_maximum)) << endl;
-
      }
      new_file << endl;
    }
