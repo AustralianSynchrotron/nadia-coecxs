@@ -1,6 +1,9 @@
 #ifndef PROJECTION_H
 #define PROJECTION_H
 
+#include <map>
+#include <string>
+
 /** The number of reconstruction algorithms */
 #define NALGORITHMS 9 
 
@@ -15,6 +18,7 @@ enum { PSF, PFS, PS, PF, PI };
 
 /** The different algorithms to choose from */
 enum { ER, BIO, BOO, HIO, DM, SF, ASR, HPR, RAAR};
+
 
 //forward declarations
 class Complex_2D;
@@ -88,6 +92,8 @@ class Projection{
   Complex_2D * temp_complex_PFS;
   Complex_2D * temp_complex_PF;
 
+  static std::map<std::string,int> * algNameMap;
+
  public:
   
   Projection(Complex_2D * complex);
@@ -123,12 +129,20 @@ class Projection{
   double get_chi2_error(Complex_2D * c);
   double get_current_error();
 
+  static int getAlgFromName(std::string algorithm_name){
+    std::map<std::string,int>::iterator alg;
+    alg = algNameMap->find(algorithm_name);
+    if(alg == algNameMap->end() )
+      return -1;
+    return (alg->second);
+  }
 
  private:
   
   void project_support(Complex_2D * c);
   void project_intensity(Complex_2D * c);
   void scale_intensity(Complex_2D * c);
+  static std::map<std::string,int> * set_up_algorithm_name_map();
   //bool is_support(int x, int y);
     
 };

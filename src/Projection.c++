@@ -12,8 +12,28 @@
 #include "io.h" //
 #include <sstream>
 
+
 using namespace std;
 
+map<string,int> * Projection::algNameMap = Projection::set_up_algorithm_name_map();
+
+//Projection::AlgNameMap[0] = 
+// = map_list_of("ER",ER)("BIO",BIO)("BOO",BOO)("HIO",HIO)("DM",DM)("SF",SF)("ASR",ASR)("HPR",HPR)("RAAR",RAAR);
+
+map<string,int> * Projection::set_up_algorithm_name_map(){
+  
+  map<string,int> * temp_map = new map<string,int>;
+  temp_map->insert(pair<string,int>("ER",ER));
+  temp_map->insert(pair<string,int>("BIO",BIO));
+  temp_map->insert(pair<string,int>("BOO",BOO));
+  temp_map->insert(pair<string,int>("HIO",HIO));
+  temp_map->insert(pair<string,int>("DM",DM));
+  temp_map->insert(pair<string,int>("SF",SF));
+  temp_map->insert(pair<string,int>("ASR",ASR));
+  temp_map->insert(pair<string,int>("HPR",HPR));
+  temp_map->insert(pair<string,int>("RAAR",RAAR));
+  return temp_map;
+}
 
 Projection::Projection(Complex_2D * initial_guess){
   complex = initial_guess;
@@ -258,6 +278,12 @@ void Projection::scale_intensity(Complex_2D * c){
 
 
 void Projection::set_algorithm(int alg){
+  if(algorithm==alg){
+    cout << "Warning you are trying to set the algorithm"
+	 << " to the one already in use" << endl; 
+    return;
+  }
+
   algorithm = alg;
   
   switch(alg){

@@ -3,6 +3,7 @@
 
 #include <string>
 #include <map>
+#include <list>
 
 #define FAILURE 0
 #define SUCCESS 1
@@ -25,7 +26,8 @@ class Config{
   int getInt(std::string key);
   //bool getBoolean(std::string key);
 
-  //std::list<int> getIntList(std::string key);
+  std::list<int> * getIntList(std::string key);
+  std::list<std::string> * getStringList(std::string key);
 
   int getStatus(){return status;};
 

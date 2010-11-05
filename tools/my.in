@@ -1,0 +1,17 @@
+#this is a comment
+
+#set the parameters
+data_file_name= ../examples/data_after.ppm 
+noise_level = 30    #this is also a comment
+support_file_name = ../examples/image_files/support_2.tiff
+output_file_name_prefix = real
+output_iterations = 40
+
+do_autocorrelation = true
+do_reconstruction = true
+
+#setup the algorithm
+algorithm = HIO ER HIO ER
+iterations= 1 2 3 4
+
+

@@ -50,17 +50,6 @@ Config::Config(string file_name){
       string value = line.substr(pos+1);
 
       mapping.insert(pair<string,string>(key,value));
-
-      /**
-      istringstream value_stream(value_temp);
-      string value;
-      value_stream >> value;
-      
-      cout << "original line after comment removed:"<<line<<endl;
-      cout << "key with shite space:"<<key_temp<<"-"<<endl;
-      cout << "key without shite space:"<<key<<"-"<<endl;
-      cout << "value with shite space:"<<value_temp<<"-"<<endl;
-      cout << "value without shite space:"<<value<<"-"<<endl; **/
       }
     }
     
@@ -73,26 +62,76 @@ Config::Config(string file_name){
 string Config::getString(string key){
   MapType::iterator iter = mapping.find(key);
   if (iter == mapping.end() ){
-    std::cout << "Key is not in my_map" << endl;
+    std::cout << "Key:"<<key<<" not found in config file" << endl;
     status=FAILURE;
     return "";
   }
+
+  //remove white space
   string value;      
   istringstream value_temp(iter->second);
   value_temp >> value;
-  //remove white space
-  
   return value;
+}
+
+list<string> * Config::getStringList(string key){
+  MapType::iterator iter = mapping.find(key);
+  if (iter == mapping.end() ){
+    std::cout << "Key:"<<key<<" not found in config file" << endl;
+    status=FAILURE;
+    return 0;
+  }
+  //tokenize the string
+  list<string> * new_list = new list<string>;
+  string value;
+  istringstream value_temp(iter->second);
+  value_temp >> value;
+  while(value_temp){
+    new_list->push_back(value);
+    value_temp >> value;
+  }
+  if(new_list->size()==0){
+    std::cout << "Key:"<<key
+	      <<" has no entries in the config file" << endl;
+    status=FAILURE;
+    return 0;
+  }
   
+  return new_list;
+}
+
+list<int> * Config::getIntList(string key){
+  MapType::iterator iter = mapping.find(key);
+  if (iter == mapping.end() ){
+    std::cout << "Key:"<<key<<" not found in config file" << endl;
+    status=FAILURE;
+    return 0;
+  }
+  //tokenize the string
+  list<int> * new_list = new list<int>;
+  string value;
+  istringstream value_temp(iter->second);
+  value_temp >> value;
+  while(value_temp){
+    new_list->push_back(atoi(value.c_str()));
+    value_temp >> value;
+  }
+  if(new_list->size()==0){
+    std::cout << "Key:"<<key<<" has no entries in the config file" << endl;
+    status=FAILURE;
+    return 0;
+  }
+  return new_list;
 }
 
 double Config::getDouble(string key){
 MapType::iterator iter = mapping.find(key);
  if (iter == mapping.end() ){
-   std::cout << "Key is not in my_map" << endl;
+   std::cout << "Key:"<<key<<" not found in config file" << endl;
    status=FAILURE;
    return 0;
  }
+ //convert to a double
  return atof((iter->second).c_str());
  
 }
@@ -100,12 +139,11 @@ MapType::iterator iter = mapping.find(key);
 int Config::getInt(string key){
 MapType::iterator iter = mapping.find(key);
  if (iter == mapping.end() ){
-   std::cout << "Key is not in my_map" << endl;
+   std::cout << "Key:"<<key<<" not found in config file" << endl;
    status=FAILURE;
    return 0;
  }
+ //convert to an int
  return atoi((iter->second).c_str());
- 
 }
 
-  
