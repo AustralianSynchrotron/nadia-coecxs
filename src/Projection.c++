@@ -51,11 +51,6 @@ Projection::Projection(Complex_2D * initial_guess){
   //make the fourier transform object
   fft = new FourierT(complex->get_size_x(), complex->get_size_y());
 
-  //set up the copies of the initial guess ready for
-  //running the algorithm
-  // for(int i=0; i<NTERMS-1; i++)
-  //  x[i] = new Complex_2D(nx,ny);
-  
   temp_complex_PFS = new Complex_2D(nx,ny);
   temp_complex_PF = new Complex_2D(nx,ny);
 
@@ -117,7 +112,7 @@ double ** Projection::get_intensity_autocorrelation(){
 }
 
 
-void Projection::initialise_estimate(double seed){
+void Projection::initialise_estimate(int seed){
   //initialise the random number generator
   srand(seed);
 
@@ -161,7 +156,8 @@ void Projection::set_intensity(double ** detector_intensity){
   do_error = error;
   }**/
 
-double Projection::get_current_error(){
+double Projection::get_error(){
+    
   //if(do_error)
     return current_error;
     //else
@@ -247,7 +243,7 @@ void Projection::project_support(Complex_2D * c){
 
 
 void Projection::project_intensity(Complex_2D * c){
-  fft->perform_forward_fft(c);      
+  fft->perform_forward_fft(c);    
   scale_intensity(c);
   fft->perform_backward_fft(c);  
 }

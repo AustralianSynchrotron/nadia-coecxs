@@ -114,7 +114,7 @@ class Projection{
     set_algorithm(algorithm); //force algorithm constants to update
   };
 
-  void initialise_estimate(double seed=0);
+  void initialise_estimate(int seed=0);
   
   double ** get_intensity_autocorrelation();
 
@@ -126,8 +126,11 @@ class Projection{
 			    double m9, double m10);
   
   void print_algorithm();
-  double get_chi2_error(Complex_2D * c);
-  double get_current_error();
+  //double get_chi2_error(Complex_2D * c);
+ 
+  /** Get the error for the previous iteration.
+      .....  */
+  double get_error();
 
   static int getAlgFromName(std::string algorithm_name){
     std::map<std::string,int>::iterator alg;

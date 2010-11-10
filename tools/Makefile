@@ -1,6 +1,6 @@
 include ../make.inc
 
-SOURCE_TOOLS=hdf2ppm.c planar_CDI_reconstruction.c
+SOURCE_TOOLS=hdf2ppm.c tiff2ppm.c planar_CDI_reconstruction.c
 EXEC_TOOLS=$(SOURCE_TOOLS:.c=.exe)
 
 LIB_SO=../lib/libCOECXS.so
