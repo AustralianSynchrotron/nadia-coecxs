@@ -22,24 +22,37 @@
 #include "Complex_2D.h"
 #include "Projection.h"
 #include "Config.h"
+#include "FourierT.h"
 
 using namespace std;
+
+#define OUTPUT_MINIMAL 0
+#define OUTPUT_ITER    1
+#define OUTPUT_ERROR   2
 
 int main(int argc, char * argv[]){
 
   /** work out which config file to use **/
   string config_file = "planar.config";
-  
+
+  //and set the seed of the inital guess
+  int seed = 0;
+
   if(argc==1)
     cout << "No config file given, using "
 	 << "the default: "<<config_file<<endl;
 
-  if(argc==2)
+  if(argc==2){
+    cout << "No seed value given... using the default (0)" <<endl;
     config_file=argv[1];
+  }
 
-  if(argc>2){
+  if(argc==3)
+    seed = atoi(argv[2]);
+
+  if(argc>3){
     cout << "Too many arguments given. Usage: "
-	 << "planar_CDI_reconstuction <config filename>"<<endl;
+	 << "planar_CDI_reconstuction <config filename> <seed>"<<endl;
       exit(0);
   }
 
@@ -54,14 +67,18 @@ int main(int argc, char * argv[]){
   //the data file name
   string data_file_name = c.getString("data_file_name");
 
+  string data_file_type = c.getString("data_file_type");
+
   //the file which provides the support (pixels with the value 0
   //are considered as outside the object)
   string support_file_name = c.getString("support_file_name");
 
+  string support_file_type = c.getString("support_file_type");
+
   //output filename prefix
   string output_file_name_prefix = c.getString("output_file_name_prefix");
 
-  //output the current image ever "output_iterations"
+  //output the current image every "output_iterations"
   int output_iterations = c.getDouble("output_iterations");
 
   //names of the algorithms to use in order
@@ -70,7 +87,7 @@ int main(int argc, char * argv[]){
   //the number of iterations to perform for each algorithm
   list<int> * iterations = c.getIntList("iterations");
   
-  //do some error checking. where all the values we need present
+  //do some error checking. Were all the values we need present
   //in the config file?
   if(c.getStatus()==FAILURE){
     cout << "Problem reading the configuration file. Exiting" <<endl;
@@ -81,14 +98,27 @@ int main(int argc, char * argv[]){
 	 <<"of iteractions do not match. Exiting"<< endl;
     exit(0);
   }
-  
+
+  /** get some optional configuration parameters **/
+  int output_level = c.getInt("info_level");
+  int output_diffraction_estimate = c.getInt("output_diffraction_estimate");
+  int use_log_scale_for_diffraction = c.getInt("use_log_scale_for_diffraction");
+  int use_log_scale_for_object = c.getInt("use_log_scale_for_object");
 
   /*** get the diffraction data from file and read into an array *****/
   int nx, ny;
   double ** data;
-  int status = read_ppm(data_file_name, &nx, &ny, &data);  
-  
-  //check that the file could be opened okay
+  int status;
+  if(data_file_type=="tiff")
+    status = read_tiff(data_file_name, &nx, &ny, &data);  
+  else if(data_file_type=="ppm")
+    status = read_ppm(data_file_name, &nx, &ny, &data);
+  else{ //check that the file type is valid
+    cout << "Can not process files of type \""<< data_file_type 
+	 <<"\".. exiting"  << endl;
+    return(1);
+  }
+  //and check that the file could be opened okay
   if(!status){
     cout << "failed to get data from "<< data_file_name 
 	 <<".. exiting"  << endl;
@@ -97,8 +127,16 @@ int main(int argc, char * argv[]){
 
   /******* get the support from file and read it into an array *****/
   double ** support;
-  int nx_s, ny_s;
-  status = read_tiff(support_file_name, &nx_s, &ny_s, &support);  
+  int nx_s=0, ny_s=0;
+  if(support_file_type=="tiff")
+    status = read_tiff(support_file_name, &nx_s, &ny_s, &support);  
+  else if(support_file_type=="ppm")
+    status = read_ppm(support_file_name, &nx_s, &ny_s, &support);
+  else{ //check that the file type is valid
+    cout << "Can not process files of type \""<< support_file_type 
+	 <<"\".. exiting"  << endl;
+    return(1);
+  }
   if(!status){
     cout << "failed to get data from "<< support_file_name 
 	 <<".. exiting"  << endl;
@@ -121,7 +159,7 @@ int main(int argc, char * argv[]){
   proj.set_intensity(data);
 
   //Initialise the current object ESW with a random numbers
-  proj.initialise_estimate(0);
+  proj.initialise_estimate(seed);
 
   //make a 2D array and allocate some memory.
   //This will be used to output the image of the 
@@ -130,8 +168,15 @@ int main(int argc, char * argv[]){
   for(int i=0; i < nx; i++)
     result[i]= new double[ny];
 
- 
+  //get up a temporary FFT in case we need to output
+  //the guess of the diffraction pattern
+  FourierT * fft;
+  if(output_diffraction_estimate){
+    fft = new FourierT(nx,ny);
+  }
+
   /*** run the reconstruction ************/
+
 
   list<string>::iterator algorithms_itr = algorithms->begin();
   list<int>::iterator iterations_itr = iterations->begin();
@@ -141,10 +186,10 @@ int main(int argc, char * argv[]){
   while(algorithms_itr != algorithms->end()&&
 	iterations_itr != iterations->end()){
 
-    //proj.set_algorithm((*algorithms_itr)); //<-- to be fixed    
-    cout << "Switching to the "<<(*algorithms_itr)
-	 <<" algorithm" << endl;
-
+    if(output_level!=OUTPUT_MINIMAL)
+      cout << "Switching to the "<< (*algorithms_itr)
+    	   <<" algorithm" << endl;
+    
     //get the projection
     int alg = Projection::getAlgFromName(*algorithms_itr);
     if(alg == -1 ){
@@ -158,34 +203,54 @@ int main(int argc, char * argv[]){
     cumulative_iterations+=(*iterations_itr);
 
     for(; i < cumulative_iterations; i++){
+      if(output_level!=OUTPUT_MINIMAL)
+	cout << "Iteration " << i << endl;
+     
 
-      cout << "iteration " << i << endl;
-      
       //apply the iterations  
       proj.iterate(); 
-    
+      if(output_level==OUTPUT_ERROR && i>0)
+	cout << "Error for iteration "<<(i-1)<<" is " << proj.get_error() << endl;
+
       if(i%output_iterations==0){
 	//output the current estimate of the object
 	ostringstream temp_str ( ostringstream::out ) ;
 	object_estimate.get_2d(MAG,&result);
-	temp_str << output_file_name_prefix << "_" << i << ".ppm";
-	write_ppm(temp_str.str(), nx, ny, result);
-	temp_str.clear();
+	temp_str << output_file_name_prefix << "_" << i << ".ppm" << flush;
+	write_ppm(temp_str.str(), nx, ny, result, use_log_scale_for_object);
+	//temp_str.clear();
 
-	//uncomment to output the estimated 
-	/**Complex_2D * temp = object_estimate.clone();
-	   fft.perform_forward_fft(temp);
-	   temp->get_2d(MAG_SQ,&result);
-	   temp_str << "diffraction.ppm";
-	   write_ppm(temp_str.str(), nx, ny, result, true); 
-	   delete temp;
-	**/
+	//output the estimation of the intensity in 
+	//the detector plane if needed
+	if(output_diffraction_estimate){
+	  Complex_2D * temp = object_estimate.clone();
+	  fft->perform_forward_fft(temp);
+	  temp->get_2d(MAG_SQ,&result);
+	  temp_str << output_file_name_prefix << "_diffraction_" << i << ".ppm" << flush;
+	  write_ppm(temp_str.str(), nx, ny, result, use_log_scale_for_diffraction); 
+	  delete temp;
+	}
       }
     }
     iterations_itr++;
     algorithms_itr++;
   }
+
+  //write out the final image
+  object_estimate.get_2d(MAG,&result);
+  ostringstream temp_str ( ostringstream::out ) ;
+  temp_str << output_file_name_prefix << "_final.ppm" << flush;
+  write_ppm(temp_str.str(), nx, ny, result, use_log_scale_for_object);
   
+  if(output_diffraction_estimate){
+    Complex_2D * temp = object_estimate.clone();
+    fft->perform_forward_fft(temp);
+    temp->get_2d(MAG_SQ,&result);
+    temp_str << output_file_name_prefix << "_diffraction_final.ppm" << flush;
+    write_ppm(temp_str.str(), nx, ny, result, use_log_scale_for_diffraction); 
+    delete temp;
+  }
+
   //clean up
   for(int i=0; i< nx; i++){
     delete[] result[i];
@@ -199,7 +264,10 @@ int main(int argc, char * argv[]){
 
   delete algorithms;
   delete iterations;
-
+  
+  if(output_diffraction_estimate)
+    delete fft;
+ 
   return 0;
 }
 
