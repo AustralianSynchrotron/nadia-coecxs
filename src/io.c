@@ -19,7 +19,7 @@ typedef unsigned int tiffio_uint32;
 #define int8 mfhdf_int8
 #define int32 mfhdf_int32
 #define uint32 mfhdf_uint32
-#include "mfhdf.h"
+#include "hdf/mfhdf.h"
 
 #undef int8
 #undef int32

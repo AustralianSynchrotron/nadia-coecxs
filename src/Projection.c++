@@ -8,7 +8,7 @@
 #include "Complex_2D.h"
 #include "FourierT.h"
 #include "Projection.h"
-#include <time.h>
+//#include <time.h>
 #include "io.h" //
 #include <sstream>
 
