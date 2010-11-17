@@ -12,7 +12,7 @@ LIB_A = ../lib/libCOECXS.a
 all: $(EXAMPLE_EXEC)
 
 %.exe: %.c
-	g++ -g -O2 -I../include $< -o $@  -ltiff -lmfhdf -ldf -lfftw3 -lstdc++  $(LIB_A)
+	@CXX@ @CXXFLAGS@ -I../include $< -o $@ @LDFLAGS@ @LIBS@ $(LIB_A)
 
 clean:                                                     
 	rm -f *~
