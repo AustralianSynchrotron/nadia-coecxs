@@ -1,5 +1,7 @@
 #include ../make.inc
 
+LD_RUN_PATH=$(PWD)/../lib
+
 EXAMPLE_SRC=real_example.c simulation_example.c simple_example.c
 EXAMPLE_EXEC=$(EXAMPLE_SRC:.c=.exe)
 
@@ -12,7 +14,7 @@ LIB_A = ../lib/libCOECXS.a
 all: $(EXAMPLE_EXEC)
 
 %.exe: %.c
-	@CXX@ @CXXFLAGS@ -I../include $< -o $@ @LDFLAGS@ @LIBS@ $(LIB_A)
+	@CXX@ @CXXFLAGS@ -I../include $< -o $@ @LDFLAGS@ @LIBS@ -L../lib -lCOECXS
 
 clean:                                                     
 	rm -f *~
