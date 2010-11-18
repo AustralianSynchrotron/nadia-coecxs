@@ -29,4 +29,11 @@ clobber:
 	rm -f lib/libCOECXS.so lib/libCOECXS.a
 	rm -f include/*.h
 
-
+#use with caution
+bare:
+	make clean
+	make clobber
+	rm -rf examples/*.ppm tools/*.ppm
+	rm -rf \#*# examples/\#*# src/\#*# tools/\#*#
+	rm -rf src/Makefile example/Makefile tools/Makefile
+	rm -rf config.log config.status
