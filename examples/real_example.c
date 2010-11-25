@@ -21,6 +21,7 @@
 #include "Complex_2D.h"
 #include "Projection.h"
 #include "Config.h"
+#include "shrinkwrap.h"
 //#include "FourierT.h"
 //#include <google/profiler.h>
 
@@ -47,10 +48,10 @@ int main(void){
   cout << "value:"<<support_file_name<<"-"<<endl;
 
   //number of hybrid input-out iterations to perform.
-  const int hio_iterations = 200;
+  const int hio_iterations = 1200;
   
   //number of error reduction iterations to perform after the HIO.
-  const int er_iterations = 0;
+  const int er_iterations = 200;
 
   //output the current image ever "output_iterations"
   int output_iterations = c.getDouble("output_iterations");
@@ -173,6 +174,13 @@ int main(void){
       write_ppm(temp_str.str(), nx, ny, result, true); 
       delete temp;
       **/
+      
+      //apply the shrinkwrap algorithm
+      apply_shrinkwrap(nx,ny,&result,2,0.1);
+      proj.set_support(result);
+      write_ppm("shrink.ppm", nx, ny, result);
+      
+
     }
 
   }
@@ -193,6 +201,11 @@ int main(void){
       temp_str << "real_example_iter_" << i << ".ppm";
       write_ppm(temp_str.str(), nx, ny, result);
       temp_str.clear();
+
+      //apply the shrinkwrap algorithm
+      apply_shrinkwrap(nx,ny,&result,2,0.1);
+      proj.set_support(result);
+      write_ppm("shrink.ppm", nx, ny, result);
     }
     
   }

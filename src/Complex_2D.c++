@@ -125,6 +125,27 @@ void Complex_2D::add(Complex_2D * c2, double scale){
 
 }
 
+void Complex_2D::multiply(Complex_2D * c2, double scale){
+
+  if(nx!=c2->get_size_x() || ny!=c2->get_size_y()){
+    cout << "in Complex_2D::add, the dimensions of the "
+      "input Complex_2D do not match the dimensions of "
+      "this Complex_2D object" << endl;
+    exit(1);
+  }
+  
+  for(int i=0; i < nx; ++i){
+    for(int j=0; j < ny; ++j){
+      double new_real = c2->get_real(i,j)*this->get_real(i,j)
+	- c2->get_imag(i,j)*this->get_imag(i,j);
+      double new_imag = c2->get_real(i,j)*this->get_imag(i,j)
+	+ c2->get_imag(i,j)*this->get_real(i,j);
+      array[i][j][REAL]=scale*new_real;
+      array[i][j][IMAG]=scale*new_imag;
+    }
+  }
+}
+
 double Complex_2D::get_norm(){
 
   double norm_squared=0;

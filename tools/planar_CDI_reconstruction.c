@@ -210,7 +210,8 @@ int main(int argc, char * argv[]){
       //apply the iterations  
       proj.iterate(); 
       if(output_level==OUTPUT_ERROR && i>0)
-	cout << "Error for iteration "<<(i-1)<<" is " << proj.get_error() << endl;
+	cout << "Error for iteration "<<(i-1)<<" is " 
+	     << proj.get_error() << endl;
 
       if(i%output_iterations==0){
 	//output the current estimate of the object
@@ -226,8 +227,12 @@ int main(int argc, char * argv[]){
 	  Complex_2D * temp = object_estimate.clone();
 	  fft->perform_forward_fft(temp);
 	  temp->get_2d(MAG_SQ,&result);
-	  temp_str << output_file_name_prefix << "_diffraction_" << i << ".ppm" << flush;
-	  write_ppm(temp_str.str(), nx, ny, result, use_log_scale_for_diffraction); 
+	  temp_str << output_file_name_prefix 
+		   << "_diffraction_" << i 
+		   << ".ppm" << flush;
+	  write_ppm(temp_str.str(), nx, ny, 
+		    result, 
+		    use_log_scale_for_diffraction); 
 	  delete temp;
 	}
       }

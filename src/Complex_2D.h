@@ -207,6 +207,22 @@ class Complex_2D{
    */
   void add(Complex_2D *c2, double scale=1);
 
+
+  /**
+   * Multiple another Complex_2D to this Complex_2D. The values in this object
+   * will be modified.
+   * 
+   * @param c2 The Complex_2D to add.
+   * @param scale If this value is non-empty, or not 1, c2 will be
+   * scaled before being added to the Complex_2D,@f $\mathrm{this} = \mathrm{this} \times
+   * \mathrm{scale} \times \mathrm{c2} $ @f . Using this function is more efficient than
+   * calling Complex_2D::scale() followed by Complex_2D:multiply()
+   * separately.
+   */
+  void multiply(Complex_2D *c2, double scale=1);
+
+
+
   /**
    * Get the norm of this Complex_2D: @f $     $ @f.
    * 

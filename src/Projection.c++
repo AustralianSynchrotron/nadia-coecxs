@@ -12,7 +12,6 @@
 #include "io.h" //
 #include <sstream>
 
-
 using namespace std;
 
 map<string,int> * Projection::algNameMap = Projection::set_up_algorithm_name_map();
