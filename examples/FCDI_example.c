@@ -35,7 +35,7 @@ int main(void){
 
   //the file which provides the support (pixels with the value 0
   //are considered as outside the object)
-  string support_file_name = "image_files/wf_support.tiff";
+  string support_file_name = "image_files/wf_support_2.tiff";
 
   /*******  get the diffraction data from file and read into an array *****/
   int nx, ny;
@@ -78,8 +78,8 @@ int main(void){
   Complex_2D zone_estimate(nx,ny);
 
   //dimensions in micron
-  double wavelength = 1.240/(2.54*1000);
-  double focallength = 2*80*0.05/wavelength;
+  double wavelength = 1.240/(2.54*1000); //0.000488
+  double focallength = 2*80*0.05/wavelength; //16,400
 
   FCDI_IllumRecon proj(&zone_estimate,
 		       wavelength,

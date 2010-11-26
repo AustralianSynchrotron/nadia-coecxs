@@ -38,21 +38,29 @@ FCDI_IllumRecon::FCDI_IllumRecon(Complex_2D * initial_guess,
   fft = new FourierT(complex->get_size_x(), complex->get_size_y());
 
 
-  coefficients = new Complex_2D(nx,ny);
+  forward_coefficients = new Complex_2D(nx,ny);
+  backward_coefficients = new Complex_2D(nx,ny);
+
   //set-up the coefficients
   //it's easier to do it once and reuse the matrix.
   int x_mid = nx/2;
   int y_mid = ny/2;
 
+  double scaling = beam_wavelength*focal_to_detector_length/(pixel_length*nx);
+
   for(int i=0; i<nx; i++){
     for(int j=0; j<ny; j++){
       double phi = 2*zone_to_focal_length + 2*focal_to_detector_length;
-      phi += ((x_mid-i)*(x_mid-i)+(y_mid-j)*(y_mid-j))/zone_to_focal_length;
-      phi += ((x_mid-i)*(x_mid-i)+(y_mid-j)*(y_mid-j))/focal_to_detector_length;
+      
+      phi += scaling*((x_mid-i)*(x_mid-i)+(y_mid-j)*(y_mid-j))/zone_to_focal_length;
+      phi += scaling*((x_mid-i)*(x_mid-i)+(y_mid-j)*(y_mid-j))/focal_to_detector_length;
       //add in the rho part
       phi *= M_PI/beam_wavelength;
-      coefficients->set_real(i,j,(-1/beam_wavelength)*cos(phi));
-      coefficients->set_imag(i,j,(-1/beam_wavelength)*sin(phi));
+      forward_coefficients->set_real(i,j,(-1/beam_wavelength)*cos(phi));
+      forward_coefficients->set_imag(i,j,(-1/beam_wavelength)*sin(phi));
+
+      backward_coefficients->set_real(i,j,(1/beam_wavelength)*cos(-1*phi));
+      backward_coefficients->set_imag(i,j,(1/beam_wavelength)*sin(-1*phi));
     }
   }
   
@@ -61,7 +69,8 @@ FCDI_IllumRecon::FCDI_IllumRecon(Complex_2D * initial_guess,
 
 FCDI_IllumRecon::~FCDI_IllumRecon(){
   delete fft;
-  delete coefficients;
+  delete forward_coefficients;
+  delete backward_coefficients;
 
   for(int i=0; i<complex->get_size_x() ; i++){
     delete[] support[i];
@@ -172,8 +181,8 @@ int FCDI_IllumRecon::iterate(){
   for(int i=0; i < nx; i++)
     result[i]= new double[ny];
 
-  complex->get_2d(MAG,&result);
-  write_ppm("before.ppm", nx, ny, result);
+  // complex->get_2d(MAG,&result);
+  // write_ppm("before.ppm", nx, ny, result);
 
   //propogate to the focal plane.
   fft->perform_forward_fft(complex);    
@@ -182,10 +191,10 @@ int FCDI_IllumRecon::iterate(){
   write_ppm("1.ppm", nx, ny, result);
 
   //multiply by A and B and constants (from nature paper 2006)
-  complex->multiply(coefficients,(1/zone_to_focal_length));
+  complex->multiply(forward_coefficients,(1/zone_to_focal_length));
 
-  complex->get_2d(MAG,&result);
-  write_ppm("1.5.ppm", nx, ny, result);
+  //complex->get_2d(MAG,&result);
+  //write_ppm("1.5.ppm", nx, ny, result);
 
   //propogate to the detector plane.
   fft->perform_forward_fft(complex);
@@ -203,13 +212,13 @@ int FCDI_IllumRecon::iterate(){
   fft->perform_backward_fft(complex); 
     
   complex->get_2d(MAG,&result);
-  write_ppm("4.ppm", nx, ny, result);
+  write_ppm("4.ppm", nx, ny, result,log);
 
   //multiply by constants
-  complex->multiply(coefficients,1/focal_to_detector_length);
+  complex->multiply(backward_coefficients,1/focal_to_detector_length);
 
-  complex->get_2d(MAG,&result);
-  write_ppm("4.5.ppm", nx, ny, result);
+  //complex->get_2d(MAG,&result);
+  //write_ppm("4.5.ppm", nx, ny, result);
 
   //go back to zone plate plane. 
   fft->perform_backward_fft(complex); 
