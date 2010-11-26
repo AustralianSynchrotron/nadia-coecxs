@@ -79,7 +79,10 @@ int main(void){
 
   //dimensions in micron
   double wavelength = 1.240/(2.54*1000); //0.000488
+  cout << "wavelength " << wavelength << endl;
+
   double focallength = 2*80*0.05/wavelength; //16,400
+  cout << "focallength " << focallength << endl;
 
   FCDI_IllumRecon proj(&zone_estimate,
 		       wavelength,

@@ -71,6 +71,8 @@ class FCDI_IllumRecon{
 
   Complex_2D * forward_coefficients;
   Complex_2D * backward_coefficients;
+  Complex_2D * forward_coefficients_const;
+  Complex_2D * backward_coefficients_const;
 
  public:
   
