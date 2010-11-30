@@ -69,10 +69,15 @@ class FCDI_IllumRecon{
 
   double pixel_length;
 
-  Complex_2D * forward_coefficients;
-  Complex_2D * backward_coefficients;
+  //Complex_2D * forward_coefficients;
+  //Complex_2D * backward_coefficients;
   Complex_2D * forward_coefficients_const;
   Complex_2D * backward_coefficients_const;
+
+  Complex_2D * A_forward;
+  Complex_2D * A_backward;
+  Complex_2D * B_forward;
+  Complex_2D * B_backward;
 
  public:
   

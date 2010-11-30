@@ -49,15 +49,17 @@ void FourierT::perform_forward_fft(Complex_2D * c_in, Complex_2D * c_out){
     copy_from_fftw_array(transformed, c_in);
   }
   else{
-    copy_from_fftw_array(transformed, c_out);
+    copy_from_fftw_array(transformed, c_out); //true=invert
   }
 
 }
 
 
 void FourierT::perform_backward_fft(Complex_2D * c_in, Complex_2D *c_out){
-  copy_to_fftw_array(transformed, c_in);
+
+  copy_to_fftw_array(transformed, c_in); //true=invert
   fftw_execute(f_backward);
+
   if(!c_out){
     copy_from_fftw_array(original, c_in);
   }
@@ -66,7 +68,7 @@ void FourierT::perform_backward_fft(Complex_2D * c_in, Complex_2D *c_out){
   }
 }
 
-void FourierT::copy_to_fftw_array(fftw_complex * array , Complex_2D * c){
+void FourierT::copy_to_fftw_array(fftw_complex * array , Complex_2D * c, bool invert){
   //check the dimensions:
   if(!c || c->get_size_x()!=nx || c->get_size_y()!=ny ){
     cout << "In FourierT::copy_to_fftw_array. Dimensions of "
@@ -74,16 +76,35 @@ void FourierT::copy_to_fftw_array(fftw_complex * array , Complex_2D * c){
 	 << "match.. exiting" <<endl;
     exit(1);
   }
+  int middle_x = nx/2;
+  int middle_y = ny/2;
+
+  if(nx%2==1 || ny%2==1)
+    cout << "WARNING: The array dimensions are odd "
+	 << "but we have assumed they are even when inverting an "
+	 << "array after FFT. This will probably cause you issues..."<<endl;
 
   for(int i=0; i < nx; ++i){
     for(int j=0; j < ny; ++j){
-      array[(i*ny) + j][REAL]=c->get_real(i,j);
-      array[(i*ny) + j][IMAG]=c->get_imag(i,j);
+      if(invert){
+	int j_new = j+middle_y; 
+	int i_new = i+middle_x; 
+	if(j >=  middle_y)
+	  j_new = j_new - 2*middle_y; 
+	if(i >=  middle_x)
+	  i_new = i_new - 2*middle_x; 
+	array[(i*ny) + j][REAL]=c->get_real(i_new,j_new);
+	array[(i*ny) + j][IMAG]=c->get_imag(i_new,j_new);
+      }
+      else{
+	array[(i*ny) + j][REAL]=c->get_real(i,j);
+	array[(i*ny) + j][IMAG]=c->get_imag(i,j);
+      }
     }
   } 
 }
 
-void FourierT::copy_from_fftw_array(fftw_complex * array, Complex_2D * c){
+void FourierT::copy_from_fftw_array(fftw_complex * array, Complex_2D * c, bool invert){
   //check the dimensions:
   if(!c || c->get_size_x()!=nx || c->get_size_y()!=ny ){
     cout << "Dimensions of the Complex_2D and "
@@ -95,14 +116,36 @@ void FourierT::copy_from_fftw_array(fftw_complex * array, Complex_2D * c){
   //always scale as FFTW doesn't normalise the result
   double scale_factor = 1.0/(sqrt(nx*ny));
 
+  int middle_x = nx/2;
+  int middle_y = ny/2;
+
+  if(nx%2==1 || ny%2==1)
+    cout << "WARNING: The array dimensions are odd "
+	 << "but we have assumed they are even when inverting an "
+	 << "array after FFT. This will probably cause you issues..."<<endl;
+
   for(int i=0; i < nx; ++i){
     for(int j=0; j < ny; ++j){
-      c->set_real(i,j,(array[i*ny + j][REAL])*scale_factor);
-      c->set_imag(i,j,(array[i*ny + j][IMAG])*scale_factor);
+
+      //tricky code here which puts the corners back into the
+      //center after FFT
+      if(invert){
+	int j_new = j+middle_y; 
+	int i_new = i+middle_x; 
+	if(j >=  middle_y)
+	  j_new = j_new - 2*middle_y; 
+	if(i >=  middle_x)
+	  i_new = i_new - 2*middle_x; 
+
+	c->set_real(i,j,(array[i_new*ny + j_new][REAL])*scale_factor);
+	c->set_imag(i,j,(array[i_new*ny + j_new][IMAG])*scale_factor);
+      }
+      else{
+	c->set_real(i,j,(array[i*ny + j][REAL])*scale_factor);
+	c->set_imag(i,j,(array[i*ny + j][IMAG])*scale_factor);
+      }
     }
   }
-
+  
 }
-
-
 

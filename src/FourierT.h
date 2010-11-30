@@ -39,9 +39,11 @@ class FourierT{
 
   
  private:
-  void copy_to_fftw_array(fftw_complex * array , Complex_2D * c);
-  void copy_from_fftw_array(fftw_complex * array , Complex_2D * c);
-    
+  void copy_to_fftw_array(fftw_complex * array , Complex_2D * c, 
+			  bool invert=false);
+  void copy_from_fftw_array(fftw_complex * array , Complex_2D * c,
+			    bool invert=false);
+
 };
 
 #endif

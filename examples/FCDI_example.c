@@ -35,7 +35,7 @@ int main(void){
 
   //the file which provides the support (pixels with the value 0
   //are considered as outside the object)
-  string support_file_name = "image_files/wf_support_2.tiff";
+  string support_file_name = "image_files/wf_support_4.tiff";
 
   /*******  get the diffraction data from file and read into an array *****/
   int nx, ny;

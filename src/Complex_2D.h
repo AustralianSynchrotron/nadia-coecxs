@@ -246,6 +246,10 @@ class Complex_2D{
    */
   void copy(Complex_2D * c);
 
+
+  void invert();
+
+
  private:
     
   /**

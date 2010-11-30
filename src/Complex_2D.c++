@@ -67,8 +67,18 @@ double Complex_2D::get_value(int x, int y, int type){
     return get_real(x,y);
   case IMAG:
     return get_imag(x,y);
-  case PHASE:
-    return 0; //to fix
+  case PHASE: //goes between 0 and 2pi i.e. always positive.
+    if(get_real(x,y)==0){
+      if(get_imag(x,y)==0)
+	return 0;
+      if(get_imag(x,y)>0)
+	return M_PI/2;
+      else
+	return 3*M_PI/2;
+    }
+    if( atan2(get_imag(x,y),get_real(x,y)) <0 )
+      return atan2(get_imag(x,y),get_real(x,y)) + 2*M_PI;
+    return atan2(get_imag(x,y),get_real(x,y));
   case MAG_SQ:
     return pow(get_mag(x,y),2);
   default:
@@ -185,6 +195,34 @@ void Complex_2D::copy(Complex_2D * c){
 
 }
 
+void Complex_2D::invert(){
+
+  Complex_2D * temp = clone();
+    
+  int middle_x = nx/2;
+  int middle_y = ny/2;
+
+  if(nx%2==1 || ny%2==1)
+    cout << "WARNING: The array dimensions are odd "
+	 << "but we have assumed they are even when inverting an "
+	 << "array after FFT. This will probably cause you issues..."<<endl;
+
+  for(int i=0; i < nx; ++i){
+    for(int j=0; j < ny; ++j){
+      
+	int j_new = j+middle_y; 
+	int i_new = i+middle_x; 
+	if(j >=  middle_y)
+	  j_new = j_new - 2*middle_y; 
+	if(i >=  middle_x)
+	  i_new = i_new - 2*middle_x; 
+	set_real(i,j,temp->get_real(i_new,j_new));
+	set_imag(i,j,temp->get_imag(i_new,j_new));
+    }
+  }
+  delete temp;
+
+}
 
 
 int Complex_2D::check_bounds(int x, int y){
