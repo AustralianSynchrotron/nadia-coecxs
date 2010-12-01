@@ -37,7 +37,6 @@ FCDI_IllumRecon::FCDI_IllumRecon(Complex_2D * initial_guess,
   //make the fourier transform object
   fft = new FourierT(complex->get_size_x(), complex->get_size_y());
 
-
   //forward_coefficients = new Complex_2D(nx,ny);
   //backward_coefficients = new Complex_2D(nx,ny);
   forward_coefficients_const = new Complex_2D(nx,ny);
@@ -53,7 +52,7 @@ FCDI_IllumRecon::FCDI_IllumRecon(Complex_2D * initial_guess,
   double y_mid = (ny-1)/2;
 
   double z12 = zone_to_focal_length;
-  double z21 = -1*zone_to_focal_length;
+  double z21 = -zone_to_focal_length;
   double z23 = focal_to_detector_length;
   double z32 = -1*focal_to_detector_length;
 
@@ -74,19 +73,14 @@ FCDI_IllumRecon::FCDI_IllumRecon(Complex_2D * initial_guess,
       double phi_B_b = (M_PI/beam_wavelength)*(rho_2/z21);
 
 
-      //      cout << "phi_B_f="<< phi_B_f;
-      // cout << "sanity check: " << cos(phi_B_f) << endl;
-      //cout << "sanity check: " << cos(phi_B_f) << endl;
-
-      
       A_forward->set_real(i,j,sin(phi_A_f));
       A_forward->set_imag(i,j,-1*cos(phi_A_f));
 
       A_backward->set_real(i,j,sin(phi_A_b));
       A_backward->set_imag(i,j,-1*cos(phi_A_b));
 
-      B_forward->set_real(i,j,rho_2);//cos(phi_B_f));
-      B_forward->set_imag(i,j,rho_2);//sin(phi_B_f));
+      B_forward->set_real(i,j,cos(phi_B_f));
+      B_forward->set_imag(i,j,sin(phi_B_f));
 
       B_backward->set_real(i,j,cos(phi_B_b));
       B_backward->set_imag(i,j,sin(phi_B_b));
@@ -97,21 +91,15 @@ FCDI_IllumRecon::FCDI_IllumRecon(Complex_2D * initial_guess,
       backward_coefficients_const->set_real(i,j,sin(2*M_PI*z21/beam_wavelength));
       backward_coefficients_const->set_imag(i,j,-1*cos(2*M_PI*z21/beam_wavelength));
 
-      /**  double phi_a_12 = (M_PI/beam_wavelength)*(rho_2/fabs(z12));
-      double phi_a_23 = (M_PI/beam_wavelength)*(rho_2/fabs(z23));
-
-      A_forward->set_real(i,j,cos(phi_a_12));
-      A_forward->set_imag(i,j,sin(phi_a_12));
-      A_backward->set_real(i,j,cos(phi_a_12));
-      A_backward->set_imag(i,j,-sin(phi_a_12));
-
-      B_forward->set_real(i,j,cos(phi_a_23));
-      B_forward->set_imag(i,j,sin(phi_a_23));
-      B_backward->set_real(i,j,cos(phi_a_23));
-      B_backward->set_imag(i,j,-sin(phi_a_23));**/
     }
   }
-  
+
+  forward_coefficients_const->multiply(A_forward);
+  forward_coefficients_const->multiply(B_forward);
+
+  backward_coefficients_const->multiply(A_backward);
+  backward_coefficients_const->multiply(B_backward);
+
 }
 
 
@@ -186,8 +174,8 @@ void FCDI_IllumRecon::initialise_estimate(int seed){
 	complex->set_value(i,j,IMAG,0);
       }
       else{
-	double r = (65000.0*rand()/(double) RAND_MAX) ;//* pow(-1,i + j);
-	double im = (65000.0*rand()/(double) RAND_MAX) ;//* pow(-1,i + j);
+	double r = (65000.0);//*rand()/(double) RAND_MAX) ;//* pow(-1,i + j);
+	double im = (65000.0);//*rand()/(double) RAND_MAX) ;//* pow(-1,i + j);
 	complex->set_value(i,j,REAL,r); 
 	complex->set_value(i,j,IMAG,im);
       }
@@ -235,16 +223,16 @@ int FCDI_IllumRecon::iterate(){
   for(int i=0; i < nx; i++)
     result[i]= new double[ny];
 
-  complex->get_2d(MAG,&result);
+  /**complex->get_2d(MAG,&result);
   write_ppm("before.ppm", nx, ny, result);
   complex->get_2d(PHASE,&result);
-  write_ppm("before_phase.ppm", nx, ny, result);
+  write_ppm("before_phase.ppm", nx, ny, result);**/
   
   //cout << "0: "<< complex->get_norm() << endl;
 
   //propogate to the focal plane.
   fft->perform_forward_fft(complex);
-  //complex->invert();
+  complex->invert();
 
   /**for(int i=0; i<nx; i++){
     for(int j=0; j<ny; j++){
@@ -254,22 +242,17 @@ int FCDI_IllumRecon::iterate(){
     }
     }**/
 
-  complex->get_2d(MAG,&result);
-  write_ppm("A_forward_mag.ppm", nx, ny, result);
-  complex->get_2d(PHASE,&result);
-  write_ppm("A_forward_phase.ppm", nx, ny, result);
-
-  complex->multiply(A_forward);
+  //complex->multiply(A_forward);
   
   complex->get_2d(MAG,&result);
-  write_ppm("1.ppm", nx, ny, result);
+  write_ppm("1.ppm", nx, ny, result,true);
   cout << "1: "<< complex->get_norm() << endl;
-
-  complex->multiply(B_forward);
-  complex->get_2d(MAG,&result);
-  write_ppm("B_forward_mag.ppm", nx, ny, result);
   complex->get_2d(PHASE,&result);
-  write_ppm("B_forward_phase.ppm", nx, ny, result);
+  write_ppm("1_phase.ppm", nx, ny, result);
+
+  //complex->multiply(B_forward);
+
+  complex->multiply(forward_coefficients_const);
 
   //multiply by A and B and constants (from nature paper 2006)
   //complex->multiply(forward_coefficients,(1.0/zone_to_focal_length));
@@ -283,6 +266,7 @@ int FCDI_IllumRecon::iterate(){
   //write_ppm("1.5.ppm", nx, ny, result);
 
   //propogate to the detector plane.
+  complex->invert();
   fft->perform_forward_fft(complex);
 
   /** for(int i=0; i<nx; i++){
@@ -294,21 +278,21 @@ int FCDI_IllumRecon::iterate(){
     }**/
   
 
-  complex->multiply(forward_coefficients_const);
+  //complex->multiply(forward_coefficients_const);
 
   complex->get_2d(MAG,&result);
   write_ppm("2.ppm", nx, ny, result);
   cout << "2: "<< complex->get_norm() << endl;
 
   complex->get_2d(PHASE,&result);
-  write_ppm("phase_bf.ppm", nx, ny, result);
+  write_ppm("2_phase.ppm", nx, ny, result);
 
   //impose the amplitude constraint
   scale_intensity(complex);
   cout << "Current Error is: " << current_error<<endl;
 
   complex->get_2d(MAG,&result);
-  write_ppm("3.ppm", nx, ny, result);
+  write_ppm("3.ppm", nx, ny, result,true);
   cout << "3: "<< complex->get_norm() << endl;
 
   //complex->get_2d(PHASE,&result);
@@ -316,8 +300,8 @@ int FCDI_IllumRecon::iterate(){
 
   //go back to the focal plane
 
-  fft->perform_forward_fft(complex);
-
+  fft->perform_backward_fft(complex);
+  complex->invert();
   //complex->multiply(B_backward);
 
   /**
@@ -329,7 +313,7 @@ int FCDI_IllumRecon::iterate(){
     }
     }**/
 
-  complex->multiply(A_backward);
+  //complex->multiply(A_backward);
 
   //complex->multiply(forward_coefficients_const);
 
@@ -346,28 +330,30 @@ int FCDI_IllumRecon::iterate(){
   //complex->get_2d(MAG,&result);
   //write_ppm("4.5.ppm", nx, ny, result);
 
-  complex->multiply(B_backward);
+  //complex->multiply(B_backward);
 
   //go back to zone plate plane. 
+  complex->multiply(backward_coefficients_const);
 
   //complex->multiply(A_backward);
-
-  fft->perform_forward_fft(complex);
+  complex->invert();
+  fft->perform_backward_fft(complex);
  
   /**for(int i=0; i<nx; i++){
     for(int j=0; j<ny; j++){
       double temp = complex->get_real(i,j);
       complex->set_real(i,j,complex->get_imag(i,j));
       complex->set_imag(i,j,-1*temp);
-    }
+      }
     }**/
 
-  
-  complex->multiply(backward_coefficients_const);
+  //complex->multiply(backward_coefficients_const);
 
   complex->get_2d(MAG,&result);
-  write_ppm("5.ppm", nx, ny, result);
+  write_ppm("5.ppm", nx, ny, result,true);
   cout << "5: "<< complex->get_norm() << endl;
+  complex->get_2d(PHASE,&result);
+  write_ppm("5_phase.ppm", nx, ny, result);
 
   //apply support constraint
   project_support(complex);
@@ -376,8 +362,6 @@ int FCDI_IllumRecon::iterate(){
   write_ppm("6.ppm", nx, ny, result);
   cout << "6: "<< complex->get_norm() << endl;
 
-  complex->get_2d(PHASE,&result);
-  write_ppm("6_phase.ppm", nx, ny, result);
 
   for(int i=0; i < nx; i++)
     delete [] result[i];
