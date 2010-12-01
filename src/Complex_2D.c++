@@ -197,7 +197,7 @@ void Complex_2D::copy(Complex_2D * c){
 
 void Complex_2D::invert(){
 
-  Complex_2D * temp = clone();
+  //Complex_2D * temp = clone();
     
   int middle_x = nx/2;
   int middle_y = ny/2;
@@ -208,19 +208,26 @@ void Complex_2D::invert(){
 	 << "array after FFT. This will probably cause you issues..."<<endl;
 
   for(int i=0; i < nx; ++i){
-    for(int j=0; j < ny; ++j){
+    for(int j=0; j < middle_y; ++j){
       
 	int j_new = j+middle_y; 
 	int i_new = i+middle_x; 
-	if(j >=  middle_y)
-	  j_new = j_new - 2*middle_y; 
+
+	//	if(j >=  middle_y)
+	//	  j_new = j_new - 2*middle_y; 
 	if(i >=  middle_x)
-	  i_new = i_new - 2*middle_x; 
-	set_real(i,j,temp->get_real(i_new,j_new));
-	set_imag(i,j,temp->get_imag(i_new,j_new));
+	  i_new = i_new - 2*middle_x;
+
+	double temp_rl = get_real(i_new,j_new);
+	double temp_im = get_imag(i_new,j_new);
+
+	set_real(i_new,j_new,get_real(i,j));
+	set_imag(i_new,j_new,get_imag(i,j));
+
+	set_real(i,j,temp_rl);
+	set_imag(i,j,temp_im);
     }
   }
-  delete temp;
 
 }
 

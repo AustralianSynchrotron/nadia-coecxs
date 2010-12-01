@@ -108,7 +108,7 @@ int main(void){
 
 
   /*** run the reconstruction ************/
-  for(int i=0; i<100; i++){
+  for(int i=0; i<10; i++){
 
     cout << "iteration " << i << endl;
 
