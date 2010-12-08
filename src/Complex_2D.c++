@@ -68,14 +68,14 @@ double Complex_2D::get_value(int x, int y, int type){
   case IMAG:
     return get_imag(x,y);
   case PHASE: //goes between 0 and 2pi i.e. always positive.
-    if(get_real(x,y)==0){
+    /**    if(get_real(x,y)==0){
       if(get_imag(x,y)==0)
-	return 0;
+    	return 0;
       if(get_imag(x,y)>0)
-	return M_PI/2;
+	return M_PI/2.0;
       else
-	return 3*M_PI/2;
-    }
+	return 3*M_PI/2.0;
+	}**/
     if( atan2(get_imag(x,y),get_real(x,y)) <0 )
       return atan2(get_imag(x,y),get_real(x,y)) + 2*M_PI;
     return atan2(get_imag(x,y),get_real(x,y));
