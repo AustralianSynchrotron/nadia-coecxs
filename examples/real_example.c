@@ -19,7 +19,7 @@
 #include <cstdlib> 
 #include "io.h"
 #include "Complex_2D.h"
-#include "Projection.h"
+#include "PlanarCDI.h"
 #include "Config.h"
 #include "shrinkwrap.h"
 //#include "FourierT.h"
@@ -124,7 +124,7 @@ int main(void){
   //create the projection object which will be used to
   //perform the reconstuction.
   Complex_2D object_estimate(nx,ny);
-  Projection proj(&object_estimate);
+  PlanarCDI proj(&object_estimate);
  
   //set the support and intensity
   proj.set_support(support);

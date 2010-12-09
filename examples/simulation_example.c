@@ -18,7 +18,7 @@
 #include <cstdlib> 
 #include "io.h"
 #include "Complex_2D.h"
-#include "Projection.h"
+#include "PlanarCDI.h"
 #include "FourierT.h"
 #include <sstream>
 
@@ -126,7 +126,7 @@ int main(void){
   /*************** do the reconstruction *******************/
 
   //create a project object and set the options.
-  Projection proj(&first_guess);
+  PlanarCDI proj(&first_guess);
   proj.set_support(support);
   proj.set_intensity(intensity);
   proj.set_algorithm(HIO);

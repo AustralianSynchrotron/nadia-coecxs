@@ -7,7 +7,7 @@
 #include <cstdlib> 
 #include "io.h"
 #include "Complex_2D.h"
-#include "Projection.h"
+#include "PlanarCDI.h"
 #include "FourierT.h"
 
 
@@ -72,7 +72,7 @@ int main(void){
     }
   }
 
-  Projection proj(&first_guess);
+  PlanarCDI proj(&first_guess);
   proj.set_support(support);
   proj.set_intensity(mag);
   proj.set_algorithm(HIO);

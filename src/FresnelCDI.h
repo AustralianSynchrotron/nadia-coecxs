@@ -48,18 +48,25 @@ class FresnelCDI: public PhaseRetrievalBase{
 
   double pixel_length;
 
+  double norm;
+
   Complex_2D * illumination;
 
-  Complex_2D * forward_coefficients_const;
-  Complex_2D * backward_coefficients_const;
+  Complex_2D * A_s;
+  Complex_2D * A_d;
+  Complex_2D * B_s;
+  Complex_2D * B_d;
+  Complex_2D * wf_curvature;
   
  public:
   
   FresnelCDI(Complex_2D * initial_guess,
 	     Complex_2D * white_field,
 	     double beam_wavelength,
-	     double sample_detector_length,
-	     double pixel_size
+	     double focal_detector_length,
+	     double focal_sample_length,
+	     double pixel_size,
+	     double normalisation=1.0
 	     );
 
   ~FresnelCDI();

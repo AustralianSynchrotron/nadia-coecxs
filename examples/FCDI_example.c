@@ -19,11 +19,11 @@
 #include <cstdlib> 
 #include "io.h"
 #include "Complex_2D.h"
-#include "FCDI_IllumRecon.h"
+#include "FresnelCDI_WF.h"
 #include "Config.h"
 #include "shrinkwrap.h"
 //#include "FourierT.h"
-//#include <google/profiler.h>
+#include <google/profiler.h>
 
 using namespace std;
 
@@ -31,16 +31,18 @@ using namespace std;
 int main(void){
 
   //the data file name
-  string data_file_name = "image_files/nadia_wf_data.tif";
+  //string data_file_name = "image_files/nadia_wf_data.tif";
+  string data_file_name = "../tools/wf_A_real.ppm";
+
 
   //the file which provides the support (pixels with the value 0
   //are considered as outside the object)
-  string support_file_name = "image_files/wf_support_4.tiff";
+  string support_file_name = "image_files/wf_A_support.tiff";
 
   /*******  get the diffraction data from file and read into an array *****/
   int nx, ny;
   double ** data;
-  int status = read_tiff(data_file_name, &nx, &ny, &data);  
+  int status = read_ppm(data_file_name, &nx, &ny, &data);  
    
   //check that the file could be opened okay
   if(!status){
@@ -78,18 +80,25 @@ int main(void){
   Complex_2D zone_estimate(nx,ny);
 
   //dimensions in micron
-  double wavelength = 1.240/(2.54*1000); //0.000488
+  /** double wavelength = 1.240/(2.54*1000); //0.000488
   cout << "wavelength " << wavelength << endl;
 
   double focallength = 2*80*0.05/wavelength; //16,400
   cout << "focallength " << focallength << endl;
 
-  FCDI_IllumRecon proj(&zone_estimate,
+  FresnelCDI_WF proj(&zone_estimate,
 		       wavelength,
 		       focallength,
 		       800000,
-		       13.5);
+		       13.5); **/
  
+  
+  FresnelCDI_WF proj(&zone_estimate,
+		     4.892e-10,
+		     16.353e-3,
+		     0.909513-16.353e-3,
+		     13.5e-3);
+
   //set the support and intensity
   proj.set_support(support);
   proj.set_intensity(data);
@@ -106,39 +115,44 @@ int main(void){
   for(int i=0; i < nx; i++)
     result[i]= new double[ny];
 
+  ProfilerStart("my_prof.prof");
 
   /*** run the reconstruction ************/
-  for(int i=0; i<10; i++){
+  for(int i=0; i<100; i++){
 
     cout << "iteration " << i << endl;
 
     //apply the iterations  
-    proj.iterate(); 
-    
-    /**if(i%1==0){
-      //output the current estimate of the object
+    if(i%5==0){
+
+      //output the current estimate of the detector
       ostringstream temp_str ( ostringstream::out ) ;
-      zone_estimate.get_2d(MAG,&result);
-      temp_str << "fcdi_example_iter_" << i << ".ppm";
+      zone_estimate.get_2d(PHASE,&result);
+      temp_str << "detector_phase_iter_" << i << ".ppm";
       write_ppm(temp_str.str(), nx, ny, result);
       temp_str.clear();
 
       //uncomment to output the estimated 
-      Complex_2D * temp = zone_estimate.clone();
-      fft.perform_forward_fft(temp);
-      temp->get_2d(MAG_SQ,&result);
-      temp_str << "diffraction.ppm";
-      write_ppm(temp_str.str(), nx, ny, result, true); 
-      delete temp;**/
+      //Complex_2D * temp = zone_estimate.clone();
+      //fft.perform_forward_fft(temp);
+      //temp->get_2d(MAG_SQ,&result);
+      //temp_str << "diffraction.ppm";
+      //write_ppm(temp_str.str(), nx, ny, result, true); 
+      //delete temp;**/
       
       
       //apply the shrinkwrap algorithm
       //apply_shrinkwrap(nx,ny,&result,2,0.1);
       //proj.set_support(result);
       //write_ppm("shrink.ppm", nx, ny, result);
-    //}
+    }
+    proj.iterate(); 
+    
+
   }
-  
+
+  ProfilerStop();
+
   //now change to the error reduction algorithm 
 
   //clean up
@@ -151,10 +165,9 @@ int main(void){
   delete[] data;
   delete[] result;
   delete[] support;
-  delete[] data;
 
   //ProfilerStop();
 
   return 0;
-}
+  }
 
