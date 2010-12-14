@@ -1,7 +1,7 @@
 #ifndef FCDI_H
 #define FCDI_H
 
-#include "PhaseRetrievalBase.h"
+#include "PlanarCDI.h"
 
 //forward declarations
 class Complex_2D;
@@ -38,7 +38,7 @@ class Complex_2D;
  * at any point during reconstuction.
  */
 
-class FresnelCDI: public PhaseRetrievalBase{
+class FresnelCDI: public PlanarCDI{
 
  private:
 

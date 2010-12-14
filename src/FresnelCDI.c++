@@ -6,6 +6,7 @@
 #include <fftw3.h>
 #include <cstdlib> 
 #include "Complex_2D.h"
+#include "Double_2D.h"
 #include "FourierT.h"
 #include "FresnelCDI.h"
 #include "io.h" //
@@ -20,7 +21,7 @@ FresnelCDI::FresnelCDI(Complex_2D * initial_guess,
 		       double focal_sample_length,
 		       double pixel_size,
 		       double normalisation)
-                       :PhaseRetrievalBase(initial_guess){
+                       :PlanarCDI(initial_guess){
 
 
   norm = normalisation;
@@ -103,11 +104,9 @@ void FresnelCDI::initialise_estimate(int seed){
     }
   }
 
-  double ** result = new double *[nx];
-  for(int i=0; i<nx; i++)
-    result[i]=new double[ny];
+  Double_2D result(nx,ny);
   complex->get_2d(MAG,&result);
-  write_ppm("first_guess_bf.ppm",nx,ny,result);
+  write_ppm("first_guess_bf.ppm",result);
 
   complex->multiply(B_d);
   fft->perform_forward_fft(complex);
@@ -116,7 +115,7 @@ void FresnelCDI::initialise_estimate(int seed){
   apply_support(complex);
 
   complex->get_2d(MAG,&result);
-  write_ppm("first_guess_after.ppm",nx,ny,result); 
+  write_ppm("first_guess_after.ppm",result); 
 }
 
 
@@ -131,12 +130,8 @@ void FresnelCDI::initialise_estimate(int seed){
 // }
 
 void FresnelCDI::project_intensity(Complex_2D * c){
-  int nx = complex->get_size_x();
-  int ny = complex->get_size_y();
 
-  double ** result = new double *[nx];
-  for(int i=0; i<nx; i++)
-  result[i]=new double[ny];
+  Double_2D result(complex->get_size_x(),complex->get_size_y());
 
   //Forward propgate
   c->invert();
@@ -144,30 +139,30 @@ void FresnelCDI::project_intensity(Complex_2D * c){
   c->multiply(B_s);
 
   c->get_2d(MAG,&result);
-  write_ppm("1-forward.ppm",nx,ny,result);
+  write_ppm("1-forward.ppm",result);
   c->get_2d(PHASE,&result);
-  write_ppm("1-forward_p.ppm",nx,ny,result);
+  write_ppm("1-forward_p.ppm",result);
 
   c->add(illumination,norm);
 
   c->get_2d(MAG,&result);
-  write_ppm("2-with_illum.ppm",nx,ny,result);
+  write_ppm("2-with_illum.ppm",result);
   c->get_2d(PHASE,&result);
-  write_ppm("2-with_illum_p.ppm",nx,ny,result);
+  write_ppm("2-with_illum_p.ppm",result);
 
   scale_intensity(c);
 
   c->get_2d(MAG,&result);
-  write_ppm("3-scaled.ppm",nx,ny,result);
+  write_ppm("3-scaled.ppm",result);
   c->get_2d(PHASE,&result);
-  write_ppm("3-scaled_p.ppm",nx,ny,result);
+  write_ppm("3-scaled_p.ppm",result);
 
   c->add(illumination,-norm);
 
   c->get_2d(MAG,&result);
-  write_ppm("4-subtracted.ppm",nx,ny,result);
+  write_ppm("4-subtracted.ppm",result);
   c->get_2d(PHASE,&result);
-  write_ppm("4-subtracted_p.ppm",nx,ny,result);
+  write_ppm("4-subtracted_p.ppm",result);
 
   //backward propogate
   c->multiply(B_d);
@@ -175,15 +170,9 @@ void FresnelCDI::project_intensity(Complex_2D * c){
   c->invert();  
 
   c->get_2d(MAG,&result);
-  write_ppm("5-backward.ppm",nx,ny,result);
+  write_ppm("5-backward.ppm",result);
   c->get_2d(PHASE,&result);
-  write_ppm("5-backward_p.ppm",nx,ny,result);
-
-  for(int i=0; i<nx; i++)
-    delete [] result[i];
-  delete [] result;
-  
-
+  write_ppm("5-backward_p.ppm",result);
 
 }
 

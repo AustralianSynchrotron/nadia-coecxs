@@ -1,5 +1,6 @@
 #include <iostream>  
 #include "Complex_2D.h"
+#include "Double_2D.h"
 #include <stdlib.h>
 
 
@@ -100,6 +101,14 @@ void Complex_2D::get_2d(int type, double *** result){
   for(int i=0; i < nx; i++)
     for(int j=0; j < ny; j++){
       (*result)[i][j] = get_value(i,j,type);
+    }
+}
+
+void Complex_2D::get_2d(int type, Double_2D * result){
+  
+  for(int i=0; i < nx; i++)
+    for(int j=0; j < ny; j++){
+      result->set(i,j,get_value(i,j,type));
     }
 }
 

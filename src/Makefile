@@ -3,9 +3,9 @@
 SOURCE_FILES_CXX=Complex_2D.c++ FourierT.c++ \
 	PlanarCDI.c++ Config.c++ FresnelCDI_WF.c++ FresnelCDI.c++
 SOURCE_FILES_C=io_hdf.c io_ppm.c io_tiff.c io_dbin.c \
-	io_cplx.c shrinkwrap.c
+	io_cplx.c
 OBJECT_FILES=$(SOURCE_FILES_CXX:.c++=.o) $(SOURCE_FILES_C:.c=.o)
-HEADER_FILES=$(SOURCE_FILES_CXX:.c++=.h) io.h shrinkwrap.h #$(SOURCE_FILES_C:.c=.h)
+HEADER_FILES=$(SOURCE_FILES_CXX:.c++=.h) io.h Double_2D.h #$(SOURCE_FILES_C:.c=.h)
 
 LIB_SO=../lib/libCOECXS.so
 LIB_A=../lib/libCOECXS.a

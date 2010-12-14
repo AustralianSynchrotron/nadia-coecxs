@@ -18,7 +18,7 @@ FresnelCDI_WF::FresnelCDI_WF(Complex_2D * initial_guess,
 				 double zone_focal_length,
 				 double focal_detector_length,
 				 double pixel_size)
-                                 :PhaseRetrievalBase(initial_guess){
+                                 :PlanarCDI(initial_guess){
 
 
   wavelength = beam_wavelength;
@@ -120,8 +120,8 @@ int FresnelCDI_WF::iterate(){
   fft->perform_forward_fft(complex);
   complex->invert();
 
-  complex->get_2d(MAG,&result);
-  write_ppm("zone_reco.ppm", nx, ny, result);
+  //complex->get_2d(MAG,&result);
+  //write_ppm("zone_reco.ppm", nx, ny, result);
  
   //apply support constraint
   apply_support(complex);

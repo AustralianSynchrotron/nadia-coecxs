@@ -5,6 +5,7 @@
 #include <sstream>
 #include <cmath>
 #include "io.h"
+#include "Double_2D.h"
 
 using namespace std;
 
@@ -14,7 +15,10 @@ using namespace std;
 /***************************************************************/
 
 /***************************************************************/
-int write_ppm(string file_name, int nx, int ny, double ** data, bool log_scale){
+int write_ppm(string file_name, Double_2D data, bool log_scale){
+
+  int nx = data.get_size_x();
+  int ny = data.get_size_y();
 
   const int largest_pixel_value = pow(2.0,16.0)-1; //16 bit
   
@@ -22,8 +26,8 @@ int write_ppm(string file_name, int nx, int ny, double ** data, bool log_scale){
    double array_maximum = 0;
    for(int i=0; i < nx ; ++i){
      for(int j=0; j < ny; ++j){
-       if(array_maximum < data[i][j])
-	 array_maximum = data[i][j];
+       if(array_maximum < data.get(i,j))
+	 array_maximum = data.get(i,j);
      }
    }
 
@@ -60,13 +64,13 @@ int write_ppm(string file_name, int nx, int ny, double ** data, bool log_scale){
    for(int j=0; j < ny; ++j){
      for(int i=0; i < nx; ++i){
        if(log_scale){
-	 if(data[i][j] >= 0.1)
-	   new_file << (uint) (scale_factor*(log10((data[i][j])*10))) << " ";
+	 if(data.get(i,j) >= 0.1)
+	   new_file << (uint) (scale_factor*(log10((data.get(i,j)*10)))) << " ";
 	 else
 	   new_file << "0 ";
        }
        else
-	 new_file << (uint) (scale_factor*(data[i][j])) << " ";
+	 new_file << (uint) (scale_factor*(data.get(i,j))) << " ";
      }
      new_file << endl;
    }

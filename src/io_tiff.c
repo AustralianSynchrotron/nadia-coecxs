@@ -6,6 +6,7 @@
 #include <cmath>
 #include "tiffio.h"
 #include "io.h"
+#include "Double_2D.h"
 
 using namespace std;
 
@@ -103,10 +104,12 @@ class anonomous_array{
   
 };
 
+
 /***************************************************************/
 
 /***************************************************************/
-int read_tiff(string file_name, int * nx, int * ny, double *** data){
+
+int read_tiff(string file_name, Double_2D* &data){
  
   //open the input file:
   TIFF* tif = TIFFOpen(file_name.c_str(), "r");
@@ -176,21 +179,23 @@ int read_tiff(string file_name, int * nx, int * ny, double *** data){
   }
 
   //copy to the image array
-  *nx=w;
-  *ny=h;
-    
-    *data = new double*[*nx];
-    for(int i=0; i < *nx; ++i){
-      (*data)[i] = new double[*ny];
-      for(int j=0; j< *ny; ++j){
-	if(samples_per_pixel>1){//if the image is colour we take the sum of colour value
-	  int pixel = colour_image[(h-j)*w+i];
-	  (*data)[i][j]=TIFFGetR(pixel)+TIFFGetG(pixel)+TIFFGetB(pixel);
-	}
-	else //grey scale:
-	  (*data)[i][j]= grey_image[j*w+i];
+  cout << data << endl;
+  data = new Double_2D(w,h);
+  cout << data << endl;
+
+  for(int i=0; i < w; ++i){
+    for(int j=0; j< h; ++j){
+      if(samples_per_pixel>1){//if the image is colour we take the sum of colour value
+	int pixel = colour_image[(h-j)*w+i];
+	data->set(i,j,TIFFGetR(pixel)+TIFFGetG(pixel)+TIFFGetB(pixel));
       }
+      else //grey scale:
+	data->set(i,j,grey_image[j*w+i]);
     }
+  }
+  
+  cout << data->get_size_x() <<endl;
+  cout << data << endl;
 
   delete[] grey_image;
   delete[] colour_image;

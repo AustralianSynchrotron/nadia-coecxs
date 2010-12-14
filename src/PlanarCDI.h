@@ -22,7 +22,9 @@ enum { ER, BIO, BOO, HIO, DM, SF, ASR, HPR, RAAR};
 
 //forward declarations
 class Complex_2D;
+class Double_2D;
 class FourierT;
+
 
 /**
  * @file PlanarCDI.h
@@ -107,8 +109,10 @@ class PlanarCDI{
     };**/
 
   void set_support(double ** object_support);
+  void set_support(Double_2D object_support);
 
   void set_intensity(double ** detector_intensity);
+  void set_intensity(Double_2D detector_intensity);
 
   void set_relaxation_parameter(double relaxation_parameter){
     beta = relaxation_parameter;
@@ -117,7 +121,7 @@ class PlanarCDI{
 
 
   
-  double ** get_intensity_autocorrelation();
+  void get_intensity_autocorrelation(Double_2D * autoc);
 
   void set_algorithm(int alg);
 
@@ -138,13 +142,27 @@ class PlanarCDI{
     return (alg->second);
   }
 
- protected:
-  
   virtual void apply_support(Complex_2D * c);
   virtual void project_intensity(Complex_2D * c);
   virtual void scale_intensity(Complex_2D * c);
+  
+  virtual void apply_shrinkwrap(double gauss_width, double threshold);
+
+
+ protected:
+  
   static std::map<std::string,int> * set_up_algorithm_name_map();
   //bool is_support(int x, int y);
+
+  void apply_threshold(int nx, int ny, double *** array, 
+		       double threshold);
+  
+  void convolve(int nx, int ny, double *** array, double gauss_width);
+  
+  double gauss_2d(double x, double y, 
+		  double sigma_x, double sigma_y, 
+		  double amp);
+  
     
 };
 

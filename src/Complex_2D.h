@@ -13,6 +13,7 @@
 #define PHASE 3
 #define MAG_SQ 4
 
+class Double_2D;
 
 /**
  * @file Complex_2D.h
@@ -185,6 +186,8 @@ class Complex_2D{
    * so this should be done before making the call.
    */
   void get_2d(int type, double *** result=0);
+
+  void get_2d(int type, Double_2D * result);
 
   /**
    * Scale the real and imaginary components of the array by a factor. 

@@ -5,7 +5,9 @@
 #include <stdlib.h>
 #include <fftw3.h>
 #include <cstdlib> 
+#include <cmath>
 #include "Complex_2D.h"
+#include "Double_2D.h"
 #include "FourierT.h"
 #include "PlanarCDI.h"
 //#include <time.h>
@@ -78,7 +80,8 @@ PlanarCDI::~PlanarCDI(){
 
 }
 
-double ** PlanarCDI::get_intensity_autocorrelation(){
+//double ** PlanarCDI::get_intensity_autocorrelation(){
+void PlanarCDI::get_intensity_autocorrelation(Double_2D * autoc){
 
   //make a temporary object
   int nx = complex->get_size_x();
@@ -100,14 +103,13 @@ double ** PlanarCDI::get_intensity_autocorrelation(){
   fft->perform_backward_fft(&temp_intensity);  
 
   //allocate some memory for the output.
-  double ** autoc = new double*[nx];
-  for(int i=0; i < nx; i++)
-    autoc[i]= new double[ny];
+  //double ** autoc = new double*[nx];
+  //for(int i=0; i < nx; i++)
+  //  autoc[i]= new double[ny];
 
   //get the magnitude of the fourier transformed data.
-  temp_intensity.get_2d(MAG, &autoc);
+  temp_intensity.get_2d(MAG, autoc);
 
-  return autoc;
 }
 
 
@@ -142,6 +144,14 @@ void PlanarCDI::set_support(double ** object_support){
   }
 }
 
+void PlanarCDI::set_support(Double_2D object_support){
+  for(int i=0; i< complex->get_size_x(); i++){
+    for(int j=0; j< complex->get_size_y(); j++){
+      support[i][j] = object_support.get(i,j);
+    }
+  }
+}
+
 
 void PlanarCDI::set_intensity(double ** detector_intensity){
   for(int i=0; i< complex->get_size_x(); i++){
@@ -150,6 +160,15 @@ void PlanarCDI::set_intensity(double ** detector_intensity){
     }
   }
 }
+
+void PlanarCDI::set_intensity(Double_2D detector_intensity){
+  for(int i=0; i< complex->get_size_x(); i++){
+    for(int j=0; j< complex->get_size_y(); j++){
+      intensity_sqrt[i][j] = sqrt(detector_intensity.get(i,j));
+    }
+  }
+}
+
 
 double PlanarCDI::get_error(){
   return current_error;
@@ -334,8 +353,116 @@ int PlanarCDI::iterate(){
     }
   }
 
-  complex->get_2d(MAG,&result);
-  write_ppm("end.ppm",nx,ny,result);
-
   return SUCCESS;
+}
+
+
+void PlanarCDI::apply_shrinkwrap(double gauss_width, double threshold){
+  
+  int nx = complex->get_size_x();
+  int ny = complex->get_size_y();
+  double ** recon = new double*[nx];
+  for(int i=0; i < nx; ++i)
+    recon[i] = new double[ny];
+  complex->get_2d(MAG,&recon);
+  
+  //convolve
+  convolve(nx,ny,&recon,gauss_width);
+  
+  //threshold
+  apply_threshold(nx,ny,&recon,threshold);
+
+  set_support(recon);
+
+  for(int i=0; i < nx; ++i)
+    delete [] recon[i];
+  delete recon;
+  
+}
+
+
+void PlanarCDI::convolve(int nx, int ny, double *** array, double gauss_width){
+
+  //to speed up computation we only convolve 
+  //up to 2 times the gaussian width
+  const int cut_off = 2; 
+  
+  int half_range = cut_off*gauss_width;
+
+  //make a temporary array
+  double ** temp_array = new double*[nx];
+  for(int i=0; i < nx; ++i){
+    temp_array[i] = new double[ny];
+    for(int j=0; j < ny; j++)
+      temp_array[i][j]=0;
+  }
+
+  //now do the convolution
+  //this is messy. First loop over the elements of
+  //the array which was given as input
+  for(int i=0; i < nx; i++){
+    for(int j=0; j < ny; j++){
+      
+      //now loop over the colvoluted array we want to make.
+      //Calculate the contribution to each element in it.
+      
+      for(int i2=i-half_range; i2 <= i+half_range; i2++){
+	for(int j2=j-half_range; j2 <= j+half_range; j2++){
+	  if(i2<nx && i2>=0 && j2 >=0 && j2<ny){
+	    
+	    temp_array[i2][j2]+=gauss_2d(i-i2,j-j2,
+					 gauss_width,gauss_width, 
+					 (*array)[i][j]);
+	  }
+	}
+      }
+      
+    }
+  }
+
+
+  //now copy to the original array
+  for(int i=0; i < nx; i++){
+    for(int j=0; j < ny; j++)
+      (*array)[i][j] = temp_array[i][j];
+  }
+
+  //delete the temporary array
+  for(int i=0; i < nx; ++i)
+    delete [] temp_array[i];
+  delete [] temp_array;
+
+  return;
+}
+
+/** threshold is a % of the maximum */
+void PlanarCDI::apply_threshold(int nx, int ny, double *** array, 
+			     double threshold){
+  
+  //find the maximum
+  double max = 0;
+  for(int i=0; i < nx; i++){
+    for(int j=0; j < nx; j++){
+      if( (*array)[i][j] > max)
+	max = (*array)[i][j];
+    }
+  }
+
+  //apply the threshold
+  for(int i=0; i < nx; i++){
+    for(int j=0; j < nx; j++){
+      if( (*array)[i][j] < (threshold*max) )
+	(*array)[i][j] = 0.0;
+    }
+  }
+}
+
+
+double PlanarCDI::gauss_2d(double x, double y, 
+			double sigma_x, double sigma_y, 
+			double amp){  
+  double x_part = (x*x)/(2.0*sigma_x*sigma_x);
+  double y_part = (y*y)/(2.0*sigma_y*sigma_y);
+  return amp*exp(-1*(x_part+y_part));
+  
 }
