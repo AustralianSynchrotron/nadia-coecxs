@@ -125,13 +125,20 @@ void Complex_2D::add(Complex_2D * c2, double scale){
       "this Complex_2D object" << endl;
     exit(1);
   }
-  
+
+  //cout << "scale: "<<scale<<endl;
+  //cout << "c before: " << get_norm() <<endl;;
+
   for(int i=0; i < nx; ++i){
     for(int j=0; j < ny; ++j){
       array[i][j][REAL]+=scale*c2->get_real(i,j);
       array[i][j][IMAG]+=scale*c2->get_imag(i,j);
     }
   }
+
+  // cout << "c after: " << get_norm()<<endl;
+
+
 
 }
 

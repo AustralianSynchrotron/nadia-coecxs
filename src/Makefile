@@ -1,6 +1,6 @@
 #include ../make.inc
 
-SOURCE_FILES_CXX=Complex_2D.c++ FourierT.c++ PhaseRetrievalBase.c++ \
+SOURCE_FILES_CXX=Complex_2D.c++ FourierT.c++ \
 	PlanarCDI.c++ Config.c++ FresnelCDI_WF.c++ FresnelCDI.c++
 SOURCE_FILES_C=io_hdf.c io_ppm.c io_tiff.c io_dbin.c \
 	io_cplx.c shrinkwrap.c

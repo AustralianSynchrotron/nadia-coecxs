@@ -83,7 +83,7 @@ void apply_threshold(int nx, int ny, double *** array,
     }
   }
 
-  cout << "max is:"<<max<<endl;
+  //  cout << "max is:"<<max<<endl;
 
   for(int i=0; i < nx; i++){
     for(int j=0; j < nx; j++){

@@ -124,7 +124,7 @@ int FresnelCDI_WF::iterate(){
   write_ppm("zone_reco.ppm", nx, ny, result);
  
   //apply support constraint
-  project_support(complex);
+  apply_support(complex);
   
   //go to the focal plane again.
   complex->invert();

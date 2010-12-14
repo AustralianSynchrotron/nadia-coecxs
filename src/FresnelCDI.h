@@ -71,17 +71,13 @@ class FresnelCDI: public PhaseRetrievalBase{
 
   ~FresnelCDI();
   
-  //virtual void project_support(Complex_2D * c);
+  //int iterate();
   
   //this one is changed
-  virtual void project_intensity(Complex_2D * c);
+  void project_intensity(Complex_2D * c);
   
   void initialise_estimate(int seed=0);
   
- protected:
-  void forward_propogate(Complex_2D * c);
-  void backward_propogate(Complex_2D * c);
-
 
 };
 
