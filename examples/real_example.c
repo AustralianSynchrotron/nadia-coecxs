@@ -22,6 +22,7 @@
 #include "PlanarCDI.h"
 #include "Config.h"
 #include "shrinkwrap.h"
+#include "Double_2D.h"
 //#include "FourierT.h"
 //#include <google/profiler.h>
 
@@ -61,12 +62,15 @@ int main(void){
     exit(0);
   }
 
-
   /*******  get the diffraction data from file and read into an array *****/
-  int size_x, size_y;
-  double ** data;
-  int status = read_tiff(data_file_name, &size_x, &size_y, &data);  
-  
+  //int size_x, size_y;
+  Double_2D * data = 0;
+
+  cout << data << endl;
+
+  cout << "Got this far 1 " <<endl;
+  int status = read_tiff(data_file_name, data);  
+  cout << "Got this far 2 " <<endl;
   //check that the file could be opened okay
   if(!status){
     cout << "failed to get data from "<< data_file_name 
@@ -74,48 +78,55 @@ int main(void){
     return(1);
   }
 
+  cout << data << endl;
+  cout << data->get_size_x() <<endl;
+
   /***** set up a 2d array which whill hold the magnitude information ****/
   //The image is a bit big which would slow down the fourier transforms.
   //So lets crop the edges; the image will go from 2048x2048 to 1024x1024.
 
-  int nx = size_x/2;
-  int ny = size_y/2;
+  int nx = data->get_size_x()/2;
+  int ny = data->get_size_y()/2;
+
+  cout << "Got this far 3" <<endl;
 
   //declare the array, allocate some memory for it and fill it.
-  double ** intensity = new double*[nx];
+  Double_2D intensity(nx,ny);
 
   //loop over the pixels in the image
   for(int i=0; i < nx; i++){
-    intensity[i]= new double[ny];    
     for(int j=0; j<ny; j++){
       //copy to the new array
-      intensity[i][j] = data[i+size_x/4][j+size_y/4];
+      //apply a threshold to the data to remove background
+      intensity.set(i,j,
+		    data->get(i+nx/2,j+ny/2)-noise_level);
 
-      //apply a threashold to the data to remove background
-      intensity[i][j]-=noise_level;
-      if(intensity[i][j]<0)
-	intensity[i][j]=0;
+      if(intensity.get(i,j)<0)
+	intensity.set(i,j,0);
     }
   }
 
+  cout << "and this far" <<endl;
+
   //write out the image before and after the crop and threashold to see 
   //what they look. "true" is used to indicate we want it ouput on log scale.
-  write_ppm("data_before.ppm", size_x, size_y, data, true);
-  write_ppm("data_after.ppm", nx, ny, intensity, true);
+  write_ppm("data_before.ppm", *data, true);
+  write_ppm("data_after.ppm", intensity, true);
 
 
   /******* get the support from file and read it into an array *****/
 
-  double ** support;
-  int nx_s, ny_s;
-  status = read_tiff(support_file_name, &nx_s, &ny_s, &support);  
+  Double_2D support(nx,ny);
+  status = read_tiff(support_file_name, &&support);
+
+  //double ** support;
+  //int nx_s, ny_s;
+  //status = read_tiff(support_file_name, &nx_s, &ny_s, &support);
+  //status = read_tiff(support_file_name, &support);  
+
   if(!status){
     cout << "failed to get data from "<< support_file_name 
 	 <<".. exiting"  << endl;
-    return(1);
-  }
-  if( nx_s != nx || ny_s != ny){
-    cout << "dimensions of the support to not match ... exiting"  << endl;
     return(1);
   }
 
@@ -139,15 +150,18 @@ int main(void){
   //make a 2D array and allocate some memory.
   //This will be used to output the image of the 
   //current estimate.
-  double ** result = new double*[nx];
-  for(int i=0; i < nx; i++)
-    result[i]= new double[ny];
+  
+  //double ** result = new double*[nx];
+  //for(int i=0; i < nx; i++)
+  //  result[i]= new double[ny];
 
+  Double_2D result(nx,ny);
 
   /******* now get the autocorrelation ************/
 
-  double ** autoc = proj.get_intensity_autocorrelation();
-  write_ppm("test_autocorrelation.ppm", nx, ny, autoc, true);
+  Double_2D autoc(nx,ny);
+  proj.get_intensity_autocorrelation(&autoc);
+  write_ppm("test_autocorrelation.ppm", autoc, true);
 
   /*** run the reconstruction ************/
 
@@ -163,7 +177,8 @@ int main(void){
       ostringstream temp_str ( ostringstream::out ) ;
       object_estimate.get_2d(MAG,&result);
       temp_str << "real_example_iter_" << i << ".ppm";
-      write_ppm(temp_str.str(), nx, ny, result);
+      write_ppm(temp_str.str(), result);
+
       temp_str.clear();
 
       //uncomment to output the estimated 
@@ -176,9 +191,9 @@ int main(void){
       **/
       
       //apply the shrinkwrap algorithm
-      apply_shrinkwrap(nx,ny,&result,2,0.1);
-      proj.set_support(result);
-      write_ppm("shrink.ppm", nx, ny, result);
+      proj.apply_shrinkwrap(2,0.1);
+      //proj.set_support(result);
+      //write_ppm("shrink.ppm", nx, ny, result);
       
 
     }
@@ -199,34 +214,33 @@ int main(void){
       ostringstream temp_str ( ostringstream::out ) ;
       object_estimate.get_2d(MAG,&result);
       temp_str << "real_example_iter_" << i << ".ppm";
-      write_ppm(temp_str.str(), nx, ny, result);
+      write_ppm(temp_str.str(), result);
       temp_str.clear();
 
       //apply the shrinkwrap algorithm
-      apply_shrinkwrap(nx,ny,&result,2,0.1);
-      proj.set_support(result);
-      write_ppm("shrink.ppm", nx, ny, result);
+      proj.apply_shrinkwrap(2,0.1);
+      //      write_ppm("shrink.ppm", nx, ny, result);
     }
     
   }
 
   //clean up
-  for(int i=0; i< nx; i++){
-    delete[] intensity[i];
-    delete[] result[i];
-    delete[] support[i];
-    delete[] autoc[i];
-  }
+  //for(int i=0; i< nx; i++){
+    //delete[] intensity[i];
+    //delete[] result[i];
+    //delete[] support[i];
+    //delete[] autoc[i];
+  // }
 
-  for(int i=0; i< size_x; i++){
-    delete[] data[i];
-  }
+  //for(int i=0; i< size_x; i++){
+  //  delete[] data[i];
+  //}
 
-  delete[] intensity;
-  delete[] result;
-  delete[] support;
-  delete[] autoc;
-  delete[] data;
+  //delete intensity;
+  //delete[] result;
+  //delete support;
+  //delete autoc;
+  delete data;
 
   //ProfilerStop();
 

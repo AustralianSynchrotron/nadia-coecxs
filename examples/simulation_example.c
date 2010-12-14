@@ -18,6 +18,7 @@
 #include <cstdlib> 
 #include "io.h"
 #include "Complex_2D.h"
+#include "Double_2D.h"
 #include "PlanarCDI.h"
 #include "FourierT.h"
 #include <sstream>
@@ -51,22 +52,25 @@ int main(void){
   /****** get the object from an image file ****************/
 
   //get the data from file
-  int n_x, n_y;
-  double ** data;
+  
+  Double_2D * data;
 
   //read the data into an array
-  int status = read_tiff(data_file_name, &n_x, &n_y, &data);
+  int status = read_tiff(data_file_name, data);
   if(!status){
     cout << "failed.. exiting"  << endl;
     return(1);
   }
+
+  int n_x = data->get_size_x();
+  int n_y = data->get_size_y();
   
   //fill the complex no. with image data
   Complex_2D input(n_x,n_y);
   for(int i=0; i<n_x; i++){
     for(int j=0; j<n_y; j++){
-      input.set_value(i,j,REAL, 1.0/sqrt(2.0)*data[i][j]*pow(-1,i + j));
-      input.set_value(i,j,IMAG, 1.0/sqrt(2.0)*data[i][j]*pow(-1,i + j));
+      input.set_value(i,j,REAL, 1.0/sqrt(2.0)*data->get(i,j)*pow(-1,i + j));
+      input.set_value(i,j,IMAG, 1.0/sqrt(2.0)*data->get(i,j)*pow(-1,i + j));
     }
   }
 
@@ -77,40 +81,33 @@ int main(void){
   fft.perform_forward_fft(&input);
 
   //write the fourier transform to file.
-  double ** intensity = new double*[n_x];
-  for(int i=0; i < n_x; i++)
-    intensity[i]= new double[n_y];
-
+  Double_2D intensity(n_x,n_y);
   input.get_2d(MAG_SQ, &intensity);
 
   //apply a threashold to make the simulation a bit more realistic
   for(int i=0; i<n_x; i++){
     for(int j=0; j<n_y; j++){
-      intensity[i][j]-=noise_level;
-      if(intensity[i][j]<0)
-	intensity[i][j]=0;
+      intensity.set(i,j,intensity.get(i,j)-noise_level);
+      if(intensity.get(i,j)<0)
+	intensity.set(i,j,0);
     }
   }
 
   //write the output to file
-  write_ppm("sim_intensity.ppm", n_x, n_y, intensity);
+  write_ppm("sim_intensity.ppm",intensity);
 
 
   /******** get the support from file ****************************/
 
-  double ** support = new double*[n_x];
-  for(int i=0; i<n_x; i++)
-    support[i] = new double[n_y];
-
-  status = read_tiff(support_file_name, &n_x, &n_y, &support);
-
+  Double_2D support(n_x,n_y);
+  status = read_tiff(support_file_name, &support);
 
   /**** make the first guess: random with the support imposed ******/
 
   Complex_2D first_guess(n_x,n_y);
   for(int i=0; i<n_x; i++){
     for(int j=0; j<n_y; j++){
-      if(!support[i][j]){
+      if(!support.get(i,j)){
 	first_guess.set_value(i,j,REAL,0); 
 	first_guess.set_value(i,j,IMAG,0);
       }
@@ -132,9 +129,7 @@ int main(void){
   proj.set_algorithm(HIO);
   
   //write the fourier transform to file.
-  double ** result = new double*[n_x];
-  for(int i=0; i < input.get_size_x(); i++)
-    result[i]= new double[n_y];
+  Double_2D result(n_x,n_y);
 
   //apply the iterations
   for(int i=0; i<hio_iterations; i++){
@@ -148,7 +143,7 @@ int main(void){
       ostringstream temp_str ( ostringstream::out ) ;
       first_guess.get_2d(MAG,&result);
       temp_str << "sim_result_" << i << ".ppm";
-      write_ppm(temp_str.str(), n_x, n_y, result);
+      write_ppm(temp_str.str(), result);
       //      temp_str.clear();
 
       /**Complex_2D * temp = first_guess.clone();
@@ -173,7 +168,7 @@ int main(void){
       ostringstream temp_str ( ostringstream::out ) ;
       first_guess.get_2d(MAG,&result);
       temp_str << "sim_result_" << i << ".ppm";
-      write_ppm(temp_str.str(), n_x, n_y, result);
+      write_ppm(temp_str.str(), result);
       //      temp_str.clear();
 
       /**Complex_2D * temp = first_guess.clone();
@@ -187,13 +182,7 @@ int main(void){
   
 
   //clean up
-  for(int i=0; i< n_x; i++){
-    delete[] intensity[i];
-    delete[] result[i];
-  }
-
-  delete[] intensity;
-  delete[] result;
+  delete data;
 
   return 0;
 }

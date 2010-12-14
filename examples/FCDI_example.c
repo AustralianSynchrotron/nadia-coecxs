@@ -19,9 +19,10 @@
 #include <cstdlib> 
 #include "io.h"
 #include "Complex_2D.h"
+#include "Double_2D.h"
 #include "FresnelCDI_WF.h"
 #include "Config.h"
-#include "shrinkwrap.h"
+//#include "shrinkwrap.h"
 //#include "FourierT.h"
 #include <google/profiler.h>
 
@@ -60,15 +61,14 @@ int main(void){
 
   /******* get the support from file and read it into an array *****/
 
-  double ** support;
-  int nx_s, ny_s;
-  status = read_tiff(support_file_name, &nx_s, &ny_s, &support);  
+  Double_2D * support;
+  status = read_tiff(support_file_name, support);  
   if(!status){
     cout << "failed to get data from "<< support_file_name 
 	 <<".. exiting"  << endl;
     return(1);
   }
-  if( nx_s != nx || ny_s != ny){
+  if( support->get_size_x() != nx || support->get_size_y() != ny){
     cout << "dimensions of the support to not match ... exiting"  << endl;
     return(1);
   }
@@ -100,7 +100,7 @@ int main(void){
 		     13.5e-3);
 
   //set the support and intensity
-  proj.set_support(support);
+  proj.set_support(*support);
   proj.set_intensity(data);
   //set the algorithm to hybrid input-output
   //proj.set_algorithm(HIO);
@@ -111,9 +111,8 @@ int main(void){
   //make a 2D array and allocate some memory.
   //This will be used to output the image of the 
   //current estimate.
-  double ** result = new double*[nx];
-  for(int i=0; i < nx; i++)
-    result[i]= new double[ny];
+
+  Double_2D result(nx,ny);
 
   ProfilerStart("my_prof.prof");
 
@@ -129,7 +128,7 @@ int main(void){
       ostringstream temp_str ( ostringstream::out ) ;
       zone_estimate.get_2d(PHASE,&result);
       temp_str << "detector_phase_iter_" << i << ".ppm";
-      write_ppm(temp_str.str(), nx, ny, result);
+      write_ppm(temp_str.str(), result);
       temp_str.clear();
 
       //uncomment to output the estimated 
@@ -141,10 +140,6 @@ int main(void){
       //delete temp;**/
       
       
-      //apply the shrinkwrap algorithm
-      //apply_shrinkwrap(nx,ny,&result,2,0.1);
-      //proj.set_support(result);
-      //write_ppm("shrink.ppm", nx, ny, result);
     }
     proj.iterate(); 
     
@@ -158,13 +153,13 @@ int main(void){
   //clean up
   for(int i=0; i< nx; i++){
     delete[] data[i];
-    delete[] result[i];
-    delete[] support[i];
+    //delete[] result[i];
+    //delete[] support[i];
   }
 
   delete[] data;
-  delete[] result;
-  delete[] support;
+  //delete[] result;
+  delete support;
 
   //ProfilerStop();
 
