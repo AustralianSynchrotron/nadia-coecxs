@@ -13,7 +13,7 @@
 
 using namespace std;
 
-FresnelCDI_WF::FresnelCDI_WF(Complex_2D * initial_guess,
+FresnelCDI_WF::FresnelCDI_WF(Complex_2D & initial_guess,
 				 double beam_wavelength,
 				 double zone_focal_length,
 				 double focal_detector_length,
@@ -29,8 +29,8 @@ FresnelCDI_WF::FresnelCDI_WF(Complex_2D * initial_guess,
   //set-up the coefficients
   //it's easier to do it once and reuse the matrix.
 
-  int nx = initial_guess->get_size_x();
-  int ny = initial_guess->get_size_y();
+  int nx = initial_guess.get_size_x();
+  int ny = initial_guess.get_size_y();
 
   forward_coefficients_const = new Complex_2D(nx,ny);
   backward_coefficients_const = new Complex_2D(nx,ny);
@@ -76,20 +76,20 @@ void FresnelCDI_WF::initialise_estimate(int seed){
   //initialise the random number generator
   srand(seed);
 
-  int nx = complex->get_size_x();
-  int ny = complex->get_size_y();
+  int nx = complex.get_size_x();
+  int ny = complex.get_size_y();
 
   for(int i=0; i<nx; i++){
     for(int j=0; j<ny; j++){
       if(!support[i][j]){ //enforce the support condition on the inital guess
-	complex->set_value(i,j,REAL,0); 
-	complex->set_value(i,j,IMAG,0);
+	complex.set_value(i,j,REAL,0); 
+	complex.set_value(i,j,IMAG,0);
       }
       else{
 	double r = intensity_sqrt[i][j]/sqrt(2.0);//(65000.0*rand()/(double) RAND_MAX) ;//* pow(-1,i + j);
 	double im = intensity_sqrt[i][j]/sqrt(2.0);//(65000.0*rand()/(double) RAND_MAX) ;//* pow(-1,i + j);
-	complex->set_value(i,j,REAL,r); 
-	complex->set_value(i,j,IMAG,im);
+	complex.set_value(i,j,REAL,r); 
+	complex.set_value(i,j,IMAG,im);
       }
     }
   }
@@ -97,8 +97,8 @@ void FresnelCDI_WF::initialise_estimate(int seed){
 
 int FresnelCDI_WF::iterate(){
   
-  int nx = complex->get_size_x();
-  int ny = complex->get_size_y();
+  int nx = complex.get_size_x();
+  int ny = complex.get_size_y();
 
   double ** result = new double*[nx];
   for(int i=0; i < nx; i++)
@@ -109,38 +109,38 @@ int FresnelCDI_WF::iterate(){
 
   //start with wavefield in the detector plane
   //go to the focal plane
-  complex->invert();
-  fft->perform_forward_fft(complex);
-  complex->invert();
+  complex.invert();
+  fft.perform_forward_fft(&complex);
+  complex.invert();
 
-  complex->multiply(backward_coefficients_const);
+  complex.multiply(*backward_coefficients_const);
 
-  complex->invert();
+  complex.invert();
   //go back to zone plate plane. 
-  fft->perform_forward_fft(complex);
-  complex->invert();
+  fft.perform_forward_fft(&complex);
+  complex.invert();
 
-  //complex->get_2d(MAG,&result);
+  //complex.get_2d(MAG,&result);
   //write_ppm("zone_reco.ppm", nx, ny, result);
  
   //apply support constraint
   apply_support(complex);
   
   //go to the focal plane again.
-  complex->invert();
-  fft->perform_forward_fft(complex);
-  complex->invert();
-  complex->multiply(forward_coefficients_const);
+  complex.invert();
+  fft.perform_forward_fft(&complex);
+  complex.invert();
+  complex.multiply(*forward_coefficients_const);
 
-  //complex->get_2d(MAG,&result);
+  //complex.get_2d(MAG,&result);
   //write_ppm("focal_reco.ppm", nx, ny, result,true);
 
-  complex->invert();
+  complex.invert();
 
   //and back to the detector plane
-  fft->perform_forward_fft(complex);
+  fft.perform_forward_fft(&complex);
 
-  complex->invert();
+  complex.invert();
 
   for(int i=0; i < nx; i++)
     delete [] result[i];

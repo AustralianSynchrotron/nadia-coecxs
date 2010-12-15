@@ -15,7 +15,7 @@ using namespace std;
 /***************************************************************/
 
 /***************************************************************/
-int write_ppm(string file_name, Double_2D data, bool log_scale){
+int write_ppm(string file_name, Double_2D & data, bool log_scale){
 
   int nx = data.get_size_x();
   int ny = data.get_size_y();
@@ -26,7 +26,7 @@ int write_ppm(string file_name, Double_2D data, bool log_scale){
    double array_maximum = 0;
    for(int i=0; i < nx ; ++i){
      for(int j=0; j < ny; ++j){
-       if(array_maximum < data.get(i,j))
+        if(array_maximum < data.get(i,j))
 	 array_maximum = data.get(i,j);
      }
    }
@@ -79,6 +79,8 @@ int write_ppm(string file_name, Double_2D data, bool log_scale){
    return SUCCESS; //success
    
 }
+
+
 
 
 //if empty then ignore the line

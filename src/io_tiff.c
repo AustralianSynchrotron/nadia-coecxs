@@ -104,12 +104,11 @@ class anonomous_array{
   
 };
 
-
 /***************************************************************/
 
 /***************************************************************/
 
-int read_tiff(string file_name, Double_2D* &data){
+int read_tiff(string file_name, Double_2D & data){
  
   //open the input file:
   TIFF* tif = TIFFOpen(file_name.c_str(), "r");
@@ -179,24 +178,22 @@ int read_tiff(string file_name, Double_2D* &data){
   }
 
   //copy to the image array
-  cout << data << endl;
-  data = new Double_2D(w,h);
-  cout << data << endl;
+  if(data.get_size_x()==0){
+    cout << "allocating memory"<<endl;
+    data.allocate_memory(w,h);
+  }
 
   for(int i=0; i < w; ++i){
     for(int j=0; j< h; ++j){
       if(samples_per_pixel>1){//if the image is colour we take the sum of colour value
 	int pixel = colour_image[(h-j)*w+i];
-	data->set(i,j,TIFFGetR(pixel)+TIFFGetG(pixel)+TIFFGetB(pixel));
+	data.set(i,j,TIFFGetR(pixel)+TIFFGetG(pixel)+TIFFGetB(pixel));
       }
       else //grey scale:
-	data->set(i,j,grey_image[j*w+i]);
+	data.set(i,j,grey_image[j*w+i]);
     }
   }
   
-  cout << data->get_size_x() <<endl;
-  cout << data << endl;
-
   delete[] grey_image;
   delete[] colour_image;
 
@@ -205,4 +202,3 @@ int read_tiff(string file_name, Double_2D* &data){
   return SUCCESS; //success
     
 }
-

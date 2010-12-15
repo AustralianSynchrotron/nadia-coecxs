@@ -1,5 +1,5 @@
-#ifndef REAL_2D_H
-#define REAL_2D_H
+#ifndef DOUBLE_2D_H
+#define DOUBLE_2D_H
 
 
 /**
@@ -27,23 +27,31 @@ class Double_2D{
    * @param x_size The number of samplings in the horizontal direction
    * @param y_size The number of samplings in the vertical direction
    */
+  
+  Double_2D():nx(0),ny(0){};
+
   Double_2D(int x_size, int y_size){
-    nx = x_size;
-    ny = y_size;
-    array = new double*[nx];
-    for(int i=0; i < nx; ++i)
-      array[i] = new double[ny];
+    allocate_memory(x_size,y_size);
   }
 
   /**
    * Destructor
    */
   ~Double_2D(){
-    for(int i=0; i < nx; ++i)
-      delete [] array[i];
-    delete array;
+    if(nx > 0 ){
+      for(int i=0; i < nx; ++i)
+	delete [] array[i];
+      delete [] array;
+    }
   };
 
+  void allocate_memory(int x_size, int y_size){
+    nx = x_size;
+    ny = y_size;
+    array = new double*[nx];
+    for(int i=0; i < nx; ++i)
+      array[i] = new double[ny];
+  }
 
   /**
    * Set the value at point x,y. Note that this is

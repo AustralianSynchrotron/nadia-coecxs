@@ -187,7 +187,7 @@ class Complex_2D{
    */
   void get_2d(int type, double *** result=0);
 
-  void get_2d(int type, Double_2D * result);
+  void get_2d(int type, Double_2D & result);
 
   /**
    * Scale the real and imaginary components of the array by a factor. 
@@ -208,7 +208,7 @@ class Complex_2D{
    * calling Complex_2D::scale() followed by Complex_2D:add()
    * separately.
    */
-  void add(Complex_2D *c2, double scale=1);
+  void add(Complex_2D & c2, double scale=1);
 
 
   /**
@@ -222,8 +222,7 @@ class Complex_2D{
    * calling Complex_2D::scale() followed by Complex_2D:multiply()
    * separately.
    */
-  void multiply(Complex_2D *c2, double scale=1);
-
+  void multiply(Complex_2D & c2, double scale=1);
 
 
   /**
@@ -247,7 +246,7 @@ class Complex_2D{
    * 
    * @param c The Complex_2D which will be copied from.
    */
-  void copy(Complex_2D * c);
+  void copy(Complex_2D & c);
 
 
   void invert();

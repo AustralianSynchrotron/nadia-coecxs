@@ -42,26 +42,18 @@ class FresnelCDI: public PlanarCDI{
 
  private:
 
+  Complex_2D & illumination;
   double wavelength;
-
   double sample_to_detector_length;
-
   double pixel_length;
-
   double norm;
-
-  Complex_2D * illumination;
-
-  Complex_2D * A_s;
-  Complex_2D * A_d;
-  Complex_2D * B_s;
-  Complex_2D * B_d;
-  Complex_2D * wf_curvature;
+  Complex_2D B_s;
+  Complex_2D B_d;
   
  public:
   
-  FresnelCDI(Complex_2D * initial_guess,
-	     Complex_2D * white_field,
+  FresnelCDI(Complex_2D & initial_guess,
+	     Complex_2D & white_field,
 	     double beam_wavelength,
 	     double focal_detector_length,
 	     double focal_sample_length,
@@ -71,10 +63,7 @@ class FresnelCDI: public PlanarCDI{
 
   ~FresnelCDI();
   
-  //int iterate();
-  
-  //this one is changed
-  void project_intensity(Complex_2D * c);
+  void project_intensity(Complex_2D & c);
   
   void initialise_estimate(int seed=0);
   

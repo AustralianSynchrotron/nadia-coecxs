@@ -3,6 +3,7 @@
 
 #include <map>
 #include <string>
+#include "FourierT.h"
 
 /** The number of reconstruction algorithms */
 #define NALGORITHMS 9 
@@ -23,7 +24,7 @@ enum { ER, BIO, BOO, HIO, DM, SF, ASR, HPR, RAAR};
 //forward declarations
 class Complex_2D;
 class Double_2D;
-class FourierT;
+//class FourierT;
 
 
 /**
@@ -61,13 +62,25 @@ class PlanarCDI{
 
  protected:
 
+  /**a reference to the Complex_2D object which is 
+     altering during each iterations */
+  Complex_2D & complex;
+
+  int nx;
+
+  int ny;
+
   /**a fourier transform objected used to perform 
      the forward and backward transformations */
-  FourierT * fft; 
+  FourierT fft; 
 
-  /**a pointer to the Complex_2D object which is 
-     altering during each iterations */
-  Complex_2D * complex;
+   /** temporary Complex_2Ds which are used in the computation of the
+      PFS and PF terms for each iteration. */
+  Complex_2D temp_complex_PFS;
+  Complex_2D temp_complex_PF;
+
+  /**the relaxation parameter */
+  double beta;
 
   /** a copy of the support */
   double ** support;
@@ -75,30 +88,23 @@ class PlanarCDI{
   /**a copy of the square root of the intensity at the detector plane. */
   double ** intensity_sqrt;
 
-  /**the relaxation parameter */
-  double beta;
+  /** the algorithm which is being used: ER, HIO etc. */
+  int algorithm;
 
   /**an array which holds the structure of the algorithm. i.e. the 
      coefficients for each term in the iteration equation.*/
   double algorithm_structure[NTERMS];
 
-  /** the algorithm which is being used: ER, HIO etc. */
-  int algorithm;
-
   /** the difference between the itensity in the detector plane 
       the current estimated intensity. */
   double current_error;
 
-  /** temporary Complex_2Ds which are used in the computation of the
-      PFS and PF terms for each iteration. */
-  Complex_2D * temp_complex_PFS;
-  Complex_2D * temp_complex_PF;
 
   static std::map<std::string,int> * algNameMap;
 
  public:
   
-  PlanarCDI(Complex_2D * complex);
+  PlanarCDI(Complex_2D & complex);
   ~PlanarCDI();
   
   virtual int iterate();
@@ -109,17 +115,15 @@ class PlanarCDI{
     };**/
 
   void set_support(double ** object_support);
-  void set_support(Double_2D object_support);
+  void set_support(Double_2D & object_support);
 
   void set_intensity(double ** detector_intensity);
-  void set_intensity(Double_2D detector_intensity);
+  void set_intensity(Double_2D &detector_intensity);
 
   void set_relaxation_parameter(double relaxation_parameter){
     beta = relaxation_parameter;
     set_algorithm(algorithm); //force algorithm constants to update
   };
-
-
   
   void get_intensity_autocorrelation(Double_2D * autoc);
 
@@ -142,9 +146,9 @@ class PlanarCDI{
     return (alg->second);
   }
 
-  virtual void apply_support(Complex_2D * c);
-  virtual void project_intensity(Complex_2D * c);
-  virtual void scale_intensity(Complex_2D * c);
+  virtual void apply_support(Complex_2D & c);
+  virtual void project_intensity(Complex_2D & c);
+  virtual void scale_intensity(Complex_2D & c);
   
   virtual void apply_shrinkwrap(double gauss_width, double threshold);
 
@@ -154,13 +158,12 @@ class PlanarCDI{
   static std::map<std::string,int> * set_up_algorithm_name_map();
   //bool is_support(int x, int y);
 
-  void apply_threshold(int nx, int ny, double *** array, 
+  void apply_threshold(double *** array, 
 		       double threshold);
   
-  void convolve(int nx, int ny, double *** array, double gauss_width);
+  void convolve(double *** array, double gauss_width);
   
-  double gauss_2d(double x, double y, 
-		  double sigma_x, double sigma_y, 
+  double gauss_2d(double x, double y, double sigma_x, double sigma_y, 
 		  double amp);
   
     

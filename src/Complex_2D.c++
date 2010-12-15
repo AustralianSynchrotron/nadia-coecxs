@@ -104,11 +104,11 @@ void Complex_2D::get_2d(int type, double *** result){
     }
 }
 
-void Complex_2D::get_2d(int type, Double_2D * result){
+void Complex_2D::get_2d(int type, Double_2D & result){
   
   for(int i=0; i < nx; i++)
     for(int j=0; j < ny; j++){
-      result->set(i,j,get_value(i,j,type));
+      result.set(i,j,get_value(i,j,type));
     }
 }
 
@@ -126,9 +126,9 @@ void Complex_2D::scale(double scale_factor){
 
 }
 
-void Complex_2D::add(Complex_2D * c2, double scale){
+void Complex_2D::add(Complex_2D & c2, double scale){
 
-  if(nx!=c2->get_size_x() || ny!=c2->get_size_y()){
+  if(nx!=c2.get_size_x() || ny!=c2.get_size_y()){
     cout << "in Complex_2D::add, the dimensions of the "
       "input Complex_2D do not match the dimensions of "
       "this Complex_2D object" << endl;
@@ -140,8 +140,8 @@ void Complex_2D::add(Complex_2D * c2, double scale){
 
   for(int i=0; i < nx; ++i){
     for(int j=0; j < ny; ++j){
-      array[i][j][REAL]+=scale*c2->get_real(i,j);
-      array[i][j][IMAG]+=scale*c2->get_imag(i,j);
+      array[i][j][REAL]+=scale*c2.get_real(i,j);
+      array[i][j][IMAG]+=scale*c2.get_imag(i,j);
     }
   }
 
@@ -151,9 +151,9 @@ void Complex_2D::add(Complex_2D * c2, double scale){
 
 }
 
-void Complex_2D::multiply(Complex_2D * c2, double scale){
+void Complex_2D::multiply(Complex_2D & c2, double scale){
 
-  if(nx!=c2->get_size_x() || ny!=c2->get_size_y()){
+  if(nx!=c2.get_size_x() || ny!=c2.get_size_y()){
     cout << "in Complex_2D::add, the dimensions of the "
       "input Complex_2D do not match the dimensions of "
       "this Complex_2D object" << endl;
@@ -162,10 +162,10 @@ void Complex_2D::multiply(Complex_2D * c2, double scale){
   
   for(int i=0; i < nx; ++i){
     for(int j=0; j < ny; ++j){
-      double new_real = c2->get_real(i,j)*this->get_real(i,j)
-	- c2->get_imag(i,j)*this->get_imag(i,j);
-      double new_imag = c2->get_real(i,j)*this->get_imag(i,j)
-	+ c2->get_imag(i,j)*this->get_real(i,j);
+      double new_real = c2.get_real(i,j)*this->get_real(i,j)
+	- c2.get_imag(i,j)*this->get_imag(i,j);
+      double new_imag = c2.get_real(i,j)*this->get_imag(i,j)
+	+ c2.get_imag(i,j)*this->get_real(i,j);
       array[i][j][REAL]=scale*new_real;
       array[i][j][IMAG]=scale*new_imag;
     }
@@ -198,14 +198,14 @@ Complex_2D * Complex_2D::clone(){
 }
 
 /** Fill this Complex_2D with the values from "c". */
-void Complex_2D::copy(Complex_2D * c){
+void Complex_2D::copy(Complex_2D & c){
 
   //todo: check the bounds......
 
   for(int i=0; i < nx; ++i){
     for(int j=0; j < ny; ++j){
-      array[i][j][REAL]=c->get_real(i,j);
-      array[i][j][IMAG]=c->get_imag(i,j);
+      array[i][j][REAL]=c.get_real(i,j);
+      array[i][j][IMAG]=c.get_imag(i,j);
     }
   }  
 

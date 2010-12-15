@@ -64,13 +64,9 @@ int main(void){
 
   /*******  get the diffraction data from file and read into an array *****/
   //int size_x, size_y;
-  Double_2D * data = 0;
-
-  cout << data << endl;
-
-  cout << "Got this far 1 " <<endl;
+  Double_2D data;
   int status = read_tiff(data_file_name, data);  
-  cout << "Got this far 2 " <<endl;
+
   //check that the file could be opened okay
   if(!status){
     cout << "failed to get data from "<< data_file_name 
@@ -78,17 +74,12 @@ int main(void){
     return(1);
   }
 
-  cout << data << endl;
-  cout << data->get_size_x() <<endl;
-
   /***** set up a 2d array which whill hold the magnitude information ****/
   //The image is a bit big which would slow down the fourier transforms.
   //So lets crop the edges; the image will go from 2048x2048 to 1024x1024.
 
-  int nx = data->get_size_x()/2;
-  int ny = data->get_size_y()/2;
-
-  cout << "Got this far 3" <<endl;
+  int nx = data.get_size_x()/2;
+  int ny = data.get_size_y()/2;
 
   //declare the array, allocate some memory for it and fill it.
   Double_2D intensity(nx,ny);
@@ -99,31 +90,24 @@ int main(void){
       //copy to the new array
       //apply a threshold to the data to remove background
       intensity.set(i,j,
-		    data->get(i+nx/2,j+ny/2)-noise_level);
+		    data.get(i+nx/2,j+ny/2)-noise_level);
 
       if(intensity.get(i,j)<0)
 	intensity.set(i,j,0);
     }
   }
 
-  cout << "and this far" <<endl;
-
   //write out the image before and after the crop and threashold to see 
   //what they look. "true" is used to indicate we want it ouput on log scale.
-  write_ppm("data_before.ppm", *data, true);
-  write_ppm("data_after.ppm", intensity, true);
+  //write_ppm("data_before.ppm", *data, true);
+  //write_ppm("data_after.ppm", intensity, true);
 
 
   /******* get the support from file and read it into an array *****/
 
-  Double_2D support(nx,ny);
-  status = read_tiff(support_file_name, &&support);
-
-  //double ** support;
-  //int nx_s, ny_s;
-  //status = read_tiff(support_file_name, &nx_s, &ny_s, &support);
-  //status = read_tiff(support_file_name, &support);  
-
+  //Double_2D * support = 0;
+  Double_2D support;
+  status = read_tiff(support_file_name, support);
   if(!status){
     cout << "failed to get data from "<< support_file_name 
 	 <<".. exiting"  << endl;
@@ -135,14 +119,14 @@ int main(void){
   //create the projection object which will be used to
   //perform the reconstuction.
   Complex_2D object_estimate(nx,ny);
-  PlanarCDI proj(&object_estimate);
+  PlanarCDI proj(object_estimate);
  
   //set the support and intensity
   proj.set_support(support);
   proj.set_intensity(intensity);
+
   //set the algorithm to hybrid input-output
   proj.set_algorithm(HIO);
-
 
   //Initialise the current object ESW with a random numbers
   proj.initialise_estimate(0);
@@ -175,7 +159,7 @@ int main(void){
     if(i%output_iterations==0){
       //output the current estimate of the object
       ostringstream temp_str ( ostringstream::out ) ;
-      object_estimate.get_2d(MAG,&result);
+      object_estimate.get_2d(MAG,result);
       temp_str << "real_example_iter_" << i << ".ppm";
       write_ppm(temp_str.str(), result);
 
@@ -212,7 +196,7 @@ int main(void){
     if(i%output_iterations==0){
       //output the current estimate of the object
       ostringstream temp_str ( ostringstream::out ) ;
-      object_estimate.get_2d(MAG,&result);
+      object_estimate.get_2d(MAG,result);
       temp_str << "real_example_iter_" << i << ".ppm";
       write_ppm(temp_str.str(), result);
       temp_str.clear();
@@ -240,7 +224,7 @@ int main(void){
   //delete[] result;
   //delete support;
   //delete autoc;
-  delete data;
+  //delete data;
 
   //ProfilerStop();
 

@@ -56,7 +56,7 @@ class FresnelCDI_WF: public PlanarCDI{
   
  public:
   
-  FresnelCDI_WF(Complex_2D * initial_guess,
+  FresnelCDI_WF(Complex_2D & initial_guess,
 		double beam_wavelength,
 		double zone_focal_length,
 		double focal_detector_length,
