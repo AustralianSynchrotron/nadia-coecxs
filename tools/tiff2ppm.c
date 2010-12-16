@@ -1,5 +1,6 @@
 #include <iostream>
 #include <stdlib.h>
+#include "Double_2D.h"
 #include "io.h"
 
 using namespace std;
@@ -15,12 +16,11 @@ int main(int argc, char * argv[]){
   }
 
   //read the data block in the file
-  double ** data;
-  int nx, ny;
+  Double_2D data;
   int status;
 
   //read the data into an array
-  status = read_tiff(argv[1], &nx, &ny, &data);
+  status = read_tiff(argv[1], data);
   
   if(!status){
     cout << "failed.. exiting"  << endl;
@@ -28,7 +28,7 @@ int main(int argc, char * argv[]){
   }
   
   //write the data to a file
-  write_ppm(argv[2], nx, ny, data);
+  write_ppm(argv[2], data);
       
   return 0;
 }

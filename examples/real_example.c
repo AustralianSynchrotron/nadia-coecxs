@@ -24,7 +24,7 @@
 #include "shrinkwrap.h"
 #include "Double_2D.h"
 //#include "FourierT.h"
-//#include <google/profiler.h>
+#include <google/profiler.h>
 
 using namespace std;
 
@@ -33,7 +33,7 @@ int main(void){
 
   Config c("my.in");
 
-  //ProfilerStart("profiler.prof");
+  ProfilerStart("profiler.prof");
 
   //define some constants which will be used in the code:
 
@@ -46,10 +46,9 @@ int main(void){
   //the file which provides the support (pixels with the value 0
   //are considered as outside the object)
   string support_file_name = c.getString("support_file_name");
-  cout << "value:"<<support_file_name<<"-"<<endl;
 
   //number of hybrid input-out iterations to perform.
-  const int hio_iterations = 1200;
+  const int hio_iterations = 600;
   
   //number of error reduction iterations to perform after the HIO.
   const int er_iterations = 200;
@@ -144,7 +143,7 @@ int main(void){
   /******* now get the autocorrelation ************/
 
   Double_2D autoc(nx,ny);
-  proj.get_intensity_autocorrelation(&autoc);
+  proj.get_intensity_autocorrelation(autoc);
   write_ppm("test_autocorrelation.ppm", autoc, true);
 
   /*** run the reconstruction ************/
@@ -175,10 +174,9 @@ int main(void){
       **/
       
       //apply the shrinkwrap algorithm
-      proj.apply_shrinkwrap(2,0.1);
-      //proj.set_support(result);
-      //write_ppm("shrink.ppm", nx, ny, result);
-      
+      proj.apply_shrinkwrap(1.5,0.1);
+      proj.get_support(result);
+      write_ppm("shrink.ppm", result);
 
     }
 
@@ -202,31 +200,13 @@ int main(void){
       temp_str.clear();
 
       //apply the shrinkwrap algorithm
-      proj.apply_shrinkwrap(2,0.1);
+      proj.apply_shrinkwrap(1.5,0.1);
       //      write_ppm("shrink.ppm", nx, ny, result);
     }
     
   }
 
-  //clean up
-  //for(int i=0; i< nx; i++){
-    //delete[] intensity[i];
-    //delete[] result[i];
-    //delete[] support[i];
-    //delete[] autoc[i];
-  // }
-
-  //for(int i=0; i< size_x; i++){
-  //  delete[] data[i];
-  //}
-
-  //delete intensity;
-  //delete[] result;
-  //delete support;
-  //delete autoc;
-  //delete data;
-
-  //ProfilerStop();
+  ProfilerStop();
 
   return 0;
 }

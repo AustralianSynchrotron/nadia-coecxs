@@ -54,7 +54,7 @@ void Complex_2D::set_value(int x, int y, int component, double value){
   }
 }
  
-double Complex_2D::get_value(int x, int y, int type){
+double Complex_2D::get_value(int x, int y, int type) const {
   //by default we check that the value is within the bounds of the
   //array, but this can be turned off for optimisation.
   if(check_bounds(x,y)==FAILURE){
@@ -89,7 +89,7 @@ double Complex_2D::get_value(int x, int y, int type){
 }
 
 
-void Complex_2D::get_2d(int type, double *** result){
+/**void Complex_2D::get_2d(int type, double *** result){
   
   if(result==0){
     result = new double**;
@@ -102,9 +102,9 @@ void Complex_2D::get_2d(int type, double *** result){
     for(int j=0; j < ny; j++){
       (*result)[i][j] = get_value(i,j,type);
     }
-}
+    }**/
 
-void Complex_2D::get_2d(int type, Double_2D & result){
+void Complex_2D::get_2d(int type, Double_2D & result) const {
   
   for(int i=0; i < nx; i++)
     for(int j=0; j < ny; j++){
@@ -172,7 +172,7 @@ void Complex_2D::multiply(Complex_2D & c2, double scale){
   }
 }
 
-double Complex_2D::get_norm(){
+double Complex_2D::get_norm() const {
 
   double norm_squared=0;
 
@@ -184,7 +184,7 @@ double Complex_2D::get_norm(){
   return sqrt(norm_squared);
 }
 
-Complex_2D * Complex_2D::clone(){
+Complex_2D * Complex_2D::clone() const {
 
   Complex_2D * new_complex = new Complex_2D(nx,ny);
   for(int i=0; i < nx; ++i){
@@ -248,7 +248,7 @@ void Complex_2D::invert(){
 }
 
 
-int Complex_2D::check_bounds(int x, int y){
+int Complex_2D::check_bounds(int x, int y) const{
  
   if(x < 0 || x >= nx || y < 0 || y >=ny )
       return FAILURE;

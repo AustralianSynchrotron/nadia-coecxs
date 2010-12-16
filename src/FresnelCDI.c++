@@ -78,8 +78,9 @@ void FresnelCDI::initialise_estimate(int seed){
   for(int i=0; i<nx; i++){
     for(int j=0; j<ny; j++){
  
-      double real_value = (intensity_sqrt[i][j]*intensity_sqrt[i][j] - norm*norm*illumination.get_value(i,j,MAG_SQ));
-      sum_int +=intensity_sqrt[i][j];
+      double real_value = intensity_sqrt.get(i,j)*intensity_sqrt.get(i,j) 
+	- norm*norm*illumination.get_value(i,j,MAG_SQ);
+      sum_int +=intensity_sqrt.get(i,j);
 
       real_value = real_value / (2*norm*illumination.get_value(i,j,REAL));
 
@@ -99,7 +100,7 @@ void FresnelCDI::initialise_estimate(int seed){
   write_ppm("first_guess_bf.ppm",result);
 
   complex.multiply(B_d);
-  fft.perform_forward_fft(&complex);
+  fft.perform_forward_fft(complex);
   complex.invert();  
 
   apply_support(complex);
@@ -125,7 +126,7 @@ void FresnelCDI::project_intensity(Complex_2D & c){
 
   //Forward propgate
   c.invert();
-  fft.perform_backward_fft(&c);
+  fft.perform_backward_fft(c);
   c.multiply(B_s);
 
   c.get_2d(MAG,result);
@@ -156,7 +157,7 @@ void FresnelCDI::project_intensity(Complex_2D & c){
 
   //backward propogate
   c.multiply(B_d);
-  fft.perform_forward_fft(&c);
+  fft.perform_forward_fft(c);
   c.invert();  
 
   c.get_2d(MAG,result);

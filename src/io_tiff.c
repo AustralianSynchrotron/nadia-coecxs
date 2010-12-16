@@ -178,10 +178,11 @@ int read_tiff(string file_name, Double_2D & data){
   }
 
   //copy to the image array
-  if(data.get_size_x()==0){
-    cout << "allocating memory"<<endl;
+
+  //make space for the array if it hasn't 
+  //already been allocated.
+  if(data.get_size_x()==0)
     data.allocate_memory(w,h);
-  }
 
   for(int i=0; i < w; ++i){
     for(int j=0; j< h; ++j){

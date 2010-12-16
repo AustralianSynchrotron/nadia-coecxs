@@ -38,7 +38,7 @@ FresnelCDI_WF::FresnelCDI_WF(Complex_2D & initial_guess,
   double x_mid = (nx-1)/2;
   double y_mid = (ny-1)/2;
 
-  double z12 = zone_to_focal_length;
+  double z12 = 0.1*focal_to_detector_length; //zone_to_focal_length;
   double z23 = focal_to_detector_length;
 
   double scaling_x = beam_wavelength*z23/(pixel_length*nx);
@@ -69,7 +69,6 @@ FresnelCDI_WF::~FresnelCDI_WF(){
   delete forward_coefficients_const;
   delete backward_coefficients_const;
 
-  cout << "In the FresnelCDI_WF destructor" << endl;
 }
 
 void FresnelCDI_WF::initialise_estimate(int seed){
@@ -81,13 +80,15 @@ void FresnelCDI_WF::initialise_estimate(int seed){
 
   for(int i=0; i<nx; i++){
     for(int j=0; j<ny; j++){
-      if(!support[i][j]){ //enforce the support condition on the inital guess
+      if(!support.get(i,j)){ //enforce the support condition on the inital guess
 	complex.set_value(i,j,REAL,0); 
 	complex.set_value(i,j,IMAG,0);
       }
       else{
-	double r = intensity_sqrt[i][j]/sqrt(2.0);//(65000.0*rand()/(double) RAND_MAX) ;//* pow(-1,i + j);
-	double im = intensity_sqrt[i][j]/sqrt(2.0);//(65000.0*rand()/(double) RAND_MAX) ;//* pow(-1,i + j);
+	//	double r = intensity_sqrt.get(i,j)/sqrt(2.0);//(65000.0*rand()/(double) RAND_MAX) ;//* pow(-1,i + j);
+	//	double im = intensity_sqrt.get(i,j)/sqrt(2.0);//(65000.0*rand()/(double) RAND_MAX) ;//* pow(-1,i + j);
+	double r = (65000.0*rand()/(double) RAND_MAX) ;//* pow(-1,i + j);
+	double im = (65000.0*rand()/(double) RAND_MAX) ;//* pow(-1,i + j);
 	complex.set_value(i,j,REAL,r); 
 	complex.set_value(i,j,IMAG,im);
       }
@@ -97,12 +98,12 @@ void FresnelCDI_WF::initialise_estimate(int seed){
 
 int FresnelCDI_WF::iterate(){
   
-  int nx = complex.get_size_x();
-  int ny = complex.get_size_y();
+  Double_2D result(nx,ny);
 
-  double ** result = new double*[nx];
-  for(int i=0; i < nx; i++)
-    result[i]= new double[ny];
+  complex.get_2d(MAG,result);
+  write_ppm("inital_mag.ppm", result);
+  complex.get_2d(PHASE,result);
+  write_ppm("inital_phase.ppm", result);
 
   scale_intensity(complex);
   cout << "Current Error is: " << current_error<<endl;
@@ -110,41 +111,37 @@ int FresnelCDI_WF::iterate(){
   //start with wavefield in the detector plane
   //go to the focal plane
   complex.invert();
-  fft.perform_forward_fft(&complex);
+  fft.perform_forward_fft(complex);
   complex.invert();
 
   complex.multiply(*backward_coefficients_const);
-
+  
   complex.invert();
   //go back to zone plate plane. 
-  fft.perform_forward_fft(&complex);
+  fft.perform_forward_fft(complex);
   complex.invert();
 
-  //complex.get_2d(MAG,&result);
-  //write_ppm("zone_reco.ppm", nx, ny, result);
+  complex.get_2d(MAG,result);
+  write_ppm("zone_reco.ppm", result);
  
   //apply support constraint
   apply_support(complex);
   
   //go to the focal plane again.
   complex.invert();
-  fft.perform_forward_fft(&complex);
+  fft.perform_backward_fft(complex);
   complex.invert();
   complex.multiply(*forward_coefficients_const);
 
-  //complex.get_2d(MAG,&result);
-  //write_ppm("focal_reco.ppm", nx, ny, result,true);
+  complex.get_2d(MAG,result);
+  write_ppm("focal_reco.ppm", result,true);
 
   complex.invert();
 
   //and back to the detector plane
-  fft.perform_forward_fft(&complex);
+  fft.perform_backward_fft(complex);
 
   complex.invert();
-
-  for(int i=0; i < nx; i++)
-    delete [] result[i];
-  delete [] result;
 
   return SUCCESS;
 }

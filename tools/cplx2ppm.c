@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include "io.h"
 #include "Complex_2D.h"
+#include "Double_2D.h"
 
 using namespace std;
 
@@ -11,8 +12,14 @@ int main(int argc, char * argv[]){
   //check for 5 arguements
   if(argc!=6 ){
     cout << "Wrong number of arguments. Usage: " 
-	 << "dbin2ppm <input dbin file> <output real part ppm file> "
-	 << "<output imag part ppm file> <dim x> <dim y>" << endl;
+	 << "dbin2ppm <input dbin file> <name of ppm file> "
+	 << "<component type> <dim x> <dim y>" << endl;
+    cout << "  where component type is one of:" <<endl;
+    cout << "     0 - REAL" << endl;
+    cout << "     1 - IMAG" << endl;
+    cout << "     2 - MAG" << endl;
+    cout << "     3 - PHASE" << endl;
+    cout << "     4 - MAG_SQ" << endl;
     return 1;
   }
 
@@ -23,32 +30,19 @@ int main(int argc, char * argv[]){
   int status;
 
   //read the data into an array
-  status = read_cplx(argv[1], nx, ny, &complex);
+  status = read_cplx(argv[1], complex);
   
   if(!status){
     cout << "failed.. exiting"  << endl;
     return(1);
   }
 
-  double ** mag = new double*[nx];
-  double ** phase = new double*[nx];
-  for(int i=0; i < nx; i++){
-    mag[i]= new double[ny];
-    phase[i]= new double[ny];
-  }
-  complex.get_2d(MAG,&mag);
-  complex.get_2d(PHASE,&phase);
+  Double_2D real(nx,ny);
+
+  complex.get_2d(atoi(argv[3]),real);
   
   //write the data to a file
-  write_ppm(argv[2], nx, ny, mag);
-  write_ppm(argv[3], nx, ny, phase);
+  write_ppm(argv[2], real);
       
-  for(int i=0; i < nx; i++){
-    delete [] mag[i];
-    delete [] phase[i];
-  }
-  delete [] mag;
-  delete [] phase;
-  
   return 0;
 }

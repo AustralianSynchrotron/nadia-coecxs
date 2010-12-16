@@ -20,7 +20,8 @@
 #include <cstdlib> 
 #include "io.h"
 #include "Complex_2D.h"
-#include "Projection.h"
+#include "Double_2D.h"
+#include "PlanarCDI.h"
 #include "Config.h"
 #include "FourierT.h"
 
@@ -106,13 +107,12 @@ int main(int argc, char * argv[]){
   int use_log_scale_for_object = c.getInt("use_log_scale_for_object");
 
   /*** get the diffraction data from file and read into an array *****/
-  int nx, ny;
-  double ** data;
+  Double_2D data;
   int status;
   if(data_file_type=="tiff")
-    status = read_tiff(data_file_name, &nx, &ny, &data);  
+    status = read_tiff(data_file_name, data);  
   else if(data_file_type=="ppm")
-    status = read_ppm(data_file_name, &nx, &ny, &data);
+    status = read_ppm(data_file_name, data);
   else{ //check that the file type is valid
     cout << "Can not process files of type \""<< data_file_type 
 	 <<"\".. exiting"  << endl;
@@ -125,13 +125,15 @@ int main(int argc, char * argv[]){
     return(1);
   }
 
+  int nx = data.get_size_x();
+  int ny = data.get_size_y();
+
   /******* get the support from file and read it into an array *****/
-  double ** support;
-  int nx_s=0, ny_s=0;
+  Double_2D support;
   if(support_file_type=="tiff")
-    status = read_tiff(support_file_name, &nx_s, &ny_s, &support);  
+    status = read_tiff(support_file_name, support);  
   else if(support_file_type=="ppm")
-    status = read_ppm(support_file_name, &nx_s, &ny_s, &support);
+    status = read_ppm(support_file_name, support);
   else{ //check that the file type is valid
     cout << "Can not process files of type \""<< support_file_type 
 	 <<"\".. exiting"  << endl;
@@ -142,7 +144,7 @@ int main(int argc, char * argv[]){
 	 <<".. exiting"  << endl;
     return(1);
   }
-  if( nx_s != nx || ny_s != ny){
+  if( nx != support.get_size_x() || ny != support.get_size_y() ){
     cout << "Dimensions of the support to not match ... exiting"  << endl;
     return(1);
   }
@@ -152,7 +154,7 @@ int main(int argc, char * argv[]){
   //create the projection object which will be used to
   //perform the reconstuction.
   Complex_2D object_estimate(nx,ny);
-  Projection proj(&object_estimate);
+  PlanarCDI proj(object_estimate);
  
   //set the support and intensity
   proj.set_support(support);
@@ -164,11 +166,10 @@ int main(int argc, char * argv[]){
   //make a 2D array and allocate some memory.
   //This will be used to output the image of the 
   //current estimate.
-  double ** result = new double*[nx];
-  for(int i=0; i < nx; i++)
-    result[i]= new double[ny];
+  Double_2D result(nx,ny);
 
-  //get up a temporary FFT in case we need to output
+
+  //Make a temporary FFT in case we need to output
   //the guess of the diffraction pattern
   FourierT * fft;
   if(output_diffraction_estimate){
@@ -177,9 +178,9 @@ int main(int argc, char * argv[]){
 
   /*** run the reconstruction ************/
 
-
   list<string>::iterator algorithms_itr = algorithms->begin();
   list<int>::iterator iterations_itr = iterations->begin();
+
   //loop over the algorithms
   int i=0;
   int cumulative_iterations = 0;
@@ -191,7 +192,7 @@ int main(int argc, char * argv[]){
     	   <<" algorithm" << endl;
     
     //get the projection
-    int alg = Projection::getAlgFromName(*algorithms_itr);
+    int alg = PlanarCDI::getAlgFromName(*algorithms_itr);
     if(alg == -1 ){
       std::cout << "Could not find reconstuction algorithm"
 		<< " with the name "<< (*algorithms_itr)
@@ -201,11 +202,11 @@ int main(int argc, char * argv[]){
 
     proj.set_algorithm(alg);
     cumulative_iterations+=(*iterations_itr);
-
+    
     for(; i < cumulative_iterations; i++){
       if(output_level!=OUTPUT_MINIMAL)
 	cout << "Iteration " << i << endl;
-     
+      
 
       //apply the iterations  
       proj.iterate(); 
@@ -216,22 +217,21 @@ int main(int argc, char * argv[]){
       if(i%output_iterations==0){
 	//output the current estimate of the object
 	ostringstream temp_str ( ostringstream::out ) ;
-	object_estimate.get_2d(MAG,&result);
+	object_estimate.get_2d(MAG,result);
 	temp_str << output_file_name_prefix << "_" << i << ".ppm" << flush;
-	write_ppm(temp_str.str(), nx, ny, result, use_log_scale_for_object);
+	write_ppm(temp_str.str(), result, use_log_scale_for_object);
 	//temp_str.clear();
 
 	//output the estimation of the intensity in 
 	//the detector plane if needed
 	if(output_diffraction_estimate){
 	  Complex_2D * temp = object_estimate.clone();
-	  fft->perform_forward_fft(temp);
-	  temp->get_2d(MAG_SQ,&result);
+	  fft->perform_forward_fft(*temp);
+	  temp->get_2d(MAG_SQ,result);
 	  temp_str << output_file_name_prefix 
 		   << "_diffraction_" << i 
 		   << ".ppm" << flush;
-	  write_ppm(temp_str.str(), nx, ny, 
-		    result, 
+	  write_ppm(temp_str.str(), result, 
 		    use_log_scale_for_diffraction); 
 	  delete temp;
 	}
@@ -242,31 +242,21 @@ int main(int argc, char * argv[]){
   }
 
   //write out the final image
-  object_estimate.get_2d(MAG,&result);
+  object_estimate.get_2d(MAG,result);
   ostringstream temp_str ( ostringstream::out ) ;
   temp_str << output_file_name_prefix << "_final.ppm" << flush;
-  write_ppm(temp_str.str(), nx, ny, result, use_log_scale_for_object);
+  write_ppm(temp_str.str(), result, use_log_scale_for_object);
   
   if(output_diffraction_estimate){
     Complex_2D * temp = object_estimate.clone();
-    fft->perform_forward_fft(temp);
-    temp->get_2d(MAG_SQ,&result);
+    fft->perform_forward_fft(*temp);
+    temp->get_2d(MAG_SQ,result);
     temp_str << output_file_name_prefix << "_diffraction_final.ppm" << flush;
-    write_ppm(temp_str.str(), nx, ny, result, use_log_scale_for_diffraction); 
+    write_ppm(temp_str.str(), result, use_log_scale_for_diffraction); 
     delete temp;
   }
 
   //clean up
-  for(int i=0; i< nx; i++){
-    delete[] result[i];
-    delete[] support[i];
-    delete[] data[i];
-  }
-
-  delete[] result;
-  delete[] support;
-  delete[] data;
-
   delete algorithms;
   delete iterations;
   

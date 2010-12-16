@@ -1,11 +1,12 @@
 #include <iostream>
 #include <fstream>
-#include <stdlib.h>
+//#include <stdlib.h>
 #include <vector>
 #include <sstream>
 #include <cmath>
 #include "hdf/mfhdf.h"
 #include "io.h"
+#include "Double_2D.h"
 
 using namespace std;
 
@@ -160,8 +161,7 @@ class anonomous_array{
 };
 
 /***************************************************************/
-int read_hdf4(string file_name, int * nx, int *ny, 
-	      double *** data, char * data_name){
+int read_hdf4(string file_name, Double_2D & data, char * data_name){
 
   //open the file
   int32 sd_id = SDstart(file_name.c_str(), DFACC_READ);
@@ -210,16 +210,15 @@ int read_hdf4(string file_name, int * nx, int *ny,
 
 
    //Fill return parameters
-   *data = new double*[dim_sizes[0]];
+   if(data.get_size_x()==0)
+     data.allocate_memory(dim_sizes[0],dim_sizes[1]);
+
    for(int i=0; i< dim_sizes[0]; ++i){
-     (*data)[i] = new double[dim_sizes[1]];
      for(int j=0; j< dim_sizes[1]; ++j){
-       (*data)[i][j] = array.return_array_value(dim_sizes[1]*j+i);
+       data.set(i,j,array.return_array_value(dim_sizes[1]*j+i));
      }
    }
    
-   *nx = dim_sizes[0];
-   *ny = dim_sizes[1];
 
    return SUCCESS;
 

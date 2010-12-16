@@ -15,7 +15,7 @@ using namespace std;
 /***************************************************************/
 
 /***************************************************************/
-int write_ppm(string file_name, Double_2D & data, bool log_scale){
+int write_ppm(string file_name, const Double_2D & data, bool log_scale){
 
   int nx = data.get_size_x();
   int ny = data.get_size_y();
@@ -101,8 +101,10 @@ void line_tokeniser(string line, vector<string> * data){
 /***************************************************************/
 
 /***************************************************************/
-int read_ppm(string file_name, int * nx, int * ny, double *** data){
+int read_ppm(string file_name, Double_2D & data){
   
+  int nx, ny;
+
   //open the input file:
   ifstream file(file_name.c_str());
   //  file.open(file_name);
@@ -146,8 +148,8 @@ int read_ppm(string file_name, int * nx, int * ny, double *** data){
 	}
 	else{
 	  checked_dimensions=true;
-	  std::istringstream(string_data.at(0)) >> *nx;
-	  std::istringstream(string_data.at(1)) >> *ny;
+	  std::istringstream(string_data.at(0)) >> nx;
+	  std::istringstream(string_data.at(1)) >> ny;
 	  string_data.clear();
 	}
       }
@@ -169,21 +171,24 @@ int read_ppm(string file_name, int * nx, int * ny, double *** data){
   file.close();
 
   //do a sanity check
-  if(string_data.size()!= (uint) (*nx)*(*ny)){
+  if(string_data.size()!= (uint) (nx)*(ny)){
     cout << "Confused about ppm data. Dimensions"
 	 << " don't match content... exiting." << endl;
     return FAILURE;
   }
   
   //fill the output values
-  *data = new double*[*nx];
-  for(int i=0; i < *nx; ++i)
-    (*data)[i] = new double[*ny];
+  if(data.get_size_x()==0)
+    data.allocate_memory(nx,ny);
   
+  int value = 0;
 
-  for(int j=0,k=0; j< *ny; ++j)
-    for(int i=0; i < *nx; ++i, ++k)
-      std::istringstream(string_data.at(k)) >> (*data)[i][j];
+  for(int j=0,k=0; j< ny; ++j){
+    for(int i=0; i < nx; ++i, ++k){
+      std::istringstream(string_data.at(k)) >> value;
+      data.set(i,j,value);
+    }
+  }
   
   return SUCCESS; //success
  

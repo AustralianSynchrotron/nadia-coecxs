@@ -111,7 +111,7 @@ class Complex_2D{
    * @param y The vertical position
    * @return The value at (x,y)  
    */
-  inline double get_real(int x, int y){
+  inline double get_real(int x, int y) const{
     return array[x][y][REAL];
   };
 
@@ -123,7 +123,7 @@ class Complex_2D{
    * @param y The vertical position
    * @return The value at (x,y)  
    */
-  inline double get_imag(int x, int y){
+  inline double get_imag(int x, int y) const{
     return array[x][y][IMAG];
   };
   
@@ -135,7 +135,7 @@ class Complex_2D{
    * @param y The vertical position
    * @return The value at (x,y)  
    */
-  inline double get_mag(int x, int y){
+  inline double get_mag(int x, int y) const{
     return sqrt(array[x][y][REAL]*array[x][y][REAL]+
 		array[x][y][IMAG]*array[x][y][IMAG]);
   };
@@ -153,7 +153,7 @@ class Complex_2D{
    * @return The value
    *  
    */
-  double get_value(int x, int y, int type); 
+  double get_value(int x, int y, int type) const; 
 
 
   /**
@@ -162,7 +162,7 @@ class Complex_2D{
    * @return The number of horizontal points.
    *  
    */
-  double get_size_x(){
+  double get_size_x() const{
     return nx;
   };
 
@@ -172,7 +172,7 @@ class Complex_2D{
    * @return The number of vertical points.
    *  
    */
-  double get_size_y(){
+  double get_size_y() const{
     return ny;
   };
 
@@ -185,9 +185,9 @@ class Complex_2D{
    * result. Note: This method does not allocated memory for the array,
    * so this should be done before making the call.
    */
-  void get_2d(int type, double *** result=0);
+  // void get_2d(int type, double *** result=0) const;
 
-  void get_2d(int type, Double_2D & result);
+  void get_2d(int type, Double_2D & result) const;
 
   /**
    * Scale the real and imaginary components of the array by a factor. 
@@ -232,14 +232,14 @@ class Complex_2D{
    * @todo Check that this still works. This is not really useful, maybe I
    * should get ride of it.
    */
-  double get_norm();
+  double get_norm() const;
 
   /**
    * Create a new Complex_2D with the same values as this one.
    * 
    * @return The new Complex_2D
    */
-  Complex_2D * clone();
+  Complex_2D * clone() const;
 
   /**
    * Copy the values from another Complex_2D to this one.
@@ -260,7 +260,7 @@ class Complex_2D{
    * @param x The horizontal position to check
    * @param y The vertical position to check
    */
-  int check_bounds(int x, int y);
+  int check_bounds(int x, int y) const;
   
 };
 

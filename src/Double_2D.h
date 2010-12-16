@@ -16,7 +16,7 @@
  */
 class Double_2D{
   
-  double ** array;
+  double * array;
   int nx, ny;
 
  public:
@@ -39,18 +39,24 @@ class Double_2D{
    */
   ~Double_2D(){
     if(nx > 0 ){
-      for(int i=0; i < nx; ++i)
+      /**      for(int i=0; i < nx; ++i)
 	delete [] array[i];
       delete [] array;
-    }
+      }**/
+      delete [] array;}
   };
+
 
   void allocate_memory(int x_size, int y_size){
     nx = x_size;
     ny = y_size;
-    array = new double*[nx];
+    /**    array = new double*[nx];
     for(int i=0; i < nx; ++i)
-      array[i] = new double[ny];
+    array[i] = new double[ny];**/
+    array = new double[nx*ny];
+    for(int i=0; i<nx; i++)
+      for(int j=0; j<ny; j++)
+	array[i*ny+j]=0;
   }
 
   /**
@@ -68,11 +74,13 @@ class Double_2D{
 
   /** WARNING: no bound checking is done! */
   inline void set(int x, int y, double value){
-     array[x][y]=value;
+    //     array[x][y]=value;
+    array[x*ny+y]=value;
   };
 
-  inline double get(int x, int y){
-    return array[x][y];
+  inline double get(int x, int y) const {
+    //    return array[x][y]; 
+    return array[x*ny+y];
   };
 
   /**
@@ -81,7 +89,7 @@ class Double_2D{
    * @return The number of horizontal points.
    *  
    */
-  inline double get_size_x(){
+  inline double get_size_x() const {
     return nx;
   };
 
@@ -91,7 +99,7 @@ class Double_2D{
    * @return The number of vertical points.
    *  
    */
-  inline double get_size_y(){
+  inline double get_size_y() const {
     return ny;
   };
 

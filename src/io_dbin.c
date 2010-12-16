@@ -5,6 +5,7 @@
 #include <sstream>
 #include <cmath>
 #include "io.h"
+#include "Double_2D.h"
 
 using namespace std;
 
@@ -14,7 +15,7 @@ using namespace std;
 /***************************************************************/
 
 /***************************************************************/
-int read_dbin(string file_name, int nx, int ny, double *** data){
+int read_dbin(string file_name, int nx, int ny, Double_2D & data){
  
   //open the input file:
   FILE * file = fopen(file_name.c_str(), "r");
@@ -32,11 +33,18 @@ int read_dbin(string file_name, int nx, int ny, double *** data){
   //Do a sanity check. Is the file size right 
   //for a nx by ny array with 16 bit pixel values?
   
-  *data = new double*[nx];
+  if(data.get_size_x()==0)
+    data.allocate_memory(nx,ny);
+
+  if(data.get_size_x()!=nx || data.get_size_y()!=ny ){
+    cout << "The Double_2D object supplied has the wrong " 
+	 << "dimensions" << endl;
+    return FAILURE;
+  }
+
   for(int i=0; i < nx; ++i){
-    (*data)[i] = new double[ny];
     for(int j=0; j< ny; ++j){
-      (*data)[i][j] = buffer[j*nx+i];
+      data.set(i,j,buffer[j*nx+i]);
     }
   }
   

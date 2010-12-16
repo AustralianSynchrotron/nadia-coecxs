@@ -4,6 +4,7 @@
 #include <map>
 #include <string>
 #include "FourierT.h"
+#include "Double_2D.h"
 
 /** The number of reconstruction algorithms */
 #define NALGORITHMS 9 
@@ -83,10 +84,10 @@ class PlanarCDI{
   double beta;
 
   /** a copy of the support */
-  double ** support;
+  Double_2D support;
 
   /**a copy of the square root of the intensity at the detector plane. */
-  double ** intensity_sqrt;
+  Double_2D intensity_sqrt;
 
   /** the algorithm which is being used: ER, HIO etc. */
   int algorithm;
@@ -114,18 +115,18 @@ class PlanarCDI{
     return complex;
     };**/
 
-  void set_support(double ** object_support);
-  void set_support(Double_2D & object_support);
+  //void set_support(double ** object_support);
+  void set_support(const Double_2D & object_support);
 
-  void set_intensity(double ** detector_intensity);
-  void set_intensity(Double_2D &detector_intensity);
+  //void set_intensity(double ** detector_intensity);
+  void set_intensity(const Double_2D & detector_intensity);
 
   void set_relaxation_parameter(double relaxation_parameter){
     beta = relaxation_parameter;
     set_algorithm(algorithm); //force algorithm constants to update
   };
   
-  void get_intensity_autocorrelation(Double_2D * autoc);
+  void get_intensity_autocorrelation(Double_2D & autoc);
 
   void set_algorithm(int alg);
 
@@ -150,6 +151,8 @@ class PlanarCDI{
   virtual void project_intensity(Complex_2D & c);
   virtual void scale_intensity(Complex_2D & c);
   
+  void get_support(Double_2D & support);
+
   virtual void apply_shrinkwrap(double gauss_width, double threshold);
 
 
@@ -158,13 +161,10 @@ class PlanarCDI{
   static std::map<std::string,int> * set_up_algorithm_name_map();
   //bool is_support(int x, int y);
 
-  void apply_threshold(double *** array, 
+  void apply_threshold(Double_2D & array, 
 		       double threshold);
   
-  void convolve(double *** array, double gauss_width);
-  
-  double gauss_2d(double x, double y, double sigma_x, double sigma_y, 
-		  double amp);
+  void convolve(Double_2D & array, double gauss_width);
   
     
 };

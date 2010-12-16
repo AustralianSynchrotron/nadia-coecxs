@@ -10,11 +10,11 @@
  */
 
 #include <iostream>
-#include <fstream>
+//#include <fstream>
 #include <math.h>
 #include <string>
-#include <stdlib.h>
-#include <fftw3.h>
+//#include <stdlib.h>
+//#include <fftw3.h>
 #include <cstdlib> 
 #include "io.h"
 #include "Complex_2D.h"
@@ -53,7 +53,7 @@ int main(void){
 
   //get the data from file
   
-  Double_2D * data;
+  Double_2D data;
 
   //read the data into an array
   int status = read_tiff(data_file_name, data);
@@ -62,15 +62,15 @@ int main(void){
     return(1);
   }
 
-  int n_x = data->get_size_x();
-  int n_y = data->get_size_y();
+  int n_x = data.get_size_x();
+  int n_y = data.get_size_y();
   
   //fill the complex no. with image data
   Complex_2D input(n_x,n_y);
   for(int i=0; i<n_x; i++){
     for(int j=0; j<n_y; j++){
-      input.set_value(i,j,REAL, 1.0/sqrt(2.0)*data->get(i,j)*pow(-1,i + j));
-      input.set_value(i,j,IMAG, 1.0/sqrt(2.0)*data->get(i,j)*pow(-1,i + j));
+      input.set_value(i,j,REAL, 1.0/sqrt(2.0)*data.get(i,j)*pow(-1,i + j));
+      input.set_value(i,j,IMAG, 1.0/sqrt(2.0)*data.get(i,j)*pow(-1,i + j));
     }
   }
 
@@ -78,11 +78,11 @@ int main(void){
 
   //fourier transform
   FourierT fft(n_x,n_y);
-  fft.perform_forward_fft(&input);
+  fft.perform_forward_fft(input);
 
   //write the fourier transform to file.
   Double_2D intensity(n_x,n_y);
-  input.get_2d(MAG_SQ, &intensity);
+  input.get_2d(MAG_SQ,intensity);
 
   //apply a threashold to make the simulation a bit more realistic
   for(int i=0; i<n_x; i++){
@@ -100,7 +100,7 @@ int main(void){
   /******** get the support from file ****************************/
 
   Double_2D support(n_x,n_y);
-  status = read_tiff(support_file_name, &support);
+  status = read_tiff(support_file_name, support);
 
   /**** make the first guess: random with the support imposed ******/
 
@@ -123,7 +123,7 @@ int main(void){
   /*************** do the reconstruction *******************/
 
   //create a project object and set the options.
-  PlanarCDI proj(&first_guess);
+  PlanarCDI proj(first_guess);
   proj.set_support(support);
   proj.set_intensity(intensity);
   proj.set_algorithm(HIO);
@@ -141,7 +141,7 @@ int main(void){
     if(i%output_iterations==0){
 
       ostringstream temp_str ( ostringstream::out ) ;
-      first_guess.get_2d(MAG,&result);
+      first_guess.get_2d(MAG,result);
       temp_str << "sim_result_" << i << ".ppm";
       write_ppm(temp_str.str(), result);
       //      temp_str.clear();
@@ -166,7 +166,7 @@ int main(void){
     if(i%output_iterations==0){
 
       ostringstream temp_str ( ostringstream::out ) ;
-      first_guess.get_2d(MAG,&result);
+      first_guess.get_2d(MAG,result);
       temp_str << "sim_result_" << i << ".ppm";
       write_ppm(temp_str.str(), result);
       //      temp_str.clear();
@@ -180,10 +180,6 @@ int main(void){
     }
   }
   
-
-  //clean up
-  delete data;
-
   return 0;
 }
 

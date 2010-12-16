@@ -1,18 +1,11 @@
 #include <iostream>
-#include <fstream>
-#include <math.h>
 #include <string>
-#include <stdlib.h>
 #include <fftw3.h>
 #include <cstdlib> 
 #include <cmath>
 #include "Complex_2D.h"
-#include "Double_2D.h"
-#include "FourierT.h"
 #include "PlanarCDI.h"
-//#include <time.h>
-#include "io.h" //
-#include <sstream>
+#include "io.h" 
 
 using namespace std;
 
@@ -43,14 +36,16 @@ PlanarCDI::PlanarCDI(Complex_2D & initial_guess)
     fft(nx,ny),
     temp_complex_PFS(nx,ny),
     temp_complex_PF(nx,ny),
-    beta(0.9)  {
+    beta(0.9),
+    support(nx,ny),
+    intensity_sqrt(nx,ny){
   
-  support = new double*[nx];
+  /**  support = new double*[nx];
   intensity_sqrt = new double*[nx];
   for(int i=0; i< nx; i++){
     support[i]=new double[ny];
     intensity_sqrt[i]=new double[ny];
-  }
+    }**/
 
   set_algorithm(HIO);
 
@@ -60,12 +55,12 @@ PlanarCDI::PlanarCDI(Complex_2D & initial_guess)
 PlanarCDI::~PlanarCDI(){
   //delete fft;
 
-  for(int i=0; i<nx ; i++){
+  /**  for(int i=0; i<nx ; i++){
     delete[] support[i];
     delete[] intensity_sqrt[i];
   }
   delete[] support;
-  delete[] intensity_sqrt;
+  delete[] intensity_sqrt;**/
 
   //  for(int i=0; i<NTERMS-1; i++)
   //  delete x[i];
@@ -76,14 +71,14 @@ PlanarCDI::~PlanarCDI(){
 }
 
 //double ** PlanarCDI::get_intensity_autocorrelation(){
-void PlanarCDI::get_intensity_autocorrelation(Double_2D * autoc){
+void PlanarCDI::get_intensity_autocorrelation(Double_2D & autoc){
 
   //make a temporary object
   Complex_2D temp_intensity(nx,ny);
   for(int i=0; i<nx; i++){
     for(int j=0; j<ny; j++){
       //set the real and imaginary components using the magnitude.
-      double component = (1.0/sqrt(2.0))*(intensity_sqrt[i][j]*intensity_sqrt[i][j]);
+      double component = (1.0/sqrt(2.0))*(intensity_sqrt.get(i,j)*intensity_sqrt.get(i,j));
       //scale by "pow(-1,i + j)" to make the fourier transform centered.
       component*=pow(-1,i + j);
       temp_intensity.set_value(i,j,REAL, component);
@@ -92,7 +87,7 @@ void PlanarCDI::get_intensity_autocorrelation(Double_2D * autoc){
   }
   
   // fourier transform the intensity 
-  fft.perform_backward_fft(&temp_intensity);  
+  fft.perform_backward_fft(temp_intensity);  
 
   //allocate some memory for the output.
   //double ** autoc = new double*[nx];
@@ -100,7 +95,7 @@ void PlanarCDI::get_intensity_autocorrelation(Double_2D * autoc){
   //  autoc[i]= new double[ny];
 
   //get the magnitude of the fourier transformed data.
-  temp_intensity.get_2d(MAG, *autoc);
+  temp_intensity.get_2d(MAG, autoc);
 
 }
 
@@ -111,7 +106,7 @@ void PlanarCDI::initialise_estimate(int seed){
 
   for(int i=0; i<nx; i++){
     for(int j=0; j<ny; j++){
-      if(!support[i][j]){ //enforce the support condition on the inital guess
+      if(!support.get(i,j)){ //enforce the support condition on the inital guess
 	complex.set_value(i,j,REAL,0); 
 	complex.set_value(i,j,IMAG,0);
       }
@@ -125,36 +120,20 @@ void PlanarCDI::initialise_estimate(int seed){
   }
 }
 
-void PlanarCDI::set_support(double ** object_support){
+void PlanarCDI::set_support(const Double_2D & object_support){
   for(int i=0; i< nx; i++){
     for(int j=0; j< ny; j++){
-      support[i][j] = object_support[i][j];
-    }
-  }
-}
-
-void PlanarCDI::set_support(Double_2D & object_support){
-  for(int i=0; i< nx; i++){
-    for(int j=0; j< ny; j++){
-      support[i][j] = object_support.get(i,j);
+      support.set(i,j,object_support.get(i,j));
     }
   }
 }
 
 
-void PlanarCDI::set_intensity(double ** detector_intensity){
-  for(int i=0; i< nx; i++){
-    for(int j=0; j< ny; j++){
-      intensity_sqrt[i][j] = sqrt(detector_intensity[i][j]);
-    }
-  }
-}
-
-void PlanarCDI::set_intensity(Double_2D &detector_intensity){
+void PlanarCDI::set_intensity(const Double_2D &detector_intensity){
 
   for(int i=0; i< nx; i++){
     for(int j=0; j< ny; j++){
-      intensity_sqrt[i][j] = sqrt(detector_intensity.get(i,j));
+      intensity_sqrt.set(i,j,sqrt(detector_intensity.get(i,j)));
     }
   }
 
@@ -168,7 +147,7 @@ double PlanarCDI::get_error(){
 void PlanarCDI::apply_support(Complex_2D & c){
   for(int i=0; i< nx; ++i){
     for(int j=0; j< ny; ++j){
-      if(support[i][j]==0){
+      if(support.get(i,j)==0){
 	c.set_real(i,j,0);
 	c.set_imag(i,j,0);
       }
@@ -178,9 +157,9 @@ void PlanarCDI::apply_support(Complex_2D & c){
 
 
 void PlanarCDI::project_intensity(Complex_2D & c){
-  fft.perform_forward_fft(&c);    
+  fft.perform_forward_fft(c);    
   scale_intensity(c);
-  fft.perform_backward_fft(&c);  
+  fft.perform_backward_fft(c);  
 }
 
 
@@ -194,11 +173,11 @@ void PlanarCDI::scale_intensity(Complex_2D & c){
       //scale
       double current_mag = c.get_mag(i,j);
       if(current_mag > 0.0){
-	c.set_mag(i,j,intensity_sqrt[i][j]/current_mag);
+	c.set_mag(i,j,intensity_sqrt.get(i,j)/current_mag);
       }
       //calculate the error
-      norm2_mag += intensity_sqrt[i][j]*intensity_sqrt[i][j];
-      norm2_diff += pow(current_mag-intensity_sqrt[i][j],2);
+      norm2_mag += intensity_sqrt.get(i,j)*intensity_sqrt.get(i,j);
+      norm2_diff += pow(current_mag-intensity_sqrt.get(i,j),2);
     }
   }
   current_error = (norm2_diff/norm2_mag);
@@ -207,11 +186,11 @@ void PlanarCDI::scale_intensity(Complex_2D & c){
 
 
 void PlanarCDI::set_algorithm(int alg){
-  if(algorithm==alg){
+  /**  if(algorithm==alg){
     cout << "Warning you are trying to set the algorithm"
 	 << " to the one already in use" << endl; 
     return;
-  }
+    }**/
 
   algorithm = alg;
   
@@ -267,13 +246,15 @@ void PlanarCDI::set_custom_algorithm(double m1, double m2, double m3,
 
 void PlanarCDI::print_algorithm(){
  
-  cout << "x(k+1) = x(k) + ("
+  cout << "Currently using the algorithm: "
+       << "x(k+1) = x(k) + ("
        << algorithm_structure[PSF]<<"*PsPf + "
        << algorithm_structure[PFS]<<"*PfPs + "
        << algorithm_structure[PS]<<"*Ps + "
        << algorithm_structure[PF]<<"*Pf + "
        << algorithm_structure[PI]<<"*I"
        << ")x(k)"<< endl;
+  cout << "Ps - support constraint, Pf - modulus constraint" << endl;
   
 }
 
@@ -317,7 +298,7 @@ int PlanarCDI::iterate(){
       }
 
       //Add the support
-      if(support[i][j]!=0){
+      if(support.get(i,j)!=0){
 	//PS
 	if(algorithm_structure[PS]!=0){
 	  value_real+=algorithm_structure[PS]*complex.get_real(i,j);
@@ -339,45 +320,52 @@ int PlanarCDI::iterate(){
   return SUCCESS;
 }
 
-
-void PlanarCDI::apply_shrinkwrap(double gauss_width, double threshold){
-  
-
-  double ** recon = new double*[nx];
-  for(int i=0; i < nx; ++i)
-    recon[i] = new double[ny];
-  complex.get_2d(MAG,&recon);
-  
-  //convolve
-  convolve(&recon,gauss_width);
-  
-  //threshold
-  apply_threshold(&recon,threshold);
-
-  set_support(recon);
-
-  for(int i=0; i < nx; ++i)
-    delete [] recon[i];
-  delete recon;
-  
+void PlanarCDI::get_support(Double_2D & object_support){
+  for(int i=0; i < nx; i++)
+    for(int j=0; j < ny; j++)
+      object_support.set(i,j,support.get(i,j));
 }
 
 
-void PlanarCDI::convolve(double *** array, double gauss_width){
+void PlanarCDI::apply_shrinkwrap(double gauss_width, double threshold){
+  
+  Double_2D recon(nx,ny);
+  complex.get_2d(MAG,recon);
+
+  //write_ppm("shrink_1.ppm",recon);
+
+  //convolve
+  convolve(recon,gauss_width);
+  
+  //write_ppm("shrink_2.ppm",recon);
+
+  //threshold
+  apply_threshold(recon,threshold);
+
+  //write_ppm("shrink_3.ppm",recon);
+
+  set_support(recon);
+
+}
+
+
+void PlanarCDI::convolve(Double_2D & array, double gauss_width){
 
   //to speed up computation we only convolve 
-  //up to 2 times the gaussian width
-  const int cut_off = 2; 
+  //up to 4 pixels away from the gaussian peak
+  int half_range = 4; 
   
-  int half_range = cut_off*gauss_width;
-
-  //make a temporary array
-  double ** temp_array = new double*[nx];
-  for(int i=0; i < nx; ++i){
-    temp_array[i] = new double[ny];
-    for(int j=0; j < ny; j++)
-      temp_array[i][j]=0;
-  }
+  //make a temporary array to hold the smeared image
+  Double_2D temp_array(nx,ny);
+  
+  //make a temporary array to hold the gaussian distribution.
+  Double_2D gauss_dist(half_range+1, half_range+1);
+  for(int i=0; i <= half_range; i++){
+    for(int j=0; j <= half_range; j++){
+      double denom = 2.0*gauss_width*gauss_width;
+      gauss_dist.set(i,j,exp(-1*(i*i+j*j)/denom ) );
+    }
+  }      
 
   //now do the convolution
   //this is messy. First loop over the elements of
@@ -385,16 +373,15 @@ void PlanarCDI::convolve(double *** array, double gauss_width){
   for(int i=0; i < nx; i++){
     for(int j=0; j < ny; j++){
       
-      //now loop over the colvoluted array we want to make.
+      //now loop over the colvoluted array (the one we want to make).
       //Calculate the contribution to each element in it.
       
       for(int i2=i-half_range; i2 <= i+half_range; i2++){
 	for(int j2=j-half_range; j2 <= j+half_range; j2++){
 	  if(i2<nx && i2>=0 && j2 >=0 && j2<ny){
-	    
-	    temp_array[i2][j2]+=gauss_2d(i-i2,j-j2,
-					 gauss_width,gauss_width, 
-					 (*array)[i][j]);
+	    double smeared_value = temp_array.get(i2,j2);
+	    smeared_value += array.get(i,j)*gauss_dist.get(fabs(i-i2),fabs(j-j2));
+	    temp_array.set(i2,j2,smeared_value); 
 	  }
 	}
       }
@@ -402,49 +389,34 @@ void PlanarCDI::convolve(double *** array, double gauss_width){
     }
   }
 
-
   //now copy to the original array
   for(int i=0; i < nx; i++){
     for(int j=0; j < ny; j++)
-      (*array)[i][j] = temp_array[i][j];
+      array.set(i,j,temp_array.get(i,j));
   }
-
-  //delete the temporary array
-  for(int i=0; i < nx; ++i)
-    delete [] temp_array[i];
-  delete [] temp_array;
-
-  return;
+  
 }
 
 /** threshold is a % of the maximum */
-void PlanarCDI::apply_threshold(double *** array, 
+void PlanarCDI::apply_threshold(Double_2D & array, 
 				double threshold){
   
   //find the maximum
   double max = 0;
   for(int i=0; i < nx; i++){
     for(int j=0; j < nx; j++){
-      if( (*array)[i][j] > max)
-	max = (*array)[i][j];
+      if( array.get(i,j) > max)
+	max = array.get(i,j);
     }
   }
-
+  
   //apply the threshold
   for(int i=0; i < nx; i++){
     for(int j=0; j < nx; j++){
-      if( (*array)[i][j] < (threshold*max) )
-	(*array)[i][j] = 0.0;
+      if( array.get(i,j) < (threshold*max) )
+	array.set(i,j,0.0);
     }
   }
 }
 
 
-double PlanarCDI::gauss_2d(double x, double y, 
-			   double sigma_x, double sigma_y, 
-			   double amp){  
-  double x_part = (x*x)/(2.0*sigma_x*sigma_x);
-  double y_part = (y*y)/(2.0*sigma_y*sigma_y);
-  return amp*exp(-1*(x_part+y_part));
-  
-}
