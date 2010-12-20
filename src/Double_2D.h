@@ -103,6 +103,14 @@ class Double_2D{
     return ny;
   };
 
+  double get_sum() const {
+    double total = 0;
+    for(int i=0; i<nx; i++)
+      for(int j=0; j<ny; j++)
+	total+=array[i*ny+j];
+    return total;
+  };
+  
   
 };
 

@@ -16,10 +16,11 @@ int main(int argc, char * argv[]){
   int nx = 1024;
   int ny = 1024;
   Complex_2D wf(nx,ny);
+  Complex_2D wf2(nx,ny);
   int status;
   Double_2D data;
 
-  status = read_dbin("image_files/B.dbin", nx, ny, data);
+  status = read_dbin("image_files/A.dbin", nx, ny, data);
   if(!status){
     cout << "failed.. exiting"  << endl;
     return(1);
@@ -27,7 +28,16 @@ int main(int argc, char * argv[]){
 
 
   //read the data into an array
-  status = read_cplx("image_files/wf_B_1024.cplx", wf);
+  status = read_cplx("image_files/wf_A_1024.cplx", wf2);
+  status = read_cplx("wf_recovered.cplx", wf);
+
+  Double_2D temp(nx,ny);
+  wf.get_2d(MAG,temp);
+  cout << "wf norm mine: "<< temp.get_sum() << endl;
+  wf2.get_2d(MAG,temp);
+  cout << "wf norm: "<< temp.get_sum() << endl;
+  cout << "data norm: "<< data.get_sum() << endl;
+
   if(!status){
     cout << "failed.. exiting"  << endl;
     return(1);
@@ -39,8 +49,8 @@ int main(int argc, char * argv[]){
   Double_2D support;
   //  int nx_s, ny_s;
 
-  status = read_tiff("image_files/FCDI_support_B.tiff", support);  
-  //status = read_tiff("image_files/wf_A_support.tiff", &nx_s, &ny_s, &support);  
+  //status = read_tiff("image_files/FCDI_support_B.tiff", support);  
+  status = read_tiff("image_files/wf_A_support.tiff", support);  
   if(!status){
     cout << "failed to get data from "
 	 <<".. exiting"  << endl;
@@ -62,21 +72,21 @@ int main(int argc, char * argv[]){
   //create the projection object which will be used to
   //perform the reconstuction.
   Complex_2D object_estimate(nx,ny);
-  /**FresnelCDI proj(&object_estimate,
-		  &wf,
+  FresnelCDI proj(object_estimate,
+		  wf,
 		  4.892e-10,
 		  0.909513 - 16.353e-3,
 		  18.513e-3 - 16.353e-3,
 		  13.5e-6,
-		  0.984729833);**/
+		  0.984729833);
  
-  FresnelCDI proj(object_estimate,
+  /**  FresnelCDI proj(object_estimate,
 		  wf,
 		  4.892e-10,
 		  0.909388 - 16.353e-3,
 		  18.388e-3 - 16.353e-3,
 		  13.5e-6,
-		  0.97700431);
+		  0.97700431);**/
 
   //set the support and intensity
   proj.set_support(support);

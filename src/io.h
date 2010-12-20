@@ -20,6 +20,8 @@ int read_hdf4(std::string file_name, Double_2D & data,
 
 int read_dbin(std::string file_name, int nx, int ny, Double_2D & data);
 
+int write_dbin(std::string file_name, const Double_2D & data);
+
 
 int read_cplx(std::string file_name, Complex_2D & complex);
 

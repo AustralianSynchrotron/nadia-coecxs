@@ -42,17 +42,12 @@ class FresnelCDI_WF: public PlanarCDI{
 
  private:
 
-  double zone_to_focal_length;
-
   double wavelength;
-
+  double zone_to_focal_length;
   double focal_to_detector_length;
-
   double pixel_length;
-
-  
-  Complex_2D * forward_coefficients_const;
-  Complex_2D * backward_coefficients_const;
+  Complex_2D forward_coefficient;
+  Complex_2D backward_coefficient;
   
  public:
   
@@ -61,12 +56,18 @@ class FresnelCDI_WF: public PlanarCDI{
 		double zone_focal_length,
 		double focal_detector_length,
 		double pixel_size);
-  ~FresnelCDI_WF();
   
-  int iterate();
-  
+  int iterate();  
   void initialise_estimate(int seed=0);
-  
+  void set_algorithm(int alg){
+    std::cout << "WARNING: Algorithm can not be set when performing Frenel "
+	      << "CDI white field recovery" << std::endl;
+  }
+  void get_algorithm(){
+    std::cout << "Using the default Frenel CDI "
+	      << "white field recovery algorithm" << std::endl;
+  }
+
 };
 
 #endif
