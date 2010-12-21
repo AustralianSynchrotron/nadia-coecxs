@@ -97,25 +97,7 @@ int FresnelCDI_WF::iterate(){
   Double_2D result(nx,ny);
 
   //we assume the wavefield is in the
-  //detector plane.
-
-  complex.get_2d(MAG,result);
-  cout << "before scaling: "<<result.get_sum()<<endl;
-
-  cout << "intensity: "<<intensity_sqrt.get_sum()<<endl;
-
-  //write_ppm("1-inital_mag.ppm", result);
-  //complex.get_2d(PHASE,result);
-  //write_ppm("1-inital_phase.ppm", result);
-
-
-
-  scale_intensity(complex);
-  cout << "Current Error is: " << current_error<<endl;
-  
-  complex.get_2d(MAG,result);
-  cout << "after scaling: "<<result.get_sum()<<endl;
-
+  //detector plane and has just been scaled.
 
   //complex.get_2d(MAG,result);
   //write_ppm("2-scaled_mag.ppm", result);
@@ -165,5 +147,14 @@ int FresnelCDI_WF::iterate(){
   complex.invert();
   fft.perform_forward_fft(complex);
 
+  cout << "intensity: "<<intensity_sqrt.get_sum()<<endl;
+
+  //write_ppm("1-inital_mag.ppm", result);
+  //complex.get_2d(PHASE,result);
+  //write_ppm("1-inital_phase.ppm", result);
+
+  scale_intensity(complex);
+  cout << "Current Error is: " << current_error<<endl;
+  
   return SUCCESS;
 }

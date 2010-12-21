@@ -61,11 +61,6 @@ FresnelCDI::FresnelCDI(Complex_2D & initial_guess,
 
 }
 
-FresnelCDI::~FresnelCDI(){
-  //  delete B_s;
-  //  delete B_d;
-}
-
 void FresnelCDI::initialise_estimate(int seed){
   //initialise the random number generator
   srand(seed);
@@ -95,46 +90,26 @@ void FresnelCDI::initialise_estimate(int seed){
     }
   }
 
-  Double_2D result(nx,ny);
-  complex.get_2d(MAG,result);
-  write_ppm("first_guess_bf.ppm",result);
-
-  complex.multiply(B_d);
-  fft.perform_forward_fft(complex);
-  complex.invert();  
+  propagate_to_sample(complex);
 
   apply_support(complex);
 
-  complex.get_2d(MAG,result);
-  write_ppm("first_guess_after.ppm",result); 
 }
 
-
-
-//int FresnelCDI::iterate(){
-
-//  PhaseRetrievalBase::iterate();
-  
-  //project_intensity(complex);
-
-//  return SUCCESS;
-// }
 
 void FresnelCDI::project_intensity(Complex_2D & c){
 
   Double_2D result(complex.get_size_x(),complex.get_size_y());
 
   //Forward propgate
-  c.invert();
-  fft.perform_backward_fft(c);
-  c.multiply(B_s);
+  propagate_to_detector(c);
 
   c.get_2d(MAG,result);
   write_ppm("1-forward.ppm",result);
   c.get_2d(PHASE,result);
   write_ppm("1-forward_p.ppm",result);
 
-  c.add(illumination,norm);
+  c.add(illumination,norm); //add the white field
 
   c.get_2d(MAG,result);
   write_ppm("2-with_illum.ppm",result);
@@ -148,7 +123,7 @@ void FresnelCDI::project_intensity(Complex_2D & c){
   c.get_2d(PHASE,result);
   write_ppm("3-scaled_p.ppm",result);
 
-  c.add(illumination,-norm);
+  c.add(illumination,-norm); //subtract the white field
 
   c.get_2d(MAG,result);
   write_ppm("4-subtracted.ppm",result);
@@ -156,9 +131,7 @@ void FresnelCDI::project_intensity(Complex_2D & c){
   write_ppm("4-subtracted_p.ppm",result);
 
   //backward propogate
-  c.multiply(B_d);
-  fft.perform_forward_fft(c);
-  c.invert();  
+  propagate_to_sample(c);
 
   c.get_2d(MAG,result);
   write_ppm("5-backward.ppm",result);
@@ -167,3 +140,37 @@ void FresnelCDI::project_intensity(Complex_2D & c){
 
 }
 
+void FresnelCDI::propagate_to_sample(Complex_2D & c){
+  c.multiply(B_d);
+  fft.perform_forward_fft(c); 
+  c.invert(); 
+}
+
+void FresnelCDI::propagate_to_detector(Complex_2D & c){
+  c.invert();  
+  fft.perform_backward_fft(c);
+  c.multiply(B_s);
+}
+
+
+void FresnelCDI::get_transmission_function(Complex_2D & result){
+
+  //get the illuminating wavefield in the sample plane
+  propagate_to_sample(illumination);
+
+  //divide the estimate by the illuminating wavefield
+  //and add unity.
+  for(int i=0; i<nx; i++){
+    for(int j=0; j<nx; j++){
+      double new_mag = complex.get_mag(i,j)/illumination.get_mag(i,j);
+      double new_phi = complex.get_value(i,j,PHASE) 
+	- illumination.get_value(i,j,PHASE);
+      result.set_real(i,j,new_mag*cos(new_phi)+1);
+      result.set_imag(i,j,new_mag*sin(new_phi));
+    }
+  }
+
+  //go back to the detector plane
+  propagate_to_detector(illumination);
+
+}

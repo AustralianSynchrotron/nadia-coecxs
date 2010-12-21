@@ -66,7 +66,7 @@ class FresnelCDI: public PlanarCDI{
   void project_intensity(Complex_2D & c);
   
   void initialise_estimate(int seed=0);
-  
+  void get_transmission_function(Complex_2D & result);
 
 };
 

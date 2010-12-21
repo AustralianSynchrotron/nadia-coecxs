@@ -28,15 +28,15 @@ int main(int argc, char * argv[]){
 
 
   //read the data into an array
-  status = read_cplx("image_files/wf_A_1024.cplx", wf2);
-  status = read_cplx("wf_recovered.cplx", wf);
+  status = read_cplx("image_files/wf_A_1024.cplx", wf);
+  //status = read_cplx("wf_recovered.cplx", wf);
 
-  Double_2D temp(nx,ny);
+  /**  Double_2D temp(nx,ny);
   wf.get_2d(MAG,temp);
   cout << "wf norm mine: "<< temp.get_sum() << endl;
   wf2.get_2d(MAG,temp);
   cout << "wf norm: "<< temp.get_sum() << endl;
-  cout << "data norm: "<< data.get_sum() << endl;
+  cout << "data norm: "<< data.get_sum() << endl;**/
 
   if(!status){
     cout << "failed.. exiting"  << endl;
@@ -60,6 +60,14 @@ int main(int argc, char * argv[]){
     cout << "dimensions of the support to not match ... exiting"  << endl;
     return(1);
   }
+
+  /**  for(int i=0; i<nx; i++){
+    for(int j=0; j<ny; j++){
+      //wf.set_real(i,j,436);
+      wf.set_imag(i,j,0);
+    }
+    }**/
+
 
   /*******  set up the reconstuction *********************/
 
@@ -95,7 +103,7 @@ int main(int argc, char * argv[]){
 
   proj.set_intensity(data);//result);
   //set the algorithm to hybrid input-output
-  proj.set_algorithm(HIO);
+  proj.set_algorithm(ER);
 
   //Initialise the current object ESW with a random numbers
   proj.initialise_estimate(0);
@@ -111,7 +119,7 @@ int main(int argc, char * argv[]){
     proj.iterate(); 
     cout << "Error: " << proj.get_error() << endl;
 
-    if(i%1==0){
+    if(i%2==0){
       //output the current estimate of the object
       ostringstream temp_str ( ostringstream::out ) ;
       object_estimate.get_2d(MAG,result);
@@ -125,6 +133,15 @@ int main(int argc, char * argv[]){
       //write_ppm("shrink.ppm", nx, ny, result);
     }
   }
+
+  Complex_2D trans(nx,ny);
+  proj.get_transmission_function(trans);
+
+  trans.get_2d(MAG,result);
+  write_ppm("trans_mag.ppm",result);
+  trans.get_2d(PHASE,result);
+  write_ppm("trans_phase.ppm",result);
+
       
   /**  for(int i=0; i < nx; i++){
     delete [] data[i];
