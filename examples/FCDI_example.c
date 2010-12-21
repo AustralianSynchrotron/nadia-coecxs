@@ -28,8 +28,8 @@ int main(int argc, char * argv[]){
 
 
   //read the data into an array
-  status = read_cplx("image_files/wf_A_1024.cplx", wf);
-  //status = read_cplx("wf_recovered.cplx", wf);
+  //status = read_cplx("image_files/wf_A_1024.cplx", wf);
+  status = read_cplx("wf_recovered.cplx", wf);
 
   /**  Double_2D temp(nx,ny);
   wf.get_2d(MAG,temp);
@@ -61,12 +61,12 @@ int main(int argc, char * argv[]){
     return(1);
   }
 
-  /**  for(int i=0; i<nx; i++){
+  for(int i=0; i<nx; i++){
     for(int j=0; j<ny; j++){
       //wf.set_real(i,j,436);
       wf.set_imag(i,j,0);
     }
-    }**/
+  }
 
 
   /*******  set up the reconstuction *********************/
@@ -142,11 +142,5 @@ int main(int argc, char * argv[]){
   trans.get_2d(PHASE,result);
   write_ppm("trans_phase.ppm",result);
 
-      
-  /**  for(int i=0; i < nx; i++){
-    delete [] data[i];
-  }
-  delete [] data;**/
-  
   return 0;
 }
