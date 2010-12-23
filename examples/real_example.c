@@ -48,10 +48,10 @@ int main(void){
   string support_file_name = c.getString("support_file_name");
 
   //number of hybrid input-out iterations to perform.
-  const int hio_iterations = 600;
+  const int hio_iterations = 500;
   
   //number of error reduction iterations to perform after the HIO.
-  const int er_iterations = 200;
+  const int er_iterations = 100;
 
   //output the current image ever "output_iterations"
   int output_iterations = c.getDouble("output_iterations");
@@ -159,7 +159,7 @@ int main(void){
       //output the current estimate of the object
       ostringstream temp_str ( ostringstream::out ) ;
       object_estimate.get_2d(MAG,result);
-      temp_str << "real_example_iter_" << i << ".ppm";
+      temp_str << "real_example_iter_new_" << i << ".ppm";
       write_ppm(temp_str.str(), result);
 
       temp_str.clear();
@@ -175,8 +175,6 @@ int main(void){
       
       //apply the shrinkwrap algorithm
       proj.apply_shrinkwrap(1.5,0.1);
-      proj.get_support(result);
-      write_ppm("shrink.ppm", result);
 
     }
 
@@ -195,7 +193,7 @@ int main(void){
       //output the current estimate of the object
       ostringstream temp_str ( ostringstream::out ) ;
       object_estimate.get_2d(MAG,result);
-      temp_str << "real_example_iter_" << i << ".ppm";
+      temp_str << "real_example_iter_new" << i << ".ppm";
       write_ppm(temp_str.str(), result);
       temp_str.clear();
 
