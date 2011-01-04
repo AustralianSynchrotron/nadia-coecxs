@@ -20,7 +20,7 @@ $(LIB_A): $(OBJECT_FILES) *.h
 	ar cr $(LIB_A)$  $(OBJECT_FILES)
 
 $(LIB_SO): $(OBJECT_FILES) *.h
-	g++ -shared -o $(LIB_SO) $(OBJECT_FILES) # -ltiff -lmfhdf -lm -lz -ljpeg -ldf -lfftw3 -lstdc++ 
+	g++ -O3 -shared -o $(LIB_SO) $(OBJECT_FILES) # -ltiff -lmfhdf -lm -lz -ljpeg -ldf -lfftw3 -lstdc++ 
 
 #	gcc -shared -o ../lib/cygCOECXS.dll \
 #	-Wl,--out-implib=../lib/libCOECXS.dll.a \
@@ -35,11 +35,11 @@ install_headers: $(HEADER_FILES)
 	cp $(HEADER_FILES) ../include
 
 %.o: %.c++
-	g++ -g -O2 -c $< -o $@
+	g++ -g -O3 -c $< -o $@
 
 
 %.o: %.c
-	g++ -g -O2 -c $< -o $@
+	g++ -g -O3 -c $< -o $@
 
 
 clean:                                                     

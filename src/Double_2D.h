@@ -1,6 +1,7 @@
 #ifndef DOUBLE_2D_H
 #define DOUBLE_2D_H
 
+#include "string.h"
 
 /**
  * @file Double_2D.h
@@ -71,6 +72,11 @@ class Double_2D{
    * @value The value which it will be set to
    *  
    */
+
+  void copy(const Double_2D & double_array){
+    memcpy(array,double_array.array, sizeof(double)*nx*ny);
+  }
+
 
   /** WARNING: no bound checking is done! */
   inline void set(int x, int y, double value){

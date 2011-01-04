@@ -29,46 +29,49 @@ map<string,int> * PlanarCDI::set_up_algorithm_name_map(){
 
 
 /***************************************************************/
-PlanarCDI::PlanarCDI(Complex_2D & initial_guess)
+PlanarCDI::PlanarCDI(Complex_2D & initial_guess, int n_best)
   : complex(initial_guess),
     nx(initial_guess.get_size_x()),
     ny(initial_guess.get_size_y()),
     fft(nx,ny),
     temp_complex_PFS(nx,ny),
     temp_complex_PF(nx,ny),
+    temp_complex(nx,ny),
+    temp_complex_PS(nx,ny),
+    temp_complex_PSF(nx,ny),
     beta(0.9),
     support(nx,ny),
-    intensity_sqrt(nx,ny){
+    intensity_sqrt(nx,ny),
+    n_best(n_best){
   
-  /**  support = new double*[nx];
-  intensity_sqrt = new double*[nx];
-  for(int i=0; i< nx; i++){
-    support[i]=new double[ny];
-    intensity_sqrt[i]=new double[ny];
-    }**/
-
   set_algorithm(HIO);
-
-}
-
+  
+  //initialize the best estimates
+  best_array = new Complex_2D*[n_best];
+  best_error_array = new double[n_best];
+  for(int i=0; i<n_best; i++){
+    best_array[i] = new Complex_2D(nx,ny);
+    best_error_array[i]=1;
+  }
+};
 
 PlanarCDI::~PlanarCDI(){
-  //delete fft;
-
-  /**  for(int i=0; i<nx ; i++){
-    delete[] support[i];
-    delete[] intensity_sqrt[i];
-  }
-  delete[] support;
-  delete[] intensity_sqrt;**/
-
-  //  for(int i=0; i<NTERMS-1; i++)
-  //  delete x[i];
-
-  //delete temp_complex_PFS;
-  //delete temp_complex_PF;
+  for(int i=0; i<n_best; i++)
+    delete best_array[i];
+  delete [] best_array;
 
 }
+
+Complex_2D * PlanarCDI::get_best_result(int index, double & error){
+  if(index >=0 && index < n_best ){
+    error = best_error_array[index];
+    return best_array[index];
+  }
+  
+  cout << "index out of bounds in PlanarCDI::get_best_result"<<endl;
+  return NULL;
+  
+};
 
 //double ** PlanarCDI::get_intensity_autocorrelation(){
 void PlanarCDI::get_intensity_autocorrelation(Double_2D & autoc){
@@ -88,11 +91,6 @@ void PlanarCDI::get_intensity_autocorrelation(Double_2D & autoc){
   
   // fourier transform the intensity 
   fft.perform_backward_fft(temp_intensity);  
-
-  //allocate some memory for the output.
-  //double ** autoc = new double*[nx];
-  //for(int i=0; i < nx; i++)
-  //  autoc[i]= new double[ny];
 
   //get the magnitude of the fourier transformed data.
   temp_intensity.get_2d(MAG, autoc);
@@ -136,7 +134,6 @@ void PlanarCDI::set_intensity(const Double_2D &detector_intensity){
       intensity_sqrt.set(i,j,sqrt(detector_intensity.get(i,j)));
     }
   }
-
 }
 
 
@@ -148,8 +145,8 @@ void PlanarCDI::apply_support(Complex_2D & c){
   for(int i=0; i< nx; ++i){
     for(int j=0; j< ny; ++j){
       if(support.get(i,j)==0){
-	c.set_real(i,j,0);
-	c.set_imag(i,j,0);
+	c.set_real(i,j,0.0);
+	c.set_imag(i,j,0.0);
       }
     }
   }
@@ -164,14 +161,13 @@ void PlanarCDI::project_intensity(Complex_2D & c){
 
 
 void PlanarCDI::scale_intensity(Complex_2D & c){
-
   double norm2_mag=0;
   double norm2_diff=0;
-
+  double current_mag;
   for(int i=0; i< nx; ++i){
     for(int j=0; j< ny; ++j){
       //scale
-      double current_mag = c.get_mag(i,j);
+      current_mag = c.get_mag(i,j);
       if(current_mag > 0.0){
 	c.set_mag(i,j,intensity_sqrt.get(i,j)/current_mag);
       }
@@ -181,7 +177,7 @@ void PlanarCDI::scale_intensity(Complex_2D & c){
     }
   }
   current_error = (norm2_diff/norm2_mag);
-
+  
 }
 
 
@@ -260,7 +256,7 @@ void PlanarCDI::print_algorithm(){
 
 int PlanarCDI::iterate(){
 
-  //FS
+  //PFS
   if(algorithm_structure[PFS]!=0){
     temp_complex_PFS.copy(complex);
     apply_support(temp_complex_PFS);
@@ -272,15 +268,22 @@ int PlanarCDI::iterate(){
     temp_complex_PF.copy(complex);
     project_intensity(temp_complex_PF);
   }
-
+  
+  //Apply the support contraint
+  if(algorithm_structure[PS]!=0){
+    temp_complex_PS.copy(complex);
+    apply_support(temp_complex_PS);
+  }
+  if(algorithm_structure[PSF]!=0){
+    temp_complex_PSF.copy(temp_complex_PF);
+    apply_support(temp_complex_PSF);
+  }
   
   //combine the result of the seperate operators
-
   double value_real, value_imag;
-
   for(int i=0; i < nx; ++i){
     for(int j=0; j < ny; ++j){
-
+ 
       //Add the identity
       value_real = (1+algorithm_structure[PI])*complex.get_real(i,j);
       value_imag = (1+algorithm_structure[PI])*complex.get_imag(i,j);
@@ -297,26 +300,47 @@ int PlanarCDI::iterate(){
 	value_imag+=algorithm_structure[PF]*temp_complex_PF.get_imag(i,j);
       }
 
-      //Add the support
-      if(support.get(i,j)!=0){
-	//PS
-	if(algorithm_structure[PS]!=0){
-	  value_real+=algorithm_structure[PS]*complex.get_real(i,j);
-	  value_imag+=algorithm_structure[PS]*complex.get_imag(i,j);
-	}
-	//PSF
-	if(algorithm_structure[PSF]!=0){
-	  value_real+=algorithm_structure[PSF]*temp_complex_PF.get_real(i,j);
-	  value_imag+=algorithm_structure[PSF]*temp_complex_PF.get_imag(i,j);
-	}
+      //Add the component from the Ps operator
+      if(algorithm_structure[PS]!=0){
+	value_real+=algorithm_structure[PS]*temp_complex_PS.get_real(i,j);
+	value_imag+=algorithm_structure[PS]*temp_complex_PS.get_imag(i,j);
+      }
+      
+      //Add the component from the PsPf operator
+      if(algorithm_structure[PSF]!=0){
+	value_real+=algorithm_structure[PSF]*temp_complex_PSF.get_real(i,j);
+	value_imag+=algorithm_structure[PSF]*temp_complex_PSF.get_imag(i,j);
       }
       
       complex.set_real(i,j,value_real);
       complex.set_imag(i,j,value_imag);
-   
+      
     }
   }
 
+  //check whether this estimate is as good as the current best
+  //this is a bit dodgy since we are actually storing the estimate just after the
+  //best one.
+  int place = 0;
+  for( ; place < n_best && current_error > best_error_array[place]; place++); 
+  
+  //we found a new best estimate
+  if(n_best>0 && place < n_best){
+
+    cout << "We have found a better estimate at location " << place <<endl;
+
+    Complex_2D * temp_pointer = best_array[n_best-1];
+    temp_pointer->copy(complex);
+
+    for(int i=n_best-1; i>place; i--){
+      best_error_array[i] = best_error_array[i-1];
+      best_array[i] = best_array[i-1];
+    }
+    
+    best_error_array[place] = current_error;
+    best_array[place] = temp_pointer;      
+  }
+  
   return SUCCESS;
 }
 
@@ -370,31 +394,32 @@ void PlanarCDI::convolve(Double_2D & array, double gauss_width){
   //now do the convolution
   //this is messy. First loop over the elements of
   //the array which was given as input
+  double new_value;
   for(int i=0; i < nx; i++){
     for(int j=0; j < ny; j++){
       
       //now loop over the colvoluted array (the one we want to make).
       //Calculate the contribution to each element in it.
       
+      new_value = 0;
+      
       for(int i2=i-half_range; i2 <= i+half_range; i2++){
 	for(int j2=j-half_range; j2 <= j+half_range; j2++){
-	  if(i2<nx && i2>=0 && j2 >=0 && j2<ny){
-	    double smeared_value = temp_array.get(i2,j2);
-	    smeared_value += array.get(i,j)*gauss_dist.get(fabs(i-i2),fabs(j-j2));
-	    temp_array.set(i2,j2,smeared_value); 
+	  if(i2<nx && i2>=0 && j2>=0 && j2<ny){
+	    //double smeared_value = temp_array.get(i2,j2);
+	    //smeared_value += array.get(i,j)*gauss_dist.get(fabs(i-i2),fabs(j-j2));
+	    //temp_array.set(i2,j2,smeared_value); 
+	    new_value += array.get(i2,j2)*gauss_dist.get(fabs(i-i2),fabs(j-j2));
+
 	  }
 	}
       }
-      
+      temp_array.set(i,j,new_value); 
     }
   }
 
-  //now copy to the original array
-  for(int i=0; i < nx; i++){
-    for(int j=0; j < ny; j++)
-      array.set(i,j,temp_array.get(i,j));
-  }
-  
+  array.copy(temp_array);
+
 }
 
 /** threshold is a % of the maximum */

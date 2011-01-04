@@ -1,7 +1,7 @@
 #include <iostream>
 #include <fstream>
 #include <math.h>
-#include <string>
+#include <string.h>
 #include <stdlib.h>
 
 #include "Complex_2D.h"
@@ -61,12 +61,14 @@ void FourierT::copy_to_fftw_array(fftw_complex * array , Complex_2D & c){
     exit(1);
   }
 
-  for(int i=0; i < nx; ++i){
+  memcpy(array,c.array,sizeof(fftw_complex)*nx*ny);
+
+  /**  for(int i=0; i < nx; ++i){
     for(int j=0; j < ny; ++j){
 	array[(i*ny) + j][REAL]=c.get_real(i,j);
 	array[(i*ny) + j][IMAG]=c.get_imag(i,j);
     }
-  } 
+    } **/
 }
 
 void FourierT::copy_from_fftw_array(fftw_complex * array, Complex_2D & c){

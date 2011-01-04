@@ -79,6 +79,9 @@ class PlanarCDI{
       PFS and PF terms for each iteration. */
   Complex_2D temp_complex_PFS;
   Complex_2D temp_complex_PF;
+  Complex_2D temp_complex;
+  Complex_2D temp_complex_PS;
+  Complex_2D temp_complex_PSF;
 
   /**the relaxation parameter */
   double beta;
@@ -100,25 +103,24 @@ class PlanarCDI{
       the current estimated intensity. */
   double current_error;
 
+  int n_best;
+  Complex_2D ** best_array;
+  double * best_error_array;
 
   static std::map<std::string,int> * algNameMap;
 
  public:
   
-  PlanarCDI(Complex_2D & complex);
+  PlanarCDI(Complex_2D & complex, int n_best=0);
   ~PlanarCDI();
-  
+
   virtual int iterate();
   virtual void initialise_estimate(int seed=0);
   
-  /**  Complex_2D * get_current_result(){
-    return complex;
-    };**/
+  Complex_2D * get_best_result(int index, double & error);
 
-  //void set_support(double ** object_support);
   void set_support(const Double_2D & object_support);
 
-  //void set_intensity(double ** detector_intensity);
   void set_intensity(const Double_2D & detector_intensity);
 
   void set_relaxation_parameter(double relaxation_parameter){

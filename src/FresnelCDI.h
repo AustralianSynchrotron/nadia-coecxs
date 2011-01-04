@@ -40,7 +40,7 @@ class Complex_2D;
 
 class FresnelCDI: public PlanarCDI{
 
- private:
+ protected:
 
   Complex_2D & illumination;
   double wavelength;
@@ -61,12 +61,13 @@ class FresnelCDI: public PlanarCDI{
 	     double normalisation=1.0
 	     );
 
-  ~FresnelCDI();
+  virtual void project_intensity(Complex_2D & c); 
+  virtual void initialise_estimate(int seed=0); //FIXME: seed doesn't so anything
+  virtual void get_transmission_function(Complex_2D & result);
   
-  void project_intensity(Complex_2D & c);
-  
-  void initialise_estimate(int seed=0);
-  void get_transmission_function(Complex_2D & result);
+ protected:
+  virtual void propagate_to_sample(Complex_2D & c);
+  virtual void propagate_to_detector(Complex_2D & c);
 
 };
 

@@ -3,6 +3,7 @@
 
 
 #include <math.h>
+#include "fftw3.h"
 
 #define FAILURE 0
 #define SUCCESS 1
@@ -28,9 +29,12 @@ class Double_2D;
  * in a single plane.
  */
 class Complex_2D{
-  
-  double *** array;
+
+  fftw_complex *array;
+  //  double *** array;
   int nx, ny;
+
+  friend class FourierT;
 
  public:
 
@@ -73,7 +77,8 @@ class Complex_2D{
    *  
    */
   inline void set_real(int x, int y, double value){
-    array[x][y][REAL]=value;
+    array[x*ny+y][REAL] = value;
+    //array[x][y][REAL]=value;
   };
 
   /**
@@ -86,7 +91,8 @@ class Complex_2D{
    *  
    */
   inline void set_imag(int x, int y, double value){
-    array[x][y][IMAG]=value;
+    array[x*ny+y][IMAG] = value;
+    //array[x][y][IMAG]=value;
   };
 
   /**
@@ -99,8 +105,11 @@ class Complex_2D{
    *  
    */
   inline void set_mag(int x, int y, double value){
-    array[x][y][REAL]*=value;
-    array[x][y][IMAG]*=value;
+    array[x*ny+y][REAL] *= value;
+    array[x*ny+y][IMAG] *= value;
+ 
+    //array[x][y][REAL]*=value;
+    //array[x][y][IMAG]*=value;
   };
 
   /**
@@ -112,7 +121,8 @@ class Complex_2D{
    * @return The value at (x,y)  
    */
   inline double get_real(int x, int y) const{
-    return array[x][y][REAL];
+    return array[x*ny+y][REAL];
+    //return array[x][y][REAL];
   };
 
   /**
@@ -124,7 +134,8 @@ class Complex_2D{
    * @return The value at (x,y)  
    */
   inline double get_imag(int x, int y) const{
-    return array[x][y][IMAG];
+    return array[x*ny+y][IMAG];
+    //   return array[x][y][IMAG];
   };
   
   /**
@@ -136,8 +147,11 @@ class Complex_2D{
    * @return The value at (x,y)  
    */
   inline double get_mag(int x, int y) const{
-    return sqrt(array[x][y][REAL]*array[x][y][REAL]+
-		array[x][y][IMAG]*array[x][y][IMAG]);
+    return sqrt(array[x*ny+y][REAL]*array[x*ny+y][REAL]+
+		array[x*ny+y][IMAG]*array[x*ny+y][IMAG]);
+
+    //    return sqrt(array[x][y][REAL]*array[x][y][REAL]+
+    //		array[x][y][IMAG]*array[x][y][IMAG]);
   };
 
 

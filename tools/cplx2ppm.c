@@ -1,3 +1,28 @@
+/**
+ * @file cplx2ppm.c
+ * 
+ * \a cplx2ppm - Extract part of a complex binary file (2D fftw
+ * format) and save as a ppm file (grey scale P2 which is 16 bit per
+ * pixel). The real, imaginary, magnitude, phase and magnitude squared
+ * can be extracted.
+ * 
+ * \par Usage: 
+ * cplx2ppm \<input cplx file\> \<output ppm file\> 
+ * \<component type\> \<size in x\> \<size in y\> 
+ * \par
+ * where component type is one of:
+ * - 0: REAL 
+ * - 1: IMAG 
+ * - 2: MAG 
+ * - 3: PHASE 
+ * - 4: MAG_SQ 
+ *
+ * \par Example:
+ * \verbatim cplx2ppm my_white_field.cplx my_white_field_illum.pgm 4 1024 1024 \endverbatim
+ * Extract the magnitude squared from a reconstucted white-field file. 
+ * 
+ **/
+
 #include <iostream>
 #include <stdlib.h>
 #include "io.h"
