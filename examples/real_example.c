@@ -1,8 +1,6 @@
 /**
  * @file real_example.c
- * @author  Nadia Davidson <nadiamd@unimelb.edu.au>
- *
- * @section DESCRIPTION
+ * Nadia Davidson <nadiamd@unimelb.edu.au>
  *
  * This file provides an example of running the planar CDI 
  * reconstruction on real data (from the file test_dat.tif)
@@ -89,8 +87,8 @@ int main(void){
   //write out the image before and after the crop and threashold to see 
   //what they look. "true" is used to indicate we want it ouput on log scale.
   //write_ppm("data_before.ppm", *data, true);
-  //write_ppm("data_after.ppm", intensity, true);
-
+  //write_ppm("planar_data.ppm", intensity,true);
+  
 
   /****** get the support from a file and read it into an array *****/
   
