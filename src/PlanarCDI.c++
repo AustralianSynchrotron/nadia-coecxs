@@ -327,8 +327,7 @@ int PlanarCDI::iterate(){
   //we found a new best estimate
   if(n_best>0 && place < n_best){
 
-    cout << "We have found a better estimate at location " << place <<endl;
-
+    //    cout << "We have found a better estimate at location " << place <<endl;
     Complex_2D * temp_pointer = best_array[n_best-1];
     temp_pointer->copy(complex);
 

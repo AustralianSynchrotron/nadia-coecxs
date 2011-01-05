@@ -99,44 +99,44 @@ void FresnelCDI::initialise_estimate(int seed){
 
 void FresnelCDI::project_intensity(Complex_2D & c){
 
-  Double_2D result(complex.get_size_x(),complex.get_size_y());
+  //Double_2D result(complex.get_size_x(),complex.get_size_y());
 
   //Forward propgate
   propagate_to_detector(c);
 
-  c.get_2d(MAG,result);
-  write_ppm("1-forward.ppm",result);
-  c.get_2d(PHASE,result);
-  write_ppm("1-forward_p.ppm",result);
+  //c.get_2d(MAG,result);
+  //write_ppm("1-forward.ppm",result);
+  //c.get_2d(PHASE,result);
+  //write_ppm("1-forward_p.ppm",result);
 
   c.add(illumination,norm); //add the white field
 
-  c.get_2d(MAG,result);
-  write_ppm("2-with_illum.ppm",result);
-  c.get_2d(PHASE,result);
-  write_ppm("2-with_illum_p.ppm",result);
+  //c.get_2d(MAG,result);
+  //write_ppm("2-with_illum.ppm",result);
+  //c.get_2d(PHASE,result);
+  //write_ppm("2-with_illum_p.ppm",result);
 
   scale_intensity(c);
 
-  c.get_2d(MAG,result);
-  write_ppm("3-scaled.ppm",result);
-  c.get_2d(PHASE,result);
-  write_ppm("3-scaled_p.ppm",result);
+  //c.get_2d(MAG,result);
+  //write_ppm("3-scaled.ppm",result);
+  //c.get_2d(PHASE,result);
+  //write_ppm("3-scaled_p.ppm",result);
 
   c.add(illumination,-norm); //subtract the white field
 
-  c.get_2d(MAG,result);
-  write_ppm("4-subtracted.ppm",result);
-  c.get_2d(PHASE,result);
-  write_ppm("4-subtracted_p.ppm",result);
+  //c.get_2d(MAG,result);
+  //write_ppm("4-subtracted.ppm",result);
+  //c.get_2d(PHASE,result);
+  //write_ppm("4-subtracted_p.ppm",result);
 
   //backward propogate
   propagate_to_sample(c);
 
-  c.get_2d(MAG,result);
-  write_ppm("5-backward.ppm",result);
-  c.get_2d(PHASE,result);
-  write_ppm("5-backward_p.ppm",result);
+  //c.get_2d(MAG,result);
+  //write_ppm("5-backward.ppm",result);
+  //c.get_2d(PHASE,result);
+  //write_ppm("5-backward_p.ppm",result);
 
 }
 

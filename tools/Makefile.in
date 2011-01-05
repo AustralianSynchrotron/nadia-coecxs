@@ -1,14 +1,10 @@
 LD_RUN_PATH=$(PWD)/../lib
 
-SOURCE_TOOLS=hdf2ppm.c tiff2ppm.c planar_CDI_reconstruction.c
+SOURCE_TOOLS=hdf2ppm.c tiff2ppm.c planar_CDI_reconstruction.c dbin2ppm.c cplx2ppm.c cplx2dbin.c
 EXEC_TOOLS=$(SOURCE_TOOLS:.c=.exe)
 
 LIB_SO=../lib/libCOECXS.so
 LIB_A=../lib/libCOECXS.a
-
-#External libraries to include
-#LIBS := -lfftw3 -ltiff -L$(HDF_ROOT)/lib/ -ldf -lmfhdf -lstdc++
-#INC := -I/usr/include/hdf/ -I$(HDF_ROOT)/include/ -I../include/
 
 all: $(LIB_A) $(LIB_SO) $(EXEC_TOOLS) 
 
@@ -21,10 +17,6 @@ $(LIB_SO): ../src/*.c++ ../src/*.h ../src/*.c
 %.exe: %.c ../src/*.c++ ../src/*.h ../src/*.c
 	@CXX@ @CXXFLAGS@ -I../include $< -o $@ \
 	@LDFLAGS@ @LIBS@ -L../lib -lCOECXS
-
-#$(LIB_A) 
-
-#-L../lib/ -lCOECXS
 
 clean:                                                     
 	rm -f *.o *~ 

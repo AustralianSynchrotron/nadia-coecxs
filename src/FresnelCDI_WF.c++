@@ -147,14 +147,11 @@ int FresnelCDI_WF::iterate(){
   complex.invert();
   fft.perform_forward_fft(complex);
 
-  cout << "intensity: "<<intensity_sqrt.get_sum()<<endl;
-
   //write_ppm("1-inital_mag.ppm", result);
   //complex.get_2d(PHASE,result);
   //write_ppm("1-inital_phase.ppm", result);
 
   scale_intensity(complex);
-  cout << "Current Error is: " << current_error<<endl;
   
   return SUCCESS;
 }
