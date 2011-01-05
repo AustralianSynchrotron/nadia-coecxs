@@ -4,97 +4,83 @@
 #include "io.h"
 #include "Complex_2D.h"
 #include "Double_2D.h"
-#include "FresnelCDI.h"
-#include "shrinkwrap.h"
+#include "FresnelCDI_WF.h"
+
+/**
+ * @file FCDI_WF_example.c
+ * @author  Nadia Davidson <nadiamd@unimelb.edu.au>
+ *
+ * @section DESCRIPTION
+ *
+ * This example shows how the white field can be reconstucted 
+ * in Fresnel CDI. It uses Corey's data files. 
+ */
 
 using namespace std;
 
 /**************************************/
 int main(int argc, char * argv[]){
 
-  //read the data block in the file
+  //read the detector data block in the file
   int nx = 1024;
   int ny = 1024;
-  Complex_2D wf(nx,ny);
-  Complex_2D wf2(nx,ny);
   int status;
   Double_2D data;
-
-  status = read_dbin("angelas_images/scan_029498.bin", nx, ny, data);
+  status = read_dbin("image_files/wf_A_illum.dbin", nx, ny, data);
   if(!status){
     cout << "failed.. exiting"  << endl;
     return(1);
   }
-
-  //read the data into an array
-  status = read_cplx("angelas_images/white_field.bin", wf);
-
-  Double_2D temp(nx,ny);
-  wf.get_2d(MAG_SQ,temp);
-
-  double data_sum = data.get_sum();
-  double wf_sum = temp.get_sum();
-
-  if(!status){
-    cout << "failed.. exiting"  << endl;
-    return(1);
-  }
-
 
   /******* get the support from file and read it into an array *****/
-
   Double_2D support;
-  //  int nx_s, ny_s;
-
-  //status = read_tiff("image_files/FCDI_support_B.tiff", support);  
-  status = read_ppm("angelas_images/support.pgm", support);  
+  status = read_tiff("image_files/wf_A_illum_support.tiff", support);  
   if(!status){
     cout << "failed to get data from "
 	 <<".. exiting"  << endl;
     return(1);
   }
+  //check that the dimensions are the same as the data
   if( support.get_size_x() != nx || support.get_size_y() != ny){
     cout << "dimensions of the support to not match ... exiting"  << endl;
     return(1);
   }
 
+
   /*******  set up the reconstuction *********************/
 
-  //make a 2D array and allocate some memory.
-  //This will be used to output the image of the 
-  //current estimate.
+  //create the white field (wf) object which will store
+  //the reconstucted illumination at the detector plane.
+  Complex_2D wf(nx,ny); 
   
-  Double_2D result(nx,ny);
-
-  //create the projection object which will be used to
-  //perform the reconstuction.
-  Complex_2D object_estimate(nx,ny);
-  FresnelCDI proj(object_estimate,
-		  wf,
-		  6.88795e-10,
-		  0.466795+0.001573152, //check these numbers
-		  0.001573152,
-		  13.5e-6,
-		  //0.72088);
-		  data_sum/wf_sum); 
-		  //0.984729833);
+  //make the projection operator
+  FresnelCDI_WF proj(wf, //inital estimate
+		     4.892e-10, //wavelength
+		     16.353e-3, //zone-to-focal length
+		     0.909513 - 16.353e-3, //focal-to-detector
+		     13.5e-6); //pixel size
  
   //set the support and intensity
   proj.set_support(support);
   
-  wf.get_2d(MAG,result);
+  proj.set_intensity(data);
+  
+  //no need to set the algorithm this time.
+  //since there is only one for white field reconstruction.
 
-  proj.set_intensity(data);//result);
-  //set the algorithm to hybrid input-output
-  proj.set_algorithm(ER);
-
-  //Initialise the current object ESW with a random number
+  //initialise the current detector wavefield 
+  //check FresnelCDI_WF.h to see what it is initialised to.
   proj.initialise_estimate(0);
   
 
   /*** run the reconstruction ************/
 
-  for(int i=0; i<50; i++){
+  //make a 2D array and allocate some memory.
+  //This will be used to output the image of the 
+  //current estimate.
+  Double_2D result(nx,ny);
+
+  for(int i=0; i<15; i++){
 
     cout << "iteration " << i << endl;
 
@@ -103,26 +89,26 @@ int main(int argc, char * argv[]){
     cout << "Error: " << proj.get_error() << endl;
 
     if(i%5==0){
-      //output the current estimate of the object
+      //output the current estimate at the detector
+      //(magnitude and phase)
       ostringstream temp_str ( ostringstream::out ) ;
-      object_estimate.get_2d(MAG,result);
-      temp_str << "fcdi_example_iter_" << i << ".ppm";
+      wf.get_2d(MAG,result);
+      temp_str << "fcdi_wf_example_mag_iter_" << i << ".ppm";
       write_ppm(temp_str.str(),result);
-      temp_str.clear();
-    
-      //apply the shrinkwrap algorithm
-      //proj.apply_shrinkwrap(2,0.1);
-      //write_ppm("shrink.ppm", nx, ny, result);
+
+      ostringstream temp_str2 ( ostringstream::out ) ;
+      wf.get_2d(PHASE,result);
+      temp_str2 << "fcdi_wf_example_phase_iter_" << i << ".ppm";
+      write_ppm(temp_str2.str(),result);
     }
   }
 
-  Complex_2D trans(nx,ny);
-  proj.get_transmission_function(trans);
+  //save the result as a complex binary for later use
+  status = write_cplx("wf_recovered.cplx", wf);
+  if(status!=0)
+    cout << "Successfully wrote out the reconstucted white field"
+	 << " into wf_recovered.cplx"<<endl;
 
-  trans.get_2d(MAG,result);
-  write_ppm("trans_mag.ppm",result,true);
-  trans.get_2d(PHASE,result);
-  write_ppm("trans_phase.ppm",result);
 
   return 0;
 }

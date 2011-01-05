@@ -1,3 +1,14 @@
+/**
+ * @file FCDI_example.c
+ * @author  Nadia Davidson <nadiamd@unimelb.edu.au>
+ *
+ * @section DESCRIPTION
+ *
+ * This file provides an example of running the Fresnel CDI 
+ * reconstruction on real data (from Corey's data)
+ *
+ */
+
 #include <iostream>
 #include <sstream>
 #include <stdlib.h>
@@ -5,7 +16,6 @@
 #include "Complex_2D.h"
 #include "Double_2D.h"
 #include "FresnelCDI.h"
-#include "shrinkwrap.h"
 
 using namespace std;
 
@@ -15,11 +25,10 @@ int main(int argc, char * argv[]){
   //read the data block in the file
   int nx = 1024;
   int ny = 1024;
-  Complex_2D wf(nx,ny);
-  Complex_2D wf2(nx,ny);
   int status;
   Double_2D data;
 
+  //read the diffraction data
   status = read_dbin("image_files/A.dbin", nx, ny, data);
   if(!status){
     cout << "failed.. exiting"  << endl;
@@ -27,19 +36,12 @@ int main(int argc, char * argv[]){
   }
 
 
-  //read the data into an array
-  //status = read_cplx("image_files/wf_A_1024.cplx", wf);
+  //read the reconstucted white field data
+  Complex_2D wf(nx,ny);
   status = read_cplx("wf_recovered.cplx", wf);
-
-  /**  Double_2D temp(nx,ny);
-  wf.get_2d(MAG,temp);
-  cout << "wf norm mine: "<< temp.get_sum() << endl;
-  wf2.get_2d(MAG,temp);
-  cout << "wf norm: "<< temp.get_sum() << endl;
-  cout << "data norm: "<< data.get_sum() << endl;**/
-
   if(!status){
-    cout << "failed.. exiting"  << endl;
+    cout  << "Maybe you need to run ./FCDI_WF_example.exe "
+	 << "first... exiting"  << endl;
     return(1);
   }
 
@@ -47,9 +49,6 @@ int main(int argc, char * argv[]){
   /******* get the support from file and read it into an array *****/
 
   Double_2D support;
-  //  int nx_s, ny_s;
-
-  //status = read_tiff("image_files/FCDI_support_B.tiff", support);  
   status = read_tiff("image_files/wf_A_support.tiff", support);  
   if(!status){
     cout << "failed to get data from "
@@ -60,15 +59,7 @@ int main(int argc, char * argv[]){
     cout << "dimensions of the support to not match ... exiting"  << endl;
     return(1);
   }
-
-  for(int i=0; i<nx; i++){
-    for(int j=0; j<ny; j++){
-      //wf.set_real(i,j,436);
-      wf.set_imag(i,j,0);
-    }
-  }
-
-
+  
   /*******  set up the reconstuction *********************/
 
   //make a 2D array and allocate some memory.
@@ -80,38 +71,29 @@ int main(int argc, char * argv[]){
   //create the projection object which will be used to
   //perform the reconstuction.
   Complex_2D object_estimate(nx,ny);
-  FresnelCDI proj(object_estimate,
-		  wf,
-		  4.892e-10,
-		  0.909513 - 16.353e-3,
-		  18.513e-3 - 16.353e-3,
-		  13.5e-6,
-		  0.984729833);
+  FresnelCDI proj(object_estimate, //estimate
+		  wf, //white field 
+		  4.892e-10, //wavelength
+		  0.909513 - 16.353e-3, //focal-to-detector
+		  18.513e-3 - 16.353e-3, //focal-to-sample
+		  13.5e-6, //pixel size
+		  0.984729833); //normalisation between wf and image
  
-  /**  FresnelCDI proj(object_estimate,
-		  wf,
-		  4.892e-10,
-		  0.909388 - 16.353e-3,
-		  18.388e-3 - 16.353e-3,
-		  13.5e-6,
-		  0.97700431);**/
-
   //set the support and intensity
   proj.set_support(support);
   
-  wf.get_2d(MAG,result);
+  proj.set_intensity(data);
 
-  proj.set_intensity(data);//result);
-  //set the algorithm to hybrid input-output
+  //set the algorithm to error reduction
   proj.set_algorithm(ER);
 
-  //Initialise the current object ESW with a random numbers
+  //Initialise the current object ESW
   proj.initialise_estimate(0);
   
 
   /*** run the reconstruction ************/
 
-  for(int i=0; i<10; i++){
+  for(int i=0; i<20; i++){
 
     cout << "iteration " << i << endl;
 
@@ -119,7 +101,7 @@ int main(int argc, char * argv[]){
     proj.iterate(); 
     cout << "Error: " << proj.get_error() << endl;
 
-    if(i%2==0){
+    if(i%5==0){
       //output the current estimate of the object
       ostringstream temp_str ( ostringstream::out ) ;
       object_estimate.get_2d(MAG,result);
@@ -128,17 +110,18 @@ int main(int argc, char * argv[]){
       temp_str.clear();
     
       //apply the shrinkwrap algorithm
-      proj.apply_shrinkwrap(2,0.1);
-      //proj.set_support(result);
-      //write_ppm("shrink.ppm", nx, ny, result);
+      //proj.apply_shrinkwrap(2,0.1);
     }
   }
 
+  //get the transmission function for the final iteration
   Complex_2D trans(nx,ny);
   proj.get_transmission_function(trans);
 
+  //I can't see this without using log scale.
   trans.get_2d(MAG,result);
-  write_ppm("trans_mag.ppm",result);
+  write_ppm("trans_mag.ppm",result,true);
+
   trans.get_2d(PHASE,result);
   write_ppm("trans_phase.ppm",result);
 

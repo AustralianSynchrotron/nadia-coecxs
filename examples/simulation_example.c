@@ -5,16 +5,14 @@
  * @section DESCRIPTION
  *
  * This file provides an example of running the planar CDI 
- * reconstruction on simulated data.
+ * reconstruction on simulated data. Take a look at
+ * real_example.c as well to see what the code does.
  *
  */
 
 #include <iostream>
-//#include <fstream>
 #include <math.h>
 #include <string>
-//#include <stdlib.h>
-//#include <fftw3.h>
 #include <cstdlib> 
 #include "io.h"
 #include "Complex_2D.h"
@@ -43,8 +41,7 @@ int main(void){
 
   //number of hybrid input-out iterations to perform.
   const int hio_iterations = 1000;
-  
- 
+   
   //output the current image ever "output_iterations"
   const int output_iterations = 40;
 
@@ -93,50 +90,37 @@ int main(void){
     }
   }
 
-  //write the output to file
-  write_ppm("sim_intensity.ppm",intensity);
-
+  //write the output to file (use log scale)
+  write_ppm("sim_intensity.ppm",intensity,true);
 
   /******** get the support from file ****************************/
 
   Double_2D support(n_x,n_y);
   status = read_tiff(support_file_name, support);
 
-  /**** make the first guess: random with the support imposed ******/
-
-  Complex_2D first_guess(n_x,n_y);
-  for(int i=0; i<n_x; i++){
-    for(int j=0; j<n_y; j++){
-      if(!support.get(i,j)){
-	first_guess.set_value(i,j,REAL,0); 
-	first_guess.set_value(i,j,IMAG,0);
-      }
-      else{
-	double r = (255.0*rand()/(double) RAND_MAX)* pow(-1,i + j);
-	double im = (255.0*rand()/(double) RAND_MAX)* pow(-1,i + j);
-	first_guess.set_value(i,j,REAL,r); 
-	first_guess.set_value(i,j,IMAG,im);
-      }
-    }
-  }
-
   /*************** do the reconstruction *******************/
 
   //create a project object and set the options.
-  PlanarCDI proj(first_guess);
-  proj.set_support(support);
-  proj.set_intensity(intensity);
-  proj.set_algorithm(HIO);
+  Complex_2D first_guess(n_x,n_y);
+  PlanarCDI my_planar(first_guess);
+  my_planar.set_support(support);
+  my_planar.set_intensity(intensity);
+  my_planar.set_algorithm(HIO);
+
+  //set the inital guess to be random inside the support
+  //and zero outside. Note that this must be called
+  //after "my_planar.set_support()"
+  my_planar.initialise_estimate(0);
   
-  //write the fourier transform to file.
+  //make a temporary arrary
   Double_2D result(n_x,n_y);
 
-  //apply the iterations
+  //apply the projection operators
   for(int i=0; i<hio_iterations; i++){
 
     cout << "iteration " << i << endl;
 
-    proj.iterate();
+    my_planar.iterate();
 
     if(i%output_iterations==0){
 
@@ -144,39 +128,7 @@ int main(void){
       first_guess.get_2d(MAG,result);
       temp_str << "sim_result_" << i << ".ppm";
       write_ppm(temp_str.str(), result);
-      //      temp_str.clear();
 
-      /**Complex_2D * temp = first_guess.clone();
-      fft.perform_forward_fft(temp);
-      temp->get_2d(MAG,&result);
-      temp_str << "diffraction.ppm";
-      write_ppm(temp_str.str(), n_x, n_y, result, true);
-      delete temp;**/
-    }
-  }
-
-  
-
-  for(int i=0; i<hio_iterations; i++){
-
-    cout << "iteration " << i << endl;
-
-    proj.iterate();
-
-    if(i%output_iterations==0){
-
-      ostringstream temp_str ( ostringstream::out ) ;
-      first_guess.get_2d(MAG,result);
-      temp_str << "sim_result_" << i << ".ppm";
-      write_ppm(temp_str.str(), result);
-      //      temp_str.clear();
-
-      /**Complex_2D * temp = first_guess.clone();
-      fft.perform_forward_fft(temp);
-      temp->get_2d(MAG,&result);
-      temp_str << "diffraction.ppm";
-      write_ppm(temp_str.str(), n_x, n_y, result, true);
-      delete temp;**/
     }
   }
   

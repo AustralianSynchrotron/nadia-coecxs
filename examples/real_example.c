@@ -20,9 +20,8 @@
 #include "io.h"
 #include "Complex_2D.h"
 #include "PlanarCDI.h"
-#include "shrinkwrap.h"
 #include "Double_2D.h"
-#include <google/profiler.h>
+//#include <google/profiler.h>
 
 using namespace std;
 
@@ -30,7 +29,7 @@ int main(void){
 
   //Config c("my.in");
 
-  ProfilerStart("profiler.prof");
+  //ProfilerStart("profiler.prof");
 
   //Define some constants which will be used in the code.
 
@@ -212,6 +211,7 @@ int main(void){
   //And we are done. "object_estimate" contained the final estimate of
   //the ESW.
 
+  /** ignore the stuff below  
   Double_2D result2(nx,ny);
 
   double error=0;
@@ -229,9 +229,9 @@ int main(void){
 
   planar.get_best_result(3,error)->get_2d(MAG,result2);
   write_ppm("best_error_3.ppm", result2);
-  cout << "Best error 3 is "<< error <<endl;
+  cout << "Best error 3 is "<< error <<endl; **/
 
-  ProfilerStop();
+  //ProfilerStop();
 
   return 0;
 }
