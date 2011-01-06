@@ -13,10 +13,13 @@ using namespace std;
 #define FAILURE 0
 #define SUCCESS 1
 
-/***************************************************************/
-//bad code which allows the array type to be 
-//decided at run-time.
-/***************************************************************/
+/**
+ * @class anonomous_array
+ * 
+ * This is bad code which allows me to get around the fact that
+ * I don't know the number of bytes per pixel in the data file 
+ * until it's opened.
+ */
 class anonomous_array{
 
   int type_;

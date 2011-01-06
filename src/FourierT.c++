@@ -10,10 +10,12 @@
 using namespace std;
 
 
+//constructor
 FourierT::FourierT(int x_size, int y_size) 
   : nx(x_size),
     ny(y_size){
 
+  //set up the fourier transforming array and plans
   original = new fftw_complex[nx*ny];
   transformed = new fftw_complex[nx*ny];
 
@@ -22,11 +24,11 @@ FourierT::FourierT(int x_size, int y_size)
   f_backward = fftw_plan_dft_2d(nx, ny, transformed, original, 
 				FFTW_BACKWARD, FFTW_MEASURE);
   
-};
+}
 
+//clean up
 FourierT::~FourierT(){
 
-  //clean up
   fftw_destroy_plan(f_forward);
   fftw_destroy_plan(f_backward);
 
@@ -61,26 +63,22 @@ void FourierT::copy_to_fftw_array(fftw_complex * array , Complex_2D & c){
     exit(1);
   }
 
+  //quick copy
   memcpy(array,c.array,sizeof(fftw_complex)*nx*ny);
 
-  /**  for(int i=0; i < nx; ++i){
-    for(int j=0; j < ny; ++j){
-	array[(i*ny) + j][REAL]=c.get_real(i,j);
-	array[(i*ny) + j][IMAG]=c.get_imag(i,j);
-    }
-    } **/
 }
 
 void FourierT::copy_from_fftw_array(fftw_complex * array, Complex_2D & c){
   //check the dimensions:
-  if(c.get_size_x()!=nx || c.get_size_y()!=ny ){
-    cout << "Dimensions of the Complex_2D and "
-	 << "fftw_complex do not match.. exiting" <<endl;
+  //  if(c.get_size_x()!=nx || c.get_size_y()!=ny ){
+  //  cout << "Dimensions of the Complex_2D and "
+  //	 << "fftw_complex do not match.. exiting" <<endl;
     
-    exit(1);
+  //    exit(1);
   }
 
   //always scale as FFTW doesn't normalise the result
+  //we can't so a quick copy then :(
   double scale_factor = 1.0/(sqrt(nx*ny));
 
   for(int i=0; i < nx; ++i){

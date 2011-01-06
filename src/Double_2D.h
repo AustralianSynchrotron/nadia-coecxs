@@ -1,26 +1,42 @@
+/**
+ * @file Double_2D.h
+ * @class Double_2D
+ * @author  Nadia Davidson 
+ * @date Last modified on 6/1/2011
+ *
+ * @brief A 2-dimensional array of doubles
+ *
+ * This class represents a 2D field of doubles. Setter and getter
+ * methods are provided along with some other useful functions. This
+ * is a convenient form to store and pass image data in the
+ * reconstruction software.  A better implementation of this class
+ * would use templates, but restricting the type to double is
+ * sufficient our needs.
+ */
+
 #ifndef DOUBLE_2D_H
 #define DOUBLE_2D_H
 
 #include "string.h"
 
-/**
- * @file Double_2D.h
- * @class Double_2D
- * @author  Nadia Davidson 
- *
- * @breif A 2-dimensional array of complex numbers 
- *
- * This class represents a 2D complex field. Setter and getter methods
- * are provided along with some other useful functions. Double_2D
- * objects are used in the CDI reconstruction to represent the ESW
- * in a single plane.
- */
 class Double_2D{
-  
+
+  /** the underlying 2-D array */
   double * array;
-  int nx, ny;
+  
+  /** the size in x */
+  int nx;
+
+  /** the size in y */
+  int ny;
 
  public:
+
+  /**
+   * A constructor which creates an empty array (of no size).  Note
+   * that memory has not been allocated if this method is used.
+   */
+  Double_2D();
 
   /**
    * Constructor that creates a 2D object with the given dimensions.
@@ -28,64 +44,54 @@ class Double_2D{
    * @param x_size The number of samplings in the horizontal direction
    * @param y_size The number of samplings in the vertical direction
    */
+  Double_2D(int x_size, int y_size);
   
-  Double_2D():nx(0),ny(0){};
-
-  Double_2D(int x_size, int y_size){
-    allocate_memory(x_size,y_size);
-  }
-
   /**
-   * Destructor
+   * Destructor. Memory is deallocated here.
    */
-  ~Double_2D(){
-    if(nx > 0 ){
-      /**      for(int i=0; i < nx; ++i)
-	delete [] array[i];
-      delete [] array;
-      }**/
-      delete [] array;}
-  };
-
-
-  void allocate_memory(int x_size, int y_size){
-    nx = x_size;
-    ny = y_size;
-    /**    array = new double*[nx];
-    for(int i=0; i < nx; ++i)
-    array[i] = new double[ny];**/
-    array = new double[nx*ny];
-    for(int i=0; i<nx; i++)
-      for(int j=0; j<ny; j++)
-	array[i*ny+j]=0;
-  }
-
+  ~Double_2D();
+     
   /**
-   * Set the value at point x,y. Note that this is
-   * the slow method. For fast, but unsafe, methods 
-   * use set_real or set_imag.
+   * Allocate memory for the array. This should only be used if
+   * the constructor was called with no parameters!
    * 
-   * @param x The x position
-   * @param y The y position
-   * @param type Which component to set. The options are either: 
-   * "REAL" or "IMAG"
-   * @value The value which it will be set to
-   *  
+   * @param x_size The number of samplings in the horizontal direction
+   * @param y_size The number of samplings in the vertical direction
+   */ 
+  void allocate_memory(int x_size, int y_size);
+  
+
+  /**
+   * Copy the contents of another Double_2D array to this one.  Note
+   * that this is a quick copy method and no bounds checking is done.
+   * 
+   * @param double_array The array to copy from
    */
+  void copy(const Double_2D & double_array);
+  
 
-  void copy(const Double_2D & double_array){
-    memcpy(array,double_array.array, sizeof(double)*nx*ny);
-  }
-
-
-  /** WARNING: no bound checking is done! */
+  /**
+   * Set the value at positions (x,y) WARNING: no bound checking is
+   * done!
+   *
+   * @param x The horizontal position 
+   * @param y The vertical position
+   * @param value The value to set
+   */
   inline void set(int x, int y, double value){
-    //     array[x][y]=value;
     array[x*ny+y]=value;
   };
 
+
+  /**
+   * Get the value at positions (x,y) WARNING: no bound checking is
+   * done!
+   *
+   * @param x The horizontal position 
+   * @param y The vertical position
+   * @return The value at (x,y)
+   */
   inline double get(int x, int y) const {
-    //    return array[x][y]; 
     return array[x*ny+y];
   };
 
@@ -109,14 +115,15 @@ class Double_2D{
     return ny;
   };
 
-  double get_sum() const {
-    double total = 0;
-    for(int i=0; i<nx; i++)
-      for(int j=0; j<ny; j++)
-	total+=array[i*ny+j];
-    return total;
-  };
-  
+
+  /**
+   * Get the sum of all values in the array. This is useful to
+   * determine normalisation values.
+   * 
+   * @return The sum of all values in the array
+   *  
+   */
+  double get_sum() const;
   
 };
 

@@ -31,7 +31,14 @@ int read_cplx(string file_name, Complex_2D & complex){
   }
 
   double * buffer = new double [nx*ny*2];
-  fread(buffer, sizeof(double), nx*ny*2, file);
+  size_t elements_read = fread(buffer, sizeof(double), nx*ny*2, file);
+
+  if(elements_read!=(nx*ny*2)){
+    cout << "Could not correctly read the file" << file_name
+	 << ". Perhaps the dimensions specifies are wrong?"<<endl;
+    return FAILURE;
+  }
+
   fclose(file);
   
   //Do a sanity check. Is the file size right 
@@ -39,9 +46,6 @@ int read_cplx(string file_name, Complex_2D & complex){
   
   for(int i=0; i < nx; ++i){
     for(int j=0; j< ny; ++j){
-      // cout << atan2(buffer[2*(j*nx+i)+1],buffer[2*(j*nx+i)]) <<endl; 
-	//	   << " r: "<< buffer[2*(j*nx+i)]
-      //	   << " i: "<< buffer[2*(j*nx+i)+1] << endl;
       complex.set_real(i,j,buffer[2*(j*nx+i)]);
       complex.set_imag(i,j,buffer[2*(j*nx+i)+1]);
     }

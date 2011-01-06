@@ -1,39 +1,57 @@
-#ifndef COMPLEX_2D_H
-#define COMPLEX_2D_H
-
-
-#include <math.h>
-#include "fftw3.h"
-
-#define FAILURE 0
-#define SUCCESS 1
-
-#define REAL 0
-#define IMAG 1
-#define MAG 2
-#define PHASE 3
-#define MAG_SQ 4
-
-class Double_2D;
-
 /**
  * @file Complex_2D.h
  * @class Complex_2D
- * @author  Nadia Davidson 
+ * @author Nadia Davidson 
+ * @date Last Modified on 6/1/2011
  *
- * @breif A 2-dimensional array of complex numbers 
+ * @brief A 2-dimensional array of complex numbers 
  *
  * This class represents a 2D complex field. Setter and getter methods
  * are provided along with some other useful functions. Complex_2D
  * objects are used in the CDI reconstruction to represent the ESW
  * in a single plane.
  */
+
+#ifndef COMPLEX_2D_H
+#define COMPLEX_2D_H
+
+#include <math.h>
+#include "fftw3.h"
+
+/** the function failed */
+#define FAILURE 0
+
+/** the function finished successfully */
+#define SUCCESS 1
+
+/** real component */
+#define REAL 0
+
+/** imaginary component */
+#define IMAG 1
+
+/** magnitude */
+#define MAG 2
+
+/** phase */
+#define PHASE 3
+
+/** magnitudes squared */
+#define MAG_SQ 4
+
+class Double_2D;
+
 class Complex_2D{
 
+  /** "array" holds the data */
   fftw_complex *array;
-  //  double *** array;
+
+  /** nx/ny are number of samplings in x/y */
   int nx, ny;
 
+  //Allow FourierT to access protected members.
+  //This is needed for the quick copy method used
+  //in the FourierT class.
   friend class FourierT;
 
  public:
@@ -61,7 +79,7 @@ class Complex_2D{
    * @param y The y position
    * @param type Which component to set. The options are either: 
    * "REAL" or "IMAG"
-   * @value The value which it will be set to
+   * @param value The value which it will be set to
    *  
    */
   void set_value(int x, int y, int type, double value);
@@ -73,7 +91,7 @@ class Complex_2D{
    * 
    * @param x The x position
    * @param y The y position
-   * @value The value which it will be set to
+   * @param value The value which it will be set to
    *  
    */
   inline void set_real(int x, int y, double value){
@@ -87,7 +105,7 @@ class Complex_2D{
    * 
    * @param x The x position
    * @param y The y position
-   * @value The value which it will be set to
+   * @oaram value The value which it will be set to
    *  
    */
   inline void set_imag(int x, int y, double value){
@@ -101,7 +119,7 @@ class Complex_2D{
    * 
    * @param x The x position
    * @param y The y position
-   * @value The value which it will be set to
+   * @param value The value which it will be set to
    *  
    */
   inline void set_mag(int x, int y, double value){
@@ -195,12 +213,10 @@ class Complex_2D{
    * 
    * @param type Which type of value is wanted. The options are either: 
    * "REAL","IMAG","MAG","MAG_SQ" or "PHASE"
-   * @param result A pointer to a 2D array. The array will be filled with the
+   * @param result A a 2D array. The array will be filled with the
    * result. Note: This method does not allocated memory for the array,
    * so this should be done before making the call.
    */
-  // void get_2d(int type, double *** result=0) const;
-
   void get_2d(int type, Double_2D & result) const;
 
   /**
@@ -217,8 +233,10 @@ class Complex_2D{
    * 
    * @param c2 The Complex_2D to add.
    * @param scale If this value is non-empty, or not 1, c2 will be
-   * scaled before being added to the Complex_2D,@f $\mathrm{this} = \mathrm{this} +
-   * \mathrm{scale} \times \mathrm{c2} $ @f . Using this function is more efficient than
+   * scaled before being added to the Complex_2D,
+   * @f $\mathrm{this} = \mathrm{this} +
+   * \mathrm{scale} \times \mathrm{c2} $ @f . 
+   * Using this function is more efficient than
    * calling Complex_2D::scale() followed by Complex_2D:add()
    * separately.
    */
@@ -231,8 +249,10 @@ class Complex_2D{
    * 
    * @param c2 The Complex_2D to add.
    * @param scale If this value is non-empty, or not 1, c2 will be
-   * scaled before being added to the Complex_2D,@f $\mathrm{this} = \mathrm{this} \times
-   * \mathrm{scale} \times \mathrm{c2} $ @f . Using this function is more efficient than
+   * scaled before being added to the Complex_2D,
+   * @f $\mathrm{this} = \mathrm{this} \times
+   * \mathrm{scale} \times \mathrm{c2} $ @f . 
+   * Using this function is more efficient than
    * calling Complex_2D::scale() followed by Complex_2D:multiply()
    * separately.
    */
@@ -243,8 +263,6 @@ class Complex_2D{
    * Get the norm of this Complex_2D: @f $     $ @f.
    * 
    * @return @f $ \sqrt{ \sum_{x,y}{ \mathrm{|C(x,y)|^2} }  } $ @f.
-   * @todo Check that this still works. This is not really useful, maybe I
-   * should get ride of it.
    */
   double get_norm() const;
 
@@ -263,6 +281,17 @@ class Complex_2D{
   void copy(Complex_2D & c);
 
 
+  /**
+   * Rearrange the matrix so that the corners are placed in the
+   * center. This is used after fourier transforming. i.e.
+   * if the array is represented by as 4 quadrants: 
+   * <br> 1 2
+   * <br> 3 4
+   * <p> It becomes:
+   * <br> 4 3
+   * <br> 2 1
+   * 
+   */
   void invert();
 
 

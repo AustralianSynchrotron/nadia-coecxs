@@ -87,6 +87,10 @@ int main(int argc, char * argv[]){
  
   //the number of iterations to perform for each algorithm
   list<int> * iterations = c.getIntList("iterations");
+
+  //get the number of pixels in x and y of the image
+  int pixels_x = c.getInt("pixels_x");
+  int pixels_y = c.getInt("pixels_y");
   
   //do some error checking. Were all the values we need present
   //in the config file?
@@ -106,6 +110,10 @@ int main(int argc, char * argv[]){
   int use_log_scale_for_diffraction = c.getInt("use_log_scale_for_diffraction");
   int use_log_scale_for_object = c.getInt("use_log_scale_for_object");
 
+  int shrinkwrap_iterations = c.getInt("shrinkwrap_iterations");
+  double shrinkwrap_gauss_width = c.getDouble("shrinkwrap_gauss_width");
+  double shrinkwrap_threshold = c.getDouble("shrinkwrap_threshold");
+
   /*** get the diffraction data from file and read into an array *****/
   Double_2D data;
   int status;
@@ -113,12 +121,14 @@ int main(int argc, char * argv[]){
     status = read_tiff(data_file_name, data);  
   else if(data_file_type=="ppm")
     status = read_ppm(data_file_name, data);
-  else{ //check that the file type is valid
+  else if(data_file_type=="dbin")
+    status = read_dbin(data_file_name, pixels_x, pixels_y, data);
+  else{ //unrecognised file type
     cout << "Can not process files of type \""<< data_file_type 
 	 <<"\".. exiting"  << endl;
     return(1);
   }
-  //and check that the file could be opened okay
+  //check that the file could be opened okay
   if(!status){
     cout << "failed to get data from "<< data_file_name 
 	 <<".. exiting"  << endl;
@@ -167,7 +177,6 @@ int main(int argc, char * argv[]){
   //This will be used to output the image of the 
   //current estimate.
   Double_2D result(nx,ny);
-
 
   //Make a temporary FFT in case we need to output
   //the guess of the diffraction pattern
@@ -234,6 +243,11 @@ int main(int argc, char * argv[]){
 	  write_ppm(temp_str.str(), result, 
 		    use_log_scale_for_diffraction); 
 	  delete temp;
+	}
+	if(shrinkwrap_iterations!=0 && i%shrinkwrap_iterations==0){
+	  proj.apply_shrinkwrap(shrinkwrap_gauss_width, 
+				shrinkwrap_threshold);
+	  
 	}
       }
     }

@@ -27,7 +27,15 @@ int read_dbin(string file_name, int nx, int ny, Double_2D & data){
   }
 
   double * buffer = new double [nx*ny];
-  fread(buffer, sizeof(double), nx*ny, file);
+  size_t elements_read = fread(buffer, sizeof(double), nx*ny, file);
+
+  if(elements_read!=(nx*ny*2)){
+    cout << "Could not correctly read the file" << file_name
+	 << ". Perhaps the dimensions specifies are wrong"
+	 << " or the format type is not double?" << endl;
+    return FAILURE;
+  }
+
   fclose(file);
   
   //Do a sanity check. Is the file size right 
