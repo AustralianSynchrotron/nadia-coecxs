@@ -10,7 +10,14 @@
  <hr>
  @section examples Examples
  Some examples will be here soon
+
+ @copydoc real_example.c
+ @copydoc simulation_example.c
+ @copydoc FCDI_WF_example.c
+ @copydoc FCDI_example.c
+
  <hr>
+
  @section clt Command Line Tools
  <hr>
  @copydoc dbin2ppm.c
