@@ -372,19 +372,18 @@ void PlanarCDI::apply_shrinkwrap(double gauss_width, double threshold){
 }
 
 
-void PlanarCDI::convolve(Double_2D & array, double gauss_width){
-
-  //to speed up computation we only convolve 
+void PlanarCDI::convolve(Double_2D & array, double gauss_width, 
+			 double pixel_cut_off){
+    //to speed up computation we only convolve 
   //up to 4 pixels away from the gaussian peak
-  int half_range = 4; 
-  
+
   //make a temporary array to hold the smeared image
   Double_2D temp_array(nx,ny);
   
   //make a temporary array to hold the gaussian distribution.
-  Double_2D gauss_dist(half_range+1, half_range+1);
-  for(int i=0; i <= half_range; i++){
-    for(int j=0; j <= half_range; j++){
+  Double_2D gauss_dist(pixel_cut_off+1, pixel_cut_off+1);
+  for(int i=0; i <= pixel_cut_off; i++){
+    for(int j=0; j <= pixel_cut_off; j++){
       double denom = 2.0*gauss_width*gauss_width;
       gauss_dist.set(i,j,exp(-1*(i*i+j*j)/denom ) );
     }
@@ -402,8 +401,8 @@ void PlanarCDI::convolve(Double_2D & array, double gauss_width){
       
       new_value = 0;
       
-      for(int i2=i-half_range; i2 <= i+half_range; i2++){
-	for(int j2=j-half_range; j2 <= j+half_range; j2++){
+      for(int i2=i-pixel_cut_off; i2 <= i+pixel_cut_off; i2++){
+	for(int j2=j-pixel_cut_off; j2 <= j+pixel_cut_off; j2++){
 	  if(i2<nx && i2>=0 && j2>=0 && j2<ny){
 	    //double smeared_value = temp_array.get(i2,j2);
 	    //smeared_value += array.get(i,j)*gauss_dist.get(fabs(i-i2),fabs(j-j2));

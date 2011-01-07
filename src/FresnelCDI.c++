@@ -68,14 +68,11 @@ void FresnelCDI::initialise_estimate(int seed){
   //start in the detector plane and use eq. 137 from
   //Harry's review paper.
 
-  double sum_int = 0;
-
   for(int i=0; i<nx; i++){
     for(int j=0; j<ny; j++){
  
       double real_value = intensity_sqrt.get(i,j)*intensity_sqrt.get(i,j) 
 	- norm*norm*illumination.get_value(i,j,MAG_SQ);
-      sum_int +=intensity_sqrt.get(i,j);
 
       real_value = real_value / (2*norm*illumination.get_value(i,j,REAL));
 

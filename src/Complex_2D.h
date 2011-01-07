@@ -96,7 +96,6 @@ class Complex_2D{
    */
   inline void set_real(int x, int y, double value){
     array[x*ny+y][REAL] = value;
-    //array[x][y][REAL]=value;
   };
 
   /**
@@ -110,7 +109,6 @@ class Complex_2D{
    */
   inline void set_imag(int x, int y, double value){
     array[x*ny+y][IMAG] = value;
-    //array[x][y][IMAG]=value;
   };
 
   /**
@@ -125,9 +123,6 @@ class Complex_2D{
   inline void set_mag(int x, int y, double value){
     array[x*ny+y][REAL] *= value;
     array[x*ny+y][IMAG] *= value;
- 
-    //array[x][y][REAL]*=value;
-    //array[x][y][IMAG]*=value;
   };
 
   /**
@@ -140,7 +135,6 @@ class Complex_2D{
    */
   inline double get_real(int x, int y) const{
     return array[x*ny+y][REAL];
-    //return array[x][y][REAL];
   };
 
   /**
@@ -153,7 +147,6 @@ class Complex_2D{
    */
   inline double get_imag(int x, int y) const{
     return array[x*ny+y][IMAG];
-    //   return array[x][y][IMAG];
   };
   
   /**
@@ -167,9 +160,6 @@ class Complex_2D{
   inline double get_mag(int x, int y) const{
     return sqrt(array[x*ny+y][REAL]*array[x*ny+y][REAL]+
 		array[x*ny+y][IMAG]*array[x*ny+y][IMAG]);
-
-    //    return sqrt(array[x][y][REAL]*array[x][y][REAL]+
-    //		array[x][y][IMAG]*array[x][y][IMAG]);
   };
 
 
@@ -209,11 +199,11 @@ class Complex_2D{
   };
 
   /**
-   * Get a mapping of the 2D array onto real space. 
+   * Get a 2D array of real numbers. 
    * 
    * @param type Which type of value is wanted. The options are either: 
    * "REAL","IMAG","MAG","MAG_SQ" or "PHASE"
-   * @param result A a 2D array. The array will be filled with the
+   * @param result A 2D array. The array will be filled with the
    * result. Note: This method does not allocated memory for the array,
    * so this should be done before making the call.
    */
