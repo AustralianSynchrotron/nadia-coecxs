@@ -70,9 +70,6 @@ void FresnelCDI_WF::initialise_estimate(int seed){
   //initialise the random number generator
   srand(seed);
 
-  int nx = complex.get_size_x();
-  int ny = complex.get_size_y();
-
   for(int i=0; i<nx; i++){
     for(int j=0; j<ny; j++){
       if(!support.get(i,j)){ //enforce the support condition on the inital guess
@@ -80,13 +77,17 @@ void FresnelCDI_WF::initialise_estimate(int seed){
 	complex.set_value(i,j,IMAG,0);
       }
       else{
-	double r = intensity_sqrt.get(i,j)/sqrt(2.0);//(65000.0*rand()/(double) RAND_MAX) ;//* pow(-1,i + j);
-	double im = 0;
+	//double r = intensity_sqrt.get(i,j)///sqrt(2.0);//(65000.0*rand()/(double) RAND_MAX) ;//* pow(-1,i + j);
+	//double im = 0;
 	//double im = intensity_sqrt.get(i,j)/sqrt(2.0);//(65000.0*rand()/(double) RAND_MAX) ;//* pow(-1,i + j);
+	double random = (65000.0*rand()/(double) RAND_MAX);
+
 	//double r = (65000.0*rand()/(double) RAND_MAX) ;//* pow(-1,i + j);
 	//double im = (65000.0*rand()/(double) RAND_MAX) ;//* pow(-1,i + j);
-	complex.set_value(i,j,REAL,r); 
-	complex.set_value(i,j,IMAG,im);
+	//	complex.set_value(i,j,REAL,r); 
+	//	complex.set_value(i,j,IMAG,im);
+	complex.set_value(i,j,REAL,random); 
+	complex.set_value(i,j,IMAG,0);
       }
     }
   }
@@ -94,7 +95,7 @@ void FresnelCDI_WF::initialise_estimate(int seed){
 
 int FresnelCDI_WF::iterate(){
   
-  Double_2D result(nx,ny);
+  //Double_2D result(nx,ny);
 
   //we assume the wavefield is in the
   //detector plane and has just been scaled.

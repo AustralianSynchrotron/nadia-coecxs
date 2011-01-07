@@ -36,7 +36,7 @@ install_headers: $(HEADER_FILES)
 
 
 %.o: %.c
-	g++ -g -O2 -c $< -I/usr/include/python2.6/ -o $@
+	g++ -g -O2 -c $< -o $@
 
 
 clean:                                                     

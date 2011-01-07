@@ -75,12 +75,12 @@ void FourierT::copy_from_fftw_array(fftw_complex * array, Complex_2D & c){
   //	 << "fftw_complex do not match.. exiting" <<endl;
     
   //    exit(1);
-  }
+  //  }
 
   //always scale as FFTW doesn't normalise the result
   //we can't so a quick copy then :(
   double scale_factor = 1.0/(sqrt(nx*ny));
-
+  
   for(int i=0; i < nx; ++i){
     for(int j=0; j < ny; ++j){
       c.set_real(i,j,(array[i*ny + j][REAL])*scale_factor);
