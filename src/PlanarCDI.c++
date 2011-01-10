@@ -83,7 +83,7 @@ void PlanarCDI::get_intensity_autocorrelation(Double_2D & autoc){
       //set the real and imaginary components using the magnitude.
       double component = (1.0/sqrt(2.0))*(intensity_sqrt.get(i,j)*intensity_sqrt.get(i,j));
       //scale by "pow(-1,i + j)" to make the fourier transform centered.
-      component*=pow(-1,i + j);
+      component*=pow(-1.0,i + j);
       temp_intensity.set_value(i,j,REAL, component);
       temp_intensity.set_value(i,j,IMAG, component);
     }
@@ -109,8 +109,8 @@ void PlanarCDI::initialise_estimate(int seed){
 	complex.set_value(i,j,IMAG,0);
       }
       else{
-	double r = (255.0*rand()/(double) RAND_MAX) * pow(-1,i + j);
-	double im = (255.0*rand()/(double) RAND_MAX) * pow(-1,i + j);
+	double r = (255.0*rand()/(double) RAND_MAX) * pow(-1.0,i + j);
+	double im = (255.0*rand()/(double) RAND_MAX) * pow(-1.0,i + j);
 	complex.set_value(i,j,REAL,r); 
 	complex.set_value(i,j,IMAG,im);
       }
@@ -373,7 +373,7 @@ void PlanarCDI::apply_shrinkwrap(double gauss_width, double threshold){
 
 
 void PlanarCDI::convolve(Double_2D & array, double gauss_width, 
-			 double pixel_cut_off){
+			 int pixel_cut_off){
     //to speed up computation we only convolve 
   //up to 4 pixels away from the gaussian peak
 

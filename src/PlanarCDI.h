@@ -413,7 +413,7 @@ class PlanarCDI{
    * @param pixel_cut_off Convolve up to 4 pixels away from the
    * Gaussian peak.
    */  
-  void convolve(Double_2D & array, double gauss_width, double pixel_cut_off=4);
+  void convolve(Double_2D & array, double gauss_width, int pixel_cut_off=4);
   
     
 };
