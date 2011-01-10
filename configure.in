@@ -7,10 +7,10 @@ AC_INIT([CXS_Software], [0.0], [Nadia Davidson <nadiamd@unimelb.edu.au>])
 #AC_CONFIG_HEADERS([config.h])
 
 # Checks for programs.
-AC_PROG_CC
+#AC_PROG_CC
 AC_PROG_CXX()
-AC_PROG_MAKE_SET
 AC_LANG(C++)
+AC_PROG_MAKE_SET
 
 AC_ARG_WITH(fftw-lib, [  --with-fftw_lib     
 		  specify the directory where the fftw libraries can be found])
@@ -86,7 +86,7 @@ AC_CHECK_LIB([fftw3], [fftw_plan_dft_2d], [], [
 AC_CHECK_LIB([df], [main])
 AC_CHECK_LIB([jpeg], [main])
 AC_CHECK_LIB([z], [main])
-AC_CHECK_LIB([szip], [main])
+AC_CHECK_LIB([sz], [main])
 AC_CHECK_LIB([m], [main])
 
 AC_CHECK_HEADER([hdf/mfhdf.h], [], [
