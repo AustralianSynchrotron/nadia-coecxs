@@ -1,7 +1,8 @@
 
 LD_RUN_PATH=$(PWD)/../lib
 
-EXAMPLE_SRC=real_example.c simulation_example.c FCDI_example.c FCDI_WF_example.c
+EXAMPLE_SRC=PlanarCDI_example.c PlanarCDI_simulation_example.c	\
+FresnelCDI_example.c FresnelCDI_WF_example.c
 EXAMPLE_EXEC=$(EXAMPLE_SRC:.c=.exe)
 
 LIB_A = ../lib/libCOECXS.a
@@ -9,7 +10,10 @@ LIB_A = ../lib/libCOECXS.a
 all: $(EXAMPLE_EXEC)
 
 %.exe: %.c
-	@CXX@ @CXXFLAGS@ -I../include $< -o $@ @LDFLAGS@ @LIBS@ -L../lib -lCOECXS
+	@CXX@ @CXXFLAGS@ -I../include $< -o $@ \
+	-L../lib -lCOECXS \
+	@LDFLAGS@ @LIBS@
+
 
 clean:                                                     
 	rm -f *~
