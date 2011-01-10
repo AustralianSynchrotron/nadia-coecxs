@@ -72,7 +72,6 @@ int main(int argc, char * argv[]){
   //check FresnelCDI_WF.h to see what it is initialised to.
   proj.initialise_estimate(0);
   
-
   /*** run the reconstruction ************/
 
   //make a 2D array and allocate some memory.
