@@ -1,5 +1,4 @@
-
-LD_RUN_PATH=$(PWD)/../lib
+export LD_RUN_PATH=@LD_RUN_PATH@:$(PWD)/../lib
 
 EXAMPLE_SRC=PlanarCDI_example.c PlanarCDI_simulation_example.c	\
 FresnelCDI_example.c FresnelCDI_WF_example.c
@@ -11,7 +10,7 @@ all: $(EXAMPLE_EXEC)
 
 %.exe: %.c
 	@CXX@ @CXXFLAGS@ -I../include $< -o $@ \
-	-L../lib -lCOECXS \
+	-L../lib/ -lCOECXS \
 	@LDFLAGS@ @LIBS@
 
 

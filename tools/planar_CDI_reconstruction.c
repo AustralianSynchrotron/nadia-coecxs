@@ -125,7 +125,7 @@ int main(int argc, char * argv[]){
     status = read_dbin(data_file_name, pixels_x, pixels_y, data);
   else{ //unrecognised file type
     cout << "Can not process files of type \""<< data_file_type 
-	 <<"\".. exiting"  << endl;
+	 << "\".. exiting"  << endl;
     return(1);
   }
   //check that the file could be opened okay
@@ -159,7 +159,7 @@ int main(int argc, char * argv[]){
     return(1);
   }
 
-  /*******  set up the reconstuction *********************/
+  /*******  set up the reconstuction ***************/
 
   //create the projection object which will be used to
   //perform the reconstuction.
@@ -185,7 +185,7 @@ int main(int argc, char * argv[]){
     fft = new FourierT(nx,ny);
   }
 
-  /*** run the reconstruction ************/
+  /******* run the reconstruction *********/
 
   list<string>::iterator algorithms_itr = algorithms->begin();
   list<int>::iterator iterations_itr = iterations->begin();

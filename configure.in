@@ -24,9 +24,17 @@ AC_ARG_WITH(mfhdf-lib, [  --with-mfhdf_lib
 		  specify the directory where the mfhdf libraries can be found])
 AC_ARG_WITH(mfhdf-inc, [  --with-mfhdf_inc     
 		  specify the directory where the mfhdf headers can be found])
+AC_ARG_WITH(z-lib, [  --with-z_lib     
+		  specify the directory where the z libraries can be found])
+AC_ARG_WITH(df-lib, [  --with-df_lib     
+		  specify the directory where the df libraries can be found])
+AC_ARG_WITH(sz-lib, [  --with-sz_lib     
+		  specify the directory where the sz libraries can be found])
+AC_ARG_WITH(jpeg-lib, [  --with-jpeg_lib     
+		  specify the directory where the jpeg libraries can be found])
 
 #CXXFLAGS="-I/usr/include/ $CXXFLAGS"
-LD_LIBRARY_PATH = "$PWD/lib $LD_LIBRARY_PATH"
+LD_LIBRARY_PATH="$PWD/lib $LD_LIBRARY_PATH"
 
 AC_SUBST(with_mfhdf_inc)
 if test "$with_mfhdf_inc" != ""
@@ -38,9 +46,8 @@ AC_SUBST(with_mfhdf_lib)
 if test "$with_mfhdf_lib" != ""
 then
 	LDFLAGS="-L$with_mfhdf_lib $LDFLAGS"
+	LD_RUN_PATH="$LD_RUN_PATH:$with_mfhdf_lib"
 fi
-
-echo $LDFLAGS
 
 AC_SUBST(with_fftw_inc)
 if test "$with_fftw_inc" != ""
@@ -52,9 +59,39 @@ AC_SUBST(with_fftw_lib)
 if test "$with_fftw_lib" != ""
 then
 	LDFLAGS="-L$with_fftw_lib $LDFLAGS"
+	LD_RUN_PATH="$LD_RUN_PATH:$with_fftw_lib"
 fi
 
-echo $LDFLAGS
+AC_SUBST(with_z_lib)
+if test "$with_z_lib" != ""
+then
+	LDFLAGS="-L$with_z_lib $LDFLAGS"
+	LD_RUN_PATH="$LD_RUN_PATH:$with_z_lib"
+fi
+
+AC_SUBST(with_sz_lib)
+if test "$with_sz_lib" != ""
+then
+	LDFLAGS="-L$with_sz_lib $LDFLAGS"
+	LD_RUN_PATH="$LD_RUN_PATH:$with_sz_lib"
+fi
+
+AC_SUBST(with_df_lib)
+if test "$with_df_lib" != ""
+then
+	LDFLAGS="-L$with_df_lib $LDFLAGS"
+	LD_RUN_PATH="$LD_RUN_PATH:$with_df_lib"
+fi
+
+AC_SUBST(with_jpeg_lib)
+if test "$with_jpeg_lib" != ""
+then
+	LDFLAGS="-L$with_jpeg_lib $LDFLAGS"
+	LD_RUN_PATH="$LD_RUN_PATH:$with_jpeg_lib"
+fi
+
+
+### Finished setting up the variables. Now check the libraries and headers.
 
 AC_CHECK_LIB([stdc++], [main], [], [
   echo "" &&
@@ -81,14 +118,9 @@ AC_CHECK_LIB([fftw3], [fftw_plan_dft_2d], [], [
   exit -1
 ])
 
-
-#Checks for mfhdf
-AC_CHECK_LIB([df], [main])
-AC_CHECK_LIB([jpeg], [main])
-AC_CHECK_LIB([z], [main])
-AC_CHECK_LIB([sz], [main])
 AC_CHECK_LIB([m], [main])
 
+#Checks for mfhdf
 AC_CHECK_HEADER([hdf/mfhdf.h], [], [
   echo "" &&
   echo "ERROR: Could not find the hdf headers." &&
@@ -97,13 +129,35 @@ AC_CHECK_HEADER([hdf/mfhdf.h], [], [
   exit -1
 ])
 
-AC_CHECK_LIB([mfhdf], [main], [], [
+AC_CHECK_LIB([df], [main])
+AC_CHECK_LIB([jpeg], [main])
+AC_CHECK_LIB([z], [main]) 
+AC_CHECK_LIB([sz], [main])
+
+mfhdf_okay=true
+
+AC_CHECK_LIB([mfhdf], [SDreaddata], [], [
+  mfhdf_okay=false &&		      
   echo "" &&
-  echo "ERROR: Could not find the mfhdf library." &&
-  echo "       Please specify the location with: " &&
-  echo "       './configure --with-mfhdf_lib=<path_to_mfhdf_library> " &&
-  exit -1
+  echo "ERROR: Could not find/use the mfhdf library." &&
+  echo "       First try to specify its location with: " &&
+  echo "       './configure --with-mfhdf_lib=<path_to_mfhdf_library>' " &&
+  echo "       If this still fails, check that the libraries it depends "
+  echo "       on are installed.... "
 ])
+
+if test "$mfhdf_okay" != "true"
+then
+	AC_CHECK_LIB([df], [main])
+	AC_CHECK_LIB([jpeg], [main])
+	AC_CHECK_LIB([z], [main]) 
+	AC_CHECK_LIB([sz], [main])
+	echo "" 
+	echo "The library location can be given with:" 
+	echo "./configure --with-<lib-name>_lib=<the_library_path>"
+	exit -1
+fi
+
 
 #Checks for tiff
 AC_CHECK_LIB([tiff], [main], [], [
@@ -134,4 +188,7 @@ AC_CONFIG_FILES([Makefile
                  examples/Makefile
                  src/Makefile
                  tools/Makefile])
+
+AC_SUBST(LD_RUN_PATH,$LD_RUN_PATH)
+
 AC_OUTPUT
