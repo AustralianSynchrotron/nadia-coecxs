@@ -6,6 +6,9 @@ SOURCE_FILES_C=io_hdf.c io_ppm.c io_tiff.c io_dbin.c \
 OBJECT_FILES=$(SOURCE_FILES_CXX:.c++=.o) $(SOURCE_FILES_C:.c=.o)
 HEADER_FILES=$(SOURCE_FILES_CXX:.c++=.h) io.h 
 
+LIB_A= /home/ndavidson/cxs/cxs_software/libCOECXS.a
+LIB_SO= /home/ndavidson/cxs/cxs_software/libCOECXS.so
+
 all: $(LIB_A) $(LIB_SO) install_headers 
 
 $(LIB_A): $(OBJECT_FILES) *.h
