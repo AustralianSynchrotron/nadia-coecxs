@@ -83,7 +83,7 @@ void PlanarCDI::get_intensity_autocorrelation(Double_2D & autoc){
       //set the real and imaginary components using the magnitude.
       double component = (1.0/sqrt(2.0))*(intensity_sqrt.get(i,j)*intensity_sqrt.get(i,j));
       //scale by "pow(-1,i + j)" to make the fourier transform centered.
-      component*=pow(-1.0,i + j);
+      //component*=pow(-1.0,i + j);
       temp_intensity.set_value(i,j,REAL, component);
       temp_intensity.set_value(i,j,IMAG, component);
     }
@@ -91,6 +91,7 @@ void PlanarCDI::get_intensity_autocorrelation(Double_2D & autoc){
   
   // fourier transform the intensity 
   fft.perform_backward_fft(temp_intensity);  
+  temp_intensity.invert();
 
   //get the magnitude of the fourier transformed data.
   temp_intensity.get_2d(MAG, autoc);
@@ -109,8 +110,8 @@ void PlanarCDI::initialise_estimate(int seed){
 	complex.set_value(i,j,IMAG,0);
       }
       else{
-	double r = (255.0*rand()/(double) RAND_MAX) * pow(-1.0,i + j);
-	double im = (255.0*rand()/(double) RAND_MAX) * pow(-1.0,i + j);
+	double r = (255.0*rand()/(double) RAND_MAX);// * pow(-1.0,i + j);
+	double im = (255.0*rand()/(double) RAND_MAX);// * pow(-1.0,i + j);
 	complex.set_value(i,j,REAL,r); 
 	complex.set_value(i,j,IMAG,im);
       }
@@ -154,11 +155,20 @@ void PlanarCDI::apply_support(Complex_2D & c){
 
 
 void PlanarCDI::project_intensity(Complex_2D & c){
-  fft.perform_forward_fft(c);    
+  propagate_to_detector(c);
   scale_intensity(c);
-  fft.perform_backward_fft(c);  
+  propagate_to_sample(c);
 }
 
+void PlanarCDI::propagate_to_detector(Complex_2D & c){
+  fft.perform_forward_fft(c);
+  c.invert();
+}
+
+void PlanarCDI::propagate_to_sample(Complex_2D & c){
+  c.invert();
+  fft.perform_backward_fft(c); 
+}
 
 void PlanarCDI::scale_intensity(Complex_2D & c){
   double norm2_mag=0;
@@ -355,17 +365,11 @@ void PlanarCDI::apply_shrinkwrap(double gauss_width, double threshold){
   Double_2D recon(nx,ny);
   complex.get_2d(MAG,recon);
 
-  //write_ppm("shrink_1.ppm",recon);
-
   //convolve
   convolve(recon,gauss_width);
   
-  //write_ppm("shrink_2.ppm",recon);
-
   //threshold
   apply_threshold(recon,threshold);
-
-  //write_ppm("shrink_3.ppm",recon);
 
   set_support(recon);
 

@@ -355,8 +355,6 @@ class PlanarCDI{
   void get_support(Double_2D & support);
 
 
- protected:
-
   /**
    * Apply the support constraint.
    * 
@@ -381,6 +379,23 @@ class PlanarCDI{
    * @param c The complex field to apply the scaling to
    */  
   virtual void scale_intensity(Complex_2D & c);
+
+
+  /**
+   * Propagate to the sample plane using a fast fourier transform.
+   *
+   * @param c The Complex_2D field to propagate
+   */
+  virtual void propagate_to_sample(Complex_2D & c);
+
+  /**
+   * Propagate to the detector plane using a fast fourier transform.
+   * @param c The Complex_2D field to propagate
+   */
+  virtual void propagate_to_detector(Complex_2D & c);
+
+
+ protected:
 
   /**
    * Sets up the mapping between algorithm name and number. This is

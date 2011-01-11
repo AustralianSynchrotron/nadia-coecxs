@@ -85,6 +85,20 @@ class FresnelCDI_WF: public PlanarCDI{
    */
   int iterate();  
 
+  /**
+   * Propagate to the zone plate plane using the paraxial 
+   * free-space equation.
+   * @param c The Complex_2D field to propagate
+   */
+  virtual void propagate_to_zone_plate(Complex_2D & c);
+
+  /**
+   * Propagate to the detector plane using the paraxial free-space
+   * equation.
+   * @param c The Complex_2D field to propagate
+   */
+  virtual void propagate_to_detector(Complex_2D & c);
+
 
   /**
    * This method overrides the one in PlanarCDI. The white-field is

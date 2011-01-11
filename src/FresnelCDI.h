@@ -103,17 +103,14 @@ class FresnelCDI: public PlanarCDI{
    */
   virtual void get_transmission_function(Complex_2D & result);
   
- protected:
-
   /**
-   * This method overrides the one in PlanarCDI by using the paraxial
-   * propagation equation and it adds/subtracts the white-field
-   * before/after applying the intensity constraint.
+   * This method overrides the one in PlanarCDI by adding/subtracting
+   * the white-field before/after applying the intensity constraint.
    *
    * @param c The Complex_2D object to apply the intensity constraint
    * on.
    */
-  virtual void project_intensity(Complex_2D & c); 
+  virtual void scale_intensity(Complex_2D & c); 
 
   /**
    * Propagate to the sample plane using the paraxial free-space

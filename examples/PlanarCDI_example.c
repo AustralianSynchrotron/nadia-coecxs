@@ -143,13 +143,16 @@ int main(void){
       temp_str.clear();
 
       //uncomment to output the estimated diffraction pattern
-      /**Complex_2D * temp = object_estimate.clone();
-      fft.perform_forward_fft(temp);
-      temp->get_2d(MAG_SQ,&result);
+      //object_estimate.invert();
+      //object_estimate.invert();
+
+      planar.propagate_to_detector(object_estimate);
+      object_estimate.get_2d(MAG_SQ,result);
       temp_str << "diffraction.ppm";
-      write_ppm(temp_str.str(), nx, ny, result, true); 
-      delete temp;
-      **/
+      write_ppm(temp_str.str(), result, true);
+      planar.propagate_to_sample(object_estimate);
+      object_estimate.get_2d(MAG,result);
+      write_ppm("inverted.ppm", result);
       
       //apply the shrinkwrap algorithm
       //1.5 is the gaussian width in pixels

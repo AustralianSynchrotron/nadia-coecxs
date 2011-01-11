@@ -95,64 +95,36 @@ void FresnelCDI_WF::initialise_estimate(int seed){
 
 int FresnelCDI_WF::iterate(){
   
-  //Double_2D result(nx,ny);
+  propagate_to_zone_plate(complex);
 
-  //we assume the wavefield is in the
-  //detector plane and has just been scaled.
+  apply_support(complex);
+  
+  propagate_to_detector(complex);
 
-  //complex.get_2d(MAG,result);
-  //write_ppm("2-scaled_mag.ppm", result);
-  //complex.get_2d(PHASE,result);
-  //write_ppm("2-scaled_phase.ppm", result);
+  scale_intensity(complex);
+  
+  return SUCCESS;
+}
 
-
+void FresnelCDI_WF::propagate_to_zone_plate(Complex_2D & c){
   //go to the focal plane
   fft.perform_backward_fft(complex);
   complex.invert();  
   complex.multiply(backward_coefficient);
 
 
-  //complex.get_2d(MAG,result);
-  //write_ppm("3-focal_mag.ppm", result,true);
-  //complex.get_2d(PHASE,result);
-  //write_ppm("3-focal_phase.ppm", result);
-
-
   //go back to zone plate plane. 
   fft.perform_backward_fft(complex);
+}
 
-  //complex.get_2d(MAG,result);
-  //write_ppm("4-zone_mag.ppm", result,true);
-  //complex.get_2d(PHASE,result);
-  //write_ppm("4-zone_phase.ppm", result);
-
-  //apply support constraint
-  apply_support(complex);
-  
-  //complex.get_2d(MAG,result);
-  //write_ppm("5-support_mag.ppm", result);
-  //complex.get_2d(PHASE,result);
-  //write_ppm("5-support_phase.ppm", result);
+void FresnelCDI_WF::propagate_to_detector(Complex_2D & c){
 
   //go to the focal plane again.
-  //complex.invert();
   fft.perform_forward_fft(complex);
   complex.multiply(forward_coefficient);
-
-  //complex.get_2d(MAG,result);
-  //write_ppm("focal_reco.ppm", result,true);
-
-  //complex.invert();
 
   //and back to the detector plane
   complex.invert();
   fft.perform_forward_fft(complex);
 
-  //write_ppm("1-inital_mag.ppm", result);
-  //complex.get_2d(PHASE,result);
-  //write_ppm("1-inital_phase.ppm", result);
-
-  scale_intensity(complex);
-  
-  return SUCCESS;
 }
