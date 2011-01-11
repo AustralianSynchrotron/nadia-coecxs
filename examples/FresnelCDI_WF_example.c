@@ -26,7 +26,7 @@ int main(int argc, char * argv[]){
   int ny = 1024;
   int status;
   Double_2D data;
-  status = read_dbin("image_files/wf_A_illum.dbin", nx, ny, data);
+  status = read_dbin("image_files/FCDI_wf_data.dbin", nx, ny, data);
   if(!status){
     cout << "failed.. exiting"  << endl;
     return(1);
@@ -34,7 +34,7 @@ int main(int argc, char * argv[]){
 
   /******* get the support from file and read it into an array *****/
   Double_2D support;
-  status = read_tiff("image_files/wf_A_illum_support.tiff", support);  
+  status = read_tiff("image_files/FCDI_wf_support.tiff", support);  
   if(!status){
     cout << "failed to get data from "
 	 <<".. exiting"  << endl;

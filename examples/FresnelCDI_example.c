@@ -29,7 +29,7 @@ int main(int argc, char * argv[]){
   Double_2D data;
 
   //read the diffraction data
-  status = read_dbin("image_files/A.dbin", nx, ny, data);
+  status = read_dbin("image_files/FCDI_data.dbin", nx, ny, data);
   if(!status){
     cout << "failed.. exiting"  << endl;
     return(1);
@@ -49,7 +49,7 @@ int main(int argc, char * argv[]){
   /******* get the support from file and read it into an array *****/
 
   Double_2D support;
-  status = read_tiff("image_files/wf_A_support.tiff", support);  
+  status = read_tiff("image_files/FCDI_support.tiff", support);  
   if(!status){
     cout << "failed to get data from "
 	 <<".. exiting"  << endl;
