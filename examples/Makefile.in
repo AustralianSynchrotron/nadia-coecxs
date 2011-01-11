@@ -4,12 +4,10 @@ EXAMPLE_SRC=PlanarCDI_example.c PlanarCDI_simulation_example.c	\
 FresnelCDI_example.c FresnelCDI_WF_example.c
 EXAMPLE_EXEC=$(EXAMPLE_SRC:.c=.exe)
 
-LIB_A = ../lib/libCOECXS.a
-
 all: $(EXAMPLE_EXEC)
 
 %.exe: %.c
-	@CXX@ @CXXFLAGS@ -I../include $< -o $@ \
+	@CXX@ @CXXFLAGS@ -I@BASE@/include $< -o $@ \
 	-L@BASE@/lib -lCOECXS \
 	@LDFLAGS@ @LIBS@
 

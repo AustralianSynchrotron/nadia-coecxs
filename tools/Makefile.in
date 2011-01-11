@@ -15,7 +15,7 @@ $(LIB_SO): ../src/*.c++ ../src/*.h ../src/*.c
 	make -C ../src
 
 %.exe: %.c ../src/*.c++ ../src/*.h ../src/*.c
-	@CXX@ @CXXFLAGS@ -I../include $< -o $@ \
+	@CXX@ @CXXFLAGS@ -I@BASE@/include $< -o $@ \
 	-L@BASE@/lib -lCOECXS \
 	@LDFLAGS@ @LIBS@
 	cp $@ ../bin/$@
