@@ -595,6 +595,7 @@ ac_includes_default="\
 
 ac_subst_vars='LTLIBOBJS
 LIBOBJS
+BASE
 LD_RUN_PATH
 EGREP
 GREP
@@ -3810,6 +3811,8 @@ ac_config_files="$ac_config_files Makefile examples/Makefile src/Makefile tools/
 
 
 LD_RUN_PATH=$LD_RUN_PATH
+
+BASE=$PWD
 
 
 cat >confcache <<\_ACEOF

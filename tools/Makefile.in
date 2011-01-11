@@ -1,4 +1,4 @@
-export LD_RUN_PATH=@LD_RUN_PATH@:$(PWD)/../lib
+export LD_RUN_PATH=@LD_RUN_PATH@:@BASE@/lib
 
 SOURCE_TOOLS=hdf2ppm.c tiff2ppm.c planar_CDI_reconstruction.c dbin2ppm.c cplx2ppm.c cplx2dbin.c
 EXEC_TOOLS=$(SOURCE_TOOLS:.c=.exe)
@@ -16,7 +16,7 @@ $(LIB_SO): ../src/*.c++ ../src/*.h ../src/*.c
 
 %.exe: %.c ../src/*.c++ ../src/*.h ../src/*.c
 	@CXX@ @CXXFLAGS@ -I../include $< -o ../bin/$@ \
-	-L../lib -lCOECXS \
+	-L@BASE@/lib -lCOECXS \
 	@LDFLAGS@ @LIBS@
 
 clean:                                                     

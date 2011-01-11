@@ -190,5 +190,6 @@ AC_CONFIG_FILES([Makefile
                  tools/Makefile])
 
 AC_SUBST(LD_RUN_PATH,$LD_RUN_PATH)
+AC_SUBST(BASE,$PWD)
 
 AC_OUTPUT
