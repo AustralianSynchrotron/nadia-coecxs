@@ -15,7 +15,7 @@ $(LIB_A): $(OBJECT_FILES) *.h
 	ar cr $(LIB_A)$  $(OBJECT_FILES)
 
 $(LIB_SO): $(OBJECT_FILES) *.h
-	@CXX@ -shared -o $(LIB_SO) $(OBJECT_FILES)
+	@CXX@ -shared @LDFLAGS@ -o $(LIB_SO) $(OBJECT_FILES) @LIBS@
 
 install_headers: $(HEADER_FILES)
 	cp $(HEADER_FILES) @BASE@/include
@@ -25,8 +25,7 @@ install_headers: $(HEADER_FILES)
 
 
 %.o: %.c
-	@CXX@ @CXXFLAGS@ -c $< -o $@
-
+	@CXX@ @CXXFLAGS@ @DEFS@ -c $< -o $@
 
 clean:                                                     
 	rm -f *.o *~ 

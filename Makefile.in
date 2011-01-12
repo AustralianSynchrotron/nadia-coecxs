@@ -25,6 +25,7 @@ clean:
 	rm -f *~
 
 clobber:
+	make clean
 	make clobber -C examples
 	make clobber -C tools
 	rm -f lib/libCOECXS.so lib/libCOECXS.a

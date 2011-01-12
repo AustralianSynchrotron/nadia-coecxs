@@ -1,11 +1,19 @@
 /**
- * @file 
+ * @file CDI_reconstruction.c
  * @author  Nadia Davidson <nadiamd@unimelb.edu.au>
+ * @date Last modified on 12/1/2011
  *
- * @section DESCRIPTION
+ * @brief A tool for performing CDI reconstuction
  *
- * @todo 
- * Allow input for the starting guess (phase and mag?)
+ * The code here allows Planar and Fresnel ESW reconstruction to be
+ * performed. This tool is provided as a demonstrative tool and to
+ * obtain results quickly, without knowing the c programing language.
+ * Users are encouraged to use the libraries provided by this package
+ * in their own code, rather than this tool if more flexibility is
+ * required.
+ *
+ *
+ * @todo Allow input for the starting guess (phase and mag?)
  * 
  *
  */
@@ -22,8 +30,9 @@
 #include "Complex_2D.h"
 #include "Double_2D.h"
 #include "PlanarCDI.h"
+#include "FresnelCDI.h"
+#include "FresnelCDI_WF.h"
 #include "Config.h"
-#include "FourierT.h"
 
 using namespace std;
 
@@ -31,29 +40,46 @@ using namespace std;
 #define OUTPUT_ITER    1
 #define OUTPUT_ERROR   2
 
+static const string planar_string="planar";
+static const string fresnel_string="fresnel";
+static const string fresnel_wf_string="fresnel_wf";
+
 int main(int argc, char * argv[]){
 
   /** work out which config file to use **/
-  string config_file = "planar.config";
+  string config_file = "";
 
   //and set the seed of the inital guess
   int seed = 0;
 
-  if(argc==1)
+  string reco_type = "";
+
+  if(argc==1){
     cout << "No config file given, using "
 	 << "the default: "<<config_file<<endl;
-
-  if(argc==2){
-    cout << "No seed value given... using the default (0)" <<endl;
-    config_file=argv[1];
+    config_file="example.config";
   }
+  else
+    config_file=argv[1];
 
-  if(argc==3)
-    seed = atoi(argv[2]);
+  if(argc<=2){
+    cout << "No reconstruction type given... using planar" <<endl;
+    reco_type = planar_string;
+  }
+  else
+    reco_type = argv[2];
 
-  if(argc>3){
-    cout << "Too many arguments given. Usage: "
-	 << "planar_CDI_reconstuction <config filename> <seed>"<<endl;
+  if(argc<=3)
+    cout << "No seed value given... using the default (0)" <<endl;
+  else
+    seed = atoi(argv[3]);
+
+  if(argc>4){
+    cout << "Wrong number of arguments given. Usage: "
+	 << "planar_CDI_reconstuction <config filename> <reco_type> <seed>" << endl;
+    cout << "<reco_type> may be: " << planar_string << ", " << fresnel_string
+	 << " or " << fresnel_wf_string << endl;
+    cout << "<seed> should be an integer" << endl;
       exit(0);
   }
 
@@ -64,20 +90,6 @@ int main(int argc, char * argv[]){
   }
 
   /** read the config file **/
-
-  //the data file name
-  string data_file_name = c.getString("data_file_name");
-
-  string data_file_type = c.getString("data_file_type");
-
-  //the file which provides the support (pixels with the value 0
-  //are considered as outside the object)
-  string support_file_name = c.getString("support_file_name");
-
-  string support_file_type = c.getString("support_file_type");
-
-  //output filename prefix
-  string output_file_name_prefix = c.getString("output_file_name_prefix");
 
   //output the current image every "output_iterations"
   int output_iterations = c.getDouble("output_iterations");
@@ -114,7 +126,99 @@ int main(int argc, char * argv[]){
   double shrinkwrap_gauss_width = c.getDouble("shrinkwrap_gauss_width");
   double shrinkwrap_threshold = c.getDouble("shrinkwrap_threshold");
 
-  /*** get the diffraction data from file and read into an array *****/
+  /*******  set up the reconstuction ***************/
+
+  //create the projection object which will be used to
+  //perform the reconstuction.
+  Complex_2D object_estimate(pixels_x,pixels_y);
+
+  PlanarCDI * proj = 0;
+  
+  //the data file name
+  string data_file_name = c.getString("data_file_name");
+  string data_file_type = c.getString("data_file_type");
+
+  //the file which provides the support (pixels with the value 0
+  //are considered as outside the object)
+  string support_file_name = c.getString("support_file_name");
+  string support_file_type = c.getString("support_file_type");
+
+  //output filename prefix
+  string output_file_name_prefix = c.getString("output_file_name_prefix");
+  ostringstream temp_str ( ostringstream::out ) ;
+  temp_str << output_file_name_prefix << ".cplx" << flush;
+  string output_file_name = temp_str.str();
+
+  if(reco_type.compare(planar_string)==0){ //if Planar CDI
+    proj = new PlanarCDI(object_estimate);
+  }
+  else{
+    /** get the experimental parameters needed for FCDI */
+    double beam_wavelength = c.getDouble("beam_wavelength");
+    double zone_focal_length = c.getDouble("zone_focal_length");
+    double focal_detector_length = c.getDouble("focal_detector_length");
+    double focal_sample_length = c.getDouble("focal_sample_length");
+    double pixel_size = c.getDouble("pixel_size");
+    double normalisation = c.getDouble("normalisation");
+    
+    if(reco_type.compare(fresnel_string)==0){ //if Fresnel CDI
+
+      //open the file where the reconstucted white field is
+      Complex_2D white_field(pixels_x,pixels_y);
+      int status = read_cplx(c.getString("white_field_reco_file_name"), 
+			     white_field); 
+      
+      //check that the file could be opened okay
+      if(!status){
+	cout << "failed to read white-field data " 
+	     <<".. exiting"  << endl;
+	return(1);
+      }
+
+      //create the iterator object
+      proj = new FresnelCDI(object_estimate,
+			    white_field, 
+			    beam_wavelength, 
+			    focal_detector_length, 
+			    focal_sample_length, 
+			    pixel_size, 
+			    normalisation);
+      
+    }
+    //if reconstucting the Fresnel white field.
+    else if(reco_type.compare(fresnel_wf_string)==0){
+      proj = new FresnelCDI_WF(object_estimate,
+			       beam_wavelength, 
+			       zone_focal_length, 
+			       focal_detector_length, 
+			       pixel_size);
+      output_file_name = c.getString("white_field_reco_file_name");
+      data_file_name = c.getString("white_field_data_file_name");
+      data_file_type = c.getString("white_field_data_file_type");
+      support_file_name = c.getString("white_field_support_file_name");
+      support_file_type = c.getString("white_field_support_file_type");      
+
+      //reset the algorithm and number of iterations.
+      algorithms.clear();
+      algorithms.push_back("ER"); //this is a dummy value
+      //since only one algorithm is available for white-field reco.
+      iterations.clear();
+      iterations.push_back(c.getInt("wf_iterations"));
+      //don't use shrink-wrap either
+      shrinkwrap_iterations = 0; 
+    }
+    else{
+      cout << "the reconstruction type specified ("
+	   << reco_type << ") is "
+	   << "unrecognised. Please use: "
+	   << planar_string << ", "
+	   << fresnel_string << " or "
+	   << fresnel_wf_string << endl;
+      exit(1);
+    }
+  }
+
+  /*** get the diffraction data from file and read into an array ***/
   Double_2D data;
   int status;
   if(data_file_type=="tiff")
@@ -134,9 +238,10 @@ int main(int argc, char * argv[]){
 	 <<".. exiting"  << endl;
     return(1);
   }
-
-  int nx = data.get_size_x();
-  int ny = data.get_size_y();
+  if( pixels_x != data.get_size_x() || pixels_y != data.get_size_y() ){
+    cout << "Dimensions of the data to not match those given ... exiting"  << endl;
+    return(1);
+  }
 
   /******* get the support from file and read it into an array *****/
   Double_2D support;
@@ -144,6 +249,8 @@ int main(int argc, char * argv[]){
     status = read_tiff(support_file_name, support);  
   else if(support_file_type=="ppm")
     status = read_ppm(support_file_name, support);
+  else if(support_file_type=="dbin")
+    status = read_dbin(support_file_name, pixels_x, pixels_y, support);
   else{ //check that the file type is valid
     cout << "Can not process files of type \""<< support_file_type 
 	 <<"\".. exiting"  << endl;
@@ -154,35 +261,28 @@ int main(int argc, char * argv[]){
 	 <<".. exiting"  << endl;
     return(1);
   }
-  if( nx != support.get_size_x() || ny != support.get_size_y() ){
+  if( pixels_x != support.get_size_x() || pixels_y != support.get_size_y() ){
     cout << "Dimensions of the support to not match ... exiting"  << endl;
     return(1);
   }
 
-  /*******  set up the reconstuction ***************/
-
-  //create the projection object which will be used to
-  //perform the reconstuction.
-  Complex_2D object_estimate(nx,ny);
-  PlanarCDI proj(object_estimate);
- 
   //set the support and intensity
-  proj.set_support(support);
-  proj.set_intensity(data);
+  proj->set_support(support);
+  proj->set_intensity(data);
 
   //Initialise the current object ESW with a random numbers
-  proj.initialise_estimate(seed);
+  proj->initialise_estimate(seed);
 
   //make a 2D array and allocate some memory.
   //This will be used to output the image of the 
   //current estimate.
-  Double_2D result(nx,ny);
+  Double_2D result(pixels_x,pixels_y);
 
   //Make a temporary FFT in case we need to output
   //the guess of the diffraction pattern
   FourierT * fft;
   if(output_diffraction_estimate){
-    fft = new FourierT(nx,ny);
+    fft = new FourierT(pixels_x,pixels_y);
   }
 
   /******* run the reconstruction *********/
@@ -209,7 +309,7 @@ int main(int argc, char * argv[]){
       exit(0);
     }
 
-    proj.set_algorithm(alg);
+    proj->set_algorithm(alg);
     cumulative_iterations+=(*iterations_itr);
     
     for(; i < cumulative_iterations; i++){
@@ -218,10 +318,10 @@ int main(int argc, char * argv[]){
       
 
       //apply the iterations  
-      proj.iterate(); 
+      proj->iterate(); 
       if(output_level==OUTPUT_ERROR && i>0)
 	cout << "Error for iteration "<<(i-1)<<" is " 
-	     << proj.get_error() << endl;
+	     << proj->get_error() << endl;
 
       if(i%output_iterations==0){
 	//output the current estimate of the object
@@ -235,7 +335,7 @@ int main(int argc, char * argv[]){
 	//the detector plane if needed
 	if(output_diffraction_estimate){
 	  Complex_2D * temp = object_estimate.clone();
-	  fft->perform_forward_fft(*temp);
+	  proj->propagate_to_detector(*temp);
 	  temp->get_2d(MAG_SQ,result);
 	  temp_str << output_file_name_prefix 
 		   << "_diffraction_" << i 
@@ -245,7 +345,7 @@ int main(int argc, char * argv[]){
 	  delete temp;
 	}
 	if(shrinkwrap_iterations!=0 && i%shrinkwrap_iterations==0){
-	  proj.apply_shrinkwrap(shrinkwrap_gauss_width, 
+	  proj->apply_shrinkwrap(shrinkwrap_gauss_width, 
 				shrinkwrap_threshold);
 	  
 	}
@@ -255,28 +355,14 @@ int main(int argc, char * argv[]){
     algorithms_itr++;
   }
 
-  //write out the final image
-  object_estimate.get_2d(MAG,result);
-  ostringstream temp_str ( ostringstream::out ) ;
-  temp_str << output_file_name_prefix << "_final.ppm" << flush;
-  write_ppm(temp_str.str(), result, use_log_scale_for_object);
+  //write out the final result
+  write_cplx(output_file_name, object_estimate);
   
-  if(output_diffraction_estimate){
-    Complex_2D * temp = object_estimate.clone();
-    fft->perform_forward_fft(*temp);
-    temp->get_2d(MAG_SQ,result);
-    temp_str << output_file_name_prefix << "_diffraction_final.ppm" << flush;
-    write_ppm(temp_str.str(), result, use_log_scale_for_diffraction); 
-    delete temp;
-  }
-
   //clean up
   delete algorithms;
   delete iterations;
+  delete proj;
   
-  if(output_diffraction_estimate)
-    delete fft;
- 
   return 0;
 }
 

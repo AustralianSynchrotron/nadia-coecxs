@@ -1,3 +1,18 @@
+/**
+ * @file dbin2ppm.c
+ * 
+ * \a dbin2ppm - Convert a binary file (2D double / 64 bit, format) to
+ * a ppm (grey-scale, 16 bit file). Note that this conversion loses
+ * information.
+ * 
+ * \par Usage: dbin2ppm \<input dbin file\> \<output ppm file\>
+ * \<pixels in x\> \<pixels in y\> \par 
+ *
+ * \par Example:
+ * \verbatim  dbin2ppm my_reconstruction.dbin my_reconstruction.ppm 1024 1024 \endverbatim
+ * 
+ **/
+
 #include <iostream>
 #include <stdlib.h>
 #include "Double_2D.h"

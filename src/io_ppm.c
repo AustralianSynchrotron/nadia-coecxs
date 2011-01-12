@@ -65,12 +65,12 @@ int write_ppm(string file_name, const Double_2D & data, bool log_scale){
      for(int i=0; i < nx; ++i){
        if(log_scale){
 	 if(data.get(i,j) >= 0.1)
-	   new_file << (uint) (scale_factor*(log10((data.get(i,j)*10)))) << " ";
+	   new_file << (unsigned int) (scale_factor*(log10((data.get(i,j)*10)))) << " ";
 	 else
 	   new_file << "0 ";
        }
        else
-	 new_file << (uint) (scale_factor*(data.get(i,j))) << " ";
+	 new_file << (unsigned int) (scale_factor*(data.get(i,j))) << " ";
      }
      new_file << endl;
    }
@@ -171,7 +171,7 @@ int read_ppm(string file_name, Double_2D & data){
   file.close();
 
   //do a sanity check
-  if(string_data.size()!= (uint) (nx)*(ny)){
+  if(string_data.size()!=(unsigned int) (nx)*(ny)){
     cout << "Confused about ppm data. Dimensions"
 	 << " don't match content... exiting." << endl;
     return FAILURE;

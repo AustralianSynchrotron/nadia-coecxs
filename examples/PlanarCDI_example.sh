@@ -3,11 +3,29 @@
 # This shows how to run the planar reconstuction
 # using the command line tool. 
 
-../bin/planar_CDI_reconstruction.exe example.config
+PATH=$PATH:../bin
 
-#note: once the tools are installed properly you should only
-#need to run "planar_CDI_reconstruction example.config"
+#CDI_reconstruction.exe planar_example.config
 
-#to run multiple times will the different starting seed do
+#########################################################
+
+#to run fresnel reconstruction:
+#reconstruct the white-field then the sample
+#uncomment the lines below.
+
+CDI_reconstruction.exe fresnel_example.config fresnel_wf
+CDI_reconstruction.exe fresnel_example.config fresnel
+
+#########################################################
+
+#to run multiple times with a different starting seed do
 #something like the following:
+
+#for a in `seq 10`
+#do
+#  CDI_reconstruction.exe planar_example.config planar $a &> log_$a
+#  mv planar.cplx planar_result_${a}_.cplx
+#done  
+
+#tool for merging can then be used (not written yet).
 
