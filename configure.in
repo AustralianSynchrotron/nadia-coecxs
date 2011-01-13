@@ -121,13 +121,16 @@ AC_CHECK_LIB([fftw3], [fftw_plan_dft_2d], [], [
 AC_CHECK_LIB([m], [main])
 
 #Checks for mfhdf
-AC_CHECK_HEADERS(hdf/mfhdf.h mfhdf.h, break, AC_MSG_ERROR([
-  echo "" &&
-  echo "ERROR: Could not find the hdf headers." &&
-  echo "       Please specify the location with: " &&
-  echo "       './configure --with-mfhdf_inc=<path_to_hdf_headers> " &&
+mfhdf_headers=false
+AC_CHECK_HEADERS([mfhdf.h hdf/mfhdf.h], [mfhdf_headers=true])
+if test "$mfhdf_headers" != "true"
+then
+  echo ""
+  echo "ERROR: Could not find the hdf headers."
+  echo "       Please specify the location with: "
+  echo "       './configure --with-mfhdf_inc=<path_to_hdf_headers> "
   exit -1
-]))
+fi
 
 AC_CHECK_LIB([df], [main])
 AC_CHECK_LIB([jpeg], [main])

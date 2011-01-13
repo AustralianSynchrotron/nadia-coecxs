@@ -3328,7 +3328,8 @@ fi
 
 
 #Checks for mfhdf
-for ac_header in hdf/mfhdf.h mfhdf.h
+mfhdf_headers=false
+for ac_header in mfhdf.h hdf/mfhdf.h
 do :
   as_ac_Header=`$as_echo "ac_cv_header_$ac_header" | $as_tr_sh`
 ac_fn_cxx_check_header_mongrel "$LINENO" "$ac_header" "$as_ac_Header" "$ac_includes_default"
@@ -3337,19 +3338,19 @@ eval as_val=\$$as_ac_Header
   cat >>confdefs.h <<_ACEOF
 #define `$as_echo "HAVE_$ac_header" | $as_tr_cpp` 1
 _ACEOF
- break
-else
-  as_fn_error "
-  echo \"\" &&
-  echo \"ERROR: Could not find the hdf headers.\" &&
-  echo \"       Please specify the location with: \" &&
-  echo \"       './configure --with-mfhdf_inc=<path_to_hdf_headers> \" &&
-  exit -1
-" "$LINENO" 5
+ mfhdf_headers=true
 fi
 
 done
 
+if test "$mfhdf_headers" != "true"
+then
+  echo ""
+  echo "ERROR: Could not find the hdf headers."
+  echo "       Please specify the location with: "
+  echo "       './configure --with-mfhdf_inc=<path_to_hdf_headers> "
+  exit -1
+fi
 
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for main in -ldf" >&5
 $as_echo_n "checking for main in -ldf... " >&6; }
