@@ -22,13 +22,14 @@ FresnelCDI::FresnelCDI(Complex_2D & initial_guess,
 		       double pixel_size,
 		       double normalisation)
   :PlanarCDI(initial_guess),
-   illumination(white_field),
    wavelength(beam_wavelength),
    pixel_length(pixel_size),
    norm(normalisation),
+   illumination(nx,ny),
    B_s(nx,ny),
-   B_d(ny,ny)
-{
+   B_d(ny,ny){
+
+  illumination.copy(white_field);
 
   double x_mid = (nx-1)/2;
   double y_mid = (ny-1)/2;
@@ -63,6 +64,7 @@ FresnelCDI::FresnelCDI(Complex_2D & initial_guess,
 
 void FresnelCDI::initialise_estimate(int seed){
   //initialise the random number generator
+
   srand(seed);
 
   //start in the detector plane and use eq. 137 from
@@ -70,7 +72,7 @@ void FresnelCDI::initialise_estimate(int seed){
 
   for(int i=0; i<nx; i++){
     for(int j=0; j<ny; j++){
- 
+
       double real_value = intensity_sqrt.get(i,j)*intensity_sqrt.get(i,j) 
 	- norm*norm*illumination.get_value(i,j,MAG_SQ);
 
@@ -84,11 +86,11 @@ void FresnelCDI::initialise_estimate(int seed){
 	complex.set_real(i,j,real_value); 
 	complex.set_imag(i,j,0);
       }
+
     }
   }
 
   propagate_to_sample(complex);
-
   apply_support(complex);
 
 }
@@ -99,49 +101,6 @@ void FresnelCDI::scale_intensity(Complex_2D & c){
   PlanarCDI::scale_intensity(c);
   c.add(illumination,-norm);//subtract the white field
 }
-
-//void FresnelCDI::project_intensity(Complex_2D & c){
-
-  //Double_2D result(complex.get_size_x(),complex.get_size_y());
-
-  //Forward propgate
-  //propagate_to_detector(c);
-
-  //c.get_2d(MAG,result);
-  //write_ppm("1-forward.ppm",result);
-  //c.get_2d(PHASE,result);
-  //write_ppm("1-forward_p.ppm",result);
-
-// c.add(illumination,norm); //add the white field
-
-  //c.get_2d(MAG,result);
-  //write_ppm("2-with_illum.ppm",result);
-  //c.get_2d(PHASE,result);
-  //write_ppm("2-with_illum_p.ppm",result);
-
-//  scale_intensity(c);
-
-  //c.get_2d(MAG,result);
-  //write_ppm("3-scaled.ppm",result);
-  //c.get_2d(PHASE,result);
-  //write_ppm("3-scaled_p.ppm",result);
-
-//  c.add(illumination,-norm); //subtract the white field
-
-  //c.get_2d(MAG,result);
-  //write_ppm("4-subtracted.ppm",result);
-  //c.get_2d(PHASE,result);
-  //write_ppm("4-subtracted_p.ppm",result);
-
-  //backward propogate
-//  propagate_to_sample(c);
-
-  //c.get_2d(MAG,result);
-  //write_ppm("5-backward.ppm",result);
-  //c.get_2d(PHASE,result);
-  //write_ppm("5-backward_p.ppm",result);
-
-//}
 
 void FresnelCDI::propagate_to_sample(Complex_2D & c){
   c.multiply(B_d);

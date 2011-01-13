@@ -5,7 +5,8 @@
 
 PATH=$PATH:../bin
 
-#CDI_reconstruction.exe planar_example.config
+#run the planar example:
+CDI_reconstruction.exe planar_example.config
 
 #########################################################
 
@@ -13,8 +14,8 @@ PATH=$PATH:../bin
 #reconstruct the white-field then the sample
 #uncomment the lines below.
 
-CDI_reconstruction.exe fresnel_example.config fresnel_wf
-CDI_reconstruction.exe fresnel_example.config fresnel
+#CDI_reconstruction.exe fresnel_example.config fresnel_wf
+#CDI_reconstruction.exe fresnel_example.config fresnel
 
 #########################################################
 
@@ -27,5 +28,5 @@ CDI_reconstruction.exe fresnel_example.config fresnel
 #  mv planar.cplx planar_result_${a}_.cplx
 #done  
 
-#tool for merging can then be used (not written yet).
+#a tool for merging the output can then be used (not written yet).
 

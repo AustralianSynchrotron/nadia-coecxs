@@ -29,7 +29,7 @@ class FresnelCDI: public PlanarCDI{
  protected:
 
   /** the reconstructed white field */
-  Complex_2D & illumination;
+  Complex_2D illumination;
 
   /** the beam wavelength */
   double wavelength;

@@ -76,7 +76,8 @@ int main(int argc, char * argv[]){
 
   if(argc>4){
     cout << "Wrong number of arguments given. Usage: "
-	 << "planar_CDI_reconstuction <config filename> <reco_type> <seed>" << endl;
+	 << "planar_CDI_reconstuction <config filename> "
+	 << "<reco_type> <seed>" << endl;
     cout << "<reco_type> may be: " << planar_string << ", " << fresnel_string
 	 << " or " << fresnel_wf_string << endl;
     cout << "<seed> should be an integer" << endl;
@@ -132,6 +133,17 @@ int main(int argc, char * argv[]){
   //perform the reconstuction.
   Complex_2D object_estimate(pixels_x,pixels_y);
 
+  string starting_point_file_name = c.getString("starting_point_file_name");
+
+  //if a file name has been given try to load it from the file    
+  if(starting_point_file_name.compare("")!=0){
+    if(!read_cplx(starting_point_file_name,object_estimate)){
+      cout << "Can not process the file "<< starting_point_file_name 
+	   << ".. exiting"  << endl;
+      return(1);
+    }
+  }
+
   PlanarCDI * proj = 0;
   
   //the data file name
@@ -161,19 +173,21 @@ int main(int argc, char * argv[]){
     double pixel_size = c.getDouble("pixel_size");
     double normalisation = c.getDouble("normalisation");
     
+
     if(reco_type.compare(fresnel_string)==0){ //if Fresnel CDI
 
       //open the file where the reconstucted white field is
       Complex_2D white_field(pixels_x,pixels_y);
       int status = read_cplx(c.getString("white_field_reco_file_name"), 
 			     white_field); 
-      
       //check that the file could be opened okay
       if(!status){
 	cout << "failed to read white-field data " 
 	     <<".. exiting"  << endl;
 	return(1);
       }
+
+      cout << white_field.get_value(0,0,MAG_SQ) << endl;
 
       //create the iterator object
       proj = new FresnelCDI(object_estimate,
@@ -187,6 +201,7 @@ int main(int argc, char * argv[]){
     }
     //if reconstucting the Fresnel white field.
     else if(reco_type.compare(fresnel_wf_string)==0){
+
       proj = new FresnelCDI_WF(object_estimate,
 			       beam_wavelength, 
 			       zone_focal_length, 
@@ -199,11 +214,11 @@ int main(int argc, char * argv[]){
       support_file_type = c.getString("white_field_support_file_type");      
 
       //reset the algorithm and number of iterations.
-      algorithms.clear();
-      algorithms.push_back("ER"); //this is a dummy value
+      algorithms->clear();
+      algorithms->push_back("ER"); //this is a dummy value
       //since only one algorithm is available for white-field reco.
-      iterations.clear();
-      iterations.push_back(c.getInt("wf_iterations"));
+      iterations->clear();
+      iterations->push_back(c.getInt("wf_iterations"));
       //don't use shrink-wrap either
       shrinkwrap_iterations = 0; 
     }
@@ -271,19 +286,13 @@ int main(int argc, char * argv[]){
   proj->set_intensity(data);
 
   //Initialise the current object ESW with a random numbers
-  proj->initialise_estimate(seed);
+  if(starting_point_file_name.compare("")==0)
+    proj->initialise_estimate(seed);
 
   //make a 2D array and allocate some memory.
   //This will be used to output the image of the 
   //current estimate.
   Double_2D result(pixels_x,pixels_y);
-
-  //Make a temporary FFT in case we need to output
-  //the guess of the diffraction pattern
-  FourierT * fft;
-  if(output_diffraction_estimate){
-    fft = new FourierT(pixels_x,pixels_y);
-  }
 
   /******* run the reconstruction *********/
 
