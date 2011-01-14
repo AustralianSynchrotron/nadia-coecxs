@@ -61,11 +61,13 @@ class Complex_2D{
    * 
    * @param x_size The number of samplings in the horizontal direction
    * @param y_size The number of samplings in the vertical direction
+   *
    */
   Complex_2D(int x_size, int y_size);
 
   /**
    * Destructor
+   *
    */
   ~Complex_2D();
 

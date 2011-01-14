@@ -11,26 +11,12 @@ Complex_2D::Complex_2D(int x_size, int y_size){
   nx = x_size;
   ny = y_size;
 
-  //array = new double[nx*ny*2];
-  
   array = new fftw_complex[nx*ny];
 
-
-  /**for(int i=0; i < nx; ++i){
-    array[i] = new double*[ny];
-    for(int j=0; j < ny; ++j)
-      array[i][j] = new double[2];
-      }**/
 }
 
 Complex_2D::~Complex_2D(){
 
-  /** for(int i=0; i < nx; ++i){
-    for(int j=0; j < ny; ++j){
-      delete[] array[i][j];
-    }  
-    delete[] array[i];
-    }**/
   delete[] array;
 
 }
@@ -46,11 +32,9 @@ void Complex_2D::set_value(int x, int y, int component, double value){
 
   case REAL :
     set_real(x,y,value);
-    //    array[x][y][REAL]=value;
     break;
   case IMAG :
     set_imag(x,y,value);
-    //array[x][y][IMAG]=value;
     break;
   default:
     cout << "Value type in Complex_2D::set_value is unknown: " 
@@ -74,14 +58,6 @@ double Complex_2D::get_value(int x, int y, int type) const {
   case IMAG:
     return get_imag(x,y);
   case PHASE: //goes between 0 and 2pi i.e. always positive.
-    /**    if(get_real(x,y)==0){
-      if(get_imag(x,y)==0)
-    	return 0;
-      if(get_imag(x,y)>0)
-	return M_PI/2.0;
-      else
-	return 3*M_PI/2.0;
-	}**/
     if( atan2(get_imag(x,y),get_real(x,y)) <0 )
       return atan2(get_imag(x,y),get_real(x,y)) + 2*M_PI;
     return atan2(get_imag(x,y),get_real(x,y));
@@ -110,11 +86,8 @@ void Complex_2D::scale(double scale_factor){
       array[i*ny + j][REAL]*=scale_factor;
       array[i*ny + j][IMAG]*=scale_factor;
 
-      //array[i][j][REAL]*=scale_factor;
-      //array[i][j][IMAG]*=scale_factor;
     }
   }
-  //  cout << "scaled array[0][0][0]="<<array[0][0][0]<<endl;
 
 }
 
@@ -127,22 +100,12 @@ void Complex_2D::add(Complex_2D & c2, double scale){
     exit(1);
   }
 
-  //cout << "scale: "<<scale<<endl;
-  //cout << "c before: " << get_norm() <<endl;;
-
   for(int i=0; i < nx; ++i){
     for(int j=0; j < ny; ++j){
       array[i*ny + j][REAL]+=scale*c2.get_real(i,j);
       array[i*ny + j][IMAG]+=scale*c2.get_imag(i,j);
-      //      array[i][j][REAL]+=scale*c2.get_real(i,j);
-      // array[i][j][IMAG]+=scale*c2.get_imag(i,j);
     }
   }
-
-  // cout << "c after: " << get_norm()<<endl;
-
-
-
 }
 
 void Complex_2D::multiply(Complex_2D & c2, double scale){
@@ -163,8 +126,6 @@ void Complex_2D::multiply(Complex_2D & c2, double scale){
       
       array[i*ny + j][REAL]=scale*new_real;
       array[i*ny + j][IMAG]=scale*new_imag;
-      //      array[i][j][REAL]=scale*new_real;
-      //  array[i][j][IMAG]=scale*new_imag;
     }
   }
 }
@@ -194,19 +155,6 @@ Complex_2D * Complex_2D::clone() const {
   return new_complex;
 }
 
-/** Fill this Complex_2D with the values from "c". */
-/**void Complex_2D::copy(Complex_2D & c){
-
-  //todo: check the bounds......
-
-  for(int i=0; i < nx; ++i){
-    for(int j=0; j < ny; ++j){
-      set_real(i,j,c.get_real(i,j));
-      set_imag(i,j,c.get_imag(i,j));
-    }
-  }  
-  }**/
-
 void Complex_2D::copy(Complex_2D & c){
   //todo: check the bounds......
   
@@ -216,8 +164,6 @@ void Complex_2D::copy(Complex_2D & c){
 
 void Complex_2D::invert(){
 
-  //Complex_2D * temp = clone();
-    
   int middle_x = nx/2;
   int middle_y = ny/2;
 
@@ -232,8 +178,6 @@ void Complex_2D::invert(){
 	int j_new = j+middle_y; 
 	int i_new = i+middle_x; 
 
-	//	if(j >=  middle_y)
-	//	  j_new = j_new - 2*middle_y; 
 	if(i >=  middle_x)
 	  i_new = i_new - 2*middle_x;
 
