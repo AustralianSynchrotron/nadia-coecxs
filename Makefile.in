@@ -8,6 +8,12 @@ all:
 	@echo "done making the tools"
 	make -C examples
 	@echo "done making the examples"
+	@echo ""
+	@echo "\"make\" completed successfully."
+	@echo ""
+	@echo "Look at the code in the examples directory to see how to get started"
+	@echo ""
+
 
 #install:
 #	mkdir -p $(PREFIX)/include

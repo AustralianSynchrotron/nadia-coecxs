@@ -604,6 +604,8 @@ with_jpeg_lib
 with_df_lib
 with_sz_lib
 with_z_lib
+with_tiff_lib
+with_tiff_inc
 with_fftw_lib
 with_fftw_inc
 with_mfhdf_lib
@@ -2744,6 +2746,20 @@ then
 fi
 
 
+if test "$with_tiff_inc" != ""
+then
+	CXXFLAGS="-I$with_tiff_inc $CXXFLAGS"
+fi
+
+
+if test "$with_tiff_lib" != ""
+then
+	LDFLAGS="-L$with_tiff_lib $LDFLAGS"
+	LD_RUN_PATH="$LD_RUN_PATH:$with_tiff_lib"
+fi
+
+
+
 if test "$with_z_lib" != ""
 then
 	LDFLAGS="-L$with_z_lib $LDFLAGS"
@@ -3352,45 +3368,6 @@ then
   exit -1
 fi
 
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for main in -ldf" >&5
-$as_echo_n "checking for main in -ldf... " >&6; }
-if test "${ac_cv_lib_df_main+set}" = set; then :
-  $as_echo_n "(cached) " >&6
-else
-  ac_check_lib_save_LIBS=$LIBS
-LIBS="-ldf  $LIBS"
-cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-
-
-int
-main ()
-{
-return main ();
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_cxx_try_link "$LINENO"; then :
-  ac_cv_lib_df_main=yes
-else
-  ac_cv_lib_df_main=no
-fi
-rm -f core conftest.err conftest.$ac_objext \
-    conftest$ac_exeext conftest.$ac_ext
-LIBS=$ac_check_lib_save_LIBS
-fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_df_main" >&5
-$as_echo "$ac_cv_lib_df_main" >&6; }
-if test "x$ac_cv_lib_df_main" = x""yes; then :
-  cat >>confdefs.h <<_ACEOF
-#define HAVE_LIBDF 1
-_ACEOF
-
-  LIBS="-ldf $LIBS"
-
-fi
-
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for main in -ljpeg" >&5
 $as_echo_n "checking for main in -ljpeg... " >&6; }
 if test "${ac_cv_lib_jpeg_main+set}" = set; then :
@@ -3505,6 +3482,45 @@ if test "x$ac_cv_lib_sz_main" = x""yes; then :
 _ACEOF
 
   LIBS="-lsz $LIBS"
+
+fi
+
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for main in -ldf" >&5
+$as_echo_n "checking for main in -ldf... " >&6; }
+if test "${ac_cv_lib_df_main+set}" = set; then :
+  $as_echo_n "(cached) " >&6
+else
+  ac_check_lib_save_LIBS=$LIBS
+LIBS="-ldf  $LIBS"
+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+
+int
+main ()
+{
+return main ();
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_cxx_try_link "$LINENO"; then :
+  ac_cv_lib_df_main=yes
+else
+  ac_cv_lib_df_main=no
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+LIBS=$ac_check_lib_save_LIBS
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_df_main" >&5
+$as_echo "$ac_cv_lib_df_main" >&6; }
+if test "x$ac_cv_lib_df_main" = x""yes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_LIBDF 1
+_ACEOF
+
+  LIBS="-ldf $LIBS"
 
 fi
 
@@ -3733,9 +3749,9 @@ fi
 
 
 #Checks for tiff
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for main in -ltiff" >&5
-$as_echo_n "checking for main in -ltiff... " >&6; }
-if test "${ac_cv_lib_tiff_main+set}" = set; then :
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for TIFFOpen in -ltiff" >&5
+$as_echo_n "checking for TIFFOpen in -ltiff... " >&6; }
+if test "${ac_cv_lib_tiff_TIFFOpen+set}" = set; then :
   $as_echo_n "(cached) " >&6
 else
   ac_check_lib_save_LIBS=$LIBS
@@ -3743,27 +3759,33 @@ LIBS="-ltiff  $LIBS"
 cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
 
-
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char TIFFOpen ();
 int
 main ()
 {
-return main ();
+return TIFFOpen ();
   ;
   return 0;
 }
 _ACEOF
 if ac_fn_cxx_try_link "$LINENO"; then :
-  ac_cv_lib_tiff_main=yes
+  ac_cv_lib_tiff_TIFFOpen=yes
 else
-  ac_cv_lib_tiff_main=no
+  ac_cv_lib_tiff_TIFFOpen=no
 fi
 rm -f core conftest.err conftest.$ac_objext \
     conftest$ac_exeext conftest.$ac_ext
 LIBS=$ac_check_lib_save_LIBS
 fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_tiff_main" >&5
-$as_echo "$ac_cv_lib_tiff_main" >&6; }
-if test "x$ac_cv_lib_tiff_main" = x""yes; then :
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_tiff_TIFFOpen" >&5
+$as_echo "$ac_cv_lib_tiff_TIFFOpen" >&6; }
+if test "x$ac_cv_lib_tiff_TIFFOpen" = x""yes; then :
   cat >>confdefs.h <<_ACEOF
 #define HAVE_LIBTIFF 1
 _ACEOF
