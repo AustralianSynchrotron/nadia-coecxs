@@ -1,5 +1,5 @@
 /**
- * @file hdf22ppm.c
+ * @file hdf2ppm.c
  * 
  * \a hdf2ppm.exe - Extract the data from a HDF4 file and save as 
  * a ppm (grey-scale, 16 bit file). 
