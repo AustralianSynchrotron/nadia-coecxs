@@ -21,7 +21,7 @@ using namespace std;
 //bad code which allows the array type to be 
 //decided at run-time.
 /***************************************************************/
-class anonomous_array{
+class tiff_anonymous_array{
 
   int type_;
   uint8  * a_uint8;
@@ -30,7 +30,7 @@ class anonomous_array{
   
  public:
 
-  anonomous_array(int type, int size){
+  tiff_anonymous_array(int type, int size){
     type_ = type;
 
      a_uint8=0;
@@ -53,7 +53,7 @@ class anonomous_array{
     }    
   }
   
-  ~anonomous_array(){
+  ~tiff_anonymous_array(){
     switch( type_ ){
     case ONE_BYTE:
       delete[] a_uint8;
@@ -150,17 +150,17 @@ int read_tiff(string file_name, Double_2D & data){
 
     cout << "Processing grey scale image" << endl;
 
-    anonomous_array * buffer;
+    tiff_anonymous_array * buffer;
 
     switch(bytes_per_pixel){ //otherwise set up the buffer for grey scale
     case(ONE_BYTE):
-      buffer = new anonomous_array(ONE_BYTE,pixels_per_strip);
+      buffer = new tiff_anonymous_array(ONE_BYTE,pixels_per_strip);
     break;
     case(TWO_BYTE):
-      buffer = new anonomous_array(TWO_BYTE,pixels_per_strip);
+      buffer = new tiff_anonymous_array(TWO_BYTE,pixels_per_strip);
     break;
     case(FOUR_BYTE):
-      buffer = new anonomous_array(FOUR_BYTE,pixels_per_strip);
+      buffer = new tiff_anonymous_array(FOUR_BYTE,pixels_per_strip);
       break;
     default:
       cout << "Confused about the tiff image.." <<endl;

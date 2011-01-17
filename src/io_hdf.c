@@ -20,13 +20,13 @@ using namespace std;
 #define SUCCESS 1
 
 /**
- * @class anonomous_array
+ * @class hdf_anonymous_array
  * 
  * This is bad code which allows me to get around the fact that
  * I don't know the number of bytes per pixel in the data file 
  * until it's opened.
  */
-class anonomous_array{
+class hdf_anonymous_array{
 
   int type_;
   int8 * a_int8;
@@ -40,7 +40,7 @@ class anonomous_array{
   
  public:
 
-  anonomous_array(int type, int size){
+  hdf_anonymous_array(int type, int size){
     type_ = type;
 
     a_int8=0;
@@ -83,7 +83,7 @@ class anonomous_array{
     }    
   }
   
-  ~anonomous_array(){
+  ~hdf_anonymous_array(){
     switch( type_ ){
     case DFNT_INT8:
       delete[] a_int8;
@@ -203,7 +203,7 @@ int read_hdf4(string file_name, Double_2D & data, char * data_name){
      return FAILURE;
    }
 
-   anonomous_array array(data_type,dim_sizes[0]*dim_sizes[1] );
+   hdf_anonymous_array array(data_type,dim_sizes[0]*dim_sizes[1] );
 
    int32 start[2] = {0};
    status = SDreaddata(sds_index, start, NULL, 
