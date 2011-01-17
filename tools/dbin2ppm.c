@@ -46,7 +46,7 @@ int main(int argc, char * argv[]){
   }
   
   //write the data to a file
-  write_ppm(argv[2], data, true);
+  write_ppm(argv[2], data);
       
   return 0;
 }
