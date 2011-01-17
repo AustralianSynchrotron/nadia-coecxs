@@ -1,11 +1,15 @@
+//author:  Nadia Davidson <nadiamd@unimelb.edu.au>
+//date last modified: 17/01/2011
+
 /**
- * @file FCDI_example.c
- * @author  Nadia Davidson <nadiamd@unimelb.edu.au>
+ * @file FresnelCDI_example.c
  *
- * @section DESCRIPTION
  *
- * This file provides an example of running the Fresnel CDI 
- * reconstruction on real data (from Corey's data)
+ * \a FresnelCDI_example.c - This file provides an example of running
+ * the Fresnel CDI reconstruction on real data (from Corey's
+ * data). The white-field result from the FresnelCDI_wf_example.c is
+ * required as input. The error-reduction algorithm is used. The phase
+ * and magnitude of the transmission function are output to file.
  *
  */
 

@@ -1,12 +1,14 @@
+//author:  Nadia Davidson <nadiamd@unimelb.edu.au>
+//date last modified: 17/01/2011
+
 /**
- * @file simulation_example.c
- * @author  Nadia Davidson <nadiamd@unimelb.edu.au>
+ * @file PlanarCDI_simulation_example.c
  *
- * @section DESCRIPTION
- *
- * This file provides an example of running the planar CDI 
- * reconstruction on simulated data. Take a look at
- * real_example.c as well to see what the code does.
+ * \a PlanarCDI_simulation_example.c The object from the
+ * PlanarCDI_example (in fact I used the reconstructed image as the
+ * object) is used to simulate a diffraction pattern for planar
+ * CDI. The diffraction pattern is thresholded to make it more
+ * realistic and then CDI reconstruction is performed.
  *
  */
 

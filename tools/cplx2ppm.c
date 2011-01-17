@@ -6,8 +6,7 @@
  * pixel). The real, imaginary, magnitude, phase and magnitude squared
  * can be extracted.
  * 
- * \par Usage: 
- * cplx2ppm.exe \<input cplx file\> \<output ppm file\> 
+ * \par Usage: cplx2ppm.exe \<input cplx file\> \<output ppm file\> 
  * \<component type\> \<size in x\> \<size in y\> 
  * \par
  * where component type is one of:

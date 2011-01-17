@@ -1,3 +1,15 @@
+//author:  Nadia Davidson <nadiamd@unimelb.edu.au>
+//last modified: 17/01/2011
+
+/**
+ * @file FresnelCDI_WF_example.c
+ *
+ * \a FresnelCDI_WF_example.c - This example demonstrates how the
+ * phase of a white field can be recovered and saved for use in
+ * Fresnel CDI reconstruction. The data set comes from Corey.
+ *
+ */
+
 #include <iostream>
 #include <sstream>
 #include <stdlib.h>
@@ -5,16 +17,6 @@
 #include "Complex_2D.h"
 #include "Double_2D.h"
 #include "FresnelCDI_WF.h"
-
-/**
- * @file FCDI_WF_example.c
- * @author  Nadia Davidson <nadiamd@unimelb.edu.au>
- *
- * @section DESCRIPTION
- *
- * This example shows how the white field can be reconstucted 
- * in Fresnel CDI. It uses Corey's data files. 
- */
 
 using namespace std;
 

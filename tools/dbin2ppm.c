@@ -1,3 +1,6 @@
+//author: Nadia Davidson
+//data: 17/01/2011
+
 /**
  * @file dbin2ppm.c
  * 

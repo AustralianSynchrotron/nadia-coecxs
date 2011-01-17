@@ -5,8 +5,7 @@
  * and save as a real binary file (2D double / 64 bit, format). The real, 
  * imaginary, magnitude, phase and magnitude squared can be extracted.
  * 
- * \par Usage: 
- * cplx2dbin.exe \<input cplx file\> \<output dbin file\> 
+ * \par Usage: cplx2dbin.exe \<input cplx file\> \<output dbin file\> 
  * \<component type\> \<size in x\> \<size in y\> 
  * \par
  * where component type is one of:

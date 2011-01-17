@@ -1,16 +1,14 @@
+//author:  Nadia Davidson <nadiamd@unimelb.edu.au>
+//date last modified: 12/1/2011
+
 /**
  * @file CDI_reconstruction.c
- * @author  Nadia Davidson <nadiamd@unimelb.edu.au>
- * @date Last modified on 12/1/2011
  *
- * @brief A tool for performing CDI reconstruction
+ * \a CDI_reconstruction.exe A tool for performing Planar or Fresnel
+ * ESW reconstruction.  This tool is provided as a demonstrative tool
+ * and to obtain results quickly.
  *
- * \a CDI_reconstruction.exe Perform Planar or Fresnel ESW reconstruction.
- * This tool is provided as a demonstrative tool and to
- * obtain results quickly.
- *
- * \par Usage:
- * CDI_reconstruction.exe \<config filename\> \<reco_type\> \<seed\>
+ * \par Usage: CDI_reconstruction.exe \<config filename\> \<reco_type\> \<seed\>
  *
  * 
  * where reco_type may be:
@@ -19,12 +17,9 @@
  * - "fresnel" - fresnel object reconstruction. with the white-field 
  *               previously reconstructed.
  *
- * The seed should be an integer. 
- * 
- * If seed is excluded from the command line arguments, it is assumed
- * to be "0". 
- *
- * If reco_type is also excluded, it is assumed to be "planar".
+ * The seed should be an integer. If the seed is excluded from the
+ * command line arguments, it is assumed to be "0". If reco_type is
+ * also excluded, it is assumed to be "planar".
  *
  * \par Example:
  * \verbatim CDI_reconstruction.exe planar_example.config "planar" 3 \endverbatim

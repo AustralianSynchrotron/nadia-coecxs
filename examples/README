@@ -19,7 +19,7 @@ of HIO and the error-reduction algorithm are used.
 PlanarCDI_example.sh
 --------------------
 The same reconstuction as above will be performed using the
-planar_CDI_reconstruction.exe command line program. A simple bash
+CDI_reconstruction.exe command line program. A simple bash
 script and configuration file (planar_example.config) shows how this
 tool can be used. Other parts of the bash script can be uncommented to
 run Fresnel reconstruction or to run multiple times with a different

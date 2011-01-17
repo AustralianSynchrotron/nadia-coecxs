@@ -1,9 +1,12 @@
+//author Nadia Davidson <nadiamd@unimelb.edu.au>
+
 /**
- * @file real_example.c
- * Nadia Davidson <nadiamd@unimelb.edu.au>
+ * @file PlanarCDI_example.c
  *
- * This file provides an example of running the planar CDI 
- * reconstruction on real data (from the file test_dat.tif)
+ * \a PlanarCDI_example.c This example reconstructs some planar
+ * diffraction data (Lachie's data). The shrinkwrap algorithm is used
+ * to improve the reconstruction. A combination of HIO and the
+ * error-reduction algorithm are used.
  *
  */
 

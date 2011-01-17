@@ -2,33 +2,31 @@
 
  @mainpage The CXS Software Project
  
- The doxygen documentation provided here is aimed at more advanced users
- who are comfortable with c++ and this style of reference documentation.
- 
  Instruction on how to install and begin using the software package
  are provided on the <a
  href=http://www.ph.unimelb.edu.au/~ndavidson/cxs/index.html>main
- website</a>.
+ website</a>.  The doxygen documentation provided here is aimed at
+ more advanced users who are comfortable with c++ and this style of
+ reference documentation.
 
  <hr>
  @section examples Examples
 
  All examples and there associated data files are provided in the
- examples/ directory. A brief description of each is listed below.
+ examples directory. A brief description of each is listed below.
 
- <hr>
- @copydoc PlanarCDI_example.c
- <hr>
- @copydoc PlanarCDI_simulation_example.c
- <hr>
- @copydoc FresnelCDI_WF_example.c
- <hr>
- @copydoc FresnelCDI_example.c
- <hr>
-
- A command line / bash script examples which performs some
- of the same reconstructions as the .c files above, can be found
- in PlanarCDI_example.sh.
+ <ul>
+ <li> @copydoc PlanarCDI_example.c
+ <li> @copydoc PlanarCDI_simulation_example.c
+ <li> @copydoc FresnelCDI_WF_example.c
+ <li> @copydoc FresnelCDI_example.c
+ <li> \a PlanarCDI_example.sh - Some of the same reconstuctions as above will
+ be performed using the CDI_reconstruction.exe command line program. A
+ simple bash script and configuration file (planar_example.config)
+ shows how this tool can be used. Other parts of the bash script can
+ be uncommented to run Fresnel reconstruction or to run multiple times
+ with a different starting seed.
+ </ul>
 
  <hr>
 
