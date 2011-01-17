@@ -3,18 +3,34 @@
  * @author  Nadia Davidson <nadiamd@unimelb.edu.au>
  * @date Last modified on 12/1/2011
  *
- * @brief A tool for performing CDI reconstuction
+ * @brief A tool for performing CDI reconstruction
  *
- * The code here allows Planar and Fresnel ESW reconstruction to be
- * performed. This tool is provided as a demonstrative tool and to
- * obtain results quickly, without knowing the c programing language.
- * Users are encouraged to use the libraries provided by this package
- * in their own code, rather than this tool if more flexibility is
- * required.
+ * \a CDI_reconstruction.exe Perform Planar or Fresnel ESW reconstruction.
+ * This tool is provided as a demonstrative tool and to
+ * obtain results quickly.
  *
+ * \par Usage:
+ * CDI_reconstruction.exe \<config filename\> \<reco_type\> \<seed\>
  *
- * @todo Allow input for the starting guess (phase and mag?)
  * 
+ * where reco_type may be:
+ * - "planar" - planar
+ * - "fresnel_wf" - fresnel white-field reconstruction (3-plane propagation) 
+ * - "fresnel" - fresnel object reconstruction. with the white-field 
+ *               previously reconstructed.
+ *
+ * The seed should be an integer. 
+ * 
+ * If seed is excluded from the command line arguments, it is assumed
+ * to be "0". 
+ *
+ * If reco_type is also excluded, it is assumed to be "planar".
+ *
+ * \par Example:
+ * \verbatim CDI_reconstruction.exe planar_example.config "planar" 3 \endverbatim
+ * Perform planar CDI reconstruction using the configuration given in the file,
+ * "planar_example.config". The random number generator (used to initial the
+ * first guess) is given a seed value of 3.
  *
  */
 
@@ -49,7 +65,7 @@ int main(int argc, char * argv[]){
   /** work out which config file to use **/
   string config_file = "";
 
-  //and set the seed of the inital guess
+  //and set the seed of the initial guess
   int seed = 0;
 
   string reco_type = "";
@@ -76,7 +92,7 @@ int main(int argc, char * argv[]){
 
   if(argc>4){
     cout << "Wrong number of arguments given. Usage: "
-	 << "planar_CDI_reconstuction <config filename> "
+	 << "planar_CDI_reconstruction <config filename> "
 	 << "<reco_type> <seed>" << endl;
     cout << "<reco_type> may be: " << planar_string << ", " << fresnel_string
 	 << " or " << fresnel_wf_string << endl;
@@ -113,7 +129,7 @@ int main(int argc, char * argv[]){
   }
   if(algorithms->size()!=iterations->size()){
     cout << "The number of algorithms and the number "
-	 <<"of iteractions do not match. Exiting"<< endl;
+	 <<"of iterations do not match. Exiting"<< endl;
     exit(0);
   }
 
@@ -127,10 +143,10 @@ int main(int argc, char * argv[]){
   double shrinkwrap_gauss_width = c.getDouble("shrinkwrap_gauss_width");
   double shrinkwrap_threshold = c.getDouble("shrinkwrap_threshold");
 
-  /*******  set up the reconstuction ***************/
+  /*******  set up the reconstruction ***************/
 
   //create the projection object which will be used to
-  //perform the reconstuction.
+  //perform the reconstruction.
   Complex_2D object_estimate(pixels_x,pixels_y);
 
   string starting_point_file_name = c.getString("starting_point_file_name");
@@ -176,7 +192,7 @@ int main(int argc, char * argv[]){
 
     if(reco_type.compare(fresnel_string)==0){ //if Fresnel CDI
 
-      //open the file where the reconstucted white field is
+      //open the file where the reconstructed white field is
       Complex_2D white_field(pixels_x,pixels_y);
       int status = read_cplx(c.getString("white_field_reco_file_name"), 
 			     white_field); 
@@ -199,7 +215,7 @@ int main(int argc, char * argv[]){
 			    normalisation);
       
     }
-    //if reconstucting the Fresnel white field.
+    //if reconstructing the Fresnel white field.
     else if(reco_type.compare(fresnel_wf_string)==0){
 
       proj = new FresnelCDI_WF(object_estimate,
@@ -312,7 +328,7 @@ int main(int argc, char * argv[]){
     //get the projection
     int alg = PlanarCDI::getAlgFromName(*algorithms_itr);
     if(alg == -1 ){
-      std::cout << "Could not find reconstuction algorithm"
+      std::cout << "Could not find reconstruction algorithm"
 		<< " with the name "<< (*algorithms_itr)
 		<< ". Exiting" << endl;
       exit(0);
