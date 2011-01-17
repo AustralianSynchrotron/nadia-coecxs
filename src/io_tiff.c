@@ -47,9 +47,9 @@ class anonomous_array{
     case FOUR_BYTE:
       a_uint32 = new uint32[size];
       break;
-      
     default:
       cout << "Not familiar with type.. exiting.." << endl;
+      exit(1);
     }    
   }
   
@@ -64,9 +64,9 @@ class anonomous_array{
     case FOUR_BYTE:
       delete[] a_uint32;
       break;
-
     default:
-      cout << "Not familiar with the HDF4 type.. exiting.." << endl;
+      cout << "Not familiar with the tiff type.. exiting.." << endl;
+      exit(1);
     }    
   }
 
@@ -79,8 +79,8 @@ class anonomous_array{
     case FOUR_BYTE:
       return a_uint32;
      default:
-      cout << "Not familiar with the HDF4 type.. exiting.." << endl;
-      return FAILURE;
+      cout << "Not familiar with the tiff type.. exiting.." << endl;
+      exit(1);
     }  
   }
 
@@ -95,8 +95,8 @@ class anonomous_array{
     case FOUR_BYTE:
       return a_uint32[i];
     default:
-      cout << "Not familiar with the HDF4 type.. exiting.." << endl;
-      return FAILURE;
+      cout << "Not familiar with the tiff type.. exiting.." << endl;
+      exit(1);
     }          
   }
 
