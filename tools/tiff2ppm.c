@@ -1,13 +1,13 @@
 /**
  * @file tiff2ppm.c
  * 
- * \a tiff2ppm - Convert a tiff image file into a ppm file (grey-scale, 16
+ * \a tiff2ppm.exe - Convert a tiff image file into a ppm file (grey-scale, 16
  * bit file). Note that this conversion may lose information.
  * 
- * \par Usage: tiff2ppm \<input tiff file\> \<output ppm file\> \par 
+ * \par Usage: tiff2ppm.exe \<input tiff file\> \<output ppm file\> \par 
  *
  * \par Example:
- * \verbatim  tiff2ppm my_reconstruction.tif my_reconstruction.ppm \endverbatim
+ * \verbatim  tiff2ppm.exe my_reconstruction.tif my_reconstruction.ppm \endverbatim
  * 
  **/
 

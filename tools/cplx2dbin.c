@@ -1,12 +1,12 @@
 /**
  * @file cplx2dbin.c
  * 
- * \a cplx2dbin - Extract part of a complex binary file (2D fftw format)
+ * \a cplx2dbin.exe - Extract part of a complex binary file (2D fftw format)
  * and save as a real binary file (2D double / 64 bit, format). The real, 
  * imaginary, magnitude, phase and magnitude squared can be extracted.
  * 
  * \par Usage: 
- * cplx2dbin \<input cplx file\> \<output dbin file\> 
+ * cplx2dbin.exe \<input cplx file\> \<output dbin file\> 
  * \<component type\> \<size in x\> \<size in y\> 
  * \par
  * where component type is one of:
@@ -17,7 +17,7 @@
  * - 4: MAG_SQ 
  *
  * \par Example:
- * \verbatim cplx2dbin my_white_field.cplx my_white_field_illum.bin 4 1024 1024 \endverbatim
+ * \verbatim cplx2dbin.exe my_white_field.cplx my_white_field_illum.bin 4 1024 1024 \endverbatim
  * Extract the magnitude squared from a reconstucted white-field file. 
  * 
  **/
