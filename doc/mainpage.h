@@ -8,7 +8,7 @@
  Instruction on how to install and begin using the software package
  are provided on the <a
  href=http://www.ph.unimelb.edu.au/~ndavidson/cxs/index.html>main
- website</html>.
+ website</a>.
 
  <hr>
  @section examples Examples
