@@ -186,7 +186,7 @@ class Complex_2D{
    * @return The number of horizontal points.
    *  
    */
-  double get_size_x() const{
+  int get_size_x() const{
     return nx;
   };
 
@@ -196,7 +196,7 @@ class Complex_2D{
    * @return The number of vertical points.
    *  
    */
-  double get_size_y() const{
+  int get_size_y() const{
     return ny;
   };
 

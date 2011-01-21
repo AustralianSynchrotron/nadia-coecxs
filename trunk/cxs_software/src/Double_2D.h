@@ -101,7 +101,7 @@ class Double_2D{
    * @return The number of horizontal points.
    *  
    */
-  inline double get_size_x() const {
+  inline int get_size_x() const {
     return nx;
   };
 
@@ -111,7 +111,7 @@ class Double_2D{
    * @return The number of vertical points.
    *  
    */
-  inline double get_size_y() const {
+  inline int get_size_y() const {
     return ny;
   };
 
