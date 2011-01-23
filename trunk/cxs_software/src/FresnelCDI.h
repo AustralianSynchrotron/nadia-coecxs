@@ -84,6 +84,12 @@ class FresnelCDI: public PlanarCDI{
 
 
   /**
+   * The destructor for this class
+   */
+  virtual ~FresnelCDI();
+
+
+  /**
    * This method overrides the one in PlanarCDI. The initial guess is
    * described in Harry's review paper: page 29. in particular
    * e.q.. 137.

@@ -77,6 +77,12 @@ class FresnelCDI_WF: public PlanarCDI{
 		double focal_detector_length,
 		double pixel_size);
   
+  
+  /**
+   * The destructor for this class
+   */
+  virtual ~FresnelCDI_WF();
+
 
 
   /**

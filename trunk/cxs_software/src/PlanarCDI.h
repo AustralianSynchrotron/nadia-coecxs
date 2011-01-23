@@ -161,7 +161,7 @@ class PlanarCDI{
   /**
    * Destructor. This is not interesting for users.
    */
-  ~PlanarCDI();
+  virtual ~PlanarCDI();
 
  /**
   * The main method for running the reconstruction!  This method
