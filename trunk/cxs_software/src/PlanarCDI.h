@@ -154,9 +154,9 @@ class PlanarCDI{
    *
    * @param n_best The number of "best estimates" to keep. See
    *   PlanarCDI::get_best_result below for more detail. By default
-   *   this option is switched off.
+   *   this option is set to one.
    */
-  PlanarCDI(Complex_2D & complex, int n_best=0);
+  PlanarCDI(Complex_2D & complex, int n_best=1);
 
   /**
    * Destructor. This is not interesting for users.
@@ -197,7 +197,7 @@ class PlanarCDI{
    * @param error "error" is filled with the metric error of the 
    * selected best result
    */
-  Complex_2D * get_best_result(int index, double & error);
+  Complex_2D * get_best_result(double & error, int index=0);
 
    /**
     * Set the sample support. A "0" value in the Double_2D is

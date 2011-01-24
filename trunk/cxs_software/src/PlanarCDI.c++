@@ -62,7 +62,7 @@ PlanarCDI::~PlanarCDI(){
 
 }
 
-Complex_2D * PlanarCDI::get_best_result(int index, double & error){
+Complex_2D * PlanarCDI::get_best_result(double & error, int index){
   if(index >=0 && index < n_best ){
     error = best_error_array[index];
     return best_array[index];

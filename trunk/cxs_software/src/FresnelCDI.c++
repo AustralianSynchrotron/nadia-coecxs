@@ -20,8 +20,9 @@ FresnelCDI::FresnelCDI(Complex_2D & initial_guess,
 		       double focal_detector_length,
 		       double focal_sample_length,
 		       double pixel_size,
-		       double normalisation)
-  :PlanarCDI(initial_guess),
+		       double normalisation,
+		       int n_best)
+  :PlanarCDI(initial_guess,n_best),
    wavelength(beam_wavelength),
    pixel_length(pixel_size),
    norm(normalisation),

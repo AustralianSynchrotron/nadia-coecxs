@@ -79,7 +79,8 @@ class FresnelCDI: public PlanarCDI{
 	     double focal_detector_length,
 	     double focal_sample_length,
 	     double pixel_size,
-	     double normalisation=1.0
+	     double normalisation=1.0,
+	     int n_best=1
 	     );
 
 

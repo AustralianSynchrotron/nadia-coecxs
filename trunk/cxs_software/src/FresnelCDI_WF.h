@@ -75,7 +75,8 @@ class FresnelCDI_WF: public PlanarCDI{
 		double beam_wavelength,
 		double zone_focal_length,
 		double focal_detector_length,
-		double pixel_size);
+		double pixel_size,
+		int n_best=1);
   
   
   /**
