@@ -346,7 +346,7 @@ class PlanarCDI{
   virtual void apply_shrinkwrap(double gauss_width=1.5, double threshold=0.1);  
   
   /**
-   * Get the current support. This might be useful if shripwrap has
+   * Get the current support. This might be useful if shrinkwrap has
    * been applied, as it allows you to get the updated support.
    *
    * @param support The content of "support" is overridden with the
