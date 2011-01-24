@@ -82,8 +82,7 @@ class FresnelCDI_WF: public PlanarCDI{
   /**
    * The destructor for this class
    */
-  virtual ~FresnelCDI_WF();
-
+  virtual ~FresnelCDI_WF(){};
 
 
   /**
