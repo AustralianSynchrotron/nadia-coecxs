@@ -122,10 +122,6 @@ class FresnelCDI_WF: public PlanarCDI{
   void initialise_estimate(int seed=0);
 
 
-  //make some other inherited methods private so we're not
-  //tempted to try and use them here, where they aren't applicable
- private:
-
   /**
    * This method is not available for FresnelCDI_WF.
    */
@@ -161,8 +157,6 @@ class FresnelCDI_WF: public PlanarCDI{
 			    double m5, double m6, double m7, double m8, 
 			    double m9, double m10){
   };
-  
-
 
 };
 

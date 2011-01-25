@@ -233,7 +233,7 @@ void PlanarCDI::set_algorithm(int alg){
     cout << "Algorithm unknown" <<endl;
   }
 
-  print_algorithm();
+  //  print_algorithm();
 }
 
 
