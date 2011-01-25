@@ -1,0 +1,24 @@
+#include make.inc
+
+
+all: 
+	make -C interfaces
+	@echo "done making the IDL interface"
+
+
+#install:
+#	mkdir -p $(PREFIX)/include
+#	cp src/*.h $(PREFIX)/include
+#	mkdir -p $(PREFIX)/lib
+#	cp src/lib* $(PREFIX)/lib/
+#	mkdir -p bin $(PREFIX)/bin/
+#	cp tools/*.exe $(PREFIX)/bin/
+
+clean: 
+	make clean -C interfaces
+	rm -f *~
+
+clobber:
+	make clean
+	make clobber -C interfaces
+
