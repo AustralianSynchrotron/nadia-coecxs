@@ -113,6 +113,18 @@ extern "C" void IDL_read_dbin(int argc, void * argv[])
 
 }
 
+extern "C" void IDL_read_cplx(int argc, void * argv[])
+{
+  int ny = *(int*) argv[0];
+  int nx = *(int*) argv[1];
+
+  IDL_STRING filename = *(IDL_STRING*)argv[2];
+  Complex_2D temp(nx,ny);
+  read_cplx(filename.s,temp);
+  copy_from_complex_2d(temp, (IDL_COMPLEX*) argv[3]);
+
+}
+
 extern "C" void IDL_read_tiff(int argc, void * argv[])
 {
 
@@ -128,9 +140,9 @@ extern "C" void IDL_write_dbin(int argc, void * argv[])
   int ny = *(int*) argv[0];
   int nx = *(int*) argv[1];
   
-  IDL_STRING filename = *(IDL_STRING*)argv[2];
+  IDL_STRING filename = *(IDL_STRING*)argv[3];
   Double_2D temp(nx,ny);
-  copy_to_double_2d(temp, (double*) argv[3]);
+  copy_to_double_2d(temp, (double*) argv[2]);
   write_dbin(filename.s,temp);
 }
 
@@ -139,9 +151,12 @@ extern "C" void IDL_write_cplx(int argc, void * argv[])
   int ny = *(int*) argv[0];
   int nx = *(int*) argv[1];
   
-  IDL_STRING filename = *(IDL_STRING*)argv[2];
+  IDL_STRING filename = *(IDL_STRING*)argv[3];
+
   Complex_2D temp(nx,ny);
-  copy_to_complex_2d(temp, (IDL_COMPLEX*) argv[3]);
+
+  copy_to_complex_2d(temp, (IDL_COMPLEX*) argv[2]);
+
   write_cplx(filename.s,temp);
 }
 
@@ -154,14 +169,20 @@ extern "C" void IDL_write_cplx(int argc, void * argv[])
 
 extern "C" void IDL_deallocate_memory(int argc, void * argv[])
 {
-  if(esw!=0)
-    delete esw ;
-  if(reco!=0)
+  if(reco!=0){
     delete reco ;
+    reco = 0 ;
+  }
+
+  if(esw!=0){
+    delete esw ;
+    esw = 0 ;
+  }
 }
 
 
 void common_init(int argc, void * argv[], int max_args){
+
 
   IDL_deallocate_memory(0,0);
 
@@ -173,7 +194,7 @@ void common_init(int argc, void * argv[], int max_args){
   esw = new Complex_2D(nx,ny);  
   
   if(argc == max_args)
-    copy_to_complex_2d(*esw,(IDL_COMPLEX*) argv[max_args=1]);
+    copy_to_complex_2d(*esw,(IDL_COMPLEX*) argv[max_args-1]);
 
 }
 
@@ -201,7 +222,8 @@ extern "C" void IDL_fresnel_init(int argc, void * argv[])
 
   common_init(argc, argv, 9); 
 
-  Complex_2D white_field(*(int*)argv[0],*(int*)argv[1]);
+  Complex_2D white_field(*(int*)argv[1],*(int*)argv[0]);
+
   copy_to_complex_2d(white_field,(IDL_COMPLEX*) argv[2]);
 
   reco = new FresnelCDI(*esw,
@@ -211,6 +233,7 @@ extern "C" void IDL_fresnel_init(int argc, void * argv[])
 			*(double*) argv[5],
 			*(double*) argv[6],
 			*(double*) argv[7]);
+
 }
 
 /***** Getter and setter methods ********************/
@@ -280,6 +303,8 @@ extern "C" void IDL_set_custom_algorithm(int argc, void * argv[]){
 			     *(double*)argv[7],
 			     *(double*)argv[8],
 			     *(double*)argv[9]);
+  reco->print_algorithm();
+
 }
 
 
@@ -299,15 +324,15 @@ extern "C" void IDL_apply_shrinkwrap(int argc, void * argv[]){
 }
 
 
-extern "C" double IDL_get_best_result(int argc, void * argv[]){
+extern "C" void IDL_get_best_result(int argc, void * argv[]){
 
   Complex_2D * temp;
   double error;
-  temp = reco->get_best_result(*(int*)argv[0],error);
-  copy_from_complex_2d(*temp,(IDL_COMPLEX*) argv[1]); 
-  delete temp;
-  return error;
+  temp = reco->get_best_result(error);
+  copy_from_complex_2d(*temp,(IDL_COMPLEX*) argv[0]);
 
+  cout << "Error for the best results so far "
+       << "is "<< error <<endl;
 }
 
 extern "C" void IDL_get_intensity_autocorrelation(int argc, void * argv[]){
@@ -331,16 +356,17 @@ extern "C" void IDL_get_support(int argc, void * argv[]){
 }
 
 
-extern "C" double IDL_get_error(int argc, void * argv[]){
-  return reco->get_error();
+extern "C" void IDL_get_error(int argc, void * argv[]){
+  *(double*) argv[0] = reco->get_error();
 }
 
 extern "C" void IDL_get_transmission_function(int argc, void * argv[]){
   
-  if(typeid(reco)!=typeid(FresnelCDI)){
+  if(typeid(*reco)!=typeid(FresnelCDI)){
        cout << "Sorry, can't get the transmission function for "
-	    << "anything other than Fresnel reconstuction "
-	    << endl;
+	    << "anything other than "<< typeid(FresnelCDI).name() <<" reconstuction. "
+	    << "You are doing "<<typeid(*reco).name() 
+	    << " reconstruction." << endl;
        return;
   }
   
@@ -354,3 +380,6 @@ extern "C" void IDL_get_transmission_function(int argc, void * argv[]){
 }
 
 
+extern "C" void IDL_print_algorithm(int argc, void * argv[]){
+  reco->print_algorithm();
+}

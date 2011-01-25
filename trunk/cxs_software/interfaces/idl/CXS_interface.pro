@@ -38,6 +38,8 @@ end
 ;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+
+;ok. complex_array option also tested
 pro cxs_planar_init, data, support, complex_array
 n = size(data)
 nx = n[2]
@@ -52,7 +54,7 @@ IF N_Params() EQ 2 THEN $
   cxs_initialise_esw
 end
 
-
+;ok
 pro cxs_fresnel_wf_init, data, $
                          support, $
                          beam_wavelength, $
@@ -85,7 +87,7 @@ IF N_Params() EQ 6 THEN $
 
 end
 
-
+;ok
 pro cxs_fresnel_init, data, support, $
                       white_field, $
                       beam_wavelength, $
@@ -123,33 +125,32 @@ ELSE $
 cxs_set_support, support
 cxs_set_intensity, data
 
-IF N_Params() EQ 8 THEN $
+IF N_Params() LT 9 THEN $
   cxs_initialise_esw
-
 end
 
 
-
+;ok
 pro cxs_set_support, array
 n = size(array)
 a = call_external(lib_name(),'IDL_set_support',n[1],n[2],double(array))
 end
 
+;ok
 pro cxs_set_intensity, array
 n = size(array)
 a= call_external(lib_name(),'IDL_set_intensity',n[1],n[2],double(array))
 end
 
-
+;ok
 pro cxs_initialise_esw, seed
 IF N_Params() EQ 0 THEN $
   seed = 0
 b = call_external(lib_name() ,'IDL_initialise_esw',long(seed)) 
 end
 
-
+;ok
 function cxs_iterate, iterations
-
 nx = call_external(lib_name(),'IDL_get_array_x_size')
 ny = call_external(lib_name(),'IDL_get_array_y_size')
 result = make_array(nx,ny,/COMPLEX)
@@ -161,21 +162,24 @@ TVSCL, rebin(ABS(result),pixels(),pixels())
 return, result
 end
 
-
+;ok
 pro cxs_set_relaxation_parameter, beta
-b = call_external(lib_name() ,'IDL_set_relaxation_parameter',beta) 
+b = call_external(lib_name() ,'IDL_set_relaxation_parameter',double(beta)) 
 end
 
+;ok
 pro cxs_apply_shrinkwrap, gauss_width, threshold
 if N_Params() lt 2 then threshold = 0.1 
 if N_Params() lt 1 then gauss_width = 1.5
 b = call_external(lib_name() ,'IDL_apply_shrinkwrap',double(gauss_width),double(threshold))
 end
 
+;ok
 pro cxs_set_algorithm, algorithm
 b = call_external(lib_name() ,'IDL_set_algorithm',algorithm)
 end
 
+;ok
 pro cxs_set_custom_algorithm, m1, m2, m3, m4, m5, m6, m7, m8, m9, m10
 b = call_external(lib_name() ,'IDL_set_custom_algorithm', $
                   double(m1), $
@@ -191,16 +195,16 @@ b = call_external(lib_name() ,'IDL_set_custom_algorithm', $
 end
 
 
-
-function cxs_get_best_result, place
+;ok
+function cxs_get_best_result 
 result = make_array(nx(),ny(),/COMPLEX)
-b = call_external(lib_name() ,'IDL_get_best_result',long(place),result)
+b = call_external(lib_name() ,'IDL_get_best_result',result)
 window, XSIZE=pixels(), YSIZE=pixels()
 TVSCL, rebin(ABS(result),pixels(),pixels())
 return, result
 end
 
-
+;ok
 function cxs_get_support
 result = make_array(nx(),ny(),/DOUBLE)
 b = call_external(lib_name() ,'IDL_get_support',result) 
@@ -209,11 +213,15 @@ TVSCL, rebin(result,pixels(),pixels())
 return, result
 end
 
+;ok (but need to check weather HIO is giving the correct
+;error
 function cxs_get_error
-return, call_external(lib_name(),'IDL_get_error')
+result = double(0.0)
+b = call_external(lib_name(),'IDL_get_error',result)
+return, result
 end
 
-
+;ok
 function cxs_get_transmission_function
 result = make_array(nx(),ny(),/COMPLEX)
 b = call_external(lib_name() ,'IDL_get_transmission_function',result) 
@@ -222,7 +230,7 @@ TVSCL, rebin(abs(result),pixels(),pixels())
 return, result
 end
 
-
+;ok
 pro cxs_clear_memory
 b = call_external(lib_name() ,'IDL_deallocate_memory')
 end
@@ -243,7 +251,7 @@ end
 
 
 
-
+;ok
 function cxs_get_intensity_autocorrelation
 result = make_array(nx(),ny(),/DOUBLE)
 b = call_external(lib_name() ,'IDL_get_intensity_autocorrelation',result) 
@@ -259,6 +267,7 @@ end
 ; io functions
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+;ok
 function cxs_read_dbin, nx, ny, filename
 result = make_array(nx,ny, /DOUBLE)
 b = call_external(lib_name() ,'IDL_read_dbin',nx,ny,filename,result)
@@ -267,6 +276,7 @@ TVSCL, rebin(result,pixels(),pixels())
 return, result
 end
 
+;ok
 function cxs_read_tiff, nx, ny, filename
 result = make_array(nx,ny, /DOUBLE)
 b = call_external(lib_name() ,'IDL_read_tiff',nx,ny,filename,result)
@@ -275,6 +285,7 @@ TVSCL, rebin(result,pixels(),pixels())
 return, result
 end
 
+;ok
 function cxs_read_cplx, nx, ny, filename
 result = make_array(nx,ny, /COMPLEX)
 b = call_external(lib_name() ,'IDL_read_cplx',nx,ny,filename,result)
@@ -283,14 +294,19 @@ TVSCL, rebin(abs(result),pixels(),pixels())
 return, result
 end
 
-
+;ok
 pro cxs_write_cplx, complex_array, filename
 n = size(complex_array)
 b = call_external(lib_name() ,'IDL_write_cplx',n[1],n[2],complex_array, filename)
 end
 
-
+;ok
 pro cxs_write_dbin, array, filename
 n = size(array)
 b = call_external(lib_name() ,'IDL_write_dbin',n[1],n[2],array, filename)
+end
+
+;ok
+pro cxs_print_algorithm
+b = call_external(lib_name() ,'IDL_print_algorithm')
 end
