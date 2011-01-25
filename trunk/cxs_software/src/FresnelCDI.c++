@@ -61,6 +61,8 @@ FresnelCDI::FresnelCDI(Complex_2D & initial_guess,
     }
   }
 
+  set_algorithm(ER);
+
 }
 
 void FresnelCDI::initialise_estimate(int seed){
