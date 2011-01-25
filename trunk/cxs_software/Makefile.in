@@ -8,13 +8,13 @@ all:
 	@echo "done making the tools"
 	make -C examples
 	@echo "done making the examples"
-	make -C interfaces
-	@echo "done making interface"
 	@echo ""
 	@echo "\"make\" completed successfully."
 	@echo ""
 	@echo "Look at the code in the examples directory to see how to get started"
 	@echo ""
+#	make -C interfaces
+#	@echo "done making interface"
 
 
 #install:
