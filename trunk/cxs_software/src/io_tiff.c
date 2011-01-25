@@ -144,7 +144,7 @@ int read_tiff(string file_name, Double_2D & data){
   if(samples_per_pixel>1){ //see if the image is colour
 
     cout << "Processing colour image" << endl;
-    TIFFReadRGBAImage(tif, w, h, colour_image, 0);
+    TIFFReadRGBAImage(tif, w, h, colour_image, 1);
   }
   else{ //otherwise if the image is grey scale
 
@@ -187,7 +187,7 @@ int read_tiff(string file_name, Double_2D & data){
   for(int i=0; i < w; ++i){
     for(int j=0; j< h; ++j){
       if(samples_per_pixel>1){//if the image is colour we take the sum of colour value
-	int pixel = colour_image[(h-j)*w+i];
+	int pixel = colour_image[(h-j-1)*w+i];
 	data.set(i,j,TIFFGetR(pixel)+TIFFGetG(pixel)+TIFFGetB(pixel));
       }
       else //grey scale:

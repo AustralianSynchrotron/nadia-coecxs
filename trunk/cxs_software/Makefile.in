@@ -8,6 +8,8 @@ all:
 	@echo "done making the tools"
 	make -C examples
 	@echo "done making the examples"
+	make -C interfaces
+	@echo "done making interface"
 	@echo ""
 	@echo "\"make\" completed successfully."
 	@echo ""
@@ -29,6 +31,7 @@ clean:
 	make clean -C tools
 	make clean -C doc
 	rm -f *~
+#	make clean -C interfaces
 
 clobber:
 	make clean
@@ -36,6 +39,8 @@ clobber:
 	make clobber -C tools
 	rm -f lib/libCOECXS.so lib/libCOECXS.a
 	rm -f include/*.h
+#	make clobber -C interfaces
+
 
 #use with caution
 bare:
@@ -45,3 +50,4 @@ bare:
 	rm -rf \#*# examples/\#*# src/\#*# tools/\#*#
 	rm -rf src/Makefile example/Makefile tools/Makefile
 	rm -rf config.log config.status
+#	rm -rf interfaces/Makefile interfaces/idl/Makefile 
