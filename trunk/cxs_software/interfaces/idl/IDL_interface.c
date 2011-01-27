@@ -1,9 +1,7 @@
-
-//c standard headers
-//#include <stdio.h>
-//#include <math>
+//standard headers
 #include <cstdlib>
 #include <iostream>
+#include <typeinfo>
 
 //idl header
 #include "idl_export.h"
