@@ -34,12 +34,61 @@ end
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;
-;
+; Here are the real wrappers to the C++ code
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 
-;ok. complex_array option also tested
+;+
+; NAME:
+;       CXS_PLANAR_INIT
+;
+; PURPOSE:
+;       Set-up a planar CDI reconstuction. This will
+;       initialise the reconstruction with the data
+;       and support. Some defaults will be set and
+;       memory will be allocated ready for reconstruction.
+;       It is necessary to call this procedure before
+;       attempting to call any of the reconstruction methods
+;       (e.g. before setting the algorithm or 
+;       calling CXS_ITERATE).
+;
+; CALLING SEQUENCE:
+;
+;	CXS_PLANAR_INIT, Data, Support [,Starting_point]
+;
+;
+; INPUTS:
+;
+;	Data: 
+;             The detector illumination. It should be
+;             in the form of a 2D array
+;
+;       Support: 
+;             A 2D Array giving the sample support.
+;             Values or 1 or greater are considered inside
+;             the support. All others are considered to be
+;             outside the support.
+;
+;       Starting_point: 
+;             As an option you may supply an initial 
+;             guess of the exit-surface-wave for the sample. 
+;             This maybe useful, for example, if you wish to 
+;             start from the end point of a previous run. The
+;             format of this parameter much be a 2D array of
+;             COMPLEX variables. If this parameter is not supplied,
+;             the starting point is initialised to be zero outside
+;             the support and a random number inside the support, 
+;             for both the mangitude and phase.
+;
+; EXAMPLE:
+;        An example of loading two 2D arrays from file and using
+;        them to initialise the planar reconstruction:
+;
+;        my_support = cxs_read_tiff(1024,1024,'planar_support.tiff')
+;        my_data = cxs_read_tiff(1024,1024,'planar_data.tiff')
+;        CXS_PLANAR_INIT, my_data, my_support
+;
+;-
 pro cxs_planar_init, data, support, complex_array
 n = size(data)
 nx = n[2]
@@ -54,7 +103,71 @@ IF N_Params() EQ 2 THEN $
   cxs_initialise_esw
 end
 
-;ok
+
+;+
+; NAME:
+;       CXS_FRESNEL_WF_INIT
+;
+; PURPOSE:
+;       Set-up a Fresnel white-field CDI reconstuction. This will
+;       initialise the reconstruction with the white-field intensity, 
+;       zone-plate support and experimental parameters. Some defaults 
+;       will be set and memory will be allocated ready for 
+;       reconstructing the white-field (phase and magnitude) in the
+;       detector plane. It is necessary to call this procedure before
+;       attempting to call any of the reconstruction methods
+;       (e.g. before setting the algorithm or calling CXS_ITERATE).
+;
+; CALLING SEQUENCE:
+;
+;	CXS_FRESNEL_WF_INIT, data, support, beam_wavelength,
+;                            zone_focal_length, focal_detector_length,
+;                            pixel_size [,starting_point]
+;
+; INPUTS:
+;
+;	data: 
+;             The detector illumination. It should be
+;             in the form of a 2D array.
+;
+;       support: 
+;             A 2D Array giving the sample support.
+;             Values or 1 or greater are considered inside
+;             the support. All others are considered to be
+;             outside the support.
+;
+;       beam_wavelength:
+;             The beam wavelength.
+;
+;       zone_focal_length:
+;             The distance between the zone plate and the focal point.
+;
+;       focal_detector_length:
+;             The distance between the focal point and the detector.
+;
+;       pixel_size:
+;             The side length of one detector pixel.
+;
+;       starting_point: 
+;             As an option you may supply an initial 
+;             guess of the exit-surface-wave for the sample. 
+;             This maybe useful, for example, if you wish to 
+;             start from the end point of a previous run. The
+;             format of this parameter much be a 2D array of
+;             COMPLEX variables. If this parameter is not supplied,
+;             the starting point is initialised to be zero outside
+;             the support and a random number inside the support, 
+;             for both the mangitude and phase.
+;
+; EXAMPLE:
+;
+;        An example of loading two 2D arrays from file and using
+;        them to initialise the planar reconstruction:
+;
+;        my_support = cxs_read_tiff(1024,1024,'support.tiff')
+;        my_data = cxs_read_tiff(1024,1024,'data.tiff')
+;        cxs_fresnel_wf_init, my_data, my_support, 4.892e-10, 16.353e-3, 0.9078777,13.5e-6
+;-
 pro cxs_fresnel_wf_init, data, $
                          support, $
                          beam_wavelength, $
@@ -87,7 +200,72 @@ IF N_Params() EQ 6 THEN $
 
 end
 
-;ok
+;+
+; NAME:
+;       CXS_FRESNEL_INIT
+;
+; PURPOSE:
+;       Set-up a Fresnel CDI reconstuction. This will
+;       initialise the reconstruction using a previously reconstructed
+;       white-field, detector data, sample support and experimental 
+;       parameters. Some defaults will be set and memory will be
+;       allocated ready for reconstructing the sample
+;       exit-surface-wave. It is necessary to call this procedure before
+;       attempting to call any of the reconstruction methods
+;       (e.g. before setting the algorithm or calling CXS_ITERATE).
+;
+; CALLING SEQUENCE:
+;
+;	CXS_FRESNEL_INIT, data, support, white-field, beam_wavelength,
+;	                  focal_detector_length, focal_sample_length, 
+;                         pixel_size [, normalisation, starting_point ]
+;
+; INPUTS:
+;
+;	data: 
+;             The detector illumination. It should be
+;             in the form of a 2D array.
+;
+;       support: 
+;             A 2D Array giving the sample support.
+;             Values or 1 or greater are considered inside
+;             the support. All others are considered to be
+;             outside the support.
+;
+;       white-field:
+;
+;
+;
+;       beam_wavelength:
+;             The beam wavelength.
+;
+;
+;       focal_detector_length:
+;             The distance between the focal point and the detector.
+;
+;       pixel_size:
+;             The side length of one detector pixel.
+;
+;       starting_point: 
+;             As an option you may supply an initial 
+;             guess of the exit-surface-wave for the sample. 
+;             This maybe useful, for example, if you wish to 
+;             start from the end point of a previous run. The
+;             format of this parameter much be a 2D array of
+;             COMPLEX variables. If this parameter is not supplied,
+;             the starting point is initialised to be zero outside
+;             the support and a random number inside the support, 
+;             for both the mangitude and phase.
+;
+; EXAMPLE:
+;
+;        An example of loading two 2D arrays from file and using
+;        them to initialise the planar reconstruction:
+;
+;        my_support = cxs_read_tiff(1024,1024,'support.tiff')
+;        my_data = cxs_read_tiff(1024,1024,'data.tiff')
+;        cxs_fresnel_wf_init, my_data, my_support, 4.892e-10, 16.353e-3, 0.9078777,13.5e-6
+;-
 pro cxs_fresnel_init, data, support, $
                       white_field, $
                       beam_wavelength, $
