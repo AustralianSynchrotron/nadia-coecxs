@@ -84,7 +84,7 @@ void check_objects(){
   if(!esw || !reco){
     cout << "You need to call one of the CXS_INIT_ routines"
 	 << " before calling this routine." << endl;
-      exit 1;
+    exit(1);
   }
 }
 
