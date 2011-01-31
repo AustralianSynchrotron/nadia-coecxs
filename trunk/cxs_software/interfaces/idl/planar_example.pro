@@ -1,4 +1,4 @@
-; This file shows the steps in performing planar CDI
+; This file demonstrates the steps in performing planar CDI
 ; reconstruction using the library in IDL. 
 
 ; Load up the module containing the wrapper code
@@ -28,6 +28,14 @@ cxs_apply_shrinkwrap
 ; Perform another 50 iterations
 a = cxs_iterate(50)
 
+; Lets get the result with the lowest error from the
+; last 100 iterations:
+a = cxs_get_best_result()
+
+; and use this to restart the reconstruction starting with this
+; result:
+cxs_clear_memory
+cxs_planar_init, data, support, a
 ; Change to the error-reduction algorithm 
 cxs_set_algorithm, 'ER'
 
@@ -39,6 +47,12 @@ cxs_apply_shrinkwrap, 1, 0.05
 
 ; Do one more iteration
 a = cxs_iterate()
+
+; We have finished with the reconstruction now, so free-up the
+; memory we allocated earlier (note this does not effect "a").
+; You will not longer be able to call cxs_iterate or any of the
+; cxs get and set methods.
+cxs_clear_memory
 
 ; Now you can play with "a" however you like in IDL.
 
