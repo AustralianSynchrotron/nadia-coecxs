@@ -130,6 +130,9 @@ end
 ;
 ; INPUTS:
 ;
+;       You may use any length units for the experimental parameters
+;       below, as long as all quantities are given in the same units.
+;
 ;	data: 
 ;             The white-field illumination. It should be
 ;             in the form of a 2D array.
@@ -227,6 +230,9 @@ end
 ;                         pixel_size [, normalisation, starting_point ]
 ;
 ; INPUTS:
+;
+;       You may use any length units for the experimental parameters
+;       below, as long as all quantities are given in the same units.
 ;
 ;	data: 
 ;             The detector data with the sample in place. It should be
@@ -833,11 +839,62 @@ end
 
 
 
+;+
+; NAME:
+;       CXS_PRINT_ALGORITHM
+;
+; PURPOSE:
+;       Output the form of the current algorithm to the screen. 
+;       It will be written in terms of the support and intensity
+;       projection operators.
+
+;
+; CALLING SEQUENCE:
+;       CXS_PRINT_ALGORITHM
+;
+;
+; EXAMPLE:
+;       CXS_SET_ALGORITHM, 'RAAR'
+;       CXS_PRINT_ALGORITHM
+;-
+pro cxs_print_algorithm
+b = call_external(lib_name() ,'IDL_print_algorithm')
+end
+
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; io functions
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-;ok
+;+
+; NAME:
+;       CXS_READ_DBIN
+;
+; PURPOSE:
+;       Read a double binary file (a binary file of doubles).
+;
+; CALLING SEQUENCE:
+;
+;       image = CXS_READ_DBIN( nx, ny, filename)
+;
+; INPUTS:
+;
+;       nx:
+;             The number of pixels horizontally (need to be checked?)
+;
+;       ny:
+;             The number of pixels vertically (need to be checked?)
+;
+;       filename:
+;             A string containing the name of the file to read.
+;
+; OUTPUTS:
+;       image:
+;             The image in the format of a 2D array of doubles.
+;
+; EXAMPLE:
+;       data = CXS_READ_DBIN(1024, 1024, 'data_file.dbin')
+;-
 function cxs_read_dbin, nx, ny, filename
 result = make_array(nx,ny, /DOUBLE)
 b = call_external(lib_name() ,'IDL_read_dbin',nx,ny,filename,result)
@@ -846,7 +903,36 @@ TVSCL, rebin(result,pixels(),pixels())
 return, result
 end
 
-;ok
+;+
+; NAME:
+;       CXS_READ_TIFF
+;
+; PURPOSE:
+;       Read a tiff image file. Note that there are other IDL commands
+;       which perform this same function.
+;
+; CALLING SEQUENCE:
+;
+;       image = CXS_READ_TIFF( nx, ny, filename)
+;
+; INPUTS:
+;
+;       nx:
+;             The number of pixels horizontally (need to be checked?)
+;
+;       ny:
+;             The number of pixels vertically (need to be checked?)
+;
+;       filename:
+;             A string containing the name of the file to read.
+;
+; OUTPUTS:
+;       image:
+;             The image in the format of a 2D array of doubles.
+;
+; EXAMPLE:
+;       data = CXS_READ_TIFF(1024, 1024, 'data_file.tif')
+;-
 function cxs_read_tiff, nx, ny, filename
 result = make_array(nx,ny, /DOUBLE)
 b = call_external(lib_name() ,'IDL_read_tiff',nx,ny,filename,result)
@@ -855,7 +941,36 @@ TVSCL, rebin(result,pixels(),pixels())
 return, result
 end
 
-;ok
+;+
+; NAME:
+;       CXS_READ_CPLX
+;
+; PURPOSE:
+;       Read a binary file of fftw complex numbers. This is
+;       useful for storing and restoring the result of a reconstruction.
+;
+; CALLING SEQUENCE:
+;
+;       complex_array = CXS_READ_CPLX( nx, ny, filename)
+;
+; INPUTS:
+;
+;       nx:
+;             The number of pixels horizontally (need to be checked?)
+;
+;       ny:
+;             The number of pixels vertically (need to be checked?)
+;
+;       filename:
+;             A string containing the name of the file to read.
+;
+; OUTPUTS:
+;       complex_array:
+;             A 2D array of COMPLEX numbers.
+;
+; EXAMPLE:
+;       white_field = CXS_READ_CPLX(1024, 1024, 'white_field_file.cplx')
+;-
 function cxs_read_cplx, nx, ny, filename
 result = make_array(nx,ny, /COMPLEX)
 b = call_external(lib_name() ,'IDL_read_cplx',nx,ny,filename,result)
@@ -864,19 +979,59 @@ TVSCL, rebin(abs(result),pixels(),pixels())
 return, result
 end
 
-;ok
+;+
+; NAME:
+;       CXS_WRITE_CPLX
+;
+; PURPOSE:
+;       Write a binary file of fftw complex numbers. This is
+;       useful for storing and restoring the result of a reconstruction.
+;
+; CALLING SEQUENCE:
+;
+;       CXS_WRITE_CPLX( complex_array, filename )
+;
+; INPUTS:
+;
+;       complex_array:
+;             A 2D array of COMPLEX numbers
+;
+;       filename:
+;             A string containing the name of the file to write.
+;
+; EXAMPLE:
+;       CXS_WRITE_CPLX, white_field, 'white_field_file.cplx'
+;-
 pro cxs_write_cplx, complex_array, filename
 n = size(complex_array)
 b = call_external(lib_name() ,'IDL_write_cplx',n[1],n[2],complex_array, filename)
 end
 
-;ok
+;+
+; NAME:
+;       CXS_WRITE_DBIN
+;
+; PURPOSE:
+;       Write a binary file of doubles. 
+;
+; CALLING SEQUENCE:
+;
+;       CXS_WRITE_DBIN( image, filename )
+;
+; INPUTS:
+;
+;       image:
+;             A 2D array of numbers
+;
+;       filename:
+;             A string containing the name of the file to write.
+;
+; EXAMPLE:
+;       CXS_WRITE_DBIN, result, 'reco_magnitude.dbin'
+;-
 pro cxs_write_dbin, array, filename
 n = size(array)
 b = call_external(lib_name() ,'IDL_write_dbin',n[1],n[2],array, filename)
 end
 
-;ok
-pro cxs_print_algorithm
-b = call_external(lib_name() ,'IDL_print_algorithm')
-end
+
