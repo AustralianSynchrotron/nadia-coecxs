@@ -3,8 +3,8 @@
 ; Date: 24th January 2011
 ; 
 ; This code provides wrappers to the functions in the COECXS C++
-; librarie. It calls the methods which are defined in the
-; IDL_interace.c file (and compiled into libIDLCOECXS.so), thus
+; library. It calls the methods which are defined in the
+; IDL_interface.c file (and compiled into libIDLCOECXS.so), thus
 ; allowing CDI reconstruction to be performed in IDL. Some examples
 ; are provided in this directory, showing how you can use these
 ; methods.
@@ -43,7 +43,7 @@ end
 ;       CXS_INIT_PLANAR
 ;
 ; PURPOSE:
-;       Set-up a planar CDI reconstuction. This will
+;       Set-up a planar CDI reconstruction. This will
 ;       initialise the reconstruction with the data
 ;       and support. Some defaults will be set and
 ;       memory will be allocated ready for reconstruction.
@@ -82,7 +82,7 @@ end
 ;             COMPLEX variables. If this parameter is not supplied,
 ;             the starting point is initialised to be zero outside
 ;             the support and a random number inside the support, 
-;             for both the mangitude and phase.
+;             for both the magnitude and phase.
 ;
 ; EXAMPLE:
 ;        An example of loading two 2D arrays from file and using
@@ -113,7 +113,7 @@ end
 ;       CXS_INIT_FRESNEL_WF
 ;
 ; PURPOSE:
-;       Set-up a Fresnel white-field CDI reconstuction. This will
+;       Set-up a Fresnel white-field CDI reconstruction. This will
 ;       initialise the reconstruction with the white-field intensity, 
 ;       zone-plate support and experimental parameters. Some defaults 
 ;       will be set and memory will be allocated ready for 
@@ -135,7 +135,7 @@ end
 ;             in the form of a 2D array.
 ;
 ;       support: 
-;             A 2D array of ints or doubles giving the zone-plate support.
+;             A 2D array of integers or doubles giving the zone-plate support.
 ;             Values or 1 or greater are considered inside
 ;             the support. All others are considered to be
 ;             outside the support.
@@ -160,12 +160,12 @@ end
 ;             COMPLEX variables. If this parameter is not supplied,
 ;             the starting point is initialised to be zero outside
 ;             the support, a random number inside the support 
-;             for the mangitude and zero for the phase.
+;             for the magnitude and zero for the phase.
 ;
 ; EXAMPLE:
 ;
 ;        An example of loading two 2D arrays from file and using
-;        them to initialise the white-field reconstuction for FCDI:
+;        them to initialise the white-field reconstruction for FCDI:
 ;
 ;        my_support = cxs_read_tiff(1024,1024,'support.tiff')
 ;        my_data = cxs_read_tiff(1024,1024,'data.tiff')
@@ -208,7 +208,7 @@ end
 ;       CXS_INIT_FRESNEL
 ;
 ; PURPOSE:
-;       Set-up a Fresnel CDI reconstuction. This will
+;       Set-up a Fresnel CDI reconstruction. This will
 ;       initialise the reconstruction using a previously reconstructed
 ;       white-field, detector data, sample support and experimental 
 ;       parameters. Some defaults will be set and memory will be
@@ -233,7 +233,7 @@ end
 ;             in the form of a 2D array.
 ;
 ;       support: 
-;             A 2D array of ints or doubles which give the sample support.
+;             A 2D array of integers or doubles which give the sample support.
 ;             Values or 1 or greater are considered inside
 ;             the support. All others are considered to be
 ;             outside the support.
@@ -241,7 +241,7 @@ end
 ;       white-field:
 ;             A COMPLEX 2D array of the reconstructed white-field in
 ;             the detector plane. This can be recovered using 
-;             CXS_INIT_FRESNEL_WF followered by CXS_ITERATE.
+;             CXS_INIT_FRESNEL_WF followed by CXS_ITERATE.
 ;
 ;       beam_wavelength:
 ;             The beam wavelength.
@@ -326,7 +326,7 @@ end
 ; PURPOSE:
 ;       Set the support shape to be used in reconstruction. This with override 
 ;       the support given to any of the CXS_INIT methods and maybe called
-;       at any time during the reconstuction.  
+;       at any time during the reconstruction.  
 ;
 ; CALLING SEQUENCE:
 ;
@@ -335,7 +335,7 @@ end
 ; INPUTS:
 ;
 ;       support: 
-;             A 2D array of doubles or ints giving the sample's 
+;             A 2D array of doubles or integers giving the sample's 
 ;             (or zone-plate's) support. Values of 1 or greater are 
 ;             considered inside the support. All others are considered 
 ;             to be outside the support.
@@ -367,7 +367,7 @@ end
 ;
 ;       data: 
 ;             The detector data. It should be in the form of a 2D
-;             array or doubles or ints.
+;             array or doubles or integers.
 ;
 ;
 ; EXAMPLE:
@@ -475,7 +475,7 @@ end
 
 ;+
 ; NAME:
-;       CXS_SET_RELAXATON_PARAMETER
+;       CXS_SET_RELAXATION_PARAMETER
 ;
 ; PURPOSE:
 ;       Set the relaxation parameter. The default relaxation
@@ -485,7 +485,7 @@ end
 ;
 ; CALLING SEQUENCE:
 ;
-;	CXS_SET_RELAXATON_PARAMETER, beta
+;	CXS_SET_RELAXATION_PARAMETER, beta
 ;
 ; INPUTS:
 ;
@@ -507,7 +507,7 @@ end
 ; PURPOSE:
 ;       Apply the shrinkwrap algorithm. The current exit-surface-wave
 ;       magnitude is used to update the support; it is convoluted with
-;       a gaussian and then a threashold is applied. You can use the
+;       a Gaussian and then a threshold is applied. You can use the
 ;       cxs_get_support function to see how the support have been
 ;       modified after calling this procedure.
 ;
@@ -518,7 +518,7 @@ end
 ; INPUTS:
 ;
 ;       gauss_width: 
-;             The width (1-standard dev. in pixels) of the gaussian
+;             The width (1-standard deviation. in pixels) of the Gaussian
 ;             used for smearing. If this parameter is not passed, 
 ;             a width of 1.5 pixels is used.
 ;
@@ -595,7 +595,7 @@ end
 ;       H.M. Quiney review: TUTORIAL REVIEW, Coherent diffractive
 ;       imaging using short wavelength light sources, Journal of
 ;       Modern Optics, 2010, DOI: 10.1080/09500340.2010.495459.  Some
-;       description is also given in the C++ doxygen documentaion
+;       description is also given in the C++ doxygen documentation
 ;       for PlanarCDI::set_custom_algorithm.
 ;
 ;
