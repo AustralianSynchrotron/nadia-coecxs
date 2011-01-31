@@ -604,6 +604,7 @@ FILE_PATTERNS          = *.c \
                          *.config \
 			 *.c++ \
 			 *.sh \
+			 *.pro \
 
 # The RECURSIVE tag can be used to turn specify whether or not subdirectories
 # should be searched for input files as well. Possible values are YES and NO.
