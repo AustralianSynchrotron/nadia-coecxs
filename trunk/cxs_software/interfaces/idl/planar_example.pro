@@ -57,7 +57,7 @@ cxs_clear_memory
 
 ; e.g. get the phase and display it:
 ; phase = ATAN(a, /PHASE)
-; window, 512, 512
+; window, XSIZE=512, YSIZE=512
 ; TVSCL, rebin(phase,512,512)
 
 ; or the magnitude:

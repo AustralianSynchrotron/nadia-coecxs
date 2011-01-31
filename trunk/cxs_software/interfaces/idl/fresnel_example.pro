@@ -42,9 +42,9 @@ cxs_clear_memory
 ; Now you can play with "a" however you like in IDL.
 
 ; e.g. get the phase and display it:
-; phase = ATAN(a, /PHASE)
-; window, 512, 512
-; TVSCL, rebin(phase,512,512)
+phase = ATAN(a, /PHASE)
+window, XSIZE=512, YSIZE=512
+TVSCL, rebin(phase,512,512)
 
 ; or the magnitude:
 ; TVSCL, rebin(abs(a),512,512)
