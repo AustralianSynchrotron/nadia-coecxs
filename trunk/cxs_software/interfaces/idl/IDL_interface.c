@@ -82,9 +82,9 @@ void copy_from_complex_2d(Complex_2D & cxs_array, IDL_COMPLEX * IDL_array){
 //error checking method. Make sure the objects have memory allocated.
 void check_objects(){
   if(!esw || !reco){
-    cout << "You need to call one of the CXS_INIT.. routines"
-	 << "before calling this routine" << endl;
-      exit;
+    cout << "You need to call one of the CXS_INIT_ routines"
+	 << " before calling this routine." << endl;
+      exit 1;
   }
 }
 
