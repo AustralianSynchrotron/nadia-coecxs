@@ -670,7 +670,31 @@ TVSCL, rebin(ABS(result),pixels(),pixels())
 return, result
 end
 
-;ok
+;+
+; NAME:
+;       CXS_GET_SUPPORT
+;
+; PURPOSE:
+;       Get the support. This maybe useful to see how shrinkwrap has
+;       effected the support. The result is displayed as a 512x512 
+;       pixel image on the screen.
+;
+; CALLING SEQUENCE:
+;
+;       support = CXS_GET_SUPPORT()
+;
+; OUTPUTS:
+;
+;       support:
+;             The support. A 2D array of doubles. A pixel with value below 1
+;             is outside the support and 1 and above is inside the support.
+;
+; EXAMPLE:
+;       View the support after applying shrink-wrap.
+; 
+;       CXS_APPLY_SHRINKWRAP
+;       a = CXS_GET_SUPPORT()
+;-
 function cxs_get_support
 result = make_array(nx(),ny(),/DOUBLE)
 b = call_external(lib_name() ,'IDL_get_support',result) 
@@ -679,14 +703,63 @@ TVSCL, rebin(result,pixels(),pixels())
 return, result
 end
 
-;ok 
+;+
+; NAME:
+;       CXS_GET_ERROR
+;
+; PURPOSE:
+;       Get the error metric. This is defined as the difference
+;       between the estimated diffraction and the actual diffraction
+;       pattern and is calculated as:
+;           sum over pixels of ( M - sqrt(I) ) ^2 / sum(I) 
+;       Where I is the detector data and M is the magnitude of the
+;       estimate in the detector plane. Note that due to the way this
+;       quantity is calculated, it actually corresponds to the
+;       previous estimate rather than the current iteration.
+;
+;
+; CALLING SEQUENCE:
+;
+;       error = CXS_GET_ERROR()
+;
+; OUTPUTS:
+;
+;       error:
+;             The error. 
+;
+; EXAMPLE:
+;
+;       a = CXS_GET_ERROR()
+;- 
 function cxs_get_error
 result = double(0.0)
 b = call_external(lib_name(),'IDL_get_error',result)
 return, result
 end
 
-;ok
+;+
+; NAME:
+;       CXS_GET_TRANSMISSION_FUNCTION
+;
+; PURPOSE:
+;       Get the transmission function from the current estimate of the
+;       exit-surface-wave. The magnitude of the result will be
+;       displayed on the screen. Note that this functions
+;       is only available for Fresnel CDI reconstruction.
+;
+; CALLING SEQUENCE:
+;
+;       result = CXS_GET_TRANSMISSION_FUNCTION()
+;
+; OUTPUTS:
+;
+;       result:
+;             The transmission function for the sample. A 2D array of
+;             COMPLEX variables is returned. 
+;
+; EXAMPLE:
+;       a = CXS_GET_TRANSMISSION_FUNCTION()
+;-
 function cxs_get_transmission_function
 result = make_array(nx(),ny(),/COMPLEX)
 b = call_external(lib_name() ,'IDL_get_transmission_function',result) 
@@ -695,7 +768,23 @@ TVSCL, rebin(abs(result),pixels(),pixels())
 return, result
 end
 
-;ok
+;+
+; NAME:
+;       CXS_CLEAR_MEMORY
+;
+; PURPOSE:
+;       Clean-up after a reconstruction has been performed. This 
+;       procedure should be called at the very end of a program.
+;       It will free up the memory that was allocated when one of 
+;       the "CXS_INIT_.." methods was called.
+;
+; CALLING SEQUENCE:
+;
+;       CXS_CLEAR_MEMORY
+;
+; EXAMPLE:
+;       CXS_CLEAR_MEMORY
+;-
 pro cxs_clear_memory
 b = call_external(lib_name() ,'IDL_deallocate_memory')
 end
@@ -715,8 +804,25 @@ end
 
 
 
-
-;ok
+;+
+; NAME:
+;       CXS_GET_INTENSITY_AUTOCORRELATION
+;
+; PURPOSE:
+;       Get the autocorrelation function from the intensity data.
+;       This method is only useful for planar CDI reconstruction.
+;
+; CALLING SEQUENCE:
+;
+;       a = CXS_GET_INTENSITY_AUTOCORRELATION()
+;
+; OUTPUTS:
+;       a:
+;             The autocorrelation function (a 2D array of doubles).
+;
+; EXAMPLE:
+;       a = CXS_GET_INTENSITY_AUTOCORRELATION()
+;-
 function cxs_get_intensity_autocorrelation
 result = make_array(nx(),ny(),/DOUBLE)
 b = call_external(lib_name() ,'IDL_get_intensity_autocorrelation',result) 
@@ -724,7 +830,6 @@ window, XSIZE=pixels(), YSIZE=pixels()
 TVSCL, rebin(result,pixels(),pixels())
 return, result
 end
-
 
 
 

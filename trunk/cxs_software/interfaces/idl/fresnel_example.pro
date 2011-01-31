@@ -15,21 +15,18 @@ d = cxs_read_dbin(1024,1024,'/data/nadia/cxs_software_rel_0/cxs_software/example
 ; Set-up everything ready for reconstruction of the 
 ; white-field phase. You need to pass the data, support
 ; and experimental parameters.
-cxs_fresnel_wf_init, d, s, 4.892e-10, 16.353e-3, 0.9078777, 13.5e-6
+cxs_init_fresnel_wf, d, s, 4.892e-10, 16.353e-3, 0.9078777, 13.5e-6
 
 ; Perform 20 iterations.
 white_field = cxs_iterate(20)
 
-; We are finished with the white-field reconstruction now, so
-; let free some memory
-cxs_clear_memory
 
 ; Now load the files of the sample support and data with the sample in place
 s = cxs_read_tiff(1024,1024,'/data/nadia/cxs_software_rel_0/cxs_software/examples/image_files/FCDI_support.tiff')
 d = cxs_read_dbin(1024,1024,'/data/nadia/cxs_software_rel_0/cxs_software/examples/image_files/FCDI_data.dbin')
 
 ; and set-up everything ready for the sample reconstruction.
-cxs_fresnel_init, d, s, white_field, 4.892e-10, 0.9078777, 2.16e-3, 13.5e-6, 0.95
+cxs_init_fresnel, d, s, white_field, 4.892e-10, 0.9078777, 2.16e-3, 13.5e-6, 0.95
 
 ; Perform 20 iterations
 a = cxs_iterate(20)
@@ -37,6 +34,10 @@ a = cxs_iterate(20)
 ; Now get the transmission function based on the result of the
 ; final iteration.
 a = cxs_get_transmission_function()
+cxs_clear_memory
+
+; We are finished with the white-field reconstruction now, so
+; let free some memory
 
 ; Now you can play with "a" however you like in IDL.
 

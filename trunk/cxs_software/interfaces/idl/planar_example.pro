@@ -16,7 +16,7 @@ data = cxs_read_dbin(1024,1024,'/data/nadia/cxs_software_rel_0/cxs_software/exam
 ; You need to pass the image data and support.
 ; By default the HIO algorithm is used with a relaxation
 ; parameter of beta=0.9
-cxs_planar_init, data, support
+cxs_init_planar, data, support
 
 ; Perform 50 iteration
 a = cxs_iterate(50)
@@ -34,8 +34,7 @@ a = cxs_get_best_result()
 
 ; and use this to restart the reconstruction starting with this
 ; result:
-cxs_clear_memory
-cxs_planar_init, data, support, a
+cxs_init_planar, data, support, a
 ; Change to the error-reduction algorithm 
 cxs_set_algorithm, 'ER'
 

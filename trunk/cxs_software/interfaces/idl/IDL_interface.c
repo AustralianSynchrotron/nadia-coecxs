@@ -79,6 +79,15 @@ void copy_from_complex_2d(Complex_2D & cxs_array, IDL_COMPLEX * IDL_array){
   }
 }
 
+//error checking method. Make sure the objects have memory allocated.
+void check_objects(){
+  if(!esw || !reco){
+    cout << "You need to call one of the CXS_INIT.. routines"
+	 << "before calling this routine"
+      exit;
+  }
+}
+
 
 //Allows the dimensions of the image to be passed back to the IDL code
 extern "C" IDL_LONG IDL_get_array_x_size(int argc, void *argv[]){
@@ -94,6 +103,9 @@ extern "C" IDL_LONG IDL_get_array_y_size(int argc, void *argv[]){
   else
     return esw->get_size_y();
 }
+
+
+
 
 
 /************ input-output methods ******************/
@@ -237,8 +249,9 @@ extern "C" void IDL_fresnel_init(int argc, void * argv[])
 /***** Getter and setter methods ********************/
 
 
-//This method is done.
 extern "C" void IDL_set_support(int argc, void * argv[]){
+
+  check_objects();
 
   int ny = *(int*) argv[0];
   int nx = *(int*) argv[1];
@@ -249,8 +262,9 @@ extern "C" void IDL_set_support(int argc, void * argv[]){
   reco->set_support(temp_2D);
 }
 
-//this method is done.
 extern "C" void IDL_set_intensity(int argc, void * argv[]){
+
+  check_objects();
 
   int ny = *(int*) argv[0];
   int nx = *(int*) argv[1];
@@ -261,14 +275,13 @@ extern "C" void IDL_set_intensity(int argc, void * argv[]){
   reco->set_intensity(temp_2D);
 }
 
-//this method is done
 extern "C" void IDL_initialise_esw(int argc, void * argv[]){
+  check_objects();
   reco->initialise_estimate(*(IDL_LONG*) argv[0]);
 }
 
-//this method is done
 extern "C" void IDL_iterate(int argc, void * argv[]){
-
+  check_objects();
   int iterations = *(IDL_LONG*) argv[0];
 
   for(int i=0; i<iterations; i++){
@@ -285,12 +298,14 @@ extern "C" void IDL_iterate(int argc, void * argv[]){
 }
 
 extern "C" void IDL_set_algorithm(int argc, void * argv[]){
+  check_objects();
   IDL_STRING alg_name = *(IDL_STRING*)argv[0];
   int alg = PlanarCDI::getAlgFromName(alg_name.s);
   reco->set_algorithm(alg);
 }
 
 extern "C" void IDL_set_custom_algorithm(int argc, void * argv[]){
+  check_objects();
   reco->set_custom_algorithm(*(double*)argv[0],
 			     *(double*)argv[1],
 			     *(double*)argv[2],
@@ -307,11 +322,12 @@ extern "C" void IDL_set_custom_algorithm(int argc, void * argv[]){
 
 
 extern "C" void IDL_set_relaxation_parameter(int argc, void * argv[]){
+  check_objects();
   reco->set_relaxation_parameter(*(double*) argv[0]);
 }
 
 extern "C" void IDL_apply_shrinkwrap(int argc, void * argv[]){
-
+  check_objects();
   double gauss_width = *(double*) argv[0];
   double threshold = *(double*) argv[1];
 
@@ -323,7 +339,7 @@ extern "C" void IDL_apply_shrinkwrap(int argc, void * argv[]){
 
 
 extern "C" void IDL_get_best_result(int argc, void * argv[]){
-
+  check_objects();
   Complex_2D * temp;
   double error;
   temp = reco->get_best_result(error);
@@ -334,6 +350,7 @@ extern "C" void IDL_get_best_result(int argc, void * argv[]){
 }
 
 extern "C" void IDL_get_intensity_autocorrelation(int argc, void * argv[]){
+  check_objects();
   int nx = esw->get_size_x();
   int ny = esw->get_size_y();
   
@@ -343,7 +360,7 @@ extern "C" void IDL_get_intensity_autocorrelation(int argc, void * argv[]){
 }
 
 extern "C" void IDL_get_support(int argc, void * argv[]){
-
+  check_objects();
   int nx = esw->get_size_x();
   int ny = esw->get_size_y();
   
@@ -355,11 +372,12 @@ extern "C" void IDL_get_support(int argc, void * argv[]){
 
 
 extern "C" void IDL_get_error(int argc, void * argv[]){
+  check_objects();
   *(double*) argv[0] = reco->get_error();
 }
 
 extern "C" void IDL_get_transmission_function(int argc, void * argv[]){
-  
+  check_objects();
   if(typeid(*reco)!=typeid(FresnelCDI)){
        cout << "Sorry, can't get the transmission function for "
 	    << "anything other than "<< typeid(FresnelCDI).name() <<" reconstuction. "
@@ -374,10 +392,10 @@ extern "C" void IDL_get_transmission_function(int argc, void * argv[]){
   Complex_2D temp(nx,ny);
   ((FresnelCDI*) reco)->get_transmission_function(temp);
   copy_from_complex_2d(temp,(IDL_COMPLEX*) argv[0]); 
-
 }
 
 
 extern "C" void IDL_print_algorithm(int argc, void * argv[]){
+  check_objects();
   reco->print_algorithm();
 }
