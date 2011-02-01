@@ -109,23 +109,23 @@ int FresnelCDI_WF::iterate(){
 
 void FresnelCDI_WF::propagate_from_detector(Complex_2D & c){
   //go to the focal plane
-  fft.perform_backward_fft(complex);
-  complex.invert();  
-  complex.multiply(backward_coefficient);
+  fft.perform_backward_fft(c);
+  c.invert();  
+  c.multiply(backward_coefficient);
 
 
   //go back to zone plate plane. 
-  fft.perform_backward_fft(complex);
+  fft.perform_backward_fft(c);
 }
 
 void FresnelCDI_WF::propagate_to_detector(Complex_2D & c){
 
   //go to the focal plane again.
-  fft.perform_forward_fft(complex);
-  complex.multiply(forward_coefficient);
+  fft.perform_forward_fft(c);
+  c.multiply(forward_coefficient);
 
   //and back to the detector plane
-  complex.invert();
-  fft.perform_forward_fft(complex);
+  c.invert();
+  fft.perform_forward_fft(c);
 
 }
