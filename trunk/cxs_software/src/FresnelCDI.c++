@@ -76,16 +76,16 @@ void FresnelCDI::initialise_estimate(int seed){
   for(int i=0; i<nx; i++){
     for(int j=0; j<ny; j++){
 
-      double real_value = intensity_sqrt.get(i,j)*intensity_sqrt.get(i,j) 
-	- norm*norm*illumination.get_value(i,j,MAG_SQ);
-
-      real_value = real_value / (2*norm*illumination.get_value(i,j,REAL));
-
-      if(illumination.get_value(i,j,REAL)==0){
+      if(illumination.get_value(i,j,REAL)==0 || norm==0){
       	complex.set_real(i,j,0); 
 	complex.set_imag(i,j,0); 
       }
       else{
+	double real_value = intensity_sqrt.get(i,j)*intensity_sqrt.get(i,j) 
+	  - norm*norm*illumination.get_value(i,j,MAG_SQ);
+
+	real_value = real_value / (2*norm*illumination.get_value(i,j,REAL));
+
 	complex.set_real(i,j,real_value); 
 	complex.set_imag(i,j,0);
       }
