@@ -149,7 +149,7 @@ int main(void){
       object_estimate.get_2d(MAG_SQ,result);
       temp_str << "diffraction.ppm";
       write_ppm(temp_str.str(), result, true);
-      planar.propagate_to_sample(object_estimate);
+      planar.propagate_from_detector(object_estimate);
       object_estimate.get_2d(MAG,result);
       write_ppm("inverted.ppm", result);
       

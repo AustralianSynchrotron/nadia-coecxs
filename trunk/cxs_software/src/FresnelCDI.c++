@@ -93,7 +93,7 @@ void FresnelCDI::initialise_estimate(int seed){
     }
   }
 
-  propagate_to_sample(complex);
+  propagate_from_detector(complex);
   apply_support(complex);
 
 }
@@ -105,7 +105,7 @@ void FresnelCDI::scale_intensity(Complex_2D & c){
   c.add(illumination,-norm);//subtract the white field
 }
 
-void FresnelCDI::propagate_to_sample(Complex_2D & c){
+void FresnelCDI::propagate_from_detector(Complex_2D & c){
   c.multiply(B_d);
   fft.perform_forward_fft(c); 
   c.invert(); 
@@ -121,7 +121,7 @@ void FresnelCDI::propagate_to_detector(Complex_2D & c){
 void FresnelCDI::get_transmission_function(Complex_2D & result){
 
   //get the illuminating wavefield in the sample plane
-  propagate_to_sample(illumination);
+  propagate_from_detector(illumination);
 
   //divide the estimate by the illuminating wavefield
   //and add unity.

@@ -157,7 +157,7 @@ void PlanarCDI::apply_support(Complex_2D & c){
 void PlanarCDI::project_intensity(Complex_2D & c){
   propagate_to_detector(c);
   scale_intensity(c);
-  propagate_to_sample(c);
+  propagate_from_detector(c);
 }
 
 void PlanarCDI::propagate_to_detector(Complex_2D & c){
@@ -165,7 +165,7 @@ void PlanarCDI::propagate_to_detector(Complex_2D & c){
   c.invert();
 }
 
-void PlanarCDI::propagate_to_sample(Complex_2D & c){
+void PlanarCDI::propagate_from_detector(Complex_2D & c){
   c.invert();
   fft.perform_backward_fft(c); 
 }

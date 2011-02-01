@@ -124,7 +124,7 @@ class FresnelCDI: public PlanarCDI{
    * equation.
    * @param c The Complex_2D field to propagate
    */
-  virtual void propagate_to_sample(Complex_2D & c);
+  virtual void propagate_from_detector(Complex_2D & c);
 
   /**
    * Propagate to the detector plane using the paraxial free-space

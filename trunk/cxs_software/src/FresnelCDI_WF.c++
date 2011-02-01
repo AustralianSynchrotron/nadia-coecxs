@@ -96,7 +96,7 @@ void FresnelCDI_WF::initialise_estimate(int seed){
 
 int FresnelCDI_WF::iterate(){
   
-  propagate_to_zone_plate(complex);
+  propagate_from_detector(complex);
 
   apply_support(complex);
   
@@ -107,7 +107,7 @@ int FresnelCDI_WF::iterate(){
   return SUCCESS;
 }
 
-void FresnelCDI_WF::propagate_to_zone_plate(Complex_2D & c){
+void FresnelCDI_WF::propagate_from_detector(Complex_2D & c){
   //go to the focal plane
   fft.perform_backward_fft(complex);
   complex.invert();  
