@@ -399,3 +399,37 @@ extern "C" void IDL_print_algorithm(int argc, void * argv[]){
   check_objects();
   reco->print_algorithm();
 }
+
+
+extern "C" void IDL_propagate_from_detector(int argc, void * argv[]){
+  check_objects();
+  Complex_2D temp(esw->get_size_x(),esw->get_size_y());
+  copy_to_complex_2d(temp,(IDL_COMPLEX*) argv[0]); 
+  reco->propagate_from_detector(temp);
+  copy_from_complex_2d(temp,(IDL_COMPLEX*) argv[1]); 
+}
+
+
+extern "C" void IDL_propagate_to_detector(int argc, void * argv[]){
+  check_objects();
+  Complex_2D temp(esw->get_size_x(),esw->get_size_y());
+  copy_to_complex_2d(temp,(IDL_COMPLEX*) argv[0]); 
+  reco->propagate_to_detector(temp);
+  copy_from_complex_2d(temp,(IDL_COMPLEX*) argv[1]); 
+}
+
+extern "C" void IDL_apply_support(int argc, void * argv[]){
+  check_objects();
+  Complex_2D temp(esw->get_size_x(),esw->get_size_y());
+  copy_to_complex_2d(temp,(IDL_COMPLEX*) argv[0]); 
+  reco->apply_support(temp);
+  copy_from_complex_2d(temp,(IDL_COMPLEX*) argv[1]); 
+}
+
+extern "C" void IDL_scale_intensity(int argc, void * argv[]){
+  check_objects();
+  Complex_2D temp(esw->get_size_x(),esw->get_size_y());
+  copy_to_complex_2d(temp,(IDL_COMPLEX*) argv[0]); 
+  reco->scale_intensity(temp);
+  copy_from_complex_2d(temp,(IDL_COMPLEX*) argv[1]); 
+}

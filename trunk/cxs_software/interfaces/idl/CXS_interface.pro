@@ -33,6 +33,19 @@ return, call_external(lib_name(),'IDL_get_array_y_size')
 end
 
 
+pro show, image
+window, XSIZE=pixels(), YSIZE=pixels()
+TVSCL, rebin(image,pixels(),pixels())
+end
+
+pro check_size, array
+n = size(array)
+if (nx() ne n[2]) or (ny() ne n[1]) then begin
+    print, 'Please provide a 2D array with dimensions ', nx, ' x ', ny
+    stop
+endif
+end
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; Here are the real wrappers to the C++ code
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -300,7 +313,7 @@ IF N_Params() EQ 7 THEN BEGIN
   print, normalisation
 ENDIF
 IF N_Params() EQ 9 THEN $
-  b = call_external(lib_name(),'IDL_fresnel_init',nx,ny, $
+  b = call_external(lib_name(),'IDL_fresnel_init',long(nx),long(ny), $
                     white_field, $
                     double(beam_wavelength), $
                     double(focal_detector_length), $
@@ -309,7 +322,7 @@ IF N_Params() EQ 9 THEN $
                     double(normalisation),$
                     complex_array) $
 ELSE $
-  b = call_external(lib_name() ,'IDL_fresnel_init',nx,ny, $
+  b = call_external(lib_name() ,'IDL_fresnel_init',long(nx),long(ny), $
                     white_field, $
                     double(beam_wavelength), $
                     double(focal_detector_length), $
@@ -322,6 +335,7 @@ cxs_set_intensity, data
 
 IF N_Params() LT 9 THEN $
   cxs_initialise_esw
+
 end
 
 
@@ -474,8 +488,7 @@ result = make_array(nx,ny,/COMPLEX)
 IF N_Params() EQ 0 THEN $
    iterations = 1
 b = call_external(lib_name() ,'IDL_iterate',long(iterations),result) 
-window, XSIZE=pixels(), YSIZE=pixels()
-TVSCL, rebin(ABS(result),pixels(),pixels())
+show, ABS(result)
 return, result
 end
 
@@ -671,8 +684,7 @@ end
 function cxs_get_best_result 
 result = make_array(nx(),ny(),/COMPLEX)
 b = call_external(lib_name() ,'IDL_get_best_result',result)
-window, XSIZE=pixels(), YSIZE=pixels()
-TVSCL, rebin(ABS(result),pixels(),pixels())
+show, ABS(result)
 return, result
 end
 
@@ -704,8 +716,7 @@ end
 function cxs_get_support
 result = make_array(nx(),ny(),/DOUBLE)
 b = call_external(lib_name() ,'IDL_get_support',result) 
-window, XSIZE=pixels(), YSIZE=pixels()
-TVSCL, rebin(result,pixels(),pixels())
+show, result
 return, result
 end
 
@@ -769,8 +780,7 @@ end
 function cxs_get_transmission_function
 result = make_array(nx(),ny(),/COMPLEX)
 b = call_external(lib_name() ,'IDL_get_transmission_function',result) 
-window, XSIZE=pixels(), YSIZE=pixels()
-TVSCL, rebin(abs(result),pixels(),pixels())
+show, abs(result)
 return, result
 end
 
@@ -795,20 +805,6 @@ pro cxs_clear_memory
 b = call_external(lib_name() ,'IDL_deallocate_memory')
 end
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-
-;function get_result_at_sample
-
-
-;function get_result_at_detector
-
-
-;function get_result_at_zone_plate
-
-
 
 ;+
 ; NAME:
@@ -832,8 +828,7 @@ end
 function cxs_get_intensity_autocorrelation
 result = make_array(nx(),ny(),/DOUBLE)
 b = call_external(lib_name() ,'IDL_get_intensity_autocorrelation',result) 
-window, XSIZE=pixels(), YSIZE=pixels()
-TVSCL, rebin(result,pixels(),pixels())
+show, result
 return, result
 end
 
@@ -859,6 +854,151 @@ end
 ;-
 pro cxs_print_algorithm
 b = call_external(lib_name() ,'IDL_print_algorithm')
+end
+
+;+
+; NAME:
+;       CXS_PROPAGATE_FROM_DETECTOR
+;
+; PURPOSE:
+;       Propagate the given wave field from the detector plane to the 
+;       sample plane (planar and Fresnel) or zone-plate plane (Fresnel
+;       white-field reconstruction). The result will be returned and
+;       displayed on the screen by default.
+;
+;       This function is called when using (CXS_ITERATE) so generally
+;       won't need to be call explicitly. An expection to this is if
+;       the user whishes to extend the reconstruction with an addition
+;       contraint (see the example below).
+;
+;
+; CALLING SEQUENCE:
+;
+;	result = CXS_PROPAGATE_FROM_DETECTOR( complex_array [,\SUPPRESS_DISPLAY] )
+;
+; INPUTS:
+;
+;       complex_array:
+;             A 2D array of COMPLEX values which represents a wave in
+;             the detector plane.
+;
+; KEYWORD PARAMETERS:
+;
+;       \SUPPRESS_DISPLAY:
+;             Do not display the result on the screen. This maybe useful
+;             if this function is used within a for loop. 
+;
+; OUTPUTS:
+;
+;       result:
+;             A COMPLEX 2D array which is either the field in the
+;             sample plane (for planar and Fresnel reconstruction) or
+;             the zone-plate plane for Fresnel white-field reconstruction.
+;
+; EXAMPLE:
+;       Performing the reconstruction with a new constraint applied in the
+;       sample plane (e.g. called "NEW_SUPPORT"):
+;
+;              FOR K = 0, 100 DO BEGIN 
+;                  a = CXS_PROPAGATE_TO_DETECTOR(a,/SUPPRESS_DISPLAY)
+;                  a = CXS_SCALE_INTENSITY(a,/SUPPRESS_DISPLAY)
+;                  a = CXS_PROPAGATE_FROM_DETECTOR(a,/SUPPRESS_DISPLAY)
+;                  a = CXS_APPLY_SUPPORT(a,/SUPPRESS_DISPLAY)
+;                  a = NEW_SUPPORT(a)
+;              ENDFOR 
+;
+;-
+function cxs_propagate_from_detector, complex_array, $
+                                      SUPPRESS_DISPLAY=suppress_display
+check_size, complex_array
+result = make_array(nx(),ny(),/COMPLEX)
+b = call_external(lib_name() ,'IDL_propagate_from_detector',complex_array,result) 
+if not KEYWORD_SET(suppress_display) THEN $
+  show, abs(result)
+return, result
+end
+
+;+
+; NAME:
+;       CXS_PROPAGATE_TO_DETECTOR
+;
+; PURPOSE:
+;       Propagate the given wave field to the detector plane from the 
+;       sample plane (planar and Fresnel) or zone-plate plane (Fresnel
+;       white-field reconstruction). The result will be returned and
+;       displayed on the screen by default.
+;
+;       This function is called when using (CXS_ITERATE) so generally
+;       won't need to be call explicitly. An expection to this is if
+;       the user whishes to perform simulation or to extend their
+;       reconstruction with an addition contraint (see the previous
+;       example).
+;
+;
+; CALLING SEQUENCE:
+;
+;	result = CXS_PROPAGATE_TO_DETECTOR( complex_array [,\SUPPRESS_DISPLAY] )
+;
+; INPUTS:
+;
+;       complex_array:
+;             A 2D array of COMPLEX values which represents a wave in
+;             either the sample plane (for planar and Fresnel
+;             reconstruction) or the zone-plate plane for Fresnel 
+;             white-field reconstruction.
+;
+; KEYWORD PARAMETERS:
+;
+;       \SUPPRESS_DISPLAY:
+;             Do not display the result on the screen. This maybe useful
+;             if this function is used within a for loop. 
+;
+; OUTPUTS:
+;
+;       result:
+;             A COMPLEX 2D array which is the field in the detector plane.
+;
+; EXAMPLE:
+;       Performing the reconstruction with a new constraint applied in the
+;       sample plane (e.g. called "NEW_SUPPORT"):
+;
+;              FOR K = 0, 100 DO BEGIN 
+;                  a = CXS_PROPAGATE_TO_DETECTOR(a,/SUPPRESS_DISPLAY)
+;                  a = CXS_SCALE_INTENSITY(a,/SUPPRESS_DISPLAY)
+;                  a = CXS_PROPAGATE_FROM_DETECTOR(a,/SUPPRESS_DISPLAY)
+;                  a = CXS_APPLY_SUPPORT(a,/SUPPRESS_DISPLAY)
+;                  a = NEW_SUPPORT(a)
+;              ENDFOR 
+;
+;-
+function cxs_propagate_to_detector, complex_array, $
+                                    SUPPRESS_DISPLY=suppress_display
+check_size, complex_array
+result = make_array(nx(),ny(),/COMPLEX)
+b = call_external(lib_name() ,'IDL_propagate_to_detector',complex_array,result) 
+if not KEYWORD_SET(suppress_display) THEN $
+show, abs(result)
+return, result
+end
+
+function cxs_apply_support, complex_array, $
+                            SUPPRESS_DISPLY=suppress_display
+check_size, complex_array
+result = make_array(nx(),ny(),/COMPLEX)
+b = call_external(lib_name() ,'IDL_apply_support',complex_array,result) 
+if not KEYWORD_SET(suppress_display) THEN $
+show, abs(result)
+return, result
+end
+
+function cxs_scale_intensity, complex_array, $
+                              SUPPRESS_DISPLY=suppress_display
+check_size, complex_array
+result = make_array(nx(),ny(),/COMPLEX)
+b = call_external(lib_name() ,'IDL_scale_intensity',complex_array,result) 
+if not KEYWORD_SET(suppress_display) THEN $
+show, abs(result)
+return, result
 end
 
 
@@ -898,8 +1038,7 @@ end
 function cxs_read_dbin, nx, ny, filename
 result = make_array(nx,ny, /DOUBLE)
 b = call_external(lib_name() ,'IDL_read_dbin',nx,ny,filename,result)
-window, XSIZE=pixels(), YSIZE=pixels()
-TVSCL, rebin(result,pixels(),pixels())
+show, result
 return, result
 end
 
@@ -936,8 +1075,7 @@ end
 function cxs_read_tiff, nx, ny, filename
 result = make_array(nx,ny, /DOUBLE)
 b = call_external(lib_name() ,'IDL_read_tiff',nx,ny,filename,result)
-window, XSIZE=pixels(), YSIZE=pixels()
-TVSCL, rebin(result,pixels(),pixels())
+show, result
 return, result
 end
 
@@ -974,8 +1112,7 @@ end
 function cxs_read_cplx, nx, ny, filename
 result = make_array(nx,ny, /COMPLEX)
 b = call_external(lib_name() ,'IDL_read_cplx',nx,ny,filename,result)
-window, XSIZE=pixels(), YSIZE=pixels()
-TVSCL, rebin(abs(result),pixels(),pixels())
+show, abs(result)
 return, result
 end
 
