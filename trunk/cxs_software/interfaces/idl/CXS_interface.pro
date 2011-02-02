@@ -874,7 +874,7 @@ end
 ;
 ; CALLING SEQUENCE:
 ;
-;	result = CXS_PROPAGATE_FROM_DETECTOR( complex_array [,\SUPPRESS_DISPLAY] )
+;	result = CXS_PROPAGATE_FROM_DETECTOR( complex_array [,/SUPPRESS_DISPLAY] )
 ;
 ; INPUTS:
 ;
@@ -884,7 +884,7 @@ end
 ;
 ; KEYWORD PARAMETERS:
 ;
-;       \SUPPRESS_DISPLAY:
+;       /SUPPRESS_DISPLAY:
 ;             Do not display the result on the screen. This maybe useful
 ;             if this function is used within a for loop. 
 ;
@@ -937,7 +937,7 @@ end
 ;
 ; CALLING SEQUENCE:
 ;
-;	result = CXS_PROPAGATE_TO_DETECTOR( complex_array [,\SUPPRESS_DISPLAY] )
+;	result = CXS_PROPAGATE_TO_DETECTOR( complex_array [,/SUPPRESS_DISPLAY] )
 ;
 ; INPUTS:
 ;
@@ -949,7 +949,7 @@ end
 ;
 ; KEYWORD PARAMETERS:
 ;
-;       \SUPPRESS_DISPLAY:
+;       /SUPPRESS_DISPLAY:
 ;             Do not display the result on the screen. This maybe useful
 ;             if this function is used within a for loop. 
 ;
@@ -998,7 +998,7 @@ end
 ;
 ; CALLING SEQUENCE:
 ;
-;	result = CXS_APPLY_SUPPORT( complex_array [,\SUPPRESS_DISPLAY] )
+;	result = CXS_APPLY_SUPPORT( complex_array [,/SUPPRESS_DISPLAY] )
 ;
 ; INPUTS:
 ;
@@ -1010,7 +1010,7 @@ end
 ;
 ; KEYWORD PARAMETERS:
 ;
-;       \SUPPRESS_DISPLAY:
+;       /SUPPRESS_DISPLAY:
 ;             Do not display the result on the screen. This maybe useful
 ;             if this function is used within a for loop. 
 ;
@@ -1054,7 +1054,7 @@ end
 ;
 ; CALLING SEQUENCE:
 ;
-;	result = CXS_SCALE_INTENSITY( complex_array [,\SUPPRESS_DISPLAY] )
+;	result = CXS_SCALE_INTENSITY( complex_array [,/SUPPRESS_DISPLAY] )
 ;
 ; INPUTS:
 ;
@@ -1064,7 +1064,7 @@ end
 ;
 ; KEYWORD PARAMETERS:
 ;
-;       \SUPPRESS_DISPLAY:
+;       /SUPPRESS_DISPLAY:
 ;             Do not display the result on the screen. This maybe useful
 ;             if this function is used within a for loop. 
 ;
