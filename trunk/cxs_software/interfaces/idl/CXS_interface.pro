@@ -867,9 +867,9 @@ end
 ;       displayed on the screen by default.
 ;
 ;       This function is called when using (CXS_ITERATE) so generally
-;       won't need to be call explicitly. An expection to this is if
-;       the user whishes to extend the reconstruction with an addition
-;       contraint (see the example below).
+;       won't need to be call explicitly. An exception to this is if
+;       the user wishes to extend the reconstruction with an addition
+;       constraint (see the example below).
 ;
 ;
 ; CALLING SEQUENCE:
@@ -929,9 +929,9 @@ end
 ;       displayed on the screen by default.
 ;
 ;       This function is called when using (CXS_ITERATE) so generally
-;       won't need to be call explicitly. An expection to this is if
-;       the user whishes to perform simulation or to extend their
-;       reconstruction with an addition contraint (see the previous
+;       won't need to be call explicitly. An exception to this is if
+;       the user wishes to perform simulation or to extend their
+;       reconstruction with an addition constraint (see the previous
 ;       example).
 ;
 ;
@@ -959,17 +959,14 @@ end
 ;             A COMPLEX 2D array which is the field in the detector plane.
 ;
 ; EXAMPLE:
-;       Performing the reconstruction with a new constraint applied in the
-;       sample plane (e.g. called "NEW_SUPPORT"):
+;       Performing Fresnel simulation (assuming you already have a
+;       complex white-field called "white_field" and the transmission
+;       function of the object, "trans").
 ;
-;              FOR K = 0, 100 DO BEGIN 
-;                  a = CXS_PROPAGATE_TO_DETECTOR(a,/SUPPRESS_DISPLAY)
-;                  a = CXS_SCALE_INTENSITY(a,/SUPPRESS_DISPLAY)
-;                  a = CXS_PROPAGATE_FROM_DETECTOR(a,/SUPPRESS_DISPLAY)
-;                  a = CXS_APPLY_SUPPORT(a,/SUPPRESS_DISPLAY)
-;                  a = NEW_SUPPORT(a)
-;              ENDFOR 
-;
+;       white_field_at_sample = CXS_PROPAGATE_FROM_DETECTOR(white_field)
+;       esw_at_sample = trans*white_field_at_sample
+;       esw_at_detector = CXS_PROPAGATE_TO_DETECTOR(esw_at_sample)
+;       diffraction_pattern = abs(esw_at_detector)^2
 ;-
 function cxs_propagate_to_detector, complex_array, $
                                     SUPPRESS_DISPLY=suppress_display
@@ -981,6 +978,50 @@ show, abs(result)
 return, result
 end
 
+
+;+
+; NAME:
+;       CXS_APPLY_SUPPORT
+;
+; PURPOSE:
+;       Apply the support constraint to the given complex array. All
+;       elements outside the support with be reset to zero. Elements
+;       within the support will be left as they are. The support must
+;       have been previously set using either one of the CXS_INIT 
+;       functions or CXS_SET_SUPPORT.
+;
+;       This function is called when using (CXS_ITERATE) so generally
+;       won't need to be call explicitly. An exception to this is if
+;       the user wishes to extend their reconstruction with an
+;       addition constraint.
+;
+;
+; CALLING SEQUENCE:
+;
+;	result = CXS_APPLY_SUPPORT( complex_array [,\SUPPRESS_DISPLAY] )
+;
+; INPUTS:
+;
+;       complex_array:
+;             A 2D array of COMPLEX values which represents a wave in
+;             either the sample plane (for planar and Fresnel
+;             reconstruction) or the zone-plate plane for Fresnel 
+;             white-field reconstruction.
+;
+; KEYWORD PARAMETERS:
+;
+;       \SUPPRESS_DISPLAY:
+;             Do not display the result on the screen. This maybe useful
+;             if this function is used within a for loop. 
+;
+; OUTPUTS:
+;
+;       result:
+;             A COMPLEX 2D array after the support is applied.
+;
+; EXAMPLE:
+;       See the example for CXS_PROPAGATE_FROM_DETECTOR
+;-
 function cxs_apply_support, complex_array, $
                             SUPPRESS_DISPLY=suppress_display
 check_size, complex_array
@@ -991,6 +1032,51 @@ show, abs(result)
 return, result
 end
 
+;+
+; NAME:
+;       CXS_SCALE_INTENSITY
+;
+; PURPOSE:
+;       Scale the intensity (magnitude squared) of the given complex
+;       array to the data. The intensity data must have been
+;       previously set using either one of the CXS_INIT functions or
+;       CXS_SET_INTENSITY.
+;
+;       If Fresnel reconstruction is being done, the white-field will
+;       automatically be added to the complex array prior to scaling,
+;       and will be subtracted afterward.
+;       
+;       This function is called when using (CXS_ITERATE) so generally
+;       won't need to be call explicitly. An exception to this is if
+;       the user wishes to extend their reconstruction with an
+;       addition constraint.
+;
+;
+; CALLING SEQUENCE:
+;
+;	result = CXS_SCALE_INTENSITY( complex_array [,\SUPPRESS_DISPLAY] )
+;
+; INPUTS:
+;
+;       complex_array:
+;             A 2D array of COMPLEX values which represents a wave in
+;             the detector plane.
+;
+; KEYWORD PARAMETERS:
+;
+;       \SUPPRESS_DISPLAY:
+;             Do not display the result on the screen. This maybe useful
+;             if this function is used within a for loop. 
+;
+; OUTPUTS:
+;
+;       result:
+;             A COMPLEX 2D array after the intensity has been scaled
+;             to data.
+;
+; EXAMPLE:
+;       See the example for CXS_PROPAGATE_FROM_DETECTOR
+;-
 function cxs_scale_intensity, complex_array, $
                               SUPPRESS_DISPLY=suppress_display
 check_size, complex_array
