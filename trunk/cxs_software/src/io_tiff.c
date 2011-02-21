@@ -187,7 +187,7 @@ int read_tiff(string file_name, Double_2D & data){
   for(int i=0; i < w; ++i){
     for(int j=0; j< h; ++j){
       if(samples_per_pixel>1){//if the image is colour we take the sum of colour value
-	int pixel = colour_image[(h-j-1)*w+i];
+	uint32 pixel = colour_image[(h-j-1)*w+i];
 	data.set(i,j,TIFFGetR(pixel)+TIFFGetG(pixel)+TIFFGetB(pixel));
       }
       else //grey scale:
