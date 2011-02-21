@@ -41,6 +41,8 @@ FresnelCDI_WF::FresnelCDI_WF(Complex_2D & initial_guess,
   double scaling_x = beam_wavelength*z23/(pixel_length*nx);
   double scaling_y = beam_wavelength*z23/(pixel_length*ny);
 
+  double norm = 1/(sqrt(nx*ny));
+
   for(int i=0; i<nx; i++){
     for(int j=0; j<ny; j++){
 
@@ -51,11 +53,11 @@ FresnelCDI_WF::FresnelCDI_WF(Complex_2D & initial_guess,
 
       phi*= M_PI/beam_wavelength;
 
-      forward_coefficient.set_real(i,j,sin(phi));
-      forward_coefficient.set_imag(i,j,-cos(phi));
+      forward_coefficient.set_real(i,j,sin(phi)*norm);
+      forward_coefficient.set_imag(i,j,-cos(phi)*norm);
 
-      backward_coefficient.set_real(i,j,-sin(-phi));
-      backward_coefficient.set_imag(i,j,cos(-phi));
+      backward_coefficient.set_real(i,j,-sin(-phi)*norm);
+      backward_coefficient.set_imag(i,j,cos(-phi)*norm);
 
     }
   }
@@ -109,23 +111,23 @@ int FresnelCDI_WF::iterate(){
 
 void FresnelCDI_WF::propagate_from_detector(Complex_2D & c){
   //go to the focal plane
-  fft.perform_backward_fft(c);
-  c.invert();  
+  c.perform_backward_fft();
+  c.invert(true);  
   c.multiply(backward_coefficient);
 
-
   //go back to zone plate plane. 
-  fft.perform_backward_fft(c);
+  c.perform_backward_fft();
+
 }
 
 void FresnelCDI_WF::propagate_to_detector(Complex_2D & c){
 
   //go to the focal plane again.
-  fft.perform_forward_fft(c);
+  c.perform_forward_fft();
   c.multiply(forward_coefficient);
 
   //and back to the detector plane
-  c.invert();
-  fft.perform_forward_fft(c);
+  c.invert(true);
+  c.perform_forward_fft();
 
 }

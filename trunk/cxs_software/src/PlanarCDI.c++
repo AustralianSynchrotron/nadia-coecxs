@@ -1,6 +1,6 @@
 #include <iostream>
 #include <string>
-#include <fftw3.h>
+//#include <fftw3.h>
 #include <cstdlib> 
 #include <cmath>
 #include "Complex_2D.h"
@@ -33,7 +33,7 @@ PlanarCDI::PlanarCDI(Complex_2D & initial_guess, int n_best)
   : complex(initial_guess),
     nx(initial_guess.get_size_x()),
     ny(initial_guess.get_size_y()),
-    fft(nx,ny),
+    //    fft(nx,ny),
     temp_complex_PFS(nx,ny),
     temp_complex_PF(nx,ny),
     temp_complex(nx,ny),
@@ -78,6 +78,7 @@ void PlanarCDI::get_intensity_autocorrelation(Double_2D & autoc){
 
   //make a temporary object
   Complex_2D temp_intensity(nx,ny);
+
   for(int i=0; i<nx; i++){
     for(int j=0; j<ny; j++){
       //set the real and imaginary components using the magnitude.
@@ -90,8 +91,8 @@ void PlanarCDI::get_intensity_autocorrelation(Double_2D & autoc){
   }
   
   // fourier transform the intensity 
-  fft.perform_backward_fft(temp_intensity);  
-  temp_intensity.invert();
+  temp_intensity.perform_backward_fft();  
+  temp_intensity.invert(true);
 
   //get the magnitude of the fourier transformed data.
   temp_intensity.get_2d(MAG, autoc);
@@ -105,6 +106,7 @@ void PlanarCDI::initialise_estimate(int seed){
 
   for(int i=0; i<nx; i++){
     for(int j=0; j<ny; j++){
+
       if(!support.get(i,j)){ //enforce the support condition on the inital guess
 	complex.set_value(i,j,REAL,0); 
 	complex.set_value(i,j,IMAG,0);
@@ -112,6 +114,7 @@ void PlanarCDI::initialise_estimate(int seed){
       else{
 	double r = (255.0*rand()/(double) RAND_MAX);// * pow(-1.0,i + j);
 	double im = (255.0*rand()/(double) RAND_MAX);// * pow(-1.0,i + j);
+
 	complex.set_value(i,j,REAL,r); 
 	complex.set_value(i,j,IMAG,im);
       }
@@ -143,8 +146,8 @@ double PlanarCDI::get_error(){
 }
 
 void PlanarCDI::apply_support(Complex_2D & c){
-  for(int i=0; i< nx; ++i){
-    for(int j=0; j< ny; ++j){
+  for(int i=0; i< nx; i++){
+    for(int j=0; j< ny; j++){
       if(support.get(i,j)==0){
 	c.set_real(i,j,0.0);
 	c.set_imag(i,j,0.0);
@@ -161,29 +164,42 @@ void PlanarCDI::project_intensity(Complex_2D & c){
 }
 
 void PlanarCDI::propagate_to_detector(Complex_2D & c){
-  fft.perform_forward_fft(c);
-  c.invert();
+  c.perform_forward_fft();
+  c.invert(true);
 }
 
 void PlanarCDI::propagate_from_detector(Complex_2D & c){
-  c.invert();
-  fft.perform_backward_fft(c); 
+  c.invert(true);
+  c.perform_backward_fft(); 
 }
 
 void PlanarCDI::scale_intensity(Complex_2D & c){
   double norm2_mag=0;
   double norm2_diff=0;
   double current_mag;
-  for(int i=0; i< nx; ++i){
-    for(int j=0; j< ny; ++j){
+  double current_int_sqrt;
+  for(int i=0; i< nx; i++){
+    for(int j=0; j< ny; j++){
       //scale
       current_mag = c.get_mag(i,j);
-      if(current_mag > 0.0){
-	c.set_mag(i,j,intensity_sqrt.get(i,j)/current_mag);
+      current_int_sqrt = intensity_sqrt.get(i,j);
+
+      if(current_int_sqrt==0){
+	c.set_real(i,j,0);
+	c.set_imag(i,j,0);
       }
+      else if(current_mag != 0){
+	c.set_mag(i,j,current_int_sqrt/current_mag);
+      }
+      else{
+	c.set_real(i,j,current_int_sqrt);
+	c.set_imag(i,j,0);
+      }
+      
       //calculate the error
-      norm2_mag += intensity_sqrt.get(i,j)*intensity_sqrt.get(i,j);
-      norm2_diff += pow(current_mag-intensity_sqrt.get(i,j),2);
+      norm2_mag += current_int_sqrt*current_int_sqrt;
+      norm2_diff += (current_mag-current_int_sqrt)
+      	*(current_mag-current_int_sqrt);
     }
   }
   current_error = (norm2_diff/norm2_mag);

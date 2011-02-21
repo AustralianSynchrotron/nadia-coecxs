@@ -107,13 +107,13 @@ void FresnelCDI::scale_intensity(Complex_2D & c){
 
 void FresnelCDI::propagate_from_detector(Complex_2D & c){
   c.multiply(B_d);
-  fft.perform_forward_fft(c); 
-  c.invert(); 
+  c.perform_forward_fft(); 
+  c.invert(true); 
 }
 
 void FresnelCDI::propagate_to_detector(Complex_2D & c){
-  c.invert();  
-  fft.perform_backward_fft(c);
+  c.invert(true);  
+  c.perform_backward_fft();
   c.multiply(B_s);
 }
 

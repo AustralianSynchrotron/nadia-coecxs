@@ -133,6 +133,20 @@ class FresnelCDI: public PlanarCDI{
    */
   virtual void propagate_to_detector(Complex_2D & c);
 
+
+  /**
+   * Reset the normalisation factor which is used to scale the 
+   * white-field data.
+   * @param normalisation The new normalisation
+   */
+  void set_normalisation(double normalisation){
+    norm = normalisation;
+  };
+
+
+
+
+
 };
 
 #endif

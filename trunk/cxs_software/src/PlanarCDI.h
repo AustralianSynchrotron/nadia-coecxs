@@ -95,7 +95,7 @@ class PlanarCDI{
 
   /**a Fourier transform objected used to perform 
      the forward and backward transformations */
-  FourierT fft; 
+  //  FourierT fft; 
 
    /** temporary Complex_2Ds which are used in the computation of the
       PFS and PF terms for each iteration. */
