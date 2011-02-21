@@ -6,6 +6,11 @@
  *
  * @brief An interface to the fftw3 algorithms
  * 
+ * This class is now only provided for the user's own need. All
+ * ffts in the other classes of this library are preformed
+ * within the Complex_2D class, removing the need to copy 
+ * large arrays around.
+ *
  * This class provides an interface to the fftw3 algorithms.  This
  * makes the reconstruction code a nit neater as the creation and
  * destruction of fftw plans is kept track of here. It also provides

@@ -2,14 +2,15 @@
  * @file Complex_2D.h
  * @class Complex_2D
  * @author Nadia Davidson 
- * @date Last Modified on 6/1/2011
+ * @date Last Modified on 21/2/2011
  *
  * @brief A 2-dimensional array of complex numbers 
  *
  * This class represents a 2D complex field. Setter and getter methods
- * are provided along with some other useful functions. Complex_2D
- * objects are used in the CDI reconstruction to represent the ESW
- * in a single plane.
+ * are provided along with some other useful functions (add,
+ * multiplying and fast fourier transforming). Complex_2D objects are
+ * used in the CDI reconstruction to represent the ESW in a single
+ * plane.
  */
 
 #ifndef COMPLEX_2D_H
@@ -54,6 +55,12 @@ class Complex_2D{
   //in the FourierT class.
   friend class FourierT;
 
+  /* A fftw plan for forward fourier transforms */
+  fftw_plan f_forward;
+
+  /* A fftw plan for backward fourier transforms */
+  fftw_plan f_backward;
+  
  public:
 
   /**
@@ -283,9 +290,33 @@ class Complex_2D{
    * <br> 4 3
    * <br> 2 1
    * 
+   * This function may also scale the array while it inverts it,
+   * required. This is aimed at reducing the CPU time needed, as both
+   * tasks are often performed after fourier transforming.
+   *
+   * @param scale Turn the scaling on-true or off-false. If on, the
+   * matrix will be scaled to 1/sqrt(nx*ny) while it is being inverted.
+   * By default the array is not scaled.
    */
-  void invert();
+  void invert(bool scale=false);
 
+  /**
+   * Forward fourier transform the Complex_2D object. The
+   * Complex_2D is not scaled to give the same normalisation as 
+   * before the transform. The invert() function can be used to
+   * acheive this.
+   *
+   */
+  void perform_forward_fft();
+
+  /**
+   * Backward fourier transform the Complex_2D object. The
+   * Complex_2D is not scaled to give the same normalisation as 
+   * before the transform. The invert() function can be used to
+   * acheive this.
+   *
+   */
+  void perform_backward_fft();
 
  private:
     
@@ -296,7 +327,8 @@ class Complex_2D{
    * @param y The vertical position to check
    */
   int check_bounds(int x, int y) const;
-  
+   
+
 };
 
 #endif

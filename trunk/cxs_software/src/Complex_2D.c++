@@ -8,19 +8,34 @@ using namespace std;
 
 Complex_2D::Complex_2D(int x_size, int y_size){
 
+  //set the array size
   nx = x_size;
   ny = y_size;
+  
+  //allocate memory for the array
+  array = (fftw_complex*) fftw_malloc(sizeof(fftw_complex)*nx*ny);
 
-  array = new fftw_complex[nx*ny];
+  //initalise the fftw plans to null (not created yet. We will
+  //create them when needed to avoid unnecessary time overhead).
+  f_forward = 0;
+  f_backward = 0;
 
 }
 
 Complex_2D::~Complex_2D(){
 
+  //free the memory of the array.
   delete[] array;
 
+  //free the memory of the fftw plans (but
+  //only if it was actually allocated).
+  if(f_forward)
+    fftw_destroy_plan(f_forward);
+  if(f_backward)
+    fftw_destroy_plan(f_backward);
 }
 
+//set the value at positions x,y. See Complex_2D.h for more info.
 void Complex_2D::set_value(int x, int y, int component, double value){
   
   if(check_bounds(x,y)==FAILURE){
@@ -42,7 +57,8 @@ void Complex_2D::set_value(int x, int y, int component, double value){
     exit(1);
   }
 }
- 
+
+//get the value at positions x,y. See Complex_2D.h for more info.
 double Complex_2D::get_value(int x, int y, int type) const {
   //by default we check that the value is within the bounds of the
   //array, but this can be turned off for optimisation.
@@ -62,13 +78,14 @@ double Complex_2D::get_value(int x, int y, int type) const {
       return atan2(get_imag(x,y),get_real(x,y)) + 2*M_PI;
     return atan2(get_imag(x,y),get_real(x,y));
   case MAG_SQ:
-    return pow(get_mag(x,y),2);
+    return pow(get_mag(x,y),2); //the square of the magnitude
   default:
     cout << "value type in Complex_2D::get_value is unknown" << endl;
     exit(1);
   }
 }
 
+//like get() but we do it for the entire array not just a single value.
 void Complex_2D::get_2d(int type, Double_2D & result) const {
   
   for(int i=0; i < nx; i++)
@@ -78,7 +95,7 @@ void Complex_2D::get_2d(int type, Double_2D & result) const {
 }
 
 
-
+//scale all the values in the array by the given factor.
 void Complex_2D::scale(double scale_factor){
   
   for(int i=0; i < nx; ++i){
@@ -91,6 +108,7 @@ void Complex_2D::scale(double scale_factor){
 
 }
 
+//add another Complex_2D to this one.
 void Complex_2D::add(Complex_2D & c2, double scale){
 
   if(nx!=c2.get_size_x() || ny!=c2.get_size_y()){
@@ -108,6 +126,7 @@ void Complex_2D::add(Complex_2D & c2, double scale){
   }
 }
 
+//multiply another Complex_2D with this one.
 void Complex_2D::multiply(Complex_2D & c2, double scale){
 
   if(nx!=c2.get_size_x() || ny!=c2.get_size_y()){
@@ -119,13 +138,18 @@ void Complex_2D::multiply(Complex_2D & c2, double scale){
   
   for(int i=0; i < nx; ++i){
     for(int j=0; j < ny; ++j){
+      // values are multiplied in the usual way
+      // if c1 = a + ib and c2 = d + ie
+      // then the new c1 is:
+      // c1 = (a*d - b*e) + i(a*e + b*d)
       double new_real = c2.get_real(i,j)*this->get_real(i,j)
 	- c2.get_imag(i,j)*this->get_imag(i,j);
       double new_imag = c2.get_real(i,j)*this->get_imag(i,j)
 	+ c2.get_imag(i,j)*this->get_real(i,j);
       
-      array[i*ny + j][REAL]=scale*new_real;
-      array[i*ny + j][IMAG]=scale*new_imag;
+      //and set the values
+      set_real(scale*new_real);
+      set_imag(scale*new_imag);
     }
   }
 }
@@ -142,6 +166,7 @@ double Complex_2D::get_norm() const {
   return sqrt(norm_squared);
 }
 
+//make a new complex 2d that has idential values to this one
 Complex_2D * Complex_2D::clone() const {
 
   Complex_2D * new_complex = new Complex_2D(nx,ny);
@@ -155,18 +180,33 @@ Complex_2D * Complex_2D::clone() const {
   return new_complex;
 }
 
+
+//copy another array
 void Complex_2D::copy(Complex_2D & c){
-  //todo: check the bounds......
+
+  //check the bounds
+  if(c.get_size_x()!=get_size_x()||
+     c.get_size_y()!=get_size_y()){
+    cout << "Trying to copy an array with different dimensions... "
+	   << "exiting"<<endl;
+    exit(1);
+  }
   
+  //copy
   memcpy(array,c.array,sizeof(fftw_complex)*nx*ny);
 }
 
 
-void Complex_2D::invert(){
+//invert and scale if we want to.
+void Complex_2D::invert(bool scale){
 
   int middle_x = nx/2;
   int middle_y = ny/2;
 
+  double scale_factor = 1;
+  if(scale)
+    scale_factor = 1.0/(sqrt(nx*ny));
+  
   if(nx%2==1 || ny%2==1)
     cout << "WARNING: The array dimensions are odd "
 	 << "but we have assumed they are even when inverting an "
@@ -184,11 +224,11 @@ void Complex_2D::invert(){
 	double temp_rl = get_real(i_new,j_new);
 	double temp_im = get_imag(i_new,j_new);
 
-	set_real(i_new,j_new,get_real(i,j));
-	set_imag(i_new,j_new,get_imag(i,j));
+	set_real(i_new,j_new,get_real(i,j)*scale_factor);
+	set_imag(i_new,j_new,get_imag(i,j)*scale_factor);
 
-	set_real(i,j,temp_rl);
-	set_imag(i,j,temp_im);
+	set_real(i,j,temp_rl*scale_factor);
+	set_imag(i,j,temp_im*scale_factor);
     }
   }
 
@@ -203,3 +243,23 @@ int Complex_2D::check_bounds(int x, int y) const{
    return SUCCESS;
 }
      
+void Complex_2D::perform_forward_fft(){
+
+  //make a new forward fft plan if we haven't made one already.
+  if(f_forward==0)
+    f_forward = fftw_plan_dft_2d(nx, ny,array,array, 
+				 FFTW_FORWARD, FFTW_MEASURE);
+  
+  fftw_execute(f_forward);
+}
+
+
+void Complex_2D::perform_backward_fft(){
+
+  //make a new backward fft plan if we haven't made one already.
+  if(f_backward==0)
+    f_backward = fftw_plan_dft_2d(nx, ny,array,array, 
+				  FFTW_BACKWARD, FFTW_MEASURE);
+  
+  fftw_execute(f_backward);
+}

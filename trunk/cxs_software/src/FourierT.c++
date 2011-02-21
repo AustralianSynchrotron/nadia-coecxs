@@ -19,6 +19,8 @@ FourierT::FourierT(int x_size, int y_size)
   original = new fftw_complex[nx*ny];
   transformed = new fftw_complex[nx*ny];
 
+  //create the fftw plans. see FFTW3 documentation for an
+  //explanation.
   f_forward = fftw_plan_dft_2d(nx, ny, original, transformed, 
 			       FFTW_FORWARD, FFTW_MEASURE);
   f_backward = fftw_plan_dft_2d(nx, ny, transformed, original, 
@@ -78,15 +80,16 @@ void FourierT::copy_from_fftw_array(fftw_complex * array, Complex_2D & c){
   //  }
 
   //always scale as FFTW doesn't normalise the result
-  //we can't so a quick copy then :(
-  double scale_factor = 1.0/(sqrt(nx*ny));
-  
-  for(int i=0; i < nx; ++i){
-    for(int j=0; j < ny; ++j){
-      c.set_real(i,j,(array[i*ny + j][REAL])*scale_factor);
-      c.set_imag(i,j,(array[i*ny + j][IMAG])*scale_factor);
-    }
-  }
+  //we can't do a quick copy then :(
+
+ double scale_factor = 1.0/(sqrt(nx*ny));
+ 
+ for(int i=0; i < nx; ++i){
+   for(int j=0; j < ny; ++j){
+     c.set_real(i,j,(array[i*ny + j][REAL])*scale_factor);
+     c.set_imag(i,j,(array[i*ny + j][IMAG])*scale_factor);
+   }
+ }
   
 }
 
