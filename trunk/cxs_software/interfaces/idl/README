@@ -2,7 +2,6 @@ This directory contains wrapper code and examples for running the C++
 library code in IDL. It is assumed that the user has IDL installed and
 is familiar with the language.
 
-
 - IDL_interface.c is a C wrapper for the cxs code functions.  Users
   should not need to alter this file.
 

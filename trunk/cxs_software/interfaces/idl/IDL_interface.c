@@ -2,6 +2,8 @@
 #include <cstdlib>
 #include <iostream>
 #include <typeinfo>
+#include <sstream>
+#include <string>
 
 //idl header
 #include "idl_export.h"
@@ -18,7 +20,6 @@ Complex_2D * esw = 0;
 PlanarCDI * reco = 0;
 int total_iters = 0;
 using namespace std;
-
 
 /************ helper methods ******************/
 
@@ -72,18 +73,16 @@ void copy_from_complex_2d(Complex_2D & cxs_array, IDL_COMPLEX * IDL_array){
     for(int j=0; j<ny; j++){
       (*IDL_array).r= cxs_array.get_real(j,nx-1-i);
       (*IDL_array).i= cxs_array.get_imag(j,nx-1-i);
-      // cout << *(IDL_array) << " ";
       IDL_array++;
     }
-    //cout << endl;
   }
 }
 
 //error checking method. Make sure the objects have memory allocated.
 void check_objects(){
   if(!esw || !reco){
-    cout << "You need to call one of the CXS_INIT_ routines"
-	 << " before calling this routine." << endl;
+    char buf[] = "You need to call one of the CXS_INIT_ routines before calling this routine";
+    IDL_Message(IDL_M_GENERIC, IDL_MSG_INFO, buf); 
     exit(1);
   }
 }
@@ -287,9 +286,12 @@ extern "C" void IDL_iterate(int argc, void * argv[]){
   for(int i=0; i<iterations; i++){
     total_iters++;
     reco->iterate();
-    cout << "Error for iteration " << total_iters - 1 
-	 << " is "<< reco->get_error() << endl;
-    cout << "Iteration: " << total_iters << endl;
+
+    ostringstream oss (ostringstream::out);
+    oss << "Error for iteration " << total_iters - 1 
+	<< " is "<< reco->get_error() << endl
+	<< "Iteration: " << total_iters << endl;
+    IDL_Message(IDL_M_GENERIC, IDL_MSG_INFO, oss.str().c_str());    
 
   }
 
@@ -331,9 +333,12 @@ extern "C" void IDL_apply_shrinkwrap(int argc, void * argv[]){
   double gauss_width = *(double*) argv[0];
   double threshold = *(double*) argv[1];
 
-  cout << "Applying shrink wrap with a gaussian width of "
-       << gauss_width << " pixels and a threshold of "
-       << threshold << " the maximum pixel value." << endl;
+  
+  ostringstream oss (ostringstream::out);
+  oss << "Applying shrink wrap with a gaussian width of "
+      << gauss_width <<" pixels and a threshold of " <<  threshold
+      << "  the maximum pixel value" <<endl;
+  IDL_Message(IDL_M_GENERIC, IDL_MSG_INFO, oss.str().c_str()); 
   reco->apply_shrinkwrap(gauss_width,threshold);
 }
 
@@ -345,8 +350,9 @@ extern "C" void IDL_get_best_result(int argc, void * argv[]){
   temp = reco->get_best_result(error);
   copy_from_complex_2d(*temp,(IDL_COMPLEX*) argv[0]);
 
-  cout << "Error for the best results so far "
-       << "is "<< error <<endl;
+  ostringstream oss (ostringstream::out);
+  oss << "Error for the best result so far is "<< error << endl; 
+  IDL_Message(IDL_M_GENERIC, IDL_MSG_INFO, oss.str().c_str());
 }
 
 extern "C" void IDL_get_intensity_autocorrelation(int argc, void * argv[]){
@@ -379,11 +385,14 @@ extern "C" void IDL_get_error(int argc, void * argv[]){
 extern "C" void IDL_get_transmission_function(int argc, void * argv[]){
   check_objects();
   if(typeid(*reco)!=typeid(FresnelCDI)){
-       cout << "Sorry, can't get the transmission function for "
-	    << "anything other than "<< typeid(FresnelCDI).name() <<" reconstuction. "
-	    << "You are doing "<<typeid(*reco).name() 
-	    << " reconstruction." << endl;
-       return;
+
+    ostringstream oss (ostringstream::out);
+    oss << "Sorry, can't get the transmission function for "
+	<< "anything other than "<< typeid(FresnelCDI).name() <<" reconstuction. "
+	<< "You are doing "<<typeid(*reco).name() 
+	<< " reconstruction." << endl;
+    IDL_Message(IDL_M_GENERIC, IDL_MSG_INFO, oss.str().c_str());    
+    return;
   }
   
   int nx = esw->get_size_x();
@@ -397,7 +406,23 @@ extern "C" void IDL_get_transmission_function(int argc, void * argv[]){
 
 extern "C" void IDL_print_algorithm(int argc, void * argv[]){
   check_objects();
-  reco->print_algorithm();
+
+  //now we do something tricky to redirect stdout into a string
+  //this is necessary because IDL doesn't play well with stdout in
+  //windows.
+  streambuf * backup = cout.rdbuf(); //store a pointer to the stdout buffer
+  streambuf * str_buffer = new stringbuf(); //create a new string buffer
+  cout.rdbuf(str_buffer);  //redirect stdout to the string buffer
+
+  reco->print_algorithm(); //get the algorithm
+
+  cout.rdbuf(backup);  //restore cout to stdout
+
+  //pass the string to IDL
+  IDL_Message(IDL_M_GENERIC, IDL_MSG_INFO, ( (stringbuf*) str_buffer)->str().c_str());
+
+  //clean up
+  delete str_buffer;
 }
 
 
