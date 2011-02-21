@@ -23,10 +23,11 @@
 #include "PlanarCDI.h"
 #include "Double_2D.h"
 
+#include "google/profiler.h"
+
 using namespace std;
 
 int main(void){
-
 
   //Define some constants which will be used in the code.
 
@@ -120,6 +121,9 @@ int main(void){
   write_ppm("test_autocorrelation.ppm", autoc, true); //"true" means log scale
 
 
+  ProfilerStart("profile");
+
+
   /*** run the reconstruction ************/
 
   for(int i=0; i<hio_iterations; i++){
@@ -142,16 +146,12 @@ int main(void){
       temp_str.clear();
 
       //uncomment to output the estimated diffraction pattern
-      //object_estimate.invert();
-      //object_estimate.invert();
-
-      planar.propagate_to_detector(object_estimate);
-      object_estimate.get_2d(MAG_SQ,result);
-      temp_str << "diffraction.ppm";
-      write_ppm(temp_str.str(), result, true);
-      planar.propagate_from_detector(object_estimate);
-      object_estimate.get_2d(MAG,result);
-      write_ppm("inverted.ppm", result);
+      //planar.propagate_to_detector(object_estimate);
+      //object_estimate.get_2d(MAG_SQ,result);
+      //temp_str << "diffraction.ppm";
+      //write_ppm(temp_str.str(), result, true);
+      //planar.propagate_from_detector(object_estimate);
+      //object_estimate.get_2d(MAG,result);
       
       //apply the shrinkwrap algorithm
       //1.5 is the gaussian width in pixels
@@ -209,6 +209,8 @@ int main(void){
   planar.get_best_result(3,error)->get_2d(MAG,result2);
   write_ppm("best_error_3.ppm", result2);
   cout << "Best error 3 is "<< error <<endl; **/
+
+  ProfilerStop();
 
   return 0;
 }
