@@ -34,8 +34,11 @@ end
 
 
 pro show, image
-window, XSIZE=pixels(), YSIZE=pixels()
-TVSCL, rebin(image,pixels(),pixels())
+n =  size(image)
+if ( (n[2] MOD pixels()) eq 0.0 ) and ((n[1] MOD pixels()) eq 0.0 ) then begin
+   window, XSIZE=pixels(), YSIZE=pixels()
+   TVSCL, rebin(image,pixels(),pixels())
+endif
 end
 
 pro check_size, array
@@ -1254,7 +1257,7 @@ end
 ;-
 pro cxs_write_dbin, array, filename
 n = size(array)
-b = call_external(lib_name() ,'IDL_write_dbin',n[1],n[2],array, filename)
+b = call_external(lib_name() ,'IDL_write_dbin',n[1],n[2],double(array), filename)
 end
 
 
