@@ -7,7 +7,6 @@
 #include <cstdlib> 
 #include "Complex_2D.h"
 #include "Double_2D.h"
-#include "FourierT.h"
 #include "FresnelCDI.h"
 #include "io.h" //
 #include <sstream>

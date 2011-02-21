@@ -56,7 +56,6 @@
 
 #include <map>
 #include <string>
-#include "FourierT.h"
 #include "Double_2D.h"
 
 /** The number of reconstruction algorithms */

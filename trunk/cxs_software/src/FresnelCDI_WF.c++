@@ -6,7 +6,6 @@
 #include <fftw3.h>
 #include <cstdlib> 
 #include "Complex_2D.h"
-#include "FourierT.h"
 #include "FresnelCDI_WF.h"
 #include "io.h" //
 #include <sstream>

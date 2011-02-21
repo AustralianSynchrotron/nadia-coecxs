@@ -4,6 +4,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "io.h"
+
 using namespace std;
 
 Complex_2D::Complex_2D(int x_size, int y_size){
@@ -25,7 +27,7 @@ Complex_2D::Complex_2D(int x_size, int y_size){
 Complex_2D::~Complex_2D(){
 
   //free the memory of the array.
-  delete[] array;
+  fftw_free(array);
 
   //free the memory of the fftw plans (but
   //only if it was actually allocated).
@@ -148,8 +150,8 @@ void Complex_2D::multiply(Complex_2D & c2, double scale){
 	+ c2.get_imag(i,j)*this->get_real(i,j);
       
       //and set the values
-      set_real(scale*new_real);
-      set_imag(scale*new_imag);
+      set_real(i,j,scale*new_real);
+      set_imag(i,j,scale*new_imag);
     }
   }
 }
@@ -200,6 +202,8 @@ void Complex_2D::copy(Complex_2D & c){
 //invert and scale if we want to.
 void Complex_2D::invert(bool scale){
 
+ 
+
   int middle_x = nx/2;
   int middle_y = ny/2;
 
@@ -243,13 +247,34 @@ int Complex_2D::check_bounds(int x, int y) const{
    return SUCCESS;
 }
      
+
+void Complex_2D::initialise_fft(){
+  //create the plan will eraise the content of the array
+  //so we need to be a bit tricky here.
+
+  //make a new array 
+  fftw_complex * tmp_array;
+  tmp_array = (fftw_complex*) fftw_malloc(sizeof(fftw_complex)*nx*ny);
+  
+  //make the plans
+  f_backward = fftw_plan_dft_2d(nx, ny, tmp_array, tmp_array, 
+				FFTW_BACKWARD, FFTW_MEASURE);
+  f_forward = fftw_plan_dft_2d(nx, ny,tmp_array,tmp_array, 
+			       FFTW_FORWARD, FFTW_MEASURE);
+  
+  //now copy the array contents into the tmp_array,
+  //free the old memory and update the pointer.
+  memcpy(tmp_array,array,sizeof(fftw_complex)*nx*ny);
+  fftw_free(array);
+  array = tmp_array;
+
+}
+
 void Complex_2D::perform_forward_fft(){
 
   //make a new forward fft plan if we haven't made one already.
-  if(f_forward==0)
-    f_forward = fftw_plan_dft_2d(nx, ny,array,array, 
-				 FFTW_FORWARD, FFTW_MEASURE);
-  
+  if(f_forward==0 )
+    initialise_fft();  
   fftw_execute(f_forward);
 }
 
@@ -258,8 +283,6 @@ void Complex_2D::perform_backward_fft(){
 
   //make a new backward fft plan if we haven't made one already.
   if(f_backward==0)
-    f_backward = fftw_plan_dft_2d(nx, ny,array,array, 
-				  FFTW_BACKWARD, FFTW_MEASURE);
-  
+    initialise_fft();
   fftw_execute(f_backward);
 }

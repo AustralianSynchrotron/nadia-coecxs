@@ -1,6 +1,5 @@
 #include <iostream>
 #include <string>
-//#include <fftw3.h>
 #include <cstdlib> 
 #include <cmath>
 #include "Complex_2D.h"
@@ -83,16 +82,13 @@ void PlanarCDI::get_intensity_autocorrelation(Double_2D & autoc){
     for(int j=0; j<ny; j++){
       //set the real and imaginary components using the magnitude.
       double component = (1.0/sqrt(2.0))*(intensity_sqrt.get(i,j)*intensity_sqrt.get(i,j));
-      //scale by "pow(-1,i + j)" to make the fourier transform centered.
-      //component*=pow(-1.0,i + j);
       temp_intensity.set_value(i,j,REAL, component);
       temp_intensity.set_value(i,j,IMAG, component);
     }
   }
   
   // fourier transform the intensity 
-  temp_intensity.perform_backward_fft();  
-  temp_intensity.invert(true);
+  propagate_from_detector(temp_intensity);  
 
   //get the magnitude of the fourier transformed data.
   temp_intensity.get_2d(MAG, autoc);
@@ -112,8 +108,8 @@ void PlanarCDI::initialise_estimate(int seed){
 	complex.set_value(i,j,IMAG,0);
       }
       else{
-	double r = (255.0*rand()/(double) RAND_MAX);// * pow(-1.0,i + j);
-	double im = (255.0*rand()/(double) RAND_MAX);// * pow(-1.0,i + j);
+	double r = (255.0*rand()/(double) RAND_MAX);
+	double im = (255.0*rand()/(double) RAND_MAX);
 
 	complex.set_value(i,j,REAL,r); 
 	complex.set_value(i,j,IMAG,im);

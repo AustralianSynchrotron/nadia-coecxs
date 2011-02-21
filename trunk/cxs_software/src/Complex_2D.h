@@ -327,6 +327,12 @@ class Complex_2D{
    * @param y The vertical position to check
    */
   int check_bounds(int x, int y) const;
+
+  
+  /**
+   * Create the fftw plans for forward and backward fat fourier transforms
+   */
+  void initialise_fft();
    
 
 };
