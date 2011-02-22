@@ -35,7 +35,6 @@ PlanarCDI::PlanarCDI(Complex_2D & initial_guess, int n_best)
     //    fft(nx,ny),
     temp_complex_PFS(nx,ny),
     temp_complex_PF(nx,ny),
-    temp_complex(nx,ny),
     temp_complex_PS(nx,ny),
     temp_complex_PSF(nx,ny),
     beta(0.9),
@@ -88,11 +87,15 @@ void PlanarCDI::get_intensity_autocorrelation(Double_2D & autoc){
   }
   
   // fourier transform the intensity 
-  propagate_from_detector(temp_intensity);  
+  //propagate_from_detector(temp_intensity);  
+
+  temp_intensity.perform_backward_fft(); 
+  temp_intensity.invert(true);
 
   //get the magnitude of the fourier transformed data.
   temp_intensity.get_2d(MAG, autoc);
 
+  
 }
 
 
@@ -285,22 +288,31 @@ int PlanarCDI::iterate(){
     project_intensity(temp_complex_PFS);
   }
 
-  //SF & F
-  if(algorithm_structure[PF]!=0||algorithm_structure[PSF]!=0){
+  //F
+  if(algorithm_structure[PF]!=0){
     temp_complex_PF.copy(complex);
     project_intensity(temp_complex_PF);
   }
   
-  //Apply the support contraint
+  //S
   if(algorithm_structure[PS]!=0){
     temp_complex_PS.copy(complex);
     apply_support(temp_complex_PS);
-  }
+  } 
+
+  //SF
   if(algorithm_structure[PSF]!=0){
-    temp_complex_PSF.copy(temp_complex_PF);
-    apply_support(temp_complex_PSF);
+    if(algorithm_structure[PF]!=0){
+      temp_complex_PSF.copy(temp_complex_PF);
+      apply_support(temp_complex_PSF);
+    }
+    else{
+      temp_complex_PSF.copy(complex);
+      project_intensity(temp_complex_PSF);
+      apply_support(temp_complex_PSF);
+    }
   }
-  
+
   //combine the result of the seperate operators
   double value_real, value_imag;
   for(int i=0; i < nx; ++i){
@@ -458,4 +470,8 @@ void PlanarCDI::apply_threshold(Double_2D & array,
   }
 }
 
-
+void PlanarCDI::set_fftw_type(int type){
+  temp_complex_PFS.set_fftw_type(type);
+  temp_complex_PF.set_fftw_type(type);
+  complex.set_fftw_type(type);
+}

@@ -20,7 +20,6 @@
 #include "Complex_2D.h"
 #include "Double_2D.h"
 #include "PlanarCDI.h"
-#include "FourierT.h"
 #include <sstream>
 
 using namespace std;
@@ -68,16 +67,18 @@ int main(void){
   Complex_2D input(n_x,n_y);
   for(int i=0; i<n_x; i++){
     for(int j=0; j<n_y; j++){
-      input.set_value(i,j,REAL, 1.0/sqrt(2.0)*data.get(i,j)*pow(-1,i + j));
-      input.set_value(i,j,IMAG, 1.0/sqrt(2.0)*data.get(i,j)*pow(-1,i + j));
+      input.set_value(i,j,REAL, 1.0/sqrt(2.0)*data.get(i,j));
+      input.set_value(i,j,IMAG, 1.0/sqrt(2.0)*data.get(i,j));
     }
   }
 
-  /**** fourier transform the image to get the diffraction pattern *****/
+  /**** create the projection/reconstruction object *****/
 
-  //fourier transform
-  FourierT fft(n_x,n_y);
-  fft.perform_forward_fft(input);
+  Complex_2D first_guess(n_x,n_y);
+  PlanarCDI my_planar(first_guess);
+
+  //propagate to the detector plane
+  my_planar.propagate_to_detector(input);
 
   //write the fourier transform to file.
   Double_2D intensity(n_x,n_y);
@@ -103,8 +104,6 @@ int main(void){
   /*************** do the reconstruction *******************/
 
   //create a project object and set the options.
-  Complex_2D first_guess(n_x,n_y);
-  PlanarCDI my_planar(first_guess);
   my_planar.set_support(support);
   my_planar.set_intensity(intensity);
   my_planar.set_algorithm(HIO);

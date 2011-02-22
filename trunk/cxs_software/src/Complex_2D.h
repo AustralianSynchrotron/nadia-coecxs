@@ -60,6 +60,9 @@ class Complex_2D{
 
   /* A fftw plan for backward fourier transforms */
   fftw_plan f_backward;
+
+  /* A flag which is passed to fftw when plans are created */
+  int fftw_type;
   
  public:
 
@@ -317,6 +320,18 @@ class Complex_2D{
    *
    */
   void perform_backward_fft();
+
+  /**
+   * A flag which is passed to fftw when plans are created. It maybe
+   * either FFTW_ESTIMATE, FFTW_MEASURE or FFTW_PATIENT. See the fftw
+   * documentation for a description of each. By default we use
+   * FFTW_MEASURE. FFTW_ESTIMATE is used for testing purposes.
+   *
+   * @param type - FFTW_ESTIMATE, FFTW_MEASURE or FFTW_PATIENT
+   */
+  void set_fftw_type(int type){
+    fftw_type = type;
+  };
 
  private:
     

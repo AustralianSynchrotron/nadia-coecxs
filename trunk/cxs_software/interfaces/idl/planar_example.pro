@@ -9,8 +9,8 @@
 ; Please replace the file-name with your 
 ; "cxs_software/example/image_files" directory if you are not
 ; running this example on osiris.
-support = cxs_read_tiff(1024,1024,'/data/nadia/cxs_software_rel_0/cxs_software/examples/image_files/planar_support.tiff')
-data = cxs_read_dbin(1024,1024,'/data/nadia/cxs_software_rel_0/cxs_software/examples/image_files/planar_data.dbin')
+support = cxs_read_tiff(1024,1024,'../../examples/image_files/planar_support.tiff')
+data = cxs_read_dbin(1024,1024,'../../examples/image_files/planar_data.dbin')
 
 ; Set-up everything ready for planar reconstruction.
 ; You need to pass the image data and support.
@@ -18,34 +18,44 @@ data = cxs_read_dbin(1024,1024,'/data/nadia/cxs_software_rel_0/cxs_software/exam
 ; parameter of beta=0.9
 cxs_init_planar, data, support
 
-; Perform 50 iteration
-a = cxs_iterate(50)
+;Perform an iteration
+a = cxs_iterate()
 
 ; Apply shrink wrap (default Gaussian width = 1.5 pixels,
-; threshold = 0.1 time the maximum pixel value).
+; threshold = 0.1 time the maximum pixel value). And then 
+; perform 50 more iteration. Do this 3 times.
+FOR I=0,3 DO BEGIN cxs_apply_shrinkwrap & a = cxs_iterate(50) & ENDFOR
+
 cxs_apply_shrinkwrap
 
-; Perform another 50 iterations
-a = cxs_iterate(50)
+a = cxs_iterate(49)
 
-; Lets get the result with the lowest error from the
-; last 100 iterations:
-a = cxs_get_best_result()
-
-; and use this to restart the reconstruction starting with this
-; result:
-cxs_init_planar, data, support, a
 ; Change to the error-reduction algorithm 
 cxs_set_algorithm, 'ER'
 
-; Perform another 50 iterations
-a = cxs_iterate(50)
+;Perform an iteration
+a = cxs_iterate()
+
+FOR I=0,1 DO BEGIN cxs_apply_shrinkwrap & a = cxs_iterate(50) & ENDFOR
+
+cxs_apply_shrinkwrap
+
+a = cxs_iterate(49)
 
 ; Apply shrink-wrap again. Lets be less tight this time
-cxs_apply_shrinkwrap, 1, 0.05 
+;cxs_apply_shrinkwrap, 1, 0.05 
 
 ; Do one more iteration
-a = cxs_iterate()
+;a = cxs_iterate()
+
+
+; Lets get the result with the lowest error from the
+; last 100 iterations:
+;a = cxs_get_best_result()
+
+; and use this to restart the reconstruction starting with this
+; result:
+;cxs_init_planar, data, support, a
 
 ; We have finished with the reconstruction now, so free-up the
 ; memory we allocated earlier (note this does not effect "a").

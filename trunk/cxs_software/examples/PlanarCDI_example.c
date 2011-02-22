@@ -34,21 +34,18 @@ int main(void){
   //the data file name
   string data_file_name = "image_files/planar_data.dbin";
 
-  //the approx. level of background noise in the image
-  double noise_level = 30;
-
   //the file which provides the support (pixels with the value 0
   //are considered as outside the object)
   string support_file_name = "image_files/planar_support.tiff";
 
   //number of hybrid input-out iterations to perform.
-  const int hio_iterations = 200;
+  const int hio_iterations = 250;
   
   //number of error reduction iterations to perform after the HIO.
-  const int er_iterations = 200;
+  const int er_iterations = 150;
 
   //output the current image ever "output_iterations"
-  int output_iterations = 40;
+  int output_iterations = 50;
 
   //the number of pixels in x and y
   int nx = 1024;
@@ -109,6 +106,8 @@ int main(void){
   //Initialise the current object ESW with a random numbers
   //"0" is the seed to the random number generator
   planar.initialise_estimate(0);
+
+  //  planar.set_fftw_type(FFTW_ESTIMATE);
   
   //make a 2D object. This will be used to output the 
   //image of the current estimate.

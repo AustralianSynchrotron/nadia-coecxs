@@ -2,9 +2,8 @@
 #include "Complex_2D.h"
 #include "Double_2D.h"
 #include <stdlib.h>
-#include <string.h>
-
-#include "io.h"
+//#include <string.h>
+#include <cstring>
 
 using namespace std;
 
@@ -21,7 +20,7 @@ Complex_2D::Complex_2D(int x_size, int y_size){
   //create them when needed to avoid unnecessary time overhead).
   f_forward = 0;
   f_backward = 0;
-
+  fftw_type = FFTW_MEASURE;
 }
 
 Complex_2D::~Complex_2D(){
@@ -195,7 +194,7 @@ void Complex_2D::copy(Complex_2D & c){
   }
   
   //copy
-  memcpy(array,c.array,sizeof(fftw_complex)*nx*ny);
+  std::memcpy(array,c.array,sizeof(fftw_complex)*nx*ny);
 }
 
 
@@ -258,13 +257,13 @@ void Complex_2D::initialise_fft(){
   
   //make the plans
   f_backward = fftw_plan_dft_2d(nx, ny, tmp_array, tmp_array, 
-				FFTW_BACKWARD, FFTW_MEASURE);
+				FFTW_BACKWARD, fftw_type);
   f_forward = fftw_plan_dft_2d(nx, ny,tmp_array,tmp_array, 
-			       FFTW_FORWARD, FFTW_MEASURE);
+			       FFTW_FORWARD, fftw_type);
   
   //now copy the array contents into the tmp_array,
   //free the old memory and update the pointer.
-  memcpy(tmp_array,array,sizeof(fftw_complex)*nx*ny);
+  std::memcpy(tmp_array,array,sizeof(fftw_complex)*nx*ny);
   fftw_free(array);
   array = tmp_array;
 

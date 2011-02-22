@@ -100,7 +100,6 @@ class PlanarCDI{
       PFS and PF terms for each iteration. */
   Complex_2D temp_complex_PFS;
   Complex_2D temp_complex_PF;
-  Complex_2D temp_complex;
   Complex_2D temp_complex_PS;
   Complex_2D temp_complex_PSF;
 
@@ -394,6 +393,17 @@ class PlanarCDI{
   virtual void propagate_from_detector(Complex_2D & c);
 
 
+  /**
+   * A flag which is used for the fast fourier transforms to select
+   * the fft algorithm. It maybe either FFTW_ESTIMATE, FFTW_MEASURE or
+   * FFTW_PATIENT. See the fftw documentation for a description of
+   * each. By default we use FFTW_MEASURE. FFTW_ESTIMATE is used for
+   * testing purposes.
+   *
+   * @param type - FFTW_ESTIMATE, FFTW_MEASURE or FFTW_PATIENT
+   */
+  void set_fftw_type(int type);
+
  protected:
 
   /**
@@ -429,6 +439,7 @@ class PlanarCDI{
    */  
   void convolve(Double_2D & array, double gauss_width, int pixel_cut_off=4);
   
+
     
 };
 
