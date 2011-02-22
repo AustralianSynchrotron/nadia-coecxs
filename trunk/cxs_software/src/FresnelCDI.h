@@ -107,8 +107,12 @@ class FresnelCDI: public PlanarCDI{
    * sample plane and unity is added.
    *
    * @param result The transmission function is copied into "result".
+   * @param inforce_unit_mag Values above 1 (due to artifacts from the
+   * reconstruction are reduced to 1). This helps when plotting the
+   * magnitude. By default this is done, but can be switched off by 
+   * passing "false" for this parameter.
    */
-  virtual void get_transmission_function(Complex_2D & result);
+  virtual void get_transmission_function(Complex_2D & result, bool inforce_unit_mag=true);
   
   /**
    * This method overrides the one in PlanarCDI by adding/subtracting

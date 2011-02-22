@@ -124,8 +124,8 @@ class Complex_2D{
   };
 
   /**
-   * Set the magnitude at point x,y. Note that this is
-   * an unsafe method as no bounds checking is performed.
+   * Set the magnitude at point x,y, while preserving the phase. Note
+   * that this is an unsafe method as no bounds checking is performed.
    * 
    * @param x The x position
    * @param y The y position
@@ -133,9 +133,32 @@ class Complex_2D{
    *  
    */
   inline void set_mag(int x, int y, double value){
-    array[x*ny+y][REAL] *= value;
-    array[x*ny+y][IMAG] *= value;
+    double mag = get_mag(x,y);
+    if(mag==0){
+      set_real(x,y,value);
+      set_imag(x,y,0);
+    }
+    else{
+      array[x*ny+y][REAL]*=value/mag;
+      array[x*ny+y][IMAG]*=value/mag;
+    }
   };
+
+  /**
+   * Set the phase at point x,y, while preserving the magnitude. Note
+   * that this is an unsafe method as no bounds checking is performed.
+   * 
+   * @param x The x position
+   * @param y The y position
+   * @param value The value which it will be set to
+   *  
+   */
+  inline void set_phase(int x, int y, double value){
+    double mag = get_mag(x,y);
+    set_real(x,y,mag*cos(value));
+    set_imag(x,y,mag*sin(value));
+  };
+
 
   /**
    * Get the real components at point x,y. Note that this is

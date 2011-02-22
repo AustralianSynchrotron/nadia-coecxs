@@ -175,25 +175,17 @@ void PlanarCDI::propagate_from_detector(Complex_2D & c){
 void PlanarCDI::scale_intensity(Complex_2D & c){
   double norm2_mag=0;
   double norm2_diff=0;
-  double current_mag;
-  double current_int_sqrt;
+  double current_int_sqrt=0;
+  double current_mag=0;
+
   for(int i=0; i< nx; i++){
     for(int j=0; j< ny; j++){
-      //scale
-      current_mag = c.get_mag(i,j);
-      current_int_sqrt = intensity_sqrt.get(i,j);
 
-      if(current_int_sqrt==0){
-	c.set_real(i,j,0);
-	c.set_imag(i,j,0);
-      }
-      else if(current_mag != 0){
-	c.set_mag(i,j,current_int_sqrt/current_mag);
-      }
-      else{
-	c.set_real(i,j,current_int_sqrt);
-	c.set_imag(i,j,0);
-      }
+      current_int_sqrt=intensity_sqrt.get(i,j);
+      current_mag=c.get_mag(i,j);
+
+      //reset the magnitude
+      c.set_mag(i,j,current_int_sqrt);
       
       //calculate the error
       norm2_mag += current_int_sqrt*current_int_sqrt;

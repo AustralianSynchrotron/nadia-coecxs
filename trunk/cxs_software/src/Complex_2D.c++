@@ -52,9 +52,15 @@ void Complex_2D::set_value(int x, int y, int component, double value){
   case IMAG :
     set_imag(x,y,value);
     break;
+  case MAG :
+    set_mag(x,y,value);
+    break;
+  case PHASE :
+    set_phase(x,y,value);
+    break;
   default:
     cout << "Value type in Complex_2D::set_value is unknown: " 
-	 << component << ". Must be REAL or IMAG" << endl;
+	 << component << ". Must be REAL, IMAG, MAG or PHASE" << endl;
     exit(1);
   }
 }
@@ -200,8 +206,6 @@ void Complex_2D::copy(Complex_2D & c){
 
 //invert and scale if we want to.
 void Complex_2D::invert(bool scale){
-
- 
 
   int middle_x = nx/2;
   int middle_y = ny/2;
