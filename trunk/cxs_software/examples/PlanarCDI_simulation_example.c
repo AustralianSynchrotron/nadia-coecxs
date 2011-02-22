@@ -38,13 +38,16 @@ int main(void){
 
   //the file which provides the support (pixels with the value 0
   //are considered as outside the object)
-  const static char * support_file_name = "image_files/support_2.tiff";
+  const static char * support_file_name = "image_files/planar_support.tiff";
 
   //number of hybrid input-out iterations to perform.
-  const int hio_iterations = 1000;
-   
+  const int hio_iterations = 200;
+
+  //the number of error-reduction iterations to perform.
+  const int er_iterations = 100;
+
   //output the current image ever "output_iterations"
-  const int output_iterations = 40;
+  const int output_iterations = 50;
 
 
   /****** get the object from an image file ****************/
@@ -130,8 +133,33 @@ int main(void){
       temp_str << "sim_result_" << i << ".ppm";
       write_ppm(temp_str.str(), result);
 
+      my_planar.apply_shrinkwrap();
+
     }
   }
+
+  my_planar.set_algorithm(ER);
+
+  for(int i=hio_iterations; i<(er_iterations+hio_iterations+1); i++){
+    
+    cout << "iteration " << i << endl;
+    
+    my_planar.iterate();
+
+    if(i%output_iterations==0){
+
+      ostringstream temp_str ( ostringstream::out ) ;
+      first_guess.get_2d(MAG,result);
+      temp_str << "sim_result_" << i << ".ppm";
+      write_ppm(temp_str.str(), result);
+
+      my_planar.apply_shrinkwrap();
+
+    }
+  }
+
+
+
   
   return 0;
 }
