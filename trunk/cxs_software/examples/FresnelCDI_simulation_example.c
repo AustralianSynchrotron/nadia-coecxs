@@ -3,7 +3,7 @@
  *
  * This file is a simulation of fCDI for the purpose of imaging small 
  * contrast changes in biological samples. It is based on Nadia's example 
- * and uses her header files
+ * and uses her header files.
  * see: FresnelCDI_example.c
  *
  * @author Michael Jones <michael.jones@latrobe.edu.au>,
@@ -30,11 +30,11 @@ using namespace std;
 
 int main(int argc, char * argv[]){
 
-  /***** All this part is just reading files and setting constants *****/
+  /** All of this part is just reading files and setting constants **/
 
   //number of output iterations
   int output_iterations = 25;
-  int total_iterations = 100;
+  int total_iterations = 200;
 
   //load the object file
   Double_2D object;
@@ -151,18 +151,30 @@ int main(int argc, char * argv[]){
   //multiply the transmission function by the white field
   input.multiply(wf);
 
+  //get the magnitude of the wave
+  input.get_2d(MAG_SQ,result);
+  //write the output to file
+  write_ppm("sample_plane.ppm",result);
+
   //propagate to detector
   proj.propagate_to_detector(input);
 
   //take the wf back to the detector so we're ready for the reconstructions
   proj.propagate_to_detector(wf);
+
+  //write input intensity to Double_2D array
+  //"result" will be used as the diffraction data.
+  input.get_2d(MAG_SQ,result);
+
+  //write thresholded output to file
+  write_ppm("forward_projection.ppm",result);
  
   //apply a threshold to make the simulation a bit more realistic
   for(int i=0; i<nx; i++){
     for(int j=0; j<ny; j++){
-      input.set_real(i,j,input.get_real(i,j)-noise_level);
-      if(input.get_real(i,j)<0)
-	input.set_real(i,j,0);
+      result.set(i,j,result.get(i,j)-noise_level);
+      if(result.get(i,j)<0)
+	result.set(i,j,0);
     }
   }
   
@@ -177,12 +189,6 @@ int main(int argc, char * argv[]){
   }
   */
 
-  //write input intensity to Double_2D array
-  //"result" will be used as the diffraction data.
-  input.get_2d(MAG_SQ,result);
-
-  //write thresholded output to file
-  write_ppm("forward_projection.ppm",result);
   
   /****************************************************/
   /*******  set up the reconstuction ****************
@@ -231,6 +237,7 @@ int main(int argc, char * argv[]){
       temp_str << "fcdi_example_iter_" << i << ".ppm";
       write_ppm(temp_str.str(),result);
     
+      proj.apply_shrinkwrap();
     }
   }
 
@@ -240,7 +247,7 @@ int main(int argc, char * argv[]){
 
   //I can't see this without using log scale.
   trans.get_2d(MAG,result);
-  write_ppm("trans_mag_recovered.ppm",result,true);
+  write_ppm("trans_mag_recovered.ppm",result);
 
   trans.get_2d(PHASE,result);
   write_ppm("trans_phase_recovered.ppm",result);
