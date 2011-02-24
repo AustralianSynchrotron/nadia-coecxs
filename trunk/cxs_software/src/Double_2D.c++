@@ -43,7 +43,10 @@ double Double_2D::get_sum() const {
 };
 
 double Double_2D::get_max() const {
-  double max = 0;
+  if(nx==0||ny==0)
+    return 0;
+
+  double max = array[0];
   for(int i=0; i<nx; i++){
     for(int j=0; j<ny; j++){
       if(array[i*ny+j]>max)
@@ -51,4 +54,19 @@ double Double_2D::get_max() const {
     }
   }
   return max;
+};
+
+
+double Double_2D::get_min() const {
+  if(nx==0||ny==0)
+    return 0;
+
+  double min = array[0];
+  for(int i=0; i<nx; i++){
+    for(int j=0; j<ny; j++){
+      if(array[i*ny+j]<min)
+	min = array[i*ny+j];
+    }
+  }
+  return min;
 };

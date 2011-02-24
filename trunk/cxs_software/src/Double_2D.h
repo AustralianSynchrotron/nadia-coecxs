@@ -133,6 +133,13 @@ class Double_2D{
    *  
    */
   double get_max() const;
+
+  /**
+   * Get the minimum of all values in the array. 
+   * 
+   * @return The minimum value in the array 
+   */
+  double get_min() const;
   
 };
 
