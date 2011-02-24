@@ -23,7 +23,7 @@
 #include "PlanarCDI.h"
 #include "Double_2D.h"
 
-#include "google/profiler.h"
+//#include "google/profiler.h"
 
 using namespace std;
 
@@ -120,7 +120,7 @@ int main(void){
   write_ppm("test_autocorrelation.ppm", autoc, true); //"true" means log scale
 
 
-  ProfilerStart("profile");
+  //  ProfilerStart("profile");
 
 
   /*** run the reconstruction ************/
@@ -209,7 +209,7 @@ int main(void){
   write_ppm("best_error_3.ppm", result2);
   cout << "Best error 3 is "<< error <<endl; **/
 
-  ProfilerStop();
+  //  ProfilerStop();
 
   return 0;
 }
