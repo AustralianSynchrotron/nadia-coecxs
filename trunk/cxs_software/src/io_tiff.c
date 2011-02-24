@@ -214,15 +214,16 @@ int write_tiff(string file_name, const Double_2D & data){
   }
 
   double max = data.get_max();
+  int max_pixel = 65536; //2^(8bit*2bytes)
+  double scale = max_pixel/max;
 
   //copy to the image into an array
-  uint32 w = data.get_size_x();
-  uint32 h = data.get_size_y();
+  int w = data.get_size_x();
+  int h = data.get_size_y();
   uint16 * grey_image = new uint16[w*h];
-  //tdata_t grey_image = _TIFFmalloc(sizeof(uin32)*w*h);
   for(int i=0; i < w; i++){
     for(int j=0; j< h; j++){ //copy and scale
-      grey_image[j*w+i] = (data.get(i,j)/max)*pow(2,16);
+      grey_image[j*w+i] = data.get(i,j)*scale;
     }
   }
   
