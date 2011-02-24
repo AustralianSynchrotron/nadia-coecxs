@@ -202,4 +202,52 @@ int read_tiff(string file_name, Double_2D & data){
   
   return SUCCESS; //success
     
-}
+};
+
+/** write data out to a tiff file **/
+int write_tiff(string file_name, const Double_2D & data){
+
+  TIFF* tif = TIFFOpen(file_name.c_str(), "w");
+  if (!tif) {
+    cout << "Could not open the file "<<file_name<<endl;
+    return FAILURE;
+  }
+
+  int max = data.get_max();
+
+  //copy to the image into an array
+  uint32 w = data.get_size_x();
+  uint32 h = data.get_size_y();
+  uint16 * grey_image = new uint16[w*h];
+  //tdata_t grey_image = _TIFFmalloc(sizeof(uin32)*w*h);
+  for(int i=0; i < w; i++){
+    for(int j=0; j< h; j++){ //copy and scale
+      grey_image[j*w+i] = (data.get(i,j)/(double)max)*pow(2,8*sizeof(uint16));
+    }
+  }
+  
+  // We need to set some values for basic tags before we can add any data
+  TIFFSetField(tif, TIFFTAG_IMAGEWIDTH, w);
+  TIFFSetField(tif, TIFFTAG_IMAGELENGTH, h);
+  TIFFSetField(tif, TIFFTAG_BITSPERSAMPLE, 8*sizeof(uint16));
+  TIFFSetField(tif, TIFFTAG_SAMPLESPERPIXEL, 1);
+  TIFFSetField(tif, TIFFTAG_ROWSPERSTRIP, h);
+
+  TIFFSetField(tif, TIFFTAG_COMPRESSION, COMPRESSION_PACKBITS); 
+  TIFFSetField(tif, TIFFTAG_PHOTOMETRIC, PHOTOMETRIC_MINISBLACK);
+  
+
+  //write the data out as a single strip
+  int bytes_written = TIFFWriteEncodedStrip(tif, 0, 
+					    (void*) grey_image, 
+					    h*w*sizeof(uint16));
+  if(bytes_written!=h*w*sizeof(uint16)){
+    cout << "Problem writing to tiff file" << endl;
+    exit(1);
+  }
+
+  TIFFClose(tif);
+  delete[] grey_image;  
+  return SUCCESS; //success
+
+};

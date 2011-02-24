@@ -42,3 +42,13 @@ double Double_2D::get_sum() const {
   return total;
 };
 
+double Double_2D::get_max() const {
+  double max = 0;
+  for(int i=0; i<nx; i++){
+    for(int j=0; j<ny; j++){
+      if(array[i*ny+j]>max)
+	max = array[i*ny+j];
+    }
+  }
+  return max;
+};

@@ -54,3 +54,5 @@ int write_dbin(std::string file_name, const Double_2D & data);
 
 int write_cplx(std::string file_name, const Complex_2D & complex);
 
+
+int write_tiff(std::string file_name, const Double_2D & data);

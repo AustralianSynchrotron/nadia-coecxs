@@ -124,6 +124,15 @@ class Double_2D{
    *  
    */
   double get_sum() const;
+
+
+  /**
+   * Get the maximum of all values in the array. 
+   * 
+   * @return The maximum value in the array
+   *  
+   */
+  double get_max() const;
   
 };
 
