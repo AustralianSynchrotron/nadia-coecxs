@@ -213,7 +213,7 @@ int write_tiff(string file_name, const Double_2D & data){
     return FAILURE;
   }
 
-  int max = data.get_max();
+  double max = data.get_max();
 
   //copy to the image into an array
   uint32 w = data.get_size_x();
@@ -222,7 +222,7 @@ int write_tiff(string file_name, const Double_2D & data){
   //tdata_t grey_image = _TIFFmalloc(sizeof(uin32)*w*h);
   for(int i=0; i < w; i++){
     for(int j=0; j< h; j++){ //copy and scale
-      grey_image[j*w+i] = (data.get(i,j)/(double)max)*pow(2.0,8*sizeof(uint16));
+      grey_image[j*w+i] = (data.get(i,j)/max)*pow(2,16);
     }
   }
   

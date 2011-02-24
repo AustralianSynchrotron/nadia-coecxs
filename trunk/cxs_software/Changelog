@@ -14,3 +14,12 @@
 	* inteface/idl: interface for idl has been created, but remains 
 	to be documented and cleaned up.
 
+----------------------------------------------------------------
+24/2/2011 Nadia Davidson
+	* clean up of examples and code in inteface/idl
+	* optimisation of the PlanarCDI code. Fourier transforms
+	are now performed in the Complex_2D class.
+	* FresnelCDI_simulation_example.exe added and corresponding 
+	image files.
+	* write_tiff() written
+-----------------------------------------------------------------
