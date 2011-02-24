@@ -42,26 +42,26 @@ AC_ARG_WITH(jpeg-lib, [  --with-jpeg_lib
 #AC_ARG_WITH(idl-inc, [  --with-idl_inc     
 #		  specify the directory where the file idl_export.h can be found])
 
-enable_idl_lib=yes
+#enable_idl_lib=yes
 
-IDL_FLAG=
+#IDL_FLAG=
 
-if test "$enable_idl_lib" = "yes"
-then
-	IDL_FLAG="DO_IDL=TRUE"
-	AC_SUBST(do_idl,$IDL_FLAG)
-	if test "$with_idl_inc" != ""
-	then
-		CXXFLAGS="-I$with_idl_inc $CXXFLAGS"	
-	fi	
-	AC_CHECK_HEADER([idl_export.h], [], [
-	  echo "" &&
-  	  echo "ERROR: Could not find the idl_export.h header." &&
-  	  echo "       Please specify the location with: " &&
-  	  echo "       './configure --with-idl_inc=<path_to_idl_export.h> " &&
-  	  exit -1
-	  ])	    
-fi
+#if test "$enable_idl_lib" = "yes"
+#then
+IDL_FLAG="DO_IDL=TRUE"
+AC_SUBST(do_idl,$IDL_FLAG)	
+#	if test "$with_idl_inc" != ""
+#	then
+#		CXXFLAGS="-I$with_idl_inc $CXXFLAGS"	
+#	fi	
+#	AC_CHECK_HEADER([idl_export.h], [], [
+#	  echo "" &&
+#  	  echo "ERROR: Could not find the idl_export.h header." &&
+#  	  echo "       Please specify the location with: " &&
+#  	  echo "       './configure --with-idl_inc=<path_to_idl_export.h> " &&
+#  	  exit -1
+#	  ])	    
+#fi
 
 
 LD_LIBRARY_PATH="$PWD/lib $LD_LIBRARY_PATH"
