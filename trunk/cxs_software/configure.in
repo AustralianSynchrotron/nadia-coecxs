@@ -8,6 +8,8 @@ AC_INIT([CXS_Software], [0.0], [Nadia Davidson <nadiamd@unimelb.edu.au>])
 
 # Checks for programs.
 #AC_PROG_CC
+CXXFLAGS="-O3 $CXXFLAGS"
+
 AC_PROG_CXX()
 AC_LANG(C++)
 AC_PROG_MAKE_SET
@@ -32,7 +34,6 @@ AC_ARG_WITH(sz-lib, [  --with-sz_lib
 		  specify the directory where the sz libraries can be found])
 AC_ARG_WITH(jpeg-lib, [  --with-jpeg_lib     
 		  specify the directory where the jpeg libraries can be found])
-
 
 #Check to see if the user wants the IDL wrappers compiled
 #and check that the idl_export.h header can be found

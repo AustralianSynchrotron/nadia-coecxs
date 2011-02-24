@@ -2100,6 +2100,8 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
 # Checks for programs.
 #AC_PROG_CC
+CXXFLAGS="-O3 $CXXFLAGS"
+
 ac_ext=cpp
 ac_cpp='$CXXCPP $CPPFLAGS'
 ac_compile='$CXX -c $CXXFLAGS $CPPFLAGS conftest.$ac_ext >&5'
@@ -2705,7 +2707,6 @@ fi
 if test "${with_jpeg_lib+set}" = set; then :
   withval=$with_jpeg_lib;
 fi
-
 
 
 #Check to see if the user wants the IDL wrappers compiled
