@@ -124,10 +124,10 @@ int main(int argc, char * argv[]){
 
   //I can't see this without using log scale.
   trans.get_2d(MAG,result);
-  write_ppm("trans_mag.ppm",result,true);
+  write_ppm("fcdi_example_trans_mag.ppm",result);
 
   trans.get_2d(PHASE,result);
-  write_ppm("trans_phase.ppm",result);
+  write_ppm("fcdi_example_trans_phase.ppm",result);
 
   return 0;
 }

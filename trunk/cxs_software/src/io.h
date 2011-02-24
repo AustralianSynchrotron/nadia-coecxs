@@ -92,7 +92,8 @@ int write_cplx(std::string file_name, const Complex_2D & complex);
  * @param data The array to be written to file
  * @param log_scale Output on log scale? true/false. Default is false.
  */ 
-int write_tiff(std::string file_name, const Double_2D & data);
+int write_tiff(std::string file_name, const Double_2D & data, 
+	       bool log_scale=false);
 
 
 //used to transform an array of doubles from -x_min .... x_max

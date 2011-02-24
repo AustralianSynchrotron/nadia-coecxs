@@ -112,6 +112,9 @@ int main(void){
   //make a 2D object. This will be used to output the 
   //image of the current estimate.
   Double_2D result(nx,ny);
+  object_estimate.get_2d(MAG,result);
+  write_ppm("test.ppm",result);
+  write_tiff("test.tiff",result);
 
   /******* for fun, let's get the autocorrelation *****/
 

@@ -139,9 +139,9 @@ int main(int argc, char * argv[]){
   }
 
   input.get_2d(MAG,result);
-  write_ppm("trans_mag_input.ppm",result);
+  write_tiff("trans_mag_input.tiff",result);
   input.get_2d(PHASE,result);
-  write_ppm("trans_phase_input.ppm",result);
+  write_tiff("trans_phase_input.tiff",result);
 
   //now simulate: 
  
@@ -154,7 +154,7 @@ int main(int argc, char * argv[]){
   //get the magnitude of the wave
   input.get_2d(MAG_SQ,result);
   //write the output to file
-  write_ppm("sample_plane.ppm",result);
+  write_tiff("sample_plane.tiff",result);
 
   //propagate to detector
   proj.propagate_to_detector(input);
@@ -167,7 +167,7 @@ int main(int argc, char * argv[]){
   input.get_2d(MAG_SQ,result);
 
   //write thresholded output to file
-  write_ppm("forward_projection.ppm",result);
+  write_tiff("forward_projection.tiff",result);
  
   //apply a threshold to make the simulation a bit more realistic
   for(int i=0; i<nx; i++){
@@ -234,8 +234,8 @@ int main(int argc, char * argv[]){
       //output the current estimate of the object
       ostringstream temp_str ( ostringstream::out ) ;
       object_estimate.get_2d(MAG,result);
-      temp_str << "fcdi_example_iter_" << i << ".ppm";
-      write_ppm(temp_str.str(),result);
+      temp_str << "fcdi_example_iter_" << i << ".tiff";
+      write_tiff(temp_str.str(),result);
     
       proj.apply_shrinkwrap();
     }
@@ -247,10 +247,10 @@ int main(int argc, char * argv[]){
 
   //I can't see this without using log scale.
   trans.get_2d(MAG,result);
-  write_ppm("trans_mag_recovered.ppm",result);
+  write_tiff("trans_mag_recovered.tiff",result);
 
   trans.get_2d(PHASE,result);
-  write_ppm("trans_phase_recovered.ppm",result);
+  write_tiff("trans_phase_recovered.tiff",result);
 
   return 0;
   

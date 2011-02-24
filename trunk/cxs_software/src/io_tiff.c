@@ -205,7 +205,7 @@ int read_tiff(string file_name, Double_2D & data){
 };
 
 /** write data out to a tiff file **/
-int write_tiff(string file_name, const Double_2D & data, bool log_sale){
+int write_tiff(string file_name, const Double_2D & data, bool log_scale){
 
   TIFF* tif = TIFFOpen(file_name.c_str(), "w");
   if (!tif) {
@@ -224,7 +224,8 @@ int write_tiff(string file_name, const Double_2D & data, bool log_sale){
   for(int i=0; i < w; i++){
     for(int j=0; j< h; j++){ //copy and scale
       grey_image[j*w+i] = io_scale_value(min,max, 
-					 max_pixel, data.get(i,j),
+					 max_pixel, 
+					 data.get(i,j),
 					 log_scale);
     }
   }
