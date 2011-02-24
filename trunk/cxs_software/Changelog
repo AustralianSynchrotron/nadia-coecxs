@@ -22,4 +22,6 @@
 	* FresnelCDI_simulation_example.exe added and corresponding 
 	image files.
 	* write_tiff() written
+	* fixed the scaling of images when output using write_tiff
+	of write_ppm. The phase can not be viewed better.
 -----------------------------------------------------------------
