@@ -22,7 +22,7 @@ int read_cplx(string file_name, Complex_2D & complex){
   int ny = complex.get_size_y();
 
   //open the input file:
-  FILE * file = fopen(file_name.c_str(), "r");
+  FILE * file = fopen(file_name.c_str(), "r+b");
 
   //error check.
   if(!file){
@@ -34,7 +34,7 @@ int read_cplx(string file_name, Complex_2D & complex){
   size_t elements_read = fread(buffer, sizeof(double), nx*ny*2, file);
 
   if(elements_read!=(nx*ny*2)){
-    cout << "Could not correctly read the file" << file_name
+    cout << "Could not correctly read the file " << file_name
 	 << ". Perhaps the dimensions specifies are wrong?"<<endl;
     return FAILURE;
   }
@@ -66,7 +66,7 @@ int write_cplx(string file_name, const Complex_2D & complex){
   int ny = complex.get_size_y();
 
   //open the input file:
-  FILE * file = fopen(file_name.c_str(), "w");
+  FILE * file = fopen(file_name.c_str(), "w+b");
 
   //error check.
   if(!file){
