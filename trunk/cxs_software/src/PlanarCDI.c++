@@ -134,6 +134,11 @@ void PlanarCDI::set_support(const Double_2D & object_support){
   }
 }
 
+void PlanarCDI::set_beam_stop(const Double_2D & beam_stop_region){
+  if(beam_stop==0)
+    beam_stop = new Double_2D(nx, ny);
+  beam_stop->copy(beam_stop_region);
+}
 
 void PlanarCDI::set_intensity(const Double_2D &detector_intensity){
 
@@ -143,7 +148,6 @@ void PlanarCDI::set_intensity(const Double_2D &detector_intensity){
     }
   }
 }
-
 
 double PlanarCDI::get_error(){
   return current_error;

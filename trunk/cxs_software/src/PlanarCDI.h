@@ -229,11 +229,9 @@ class PlanarCDI{
    * stop and all other values represent the region which should be
    * scaled.
    *
-   * @param beamstop The region of the beam stop in the detector plane 
+   * @param beam_stop_region The region of the beam stop in the detector plane 
    */ 
-  void set_beam_stop(const Double_2D & beam_stop){
-    *(this->beam_stop)=beam_stop;
-  };
+  void set_beam_stop(const Double_2D & beam_stop_region);
 
   /**
    * Set the relaxation parameters of the reconstruction algorithm.
