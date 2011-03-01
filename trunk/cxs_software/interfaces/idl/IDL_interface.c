@@ -129,7 +129,7 @@ extern "C" void IDL_read_ppm(int argc, void * argv[])
 
   IDL_STRING filename = *(IDL_STRING*)argv[2];
   Double_2D temp(nx,ny);
-  read_ppm(filename.s,nx,ny,temp);
+  read_ppm(filename.s,temp);
   copy_from_double_2d(temp, (double*) argv[3]);
 
 }
