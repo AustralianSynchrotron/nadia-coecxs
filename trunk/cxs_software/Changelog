@@ -24,4 +24,7 @@
 	* write_tiff() written
 	* fixed the scaling of images when output using write_tiff
 	of write_ppm. The phase can not be viewed better.
+	* PlanarCDI::set_beam_stop() added so that a beam-stop region 
+	can be excluded when scaling the intensity in planar 
+	reconstruction.
 -----------------------------------------------------------------

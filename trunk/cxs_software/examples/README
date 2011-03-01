@@ -18,12 +18,12 @@ of HIO and the error-reduction algorithm are used.
 
 PlanarCDI_example.sh
 --------------------
-The same reconstuction as above will be performed using the
-CDI_reconstruction.exe command line program. A simple bash
-script and configuration file (planar_example.config) shows how this
-tool can be used. Other parts of the bash script can be uncommented to
-run Fresnel reconstruction or to run multiple times with a different
-starting seed.
+The same reconstruction as above will be performed using the
+CDI_reconstruction.exe command line program. A simple bash script and
+configuration file (planar_example.config & fresnel_example.config)
+shows how this tool can be used. Other parts of the bash script can be
+uncommented to run Fresnel reconstruction or to run multiple times
+with a different starting seed.
 
 
 PlanarCDI_simulation_example.c
@@ -45,5 +45,17 @@ The result of the previous example is used in Fresnel CDI
 reconstruction. The error-reduction algorithm is used. The phase and
 magnitude of the transmission function are output to file.
 
+FresnelCDI_simulation_example.c
+-------------------------------
+This examples demonstrates how a Fresnel experiment can be
+simulated. It makes use of the object from the planar example and the
+white-field from the fresnel example. Because it uses the fresnel 
+white-field reconstructed from data, you will need to run 
+FresnelCDI_WF_example.exe first.
 
-Nadia Davidson - nadiamd@unimelb.edu.au - 5/1/2011
+
+IDL examples
+------------
+These can be found in the directory cxs_software/interfaces/idl
+
+Nadia Davidson - nadiamd@unimelb.edu.au - 1/3/2011

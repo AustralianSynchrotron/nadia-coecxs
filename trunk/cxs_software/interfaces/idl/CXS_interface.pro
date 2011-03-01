@@ -16,7 +16,7 @@
 ; so this is my way around it.
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 function lib_name
-return, 'IDL_interface.so'
+return, 'libIDLCOECXS.so'
 end
 
 
