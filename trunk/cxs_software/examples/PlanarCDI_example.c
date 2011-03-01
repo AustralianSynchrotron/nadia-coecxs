@@ -55,16 +55,7 @@ int main(void){
   /**** get the diffraction data from file and read into an array *****/
 
   Double_2D data;
-  //  int status = read_tiff(data_file_name, data);  
-  int status = read_dbin(data_file_name, nx, ny, data);  
-
-  //check that the file could be opened okay.
-  //status = 0 means it failed, 1 means it opened okay.
-  if(!status){
-    cout << "failed to get data from "<< data_file_name 
-	 <<".. exiting"  << endl;
-    return(1);
-  }
+  read_image(data_file_name, data, nx, ny);  
 
   /****** get the support from a file and read it into an array *****/
   
@@ -72,12 +63,7 @@ int main(void){
   //the support
 
   Double_2D support;
-  status = read_tiff(support_file_name, support);
-  if(!status){
-    cout << "failed to get data from "<< support_file_name 
-	 <<".. exiting"  << endl;
-    return(1);
-  }
+  read_image(support_file_name, support, nx, ny);
 
   //check that the support image has the same dimensions
   //as the data.
@@ -113,14 +99,12 @@ int main(void){
   //image of the current estimate.
   Double_2D result(nx,ny);
   object_estimate.get_2d(MAG,result);
-  write_ppm("test.ppm",result);
-  write_tiff("test.tiff",result);
 
   /******* for fun, let's get the autocorrelation *****/
 
   Double_2D autoc(nx,ny);
   planar.get_intensity_autocorrelation(autoc);
-  write_ppm("test_autocorrelation.ppm", autoc, true); //"true" means log scale
+  write_image("test_autocorrelation.ppm", autoc, true); //"true" means log scale
 
 
   //  ProfilerStart("profile");
@@ -143,7 +127,7 @@ int main(void){
       ostringstream temp_str ( ostringstream::out ) ;
       object_estimate.get_2d(MAG,result);
       temp_str << "real_example_iteration_" << i << ".ppm";
-      write_ppm(temp_str.str(), result);
+      write_image(temp_str.str(), result);
 
       temp_str.clear();
 
@@ -180,7 +164,7 @@ int main(void){
       ostringstream temp_str ( ostringstream::out ) ;
       object_estimate.get_2d(MAG,result);
       temp_str << "real_example_iteration_" << i << ".ppm";
-      write_ppm(temp_str.str(), result);
+      write_image(temp_str.str(), result);
       temp_str.clear();
 
       //apply the shrinkwrap algorithm

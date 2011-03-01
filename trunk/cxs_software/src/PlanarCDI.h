@@ -39,7 +39,6 @@
  * H.M. Quiney review: TUTORIAL REVIEW, Coherent diffractive imaging
  * using short wavelength light sources, Journal of Modern Optics,
  * 2010, DOI: 10.1080/09500340.2010.495459 for the formalism.</li>
- *
  * 
  * <li>The reconstruction is then performed with multiple calls to the
  * PlanarCDI::iterate() method:
@@ -47,6 +46,10 @@
  * automatically update the values in the Complex_2D estimate and the
  * current error. The error can be retrieved using
  * PlanarCDI::get_current_error().
+ *
+ * For cases where the beam-stop region must be excluded during 
+ * reconstruction, you should call the set_beam_stop() method,
+ * to define the beam-stop region before running iterate().
  *
  * </ol>
  */
@@ -111,6 +114,9 @@ class PlanarCDI{
 
   /**a copy of the square root of the intensity at the detector plane. */
   Double_2D intensity_sqrt;
+
+  /** A mask of the beam-stop which is used when scaling the intensity */
+  Double_2D * beam_stop;
 
   /** the algorithm which is being used: ER, HIO etc. */
   int algorithm;
@@ -214,6 +220,20 @@ class PlanarCDI{
    * @param detector_intensity The intensity at the detector 
    */ 
   void set_intensity(const Double_2D & detector_intensity);
+
+
+  /**
+   * Set the beam-stop position in the detector plane. This region
+   * will be leaf to float when the intensity if scaled during
+   * reconstruction. A zero in the array provided represents the beam
+   * stop and all other values represent the region which should be
+   * scaled.
+   *
+   * @param beamstop The region of the beam stop in the detector plane 
+   */ 
+  void set_beam_stop(const Double_2D & beam_stop){
+    *(this->beam_stop)=beam_stop;
+  };
 
   /**
    * Set the relaxation parameters of the reconstruction algorithm.

@@ -55,6 +55,22 @@ static const string planar_string="planar";
 static const string fresnel_string="fresnel";
 static const string fresnel_wf_string="fresnel_wf";
 
+
+void print_usage(){
+
+  cout << "Usage: " << endl << endl
+       << "CDI_reconstruction.exe <config filename> " 
+       << "<reco_type> <seed>" << endl << endl
+       << "where <reco_type> may be: " << planar_string 
+       << ", " << fresnel_string
+       << " or " << fresnel_wf_string << endl
+       << "<seed> should be an integer" << endl <<endl
+       << "If <reco_type> and <seed> do not need to be specified."
+       << "if they are not, <reco_type> will default to "<<planar_string 
+       << " and <seed> to 0." << endl;
+
+}
+
 int main(int argc, char * argv[]){
 
   /** work out which config file to use **/
@@ -66,9 +82,9 @@ int main(int argc, char * argv[]){
   string reco_type = "";
 
   if(argc==1){
-    cout << "No config file given, using "
-	 << "the default: "<<config_file<<endl;
-    config_file="example.config";
+    cout << endl << "No config file given, ";
+    print_usage();
+    exit(0);
   }
   else
     config_file=argv[1];
@@ -86,13 +102,9 @@ int main(int argc, char * argv[]){
     seed = atoi(argv[3]);
 
   if(argc>4){
-    cout << "Wrong number of arguments given. Usage: "
-	 << "planar_CDI_reconstruction <config filename> "
-	 << "<reco_type> <seed>" << endl;
-    cout << "<reco_type> may be: " << planar_string << ", " << fresnel_string
-	 << " or " << fresnel_wf_string << endl;
-    cout << "<seed> should be an integer" << endl;
-      exit(0);
+    cout << endl << "Wrong number of arguments given. ";
+    print_usage();
+    exit(0);
   }
 
   Config c(config_file);
@@ -113,8 +125,8 @@ int main(int argc, char * argv[]){
   list<int> * iterations = c.getIntList("iterations");
 
   //get the number of pixels in x and y of the image
-  int pixels_x = c.getInt("pixels_x");
-  int pixels_y = c.getInt("pixels_y");
+  const int pixels_x = c.getInt("pixels_x");
+  const int pixels_y = c.getInt("pixels_y");
   
   //do some error checking. Were all the values we need present
   //in the config file?
@@ -138,6 +150,8 @@ int main(int argc, char * argv[]){
   double shrinkwrap_gauss_width = c.getDouble("shrinkwrap_gauss_width");
   double shrinkwrap_threshold = c.getDouble("shrinkwrap_threshold");
 
+  string output_file_type = c.getString("output_file_type");
+
   /*******  set up the reconstruction ***************/
 
   //create the projection object which will be used to
@@ -159,12 +173,10 @@ int main(int argc, char * argv[]){
   
   //the data file name
   string data_file_name = c.getString("data_file_name");
-  string data_file_type = c.getString("data_file_type");
 
   //the file which provides the support (pixels with the value 0
   //are considered as outside the object)
   string support_file_name = c.getString("support_file_name");
-  string support_file_type = c.getString("support_file_type");
 
   //output filename prefix
   string output_file_name_prefix = c.getString("output_file_name_prefix");
@@ -220,9 +232,7 @@ int main(int argc, char * argv[]){
 			       pixel_size);
       output_file_name = c.getString("white_field_reco_file_name");
       data_file_name = c.getString("white_field_data_file_name");
-      data_file_type = c.getString("white_field_data_file_type");
       support_file_name = c.getString("white_field_support_file_name");
-      support_file_type = c.getString("white_field_support_file_type");      
 
       //reset the algorithm and number of iterations.
       algorithms->clear();
@@ -246,24 +256,11 @@ int main(int argc, char * argv[]){
 
   /*** get the diffraction data from file and read into an array ***/
   Double_2D data;
-  int status;
-  if(data_file_type=="tiff")
-    status = read_tiff(data_file_name, data);  
-  else if(data_file_type=="ppm")
-    status = read_ppm(data_file_name, data);
-  else if(data_file_type=="dbin")
-    status = read_dbin(data_file_name, pixels_x, pixels_y, data);
-  else{ //unrecognised file type
-    cout << "Can not process files of type \""<< data_file_type 
-	 << "\".. exiting"  << endl;
-    return(1);
-  }
-  //check that the file could be opened okay
-  if(!status){
-    cout << "failed to get data from "<< data_file_name 
-	 <<".. exiting"  << endl;
-    return(1);
-  }
+  read_image(data_file_name, data, pixels_x, pixels_y);  
+  
+  //read_image does the error checking for us and would exit if the file
+  //was not read
+
   if( pixels_x != data.get_size_x() || pixels_y != data.get_size_y() ){
     cout << "Dimensions of the data to not match those given ... exiting"  << endl;
     return(1);
@@ -271,22 +268,7 @@ int main(int argc, char * argv[]){
 
   /******* get the support from file and read it into an array *****/
   Double_2D support;
-  if(support_file_type=="tiff")
-    status = read_tiff(support_file_name, support);  
-  else if(support_file_type=="ppm")
-    status = read_ppm(support_file_name, support);
-  else if(support_file_type=="dbin")
-    status = read_dbin(support_file_name, pixels_x, pixels_y, support);
-  else{ //check that the file type is valid
-    cout << "Can not process files of type \""<< support_file_type 
-	 <<"\".. exiting"  << endl;
-    return(1);
-  }
-  if(!status){
-    cout << "failed to get data from "<< support_file_name 
-	 <<".. exiting"  << endl;
-    return(1);
-  }
+  read_image(support_file_name, support, pixels_x, pixels_y);  
   if( pixels_x != support.get_size_x() || pixels_y != support.get_size_y() ){
     cout << "Dimensions of the support to not match ... exiting"  << endl;
     return(1);
@@ -347,8 +329,9 @@ int main(int argc, char * argv[]){
 	//output the current estimate of the object
 	ostringstream temp_str ( ostringstream::out ) ;
 	object_estimate.get_2d(MAG,result);
-	temp_str << output_file_name_prefix << "_" << i << ".ppm" << flush;
-	write_ppm(temp_str.str(), result, use_log_scale_for_object);
+	temp_str << output_file_name_prefix << "_" << i << "."
+		 << output_file_type << flush;
+	write_image(temp_str.str(), result, use_log_scale_for_object);
 	//temp_str.clear();
 
 	//output the estimation of the intensity in 
@@ -359,16 +342,17 @@ int main(int argc, char * argv[]){
 	  temp->get_2d(MAG_SQ,result);
 	  temp_str << output_file_name_prefix 
 		   << "_diffraction_" << i 
-		   << ".ppm" << flush;
-	  write_ppm(temp_str.str(), result, 
+		   << "."<< output_file_type << flush;
+	  write_image(temp_str.str(), result, 
 		    use_log_scale_for_diffraction); 
 	  delete temp;
 	}
-	if(shrinkwrap_iterations!=0 && i%shrinkwrap_iterations==0){
-	  proj->apply_shrinkwrap(shrinkwrap_gauss_width, 
-				shrinkwrap_threshold);
-	  
-	}
+      }
+      if(shrinkwrap_iterations!=0&&
+	 i%shrinkwrap_iterations==(shrinkwrap_iterations-1)){
+	proj->apply_shrinkwrap(shrinkwrap_gauss_width, 
+			       shrinkwrap_threshold);
+	
       }
     }
     iterations_itr++;
@@ -377,6 +361,14 @@ int main(int argc, char * argv[]){
 
   //write out the final result
   write_cplx(output_file_name, object_estimate);
+
+  //if it's fresnel reconstruction also output the
+  //transmission function
+  if(reco_type.compare(fresnel_string)==0){
+    ((FresnelCDI*) proj)->get_transmission_function(object_estimate);
+    write_cplx("transmission_function.cplx", object_estimate);
+  }
+
   
   //clean up
   delete algorithms;

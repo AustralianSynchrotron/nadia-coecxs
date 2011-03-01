@@ -16,7 +16,7 @@
 ; so this is my way around it.
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 function lib_name
-return, 'libIDLCOECXS.so'
+return, 'IDL_interface.so'
 end
 
 
@@ -371,6 +371,38 @@ end
 pro cxs_set_support, array
 n = size(array)
 a = call_external(lib_name(),'IDL_set_support',n[1],n[2],double(array))
+end
+
+;+
+; NAME:
+;       CXS_SET_BEAM_STOP
+;
+; PURPOSE: 
+;       For PlanarCDI, you may set the beam stop region in the
+;       detector plane. This region will be left to float (i.e. left
+;       unscaled) when the intensity scaling in performed. Zeros in
+;       the array (which is passed) indicate the beam-stop region,
+;       all other values indicate that those pixel should be scaled.
+;
+; CALLING SEQUENCE:
+;
+;	CXS_SET_BEAM_STOP, beam_stop_region
+;
+; INPUTS:
+;
+;       beam_stop_region: 
+;             A 2D array of doubles or integers. Values of 0 are
+;             considered inside the beam-stop region. All others are
+;             considered to be outside the beam-stop region.
+;
+; EXAMPLE:
+;
+;       cxs_set_beam_stop, my_beam_stop_regio
+;
+;-
+pro cxs_set_beam_stop, array
+n = size(array)
+a = call_external(lib_name(),'IDL_set_beam_stop',n[1],n[2],double(array))
 end
 
 ;+
@@ -1094,6 +1126,43 @@ end
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; io functions
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+
+;+
+; NAME:
+;       CXS_READ_PPM
+;
+; PURPOSE:
+;       Read a ppm file.
+;
+; CALLING SEQUENCE:
+;
+;       image = CXS_READ_PPM( nx, ny, filename)
+;
+; INPUTS:
+;
+;       nx:
+;             The number of pixels horizontally (need to be checked?)
+;
+;       ny:
+;             The number of pixels vertically (need to be checked?)
+;
+;       filename:
+;             A string containing the name of the file to read.
+;
+; OUTPUTS:
+;       image:
+;             The image in the format of a 2D array of doubles.
+;
+; EXAMPLE:
+;       data = CXS_READ_PPM(1024, 1024, 'data_file.ppm')
+;-
+function cxs_read_ppm, nx, ny, filename
+result = make_array(nx,ny, /DOUBLE)
+b = call_external(lib_name() ,'IDL_read_ppm',nx,ny,filename,result)
+show, result
+return, result
+end
 
 ;+
 ; NAME:

@@ -122,6 +122,20 @@ extern "C" void IDL_read_dbin(int argc, void * argv[])
 
 }
 
+extern "C" void IDL_read_ppm(int argc, void * argv[])
+{
+  int ny = *(int*) argv[0];
+  int nx = *(int*) argv[1];
+
+  IDL_STRING filename = *(IDL_STRING*)argv[2];
+  Double_2D temp(nx,ny);
+  read_ppm(filename.s,nx,ny,temp);
+  copy_from_double_2d(temp, (double*) argv[3]);
+
+}
+
+
+
 extern "C" void IDL_read_cplx(int argc, void * argv[])
 {
   int ny = *(int*) argv[0];
@@ -259,6 +273,19 @@ extern "C" void IDL_set_support(int argc, void * argv[]){
   copy_to_double_2d(temp_2D,(double*) argv[2]); 
 
   reco->set_support(temp_2D);
+}
+
+extern "C" void IDL_set_beam_stop(int argc, void * argv[]){
+
+  check_objects();
+
+  int ny = *(int*) argv[0];
+  int nx = *(int*) argv[1];
+
+  Double_2D temp_2D(nx,ny);
+  copy_to_double_2d(temp_2D,(double*) argv[2]); 
+
+  reco->set_beam_stop(temp_2D);
 }
 
 extern "C" void IDL_set_intensity(int argc, void * argv[]){

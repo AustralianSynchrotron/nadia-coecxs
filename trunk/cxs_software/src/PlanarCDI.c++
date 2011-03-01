@@ -51,6 +51,11 @@ PlanarCDI::PlanarCDI(Complex_2D & initial_guess, int n_best)
     best_array[i] = new Complex_2D(nx,ny);
     best_error_array[i]=1;
   }
+
+
+  //initialize the beam-stop mask to null (not in use)
+  beam_stop=0;
+
 };
 
 PlanarCDI::~PlanarCDI(){
@@ -181,16 +186,19 @@ void PlanarCDI::scale_intensity(Complex_2D & c){
   for(int i=0; i< nx; i++){
     for(int j=0; j< ny; j++){
 
-      current_int_sqrt=intensity_sqrt.get(i,j);
-      current_mag=c.get_mag(i,j);
-
       //reset the magnitude
-      c.set_mag(i,j,current_int_sqrt);
+      if(beam_stop==0 || beam_stop->get(i,j)>0){
+	
+	current_int_sqrt=intensity_sqrt.get(i,j);
+	current_mag=c.get_mag(i,j);
+	
+	c.set_mag(i,j,current_int_sqrt);
       
-      //calculate the error
-      norm2_mag += current_int_sqrt*current_int_sqrt;
-      norm2_diff += (current_mag-current_int_sqrt)
-      	*(current_mag-current_int_sqrt);
+	//calculate the error
+	norm2_mag += current_int_sqrt*current_int_sqrt;
+	norm2_diff += (current_mag-current_int_sqrt)
+	  *(current_mag-current_int_sqrt);
+      }
     }
   }
   current_error = (norm2_diff/norm2_mag);

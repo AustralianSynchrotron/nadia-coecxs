@@ -112,7 +112,8 @@ class FresnelCDI: public PlanarCDI{
    * magnitude. By default this is done, but can be switched off by 
    * passing "false" for this parameter.
    */
-  virtual void get_transmission_function(Complex_2D & result, bool inforce_unit_mag=true);
+  virtual void get_transmission_function(Complex_2D & result, 
+					 bool inforce_unit_mag=true);
   
   /**
    * This method overrides the one in PlanarCDI by adding/subtracting
