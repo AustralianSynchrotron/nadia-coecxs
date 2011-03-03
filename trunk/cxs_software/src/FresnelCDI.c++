@@ -30,6 +30,18 @@ FresnelCDI::FresnelCDI(Complex_2D & initial_guess,
    B_d(ny,ny){
 
   illumination.copy(white_field);
+  set_experimental_parameters(wavelength,focal_detector_length,
+			      focal_sample_length,pixel_length);
+  set_algorithm(ER);
+}
+
+void FresnelCDI::set_experimental_parameters(double beam_wavelength,
+					     double focal_detector_length,
+					     double focal_sample_length,
+					     double pixel_size){
+  
+  wavelength = beam_wavelength;
+  pixel_length = pixel_size;
 
   double x_mid = (nx-1)/2;
   double y_mid = (ny-1)/2;
@@ -43,14 +55,18 @@ FresnelCDI::FresnelCDI(Complex_2D & initial_guess,
   double scaling_x = beam_wavelength*zsd/(pixel_length*nx);
   double scaling_y = beam_wavelength*zsd/(pixel_length*ny);
 
+  double rho_2_d;
+  double phi_B_d;
+  double phi_B_s;
+
   for(int i=0; i<nx; i++){
     for(int j=0; j<ny; j++){
 
-      double rho_2_d = pow(pixel_length*(x_mid-i),2) + 
+      rho_2_d = pow(pixel_length*(x_mid-i),2) + 
 	pow(pixel_length*(y_mid-j),2);
 
-      double phi_B_d = -(M_PI*rho_2_d)/(beam_wavelength)*((1/focal_detector_length)-(1/zsd));
-      double phi_B_s = -phi_B_d;
+      phi_B_d = -(M_PI*rho_2_d)/(beam_wavelength)*((1/focal_detector_length)-(1/zsd));
+      phi_B_s = -phi_B_d;
 
       B_s.set_real(i,j,cos(phi_B_s));
       B_s.set_imag(i,j,sin(phi_B_s));
@@ -61,14 +77,13 @@ FresnelCDI::FresnelCDI(Complex_2D & initial_guess,
     }
   }
 
-  set_algorithm(ER);
-
 }
 
 void FresnelCDI::initialise_estimate(int seed){
   //initialise the random number generator
 
-  srand(seed);
+  //FIXME: This is not even used!
+   srand(seed);
 
   //start in the detector plane and use eq. 137 from
   //Harry's review paper.
@@ -121,17 +136,20 @@ void FresnelCDI::propagate_to_detector(Complex_2D & c){
 void FresnelCDI::get_transmission_function(Complex_2D & result,
 					   bool inforce_unity_mag){
 
+  Complex_2D temp_illum(nx,ny);
+  temp_illum.copy(illumination);
+
   //get the illuminating wavefield in the sample plane
-  propagate_from_detector(illumination);
+  propagate_from_detector(temp_illum);
 
   //divide the estimate by the illuminating wavefield
   //and add unity.
   for(int i=0; i<nx; i++){
     for(int j=0; j<nx; j++){
 
-      double new_mag = complex.get_mag(i,j)/(norm*illumination.get_mag(i,j));
+      double new_mag = complex.get_mag(i,j)/(norm*temp_illum.get_mag(i,j));
       double new_phi = complex.get_value(i,j,PHASE) 
-	- illumination.get_value(i,j,PHASE);
+	- temp_illum.get_value(i,j,PHASE);
       
       result.set_real(i,j,new_mag*cos(new_phi)+1);
       result.set_imag(i,j,new_mag*sin(new_phi));
@@ -140,8 +158,4 @@ void FresnelCDI::get_transmission_function(Complex_2D & result,
 	result.set_mag(i,j,1);      
     }
   }
-
-  //go back to the detector plane
-  propagate_to_detector(illumination);
-
 }

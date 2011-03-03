@@ -149,7 +149,26 @@ class FresnelCDI: public PlanarCDI{
   };
 
 
-
+   /**
+    * Reset the experimental parameters. This is called when an object
+    * of this type is constructed. I maybe called at any time during
+    * reconstruction, for example to refine the experimental
+    * parameters. This method resets the coefficient matricies which
+    * are used in the propagation between the detector and sample
+    * planes. All values should be given in the same length units.
+    *
+    * @param beam_wavelength The beam wavelength
+    * @param focal_detector_length The distance between the focal plane
+    *        and dector plane.
+    * @param focal_sample_length The distance between the focal plane
+    *        and sample plane.
+    * @param pixel_size The size of one detector pixel.
+    */ 
+  void set_experimental_parameters(double beam_wavelength,
+				   double focal_detector_length,
+				   double focal_sample_length,
+				   double pixel_size);
+    
 
 
 };
