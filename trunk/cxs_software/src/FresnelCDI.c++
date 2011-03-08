@@ -146,16 +146,24 @@ void FresnelCDI::get_transmission_function(Complex_2D & result,
   //and add unity.
   for(int i=0; i<nx; i++){
     for(int j=0; j<nx; j++){
-
-      double new_mag = complex.get_mag(i,j)/(norm*temp_illum.get_mag(i,j));
-      double new_phi = complex.get_value(i,j,PHASE) 
-	- temp_illum.get_value(i,j,PHASE);
       
-      result.set_real(i,j,new_mag*cos(new_phi)+1);
-      result.set_imag(i,j,new_mag*sin(new_phi));
+      if(norm!=0&&temp_illum.get_mag(i,j)!=0){
+      
+	double new_mag = complex.get_mag(i,j)/(norm*temp_illum.get_mag(i,j));
+	double new_phi = complex.get_value(i,j,PHASE) 
+	  - temp_illum.get_value(i,j,PHASE);
+	
+	result.set_real(i,j,new_mag*cos(new_phi)+1);
+	result.set_imag(i,j,new_mag*sin(new_phi));
+	
+	if(inforce_unity_mag && result.get_mag(i,j) > 1)
+	  result.set_mag(i,j,1);      
+      }
+      else{
+	result.set_real(i,j,0);
+	result.set_imag(i,j,0);
 
-      if(inforce_unity_mag && result.get_mag(i,j) > 1)
-	result.set_mag(i,j,1);      
+      }
     }
   }
 }

@@ -140,7 +140,14 @@ class Double_2D{
    * @return The minimum value in the array 
    */
   double get_min() const;
-  
+
+
+  void add(const Double_2D & other_array, double norm=1.0){
+    for(int i=0; i< nx; i++)
+      for(int j=0; j< ny; j++)
+	array[i*ny+j]+=norm*other_array.get(i,j);
+  }
+
 };
 
 #endif
