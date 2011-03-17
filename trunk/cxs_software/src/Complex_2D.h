@@ -116,7 +116,7 @@ class Complex_2D{
    * 
    * @param x The x position
    * @param y The y position
-   * @oaram value The value which it will be set to
+   * @param value The value which it will be set to
    *  
    */
   inline void set_imag(int x, int y, double value){

@@ -91,12 +91,14 @@ class FresnelCDI: public PlanarCDI{
 
 
   /**
-   * This method overrides the one in PlanarCDI. The initial guess is
-   * described in Harry's review paper: page 29. in particular
-   * e.q.. 137.
+   * Initialise the object esw (at the sample plane). The estimate is
+   * constructed by subtracting the white-field magnitude from the
+   * diffraction data. This forms the magnitude of the esw in the
+   * detector plane. The phase is set randomly and will lie within the
+   * range -0.1*2pi to 0.1*2pi. The esw is then propagated to the
+   * sample plane and the support is applied.
    *
-   * @param seed The seed of the random number generator. NOT USED!
-   * @todo The seed currently doesn't do anything!!
+   * @param seed The seed of the random number generator 
    */
   virtual void initialise_estimate(int seed=0);
 
@@ -123,6 +125,7 @@ class FresnelCDI: public PlanarCDI{
    * on.
    */
   virtual void scale_intensity(Complex_2D & c); 
+
 
   /**
    * Propagate to the sample plane using the paraxial free-space

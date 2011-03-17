@@ -65,7 +65,7 @@ void FresnelCDI::set_experimental_parameters(double beam_wavelength,
       rho_2_d = pow(pixel_length*(x_mid-i),2) + 
 	pow(pixel_length*(y_mid-j),2);
 
-      phi_B_d = -(M_PI*rho_2_d)/(beam_wavelength)*((1/focal_detector_length)-(1/zsd));
+      phi_B_d = (M_PI*rho_2_d)/(beam_wavelength)*((1/focal_detector_length)-(1/zsd));
       phi_B_s = -phi_B_d;
 
       B_s.set_real(i,j,cos(phi_B_s));
@@ -81,54 +81,51 @@ void FresnelCDI::set_experimental_parameters(double beam_wavelength,
 
 void FresnelCDI::initialise_estimate(int seed){
   //initialise the random number generator
-
-  //FIXME: This is not even used!
-   srand(seed);
-
-  //start in the detector plane and use eq. 137 from
-  //Harry's review paper.
-
+  srand(seed);
+  
   for(int i=0; i<nx; i++){
     for(int j=0; j<ny; j++){
-
-      if(illumination.get_value(i,j,REAL)==0 || norm==0){
-      	complex.set_real(i,j,0); 
-	complex.set_imag(i,j,0); 
-      }
-      else{
-	double real_value = intensity_sqrt.get(i,j)*intensity_sqrt.get(i,j) 
-	  - norm*norm*illumination.get_value(i,j,MAG_SQ);
-
-	real_value = real_value / (2*norm*illumination.get_value(i,j,REAL));
-
-	complex.set_real(i,j,real_value); 
-	complex.set_imag(i,j,0);
-      }
-
+      
+      //do a simple initialisation
+      
+      //make the magnitude the difference of the intensity and
+      //white-field
+      double amp = intensity_sqrt.get(i,j)-norm*illumination.get_mag(i,j);
+      
+      //perterb the phase a bit about zero to allow random starts.
+      double phase = 0.2*2*M_PI*(0.5-rand()/((double) RAND_MAX) );
+      complex.set_mag(i,j,amp);
+      complex.set_phase(i,j,phase);
+      
     }
   }
 
+  //take the result to the sample plane and apply the support
   propagate_from_detector(complex);
   apply_support(complex);
-
+  
 }
 
 
 void FresnelCDI::scale_intensity(Complex_2D & c){
+
   c.add(illumination,norm); //add the white field
+
   PlanarCDI::scale_intensity(c);
+
   c.add(illumination,-norm);//subtract the white field
+
 }
 
 void FresnelCDI::propagate_from_detector(Complex_2D & c){
   c.multiply(B_d);
-  c.perform_forward_fft(); 
-  c.invert(true); 
+  c.perform_backward_fft();
+  c.invert(true);
 }
 
 void FresnelCDI::propagate_to_detector(Complex_2D & c){
-  c.invert(true);  
-  c.perform_backward_fft();
+  c.invert(true); 
+  c.perform_forward_fft();
   c.multiply(B_s);
 }
 

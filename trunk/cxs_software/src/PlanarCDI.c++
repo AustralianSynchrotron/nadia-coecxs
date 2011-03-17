@@ -56,6 +56,9 @@ PlanarCDI::PlanarCDI(Complex_2D & initial_guess, int n_best)
   //initialize the beam-stop mask to null (not in use)
   beam_stop=0;
 
+  //initialize the complex contraint to null;
+  custom_complex_contraint = NULL; 
+
 };
 
 PlanarCDI::~PlanarCDI(){
@@ -126,12 +129,18 @@ void PlanarCDI::initialise_estimate(int seed){
   }
 }
 
-void PlanarCDI::set_support(const Double_2D & object_support){
+void PlanarCDI::set_support(const Double_2D & object_support, bool soften){
+  double max = object_support.get_max();
   for(int i=0; i< nx; i++){
     for(int j=0; j< ny; j++){
-      support.set(i,j,object_support.get(i,j));
+      support.set(i,j,object_support.get(i,j)/max);
     }
   }
+  //if required, convolve the support with a gaussian to soften the
+  //edges
+  if(soften) 
+    convolve(support,3,5);
+
 }
 
 void PlanarCDI::set_beam_stop(const Double_2D & beam_stop_region){
@@ -141,7 +150,6 @@ void PlanarCDI::set_beam_stop(const Double_2D & beam_stop_region){
 }
 
 void PlanarCDI::set_intensity(const Double_2D &detector_intensity){
-
   for(int i=0; i< nx; i++){
     for(int j=0; j< ny; j++){
       intensity_sqrt.set(i,j,sqrt(detector_intensity.get(i,j)));
@@ -154,16 +162,27 @@ double PlanarCDI::get_error(){
 }
 
 void PlanarCDI::apply_support(Complex_2D & c){
+  double support_value;
+
   for(int i=0; i< nx; i++){
     for(int j=0; j< ny; j++){
-      if(support.get(i,j)==0){
-	c.set_real(i,j,0.0);
-	c.set_imag(i,j,0.0);
+
+      support_value = support.get(i,j);
+      if(support_value == 0){
+	c.set_real(i,j,0);
+	c.set_imag(i,j,0);
+      }
+      else if(support_value < 1){
+	c.set_real(i,j,c.get_real(i,j) * support_value);
+	c.set_imag(i,j,c.get_imag(i,j) * support_value);
       }
     }
   }
-}
 
+  if(custom_complex_contraint)
+    (*custom_complex_contraint)(c);
+
+}
 
 void PlanarCDI::project_intensity(Complex_2D & c){
   propagate_to_detector(c);
@@ -356,16 +375,15 @@ int PlanarCDI::iterate(){
     }
   }
 
-  //check whether this estimate is as good as the current best
-  //this is a bit dodgy since we are actually storing the estimate just after the
-  //best one.
+  // check whether this estimate is as good as the current best
+  // this is a bit dodgy since we are actually storing the 
+  // estimate just after the best one.
   int place = 0;
   for( ; place < n_best && current_error > best_error_array[place]; place++); 
   
   //we found a new best estimate
   if(n_best>0 && place < n_best){
 
-    //    cout << "We have found a better estimate at location " << place <<endl;
     Complex_2D * temp_pointer = best_array[n_best-1];
     temp_pointer->copy(complex);
 
@@ -436,11 +454,7 @@ void PlanarCDI::convolve(Double_2D & array, double gauss_width,
       for(int i2=i-pixel_cut_off; i2 <= i+pixel_cut_off; i2++){
 	for(int j2=j-pixel_cut_off; j2 <= j+pixel_cut_off; j2++){
 	  if(i2<nx && i2>=0 && j2>=0 && j2<ny){
-	    //double smeared_value = temp_array.get(i2,j2);
-	    //smeared_value += array.get(i,j)*gauss_dist.get(fabs(i-i2),fabs(j-j2));
-	    //temp_array.set(i2,j2,smeared_value); 
 	    new_value += array.get(i2,j2)*gauss_dist.get(fabs(i-i2),fabs(j-j2));
-
 	  }
 	}
       }
@@ -479,3 +493,4 @@ void PlanarCDI::set_fftw_type(int type){
   temp_complex_PF.set_fftw_type(type);
   complex.set_fftw_type(type);
 }
+

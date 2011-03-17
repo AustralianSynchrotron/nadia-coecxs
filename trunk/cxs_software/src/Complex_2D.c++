@@ -204,7 +204,7 @@ void Complex_2D::copy(Complex_2D & c){
 }
 
 
-//invert and scale if we want to.
+//invert (and scale if we want to).
 void Complex_2D::invert(bool scale){
 
   int middle_x = nx/2;

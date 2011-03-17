@@ -139,6 +139,9 @@ class PlanarCDI{
       best estimates */
   double * best_error_array;
 
+  /** a function pointer to a cumstomized complex contraint */
+  void (*custom_complex_contraint)(Complex_2D&); 
+
   /** a mapping between the algorithm name (string) and identification
       number */
   static std::map<std::string,int> * algNameMap;
@@ -205,13 +208,25 @@ class PlanarCDI{
 
    /**
     * Set the sample support. A "0" value in the Double_2D is
-    * interpreted as being outside the support. All positive values
-    * are considered inside the support. The support can be updated at
-    * anytime during reconstruction by calling this method.
+    * interpreted as being outside the support. Pixels with the
+    * maximum value of the Double_2D are considered inside the
+    * support. Values between 0 and the maximum indict the soft edge
+    * of the support. In this case, when the support is applied, the
+    * esw magnitude is scaled relative to the support edge value.  
+    * 
+    * By default, the edge of a given support will be softened by
+    * convolution with a 3 pixel wide gaussian. This feature can be
+    * turned off by setting the boolean flag to false.
     *
-    * @param object_support The sample support
+    * The support can be updated at anytime during reconstruction by
+    * calling this method.
+    *
+    * @param object_support The sample support 
+    * @param soften If true, the edges of the support will be
+    * softened by covolving it with a 3 pixel wide gaussian. By default
+    * this option is on.
     */ 
-  void set_support(const Double_2D & object_support);
+  void set_support(const Double_2D & object_support, bool soften=true);
   
   /**
    * Set the detector diffraction image (i.e. the square of the
@@ -422,6 +437,14 @@ class PlanarCDI{
    */
   void set_fftw_type(int type);
 
+
+
+  void set_complex_contraint_function(void (*complex_contraint)(Complex_2D & tranmission)){
+    custom_complex_contraint = complex_contraint;
+    
+  }
+
+
  protected:
 
   /**
@@ -457,6 +480,9 @@ class PlanarCDI{
    */  
   void convolve(Double_2D & array, double gauss_width, int pixel_cut_off=4);
   
+
+
+
 
     
 };

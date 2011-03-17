@@ -148,6 +148,13 @@ class Double_2D{
 	array[i*ny+j]+=norm*other_array.get(i,j);
   }
 
+  void scale(double scale_by){
+    for(int i=0; i< nx; i++)
+      for(int j=0; j< ny; j++)
+	array[i*ny+j]*=scale_by;
+  }
+
+
 };
 
 #endif

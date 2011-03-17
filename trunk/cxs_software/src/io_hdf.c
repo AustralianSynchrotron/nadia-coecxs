@@ -224,7 +224,7 @@ int read_hdf4(string file_name, Double_2D & data, char * data_name){
 
    for(int i=0; i< dim_sizes[0]; ++i){
      for(int j=0; j< dim_sizes[1]; ++j){
-       data.set(i,j,array.return_array_value(dim_sizes[1]*j+i));
+       data.set(i,j,array.return_array_value(dim_sizes[1]*i+j));
      }
    }
    

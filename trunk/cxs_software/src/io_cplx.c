@@ -46,8 +46,8 @@ int read_cplx(string file_name, Complex_2D & complex){
   
   for(int i=0; i < nx; ++i){
     for(int j=0; j< ny; ++j){
-      complex.set_real(i,j,buffer[2*(j*nx+i)]);
-      complex.set_imag(i,j,buffer[2*(j*nx+i)+1]);
+      complex.set_real(i,j,buffer[2*(i*ny+j)]);
+      complex.set_imag(i,j,buffer[2*(i*ny+j)+1]);
     }
   }
   
@@ -81,8 +81,8 @@ int write_cplx(string file_name, const Complex_2D & complex){
   
   for(int i=0; i < nx; ++i){
     for(int j=0; j< ny; ++j){
-      buffer[2*(j*nx+i)] = complex.get_real(i,j);
-      buffer[2*(j*nx+i)+1] = complex.get_imag(i,j);
+      buffer[2*(i*ny+j)] = complex.get_real(i,j);
+      buffer[2*(i*ny+j)+1] = complex.get_imag(i,j);
     }
   }
   

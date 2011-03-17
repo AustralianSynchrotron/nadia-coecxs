@@ -119,7 +119,24 @@ class FresnelCDI_WF: public PlanarCDI{
    * @param seed The seed for the random number generator
    * 
    */
-  void initialise_estimate(int seed=0);
+  virtual void initialise_estimate(int seed=0);
+
+  /**
+   * This method is an alternative to setting the support using an
+   * image. You should pass the zone-plate diameter and (optionally)
+   * how much bigger the support should be than the zone-plate. The
+   * support will be set to a circle, centered at the center of the
+   * zone-plate plane, with a diameter equal to the zone plate
+   * diameter time the size parameter.
+   *
+   * @param z_diameter Diameter of the zone-plate (given in the same
+   * units as the dimensions given to the constructed).  
+
+   * @param size What proportion of the zone-plate plane will be used
+   * for the support, by default this is 1.01 (the support is 1%
+   * larger than the support in diameter).
+   */
+  virtual void set_support(double z_diameter, double size=1.01);
 
 
   /**
