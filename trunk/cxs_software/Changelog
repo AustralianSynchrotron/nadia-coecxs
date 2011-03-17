@@ -28,3 +28,14 @@
 	can be excluded when scaling the intensity in planar 
 	reconstruction.
 -----------------------------------------------------------------
+17/3/2011 Nadia Davidson
+	* Fixed an issue with Fresnel simulation. It previously wasn't
+	being done correctly. The simulation example has also been improved 
+	to demonstrate how a transmission function can be set up if the
+	material and maximum thickness are known.
+	* Initialisation in Fresnel and Fresnel_WF CDI is done slightly
+	differently now. This fixed a problem with speckle in the
+	white-field reconstuction, and also allows FresnelCDI to be
+	initialised (at least partially) randomly.
+	* Soft support edges are now allowed.
+------------------------------------------------------------------
