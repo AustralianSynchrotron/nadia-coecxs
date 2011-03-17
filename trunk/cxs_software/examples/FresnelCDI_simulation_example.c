@@ -17,6 +17,7 @@
 #include <sstream>
 #include <stdlib.h>
 #include "io.h"
+#include "utils.h"
 #include "Complex_2D.h"
 #include "Double_2D.h"
 #include "FresnelCDI.h"
@@ -45,10 +46,6 @@ int main(int argc, char * argv[]){
     return(1);
   }
 
-  //the approx. theshold level of the image.
-  //Not too much (less than 1!, depending on absorption level below)
-  const double noise_level = 0.5;
-  
   //get the object dimensions
   int nx = object.get_size_x();
   int ny = object.get_size_y();
@@ -107,7 +104,8 @@ int main(int argc, char * argv[]){
 		  wavelength, //wavelength
 		  fd, //focal-to-detector
 		  fs, //focal-to-sample
-		  ps); //pixel size
+		  ps, //pixel size
+		  1.0); //normalisation 
 
   //******************************************
   //Project the object to the image plane 
@@ -117,24 +115,28 @@ int main(int argc, char * argv[]){
   // create the complex array which it will be stored in 
   Complex_2D input(ny,ny);
 
-  //find the maximum of the input
-  double max = 0;
-  for (int i = 0; i<nx; i++){
-    for (int j = 0; j<ny; j++){
-      if(max < object.get(i,j))
-	max = object.get(i,j);
-    }
-  }
-  
   //now fill the input with a scaled version of the simulation
   //object image. This part need to be controlled a bit by
   //the person doing the simulation. e.g. to work out what
   //transmission functions are physical for which types of
-  //materials etc. Here, we just give an over simplified example.
+  //materials etc. 
+
+  double thickness = 150e-9;   //150nm of gold
+  double delta = 6.45e-4;
+  double beta = 1.43e-4;
+  double k = (2.0 * M_PI)/wavelength;
+
+  double max = object.get_max();
+
   for (int i = 0; i<nx; i++){
     for (int j = 0; j<ny; j++){
-      input.set_value(i,j,MAG, 1-0.7*(object.get(i,j)/max));
-      input.set_value(i,j,PHASE,-2*(object.get(i,j)/max));
+      
+      double this_pixel_thickness = thickness*object.get(i,j)/max;
+      double mag = exp(-beta*k*this_pixel_thickness);
+      double phase = -delta*k*this_pixel_thickness;
+
+      input.set_value(i,j,MAG, mag);
+      input.set_value(i,j,PHASE, phase);
     }
   }
 
@@ -168,15 +170,19 @@ int main(int argc, char * argv[]){
 
   //write thresholded output to file
   write_tiff("forward_projection.tiff",result);
- 
+
+  //the approx. theshold level of the image.
+  //Not too much (less than 1!, depending on absorption level below)
+  //const double noise_level = 0.5;
+  
   //apply a threshold to make the simulation a bit more realistic
-  for(int i=0; i<nx; i++){
+  /**  for(int i=0; i<nx; i++){
     for(int j=0; j<ny; j++){
       result.set(i,j,result.get(i,j)-noise_level);
       if(result.get(i,j)<0)
 	result.set(i,j,0);
     }
-  }
+    }**/
   
   /*
   //add random noise to the output. Where, and in what form is best??
@@ -188,7 +194,6 @@ int main(int argc, char * argv[]){
      }
   }
   */
-
   
   /****************************************************/
   /*******  set up the reconstuction ****************
@@ -199,26 +204,22 @@ int main(int argc, char * argv[]){
 
 
   //set the support and intensity
-  proj.set_support(support);
-  
+  proj.set_support(support);  
   proj.set_intensity(result);
 
 
   //parameters are the same as before except norm
   //normalisation between wf and image
   input.get_2d(MAG,result);
-  //get intensity (MAG) of wf (use for normalisation)
-  Double_2D wf_intensity(nx,ny);
-  wf.get_2d(MAG,wf_intensity);
-  //  write_ppm("wf_intensity.ppm",wf_intensity);
-  proj.set_normalisation(result.get_sum()/wf_intensity.get_sum());
 
   //set the algorithm
   proj.set_algorithm(ER);
 
   //Initialise the current object ESW
   proj.initialise_estimate(0);
-  
+
+  //set a complex contraint for the transmission function
+  //proj.set_complex_contraint_function(charge_flip);
   
   /*** run the reconstruction ************/
   
@@ -231,13 +232,14 @@ int main(int argc, char * argv[]){
     cout << "Error: " << proj.get_error() << endl;
 
     if(i%output_iterations==0){
+
       //output the current estimate of the object
-      ostringstream temp_str ( ostringstream::out ) ;
       object_estimate.get_2d(MAG,result);
+      ostringstream temp_str ( ostringstream::out ) ;
       temp_str << "fcdi_example_iter_" << i << ".tiff";
       write_tiff(temp_str.str(),result);
     
-      proj.apply_shrinkwrap();
+      //      proj.apply_shrinkwrap();
     }
   }
 
