@@ -224,9 +224,9 @@ class PlanarCDI{
     * @param object_support The sample support 
     * @param soften If true, the edges of the support will be
     * softened by covolving it with a 3 pixel wide gaussian. By default
-    * this option is on.
+    * this option is off.
     */ 
-  void set_support(const Double_2D & object_support, bool soften=true);
+  void set_support(const Double_2D & object_support, bool soften=false);
   
   /**
    * Set the detector diffraction image (i.e. the square of the

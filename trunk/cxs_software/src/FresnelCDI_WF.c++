@@ -89,27 +89,11 @@ void FresnelCDI_WF::initialise_estimate(int seed){
 }
 
 
-void FresnelCDI_WF::set_support(double z_diameter, double size){
-
-  double center_pixel = (nx-1)/2;
-  double delta_z = (zone_to_focal_length/focal_to_detector_length)*pixel_length;
-
-  for(int i=0; i<nx; i++){
-    for(int j=0; j<ny; j++){ 
-      //calculate the distance from the center
-      double i_ = i-center_pixel;
-      double j_ = j-center_pixel;
-      double r = delta_z*sqrt(i_*i_+j_*j_);
-      if(r < size*z_diameter/2.0)
-	support.set(i,j,1);
-    }
-  }
-}
 
 
 int FresnelCDI_WF::iterate(){
 
-  Double_2D result(nx,ny);
+  //Double_2D result(nx,ny);
   
   // complex.get_2d(PHASE,result);
   // write_ppm("b0.ppm",result);
@@ -125,12 +109,12 @@ int FresnelCDI_WF::iterate(){
   // write_ppm("b3.ppm",result);
   
   propagate_to_detector(complex);
-  
+
   //  complex.get_2d(PHASE,result);
   // write_ppm("b4.ppm",result);
   
   scale_intensity(complex);
-  
+
   //  complex.get_2d(PHASE,result);
   // write_ppm("b5.ppm",result);
 
@@ -158,4 +142,22 @@ void FresnelCDI_WF::propagate_to_detector(Complex_2D & c){
   c.invert(true);
   c.perform_forward_fft();
 
+}
+
+void FresnelCDI_WF::set_support(double z_diameter, double size){
+
+  double center_pixel = (nx-1)/2;
+  double delta_z = (zone_to_focal_length/focal_to_detector_length)*pixel_length;
+
+  for(int i=0; i<nx; i++){
+    for(int j=0; j<ny; j++){ 
+      //calculate the distance from the center
+      double i_ = i-center_pixel;
+      double j_ = j-center_pixel;
+      double r = delta_z*sqrt(i_*i_+j_*j_);
+      if(r < size*z_diameter/2.0)
+	support.set(i,j,1);
+    }
+  }
+  convolve(support,3,5);
 }

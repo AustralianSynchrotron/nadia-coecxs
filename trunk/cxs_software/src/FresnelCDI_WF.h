@@ -127,7 +127,8 @@ class FresnelCDI_WF: public PlanarCDI{
    * how much bigger the support should be than the zone-plate. The
    * support will be set to a circle, centered at the center of the
    * zone-plate plane, with a diameter equal to the zone plate
-   * diameter time the size parameter.
+   * diameter time the size parameter. The support edge is softened by
+   * convoluting it with a gaussian function (width=3 pixels).
    *
    * @param z_diameter Diameter of the zone-plate (given in the same
    * units as the dimensions given to the constructed).  

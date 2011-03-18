@@ -119,14 +119,15 @@ void PlanarCDI::initialise_estimate(int seed){
 	complex.set_value(i,j,IMAG,0);
       }
       else{
-	double r = (255.0*rand()/(double) RAND_MAX);
-	double im = (255.0*rand()/(double) RAND_MAX);
-
+	double r = support.get(i,j)*(255.0*rand()/(double) RAND_MAX);
+	double im = support.get(i,j)*(255.0*rand()/(double) RAND_MAX);
+	
 	complex.set_value(i,j,REAL,r); 
 	complex.set_value(i,j,IMAG,im);
       }
     }
   }
+
 }
 
 void PlanarCDI::set_support(const Double_2D & object_support, bool soften){
@@ -471,19 +472,15 @@ void PlanarCDI::apply_threshold(Double_2D & array,
 				double threshold){
   
   //find the maximum
-  double max = 0;
-  for(int i=0; i < nx; i++){
-    for(int j=0; j < nx; j++){
-      if( array.get(i,j) > max)
-	max = array.get(i,j);
-    }
-  }
+  double max = array.get_max();
   
   //apply the threshold
   for(int i=0; i < nx; i++){
     for(int j=0; j < nx; j++){
       if( array.get(i,j) < (threshold*max) )
 	array.set(i,j,0.0);
+      else
+	array.set(i,j,1.0);
     }
   }
 }
