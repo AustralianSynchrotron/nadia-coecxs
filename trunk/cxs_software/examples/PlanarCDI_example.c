@@ -32,7 +32,7 @@ int main(void){
   //Define some constants which will be used in the code.
 
   //the data file name
-  string data_file_name = "image_files/planar_data.dbin";
+  string data_file_name = "image_files/planar_data.tif";
 
   //the file which provides the support (pixels with the value 0
   //are considered as outside the object)
@@ -83,7 +83,7 @@ int main(void){
   PlanarCDI planar(object_estimate,4);
  
   //set the support and intensity
-  planar.set_support(support);
+  planar.set_support(support,false);
   planar.set_intensity(data);
 
   //set the algorithm to hybrid input-output
@@ -142,9 +142,10 @@ int main(void){
       //apply the shrinkwrap algorithm
       //1.5 is the gaussian width in pixels
       //0.1 is the threshold (10% of the maximum pixel).
-      planar.apply_shrinkwrap(1.5,0.1);
-
+      
     }
+    if(i%output_iterations==(output_iterations-1))
+      planar.apply_shrinkwrap(1.5,0.1);
 
   }
   
@@ -168,9 +169,11 @@ int main(void){
       temp_str.clear();
 
       //apply the shrinkwrap algorithm
-      planar.apply_shrinkwrap(1.5,0.1);
+      //planar.apply_shrinkwrap(1.5,0.1);
     }
-    
+    if(i%output_iterations==(output_iterations-1))
+      planar.apply_shrinkwrap(1.5,0.1);
+   
   }
 
   //And we are done. "object_estimate" contained the final estimate of
