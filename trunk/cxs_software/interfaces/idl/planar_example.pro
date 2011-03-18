@@ -10,7 +10,7 @@
 ; "cxs_software/example/image_files" directory if you are not
 ; running this example on osiris.
 support = cxs_read_tiff(1024,1024,'../../examples/image_files/planar_support.tiff')
-data = cxs_read_dbin(1024,1024,'../../examples/image_files/planar_data.dbin')
+data = cxs_read_tiff(1024,1024,'../../examples/image_files/planar_data.tif')
 
 ; Set-up everything ready for planar reconstruction.
 ; You need to pass the image data and support.
