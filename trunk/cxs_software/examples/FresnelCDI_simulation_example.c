@@ -39,7 +39,7 @@ int main(int argc, char * argv[]){
 
   //load an image file for the sample
   Double_2D object;
-  int status = read_image("image_files/FCDI_simulation_object.tiff", object);
+  read_image("image_files/FCDI_simulation_object.tiff", object);
 
   //get the object dimensions
   int nx = object.get_size_x();
@@ -47,13 +47,13 @@ int main(int argc, char * argv[]){
 
   //load the support to use in the reconstruction
   Double_2D support;
-  status = read_image("image_files/FCDI_simulation_support.tiff", support);
+  read_image("image_files/FCDI_simulation_support.tiff", support);
   
   //we will use the same white field as the Fresnel examples. For
   //this reason you will need to reconstruct it first using
   //FresnelCDI_WF_example.exe
   Complex_2D wf(nx,ny);
-  status = read_cplx("wf_recovered.cplx", wf);
+  int status = read_cplx("wf_recovered.cplx", wf);
   if(!status){ //give an error if we couldn't open the file.
     cout  << "Maybe you need to run ./FCDI_WF_example.exe "
 	  << "first... exiting"  << endl;
@@ -131,6 +131,7 @@ int main(int argc, char * argv[]){
   //save the amplitude and phase to file so we know how it looks
   input.get_2d(MAG,result);
   write_tiff("trans_mag_input.tiff",result);
+
   input.get_2d(PHASE,result);
   write_tiff("trans_phase_input.tiff",result);
 
