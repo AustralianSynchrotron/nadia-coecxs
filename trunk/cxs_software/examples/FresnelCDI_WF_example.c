@@ -24,36 +24,31 @@ using namespace std;
 int main(int argc, char * argv[]){
 
   //read the detector data block in the file
-  int nx = 1024;
-  int ny = 1024;
+
+  int original_nx = 1024;
+  int padding = 512;
+  int nx = original_nx+2*padding;
+
   int status;
-  Double_2D data;
-  status = read_dbin("image_files/FCDI_wf_data.dbin", nx, ny, data);
+  Double_2D data_;
+  Double_2D data(nx,nx);
+  status = read_dbin("image_files/FCDI_wf_data.dbin", original_nx, original_nx, data_);
   if(!status){
     cout << "failed.. exiting"  << endl;
     return(1);
   }
 
-  /******* get the support from file and read it into an array *****/
-  Double_2D support;
-  status = read_tiff("image_files/FCDI_wf_support.tiff", support);  
-  if(!status){
-    cout << "failed to get data from "
-	 <<".. exiting"  << endl;
-    return(1);
+  for(int i=0; i<original_nx; i++){
+    for(int j=0; j<original_nx; j++){
+      data.set(i+padding,j+padding,data_.get(i,j));
+    }
   }
-  //check that the dimensions are the same as the data
-  if( support.get_size_x() != nx || support.get_size_y() != ny){
-    cout << "dimensions of the support to not match ... exiting"  << endl;
-    return(1);
-  }
-
 
   /*******  set up the reconstuction *********************/
 
   //create the white field (wf) object which will store
   //the reconstucted illumination at the detector plane.
-  Complex_2D wf(nx,ny); 
+  Complex_2D wf(nx,nx); 
   
   //make the projection operator
   FresnelCDI_WF proj(wf, //inital estimate
@@ -61,10 +56,12 @@ int main(int argc, char * argv[]){
 		     16.353e-3, //zone-to-focal length
 		     0.909513 - 16.353e-3, //focal-to-detector
 		     13.5e-6); //pixel size
- 
-  //set the support and intensity
-  proj.set_support(support);
+
+  //set the support 
+  //this will set a circular support of diameter 165micro
+  proj.set_support(165e-6);
   
+  //set the intensity
   proj.set_intensity(data);
   
   //no need to set the algorithm this time.
@@ -79,9 +76,9 @@ int main(int argc, char * argv[]){
   //make a 2D array and allocate some memory.
   //This will be used to output the image of the 
   //current estimate.
-  Double_2D result(nx,ny);
+  Double_2D result(nx,nx);
 
-  for(int i=0; i<15; i++){
+  for(int i=0; i<21; i++){
 
     cout << "iteration " << i << endl;
 
@@ -103,9 +100,18 @@ int main(int argc, char * argv[]){
       write_ppm(temp_str2.str(),result);
     }
   }
+  
+  //copy the result back into an array which is 1024x1024
+  Complex_2D wf_(original_nx,original_nx); 
+  for(int i=0; i<original_nx; i++){
+    for(int j=0; j<original_nx; j++){
+      wf_.set_real(i,j,wf.get_real(i+padding,j+padding));
+      wf_.set_imag(i,j,wf.get_imag(i+padding,j+padding));
+    }
+  }
 
   //save the result as a complex binary for later use
-  status = write_cplx("wf_recovered.cplx", wf);
+  status = write_cplx("wf_recovered.cplx", wf_);
   if(status!=0)
     cout << "Successfully wrote out the reconstucted white field"
 	 << " into wf_recovered.cplx"<<endl;
