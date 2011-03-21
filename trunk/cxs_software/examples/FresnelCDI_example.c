@@ -44,7 +44,7 @@ int main(int argc, char * argv[]){
   Complex_2D wf(nx,ny);
   status = read_cplx("wf_recovered.cplx", wf);
   if(!status){
-    cout  << "Maybe you need to run ./FCDI_WF_example.exe "
+    cout  << "Maybe you need to run ./FresnelCDI_WF_example.exe "
 	 << "first... exiting"  << endl;
     return(1);
   }
