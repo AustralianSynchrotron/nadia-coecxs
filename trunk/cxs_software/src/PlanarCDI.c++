@@ -28,7 +28,7 @@ map<string,int> * PlanarCDI::set_up_algorithm_name_map(){
 
 
 /***************************************************************/
-PlanarCDI::PlanarCDI(Complex_2D & initial_guess, int n_best)
+PlanarCDI::PlanarCDI(Complex_2D & initial_guess, unsigned int n_best)
   : complex(initial_guess),
     nx(initial_guess.get_size_x()),
     ny(initial_guess.get_size_y()),
@@ -45,13 +45,14 @@ PlanarCDI::PlanarCDI(Complex_2D & initial_guess, int n_best)
   set_algorithm(HIO);
   
   //initialize the best estimates
-  best_array = new Complex_2D*[n_best];
-  best_error_array = new double[n_best];
-  for(int i=0; i<n_best; i++){
-    best_array[i] = new Complex_2D(nx,ny);
-    best_error_array[i]=1;
+  if(n_best>0){
+    best_array = new Complex_2D*[n_best];
+    best_error_array = new double[n_best];
+    for(int i=0; i<n_best; i++){
+      best_array[i] = new Complex_2D(nx,ny);
+      best_error_array[i]=1;
+    }
   }
-
 
   //initialize the beam-stop mask to null (not in use)
   beam_stop=0;
@@ -64,7 +65,8 @@ PlanarCDI::PlanarCDI(Complex_2D & initial_guess, int n_best)
 PlanarCDI::~PlanarCDI(){
   for(int i=0; i<n_best; i++)
     delete best_array[i];
-  delete [] best_array;
+  if(n_best>0)
+    delete [] best_array;
 
 }
 

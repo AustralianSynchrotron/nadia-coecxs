@@ -161,9 +161,9 @@ class PlanarCDI{
    *
    * @param n_best The number of "best estimates" to keep. See
    *   PlanarCDI::get_best_result below for more detail. By default
-   *   this option is set to one.
+   *   this option is set to zero.
    */
-  PlanarCDI(Complex_2D & complex, int n_best=1);
+  PlanarCDI(Complex_2D & complex, unsigned int n_best=0);
 
   /**
    * Destructor. This is not interesting for users.
