@@ -81,9 +81,7 @@ double Complex_2D::get_value(int x, int y, int type) const {
   case IMAG:
     return get_imag(x,y);
   case PHASE: //goes between -pi and pi 
-    if( atan2(get_imag(x,y),get_real(x,y)) > M_PI )
-      return atan2(get_imag(x,y),get_real(x,y)) - 2*M_PI;
-    return atan2(get_imag(x,y),get_real(x,y));
+    return get_phase(x,y);
   case MAG_SQ:
     return pow(get_mag(x,y),2); //the square of the magnitude
   default:
