@@ -4,6 +4,7 @@
 #include <cmath>
 #include "Complex_2D.h"
 #include "PlanarCDI.h"
+#include "TransmissionConstraint.h"
 #include "io.h" 
 
 using namespace std;
@@ -58,7 +59,8 @@ PlanarCDI::PlanarCDI(Complex_2D & initial_guess, unsigned int n_best)
   beam_stop=0;
 
   //initialize the complex contraint to null;
-  custom_complex_contraint = NULL; 
+  transmission_constraint = NULL; 
+
 
 };
 
@@ -67,7 +69,6 @@ PlanarCDI::~PlanarCDI(){
     delete best_array[i];
   if(n_best>0)
     delete [] best_array;
-
 }
 
 Complex_2D * PlanarCDI::get_best_result(double & error, int index){
@@ -165,6 +166,12 @@ double PlanarCDI::get_error(){
 }
 
 void PlanarCDI::apply_support(Complex_2D & c){
+  support_constraint(c);
+  if(transmission_constraint)
+    transmission_constraint->apply_constraint(c);
+}
+
+void PlanarCDI::support_constraint(Complex_2D & c){
   double support_value;
 
   for(int i=0; i< nx; i++){
@@ -181,9 +188,6 @@ void PlanarCDI::apply_support(Complex_2D & c){
       }
     }
   }
-
-  if(custom_complex_contraint)
-    (*custom_complex_contraint)(c);
 
 }
 

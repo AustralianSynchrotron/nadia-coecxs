@@ -197,6 +197,25 @@ class Complex_2D{
 		array[x*ny+y][IMAG]*array[x*ny+y][IMAG]);
   };
 
+  /**
+   * Get the phase at point x,y. It goes between -pi and pi.  Please
+   * note that this method is ineffectual when the magnitude is
+   * 0. Hence, if you are setting values in a Complex_2D array for the
+   * first time, you must use set_mag and then set_phase.  Also not,
+   * this is an unsafe method as no bounds checking is performed.
+   * 
+   * @param x The horizontal position
+   * @param y The vertical position
+   * @return The value at (x,y)  
+   */
+  inline double get_phase(int x, int y) const{
+    if( atan2(get_imag(x,y),get_real(x,y)) > M_PI )
+      return atan2(get_imag(x,y),get_real(x,y)) - 2*M_PI;
+    
+    return atan2(get_imag(x,y),get_real(x,y));
+
+  };
+  
 
   /**
    * Get the value at point x,y. Note that this is

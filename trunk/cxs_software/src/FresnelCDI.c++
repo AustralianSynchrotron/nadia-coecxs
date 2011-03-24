@@ -8,6 +8,7 @@
 #include "Complex_2D.h"
 #include "Double_2D.h"
 #include "FresnelCDI.h"
+#include "TransmissionConstraint.h"
 #include "io.h" //
 #include <sstream>
 
@@ -26,12 +27,15 @@ FresnelCDI::FresnelCDI(Complex_2D & initial_guess,
    pixel_length(pixel_size),
    norm(normalisation),
    illumination(nx,ny),
+   illumination_at_sample(nx,ny),
+   transmission(nx,ny),
    B_s(nx,ny),
    B_d(ny,ny){
 
   illumination.copy(white_field);
   set_experimental_parameters(wavelength,focal_detector_length,
 			      focal_sample_length,pixel_length);
+
   set_algorithm(ER);
 }
 
@@ -77,6 +81,9 @@ void FresnelCDI::set_experimental_parameters(double beam_wavelength,
     }
   }
 
+  illumination_at_sample.copy(illumination);
+  propagate_from_detector(illumination_at_sample);
+
 }
 
 void FresnelCDI::initialise_estimate(int seed){
@@ -106,13 +113,24 @@ void FresnelCDI::initialise_estimate(int seed){
   
 }
 
+void FresnelCDI::apply_support(Complex_2D & c){
+  
+  support_constraint(c);
+  
+  if(transmission_constraint){
+    get_transmission_function(transmission,&c);
+    //    (*custom_complex_constraint)(transmission);
+    set_transmission_function(transmission,&c);
+  }
+
+}
 
 void FresnelCDI::scale_intensity(Complex_2D & c){
 
   c.add(illumination,norm); //add the white field
 
   PlanarCDI::scale_intensity(c);
-
+  
   c.add(illumination,-norm);//subtract the white field
 
 }
@@ -129,29 +147,69 @@ void FresnelCDI::propagate_to_detector(Complex_2D & c){
   c.multiply(B_s);
 }
 
+void FresnelCDI::set_transmission_function(Complex_2D & transmission,
+					   Complex_2D * esw){
 
-void FresnelCDI::get_transmission_function(Complex_2D & result,
-					   bool inforce_unity_mag){
+  if(!esw)
+    esw=&complex;
 
-  Complex_2D temp_illum(nx,ny);
-  temp_illum.copy(illumination);
-
-  //get the illuminating wavefield in the sample plane
-  propagate_from_detector(temp_illum);
-
-  //divide the estimate by the illuminating wavefield
-  //and add unity.
+  double ill_r;
+  double trans_r;
+  double ill_i;
+  double trans_i;
+  
   for(int i=0; i<nx; i++){
     for(int j=0; j<nx; j++){
-      
-      if(norm!=0&&temp_illum.get_mag(i,j)!=0){
-      
-	double new_mag = complex.get_mag(i,j)/(norm*temp_illum.get_mag(i,j));
-	double new_phi = complex.get_value(i,j,PHASE) 
-	  - temp_illum.get_value(i,j,PHASE);
-	
-	result.set_real(i,j,new_mag*cos(new_phi)+1);
-	result.set_imag(i,j,new_mag*sin(new_phi));
+      ill_r = norm*illumination_at_sample.get_real(i,j);
+      trans_r = transmission.get_real(i,j);
+      ill_i = norm*illumination_at_sample.get_imag(i,j);
+      trans_i = transmission.get_imag(i,j);
+   
+      // ESW = TL - L
+      // T - transmission function, L - illumination
+      esw->set_real(i,j,ill_r*trans_r - ill_i*trans_i - ill_r);
+      esw->set_imag(i,j,ill_r*trans_i + ill_i*trans_r - ill_i);      
+    }
+  }
+}
+
+void FresnelCDI::get_transmission_function(Complex_2D & result, 
+					   Complex_2D * esw,
+					   bool inforce_unity_mag){
+
+  //divide the estimate by the illuminating wavefield and add unity.
+ 
+  //the code below could written more eligantly with get_mag and get_phase etc.
+  //but the code below is faster because it doesn't use the maths tan function.
+  //This is important when complex constraints are applied
+
+  if(!esw)
+    esw=&complex;
+
+  double ill_r;
+  double esw_r;
+  double ill_i;
+  double esw_i;
+  
+  double real_numerator;
+  double imag_numerator;
+  double denom;
+
+  for(int i=0; i<nx; i++){
+    for(int j=0; j<nx; j++){
+      if(norm!=0&&illumination_at_sample.get_mag(i,j)!=0){
+
+	ill_r = norm*illumination_at_sample.get_real(i,j);
+	esw_r = esw->get_real(i,j);
+	ill_i = norm*illumination_at_sample.get_imag(i,j);
+	esw_i = esw->get_imag(i,j);
+
+	denom = ill_r*ill_r + ill_i*ill_i;
+	real_numerator = ill_r*(esw_r+ill_r) + ill_i*(esw_i+ill_i);
+	imag_numerator = ill_r*(esw_i+ill_i) - ill_i*(esw_r+ill_r);
+
+	result.set_real(i,j,real_numerator/denom);
+	result.set_imag(i,j,imag_numerator/denom);
 	
 	if(inforce_unity_mag && result.get_mag(i,j) > 1)
 	  result.set_mag(i,j,1);      
@@ -163,4 +221,9 @@ void FresnelCDI::get_transmission_function(Complex_2D & result,
       }
     }
   }
+
+  if(transmission_constraint){
+    transmission_constraint->apply_constraint(result);
+  }
+  
 }

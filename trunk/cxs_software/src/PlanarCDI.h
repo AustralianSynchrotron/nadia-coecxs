@@ -80,6 +80,7 @@ enum { ER, BIO, BOO, HIO, DM, SF, ASR, HPR, RAAR};
 //forward declarations
 class Complex_2D;
 class Double_2D;
+class TransmissionConstraint;
 
 class PlanarCDI{
 
@@ -139,8 +140,9 @@ class PlanarCDI{
       best estimates */
   double * best_error_array;
 
-  /** a function pointer to a cumstomized complex contraint */
-  void (*custom_complex_contraint)(Complex_2D&); 
+  /** a function pointer to a cumstomized complex constraint */
+  //void (*custom_complex_constraint)(Complex_2D&); 
+  TransmissionConstraint * transmission_constraint;
 
   /** a mapping between the algorithm name (string) and identification
       number */
@@ -439,10 +441,14 @@ class PlanarCDI{
 
 
 
-  void set_complex_contraint_function(void (*complex_contraint)(Complex_2D & tranmission)){
-    custom_complex_contraint = complex_contraint;
-    
+  /**  void set_complex_constraint_function(void (*complex_constraint)(Complex_2D & tranmission)){
+    custom_complex_constraint = complex_constraint;
+    }**/
+
+  void set_complex_constraint(TransmissionConstraint & trans_constraint){
+    transmission_constraint = &trans_constraint;
   }
+
 
 
  protected:
@@ -481,7 +487,8 @@ class PlanarCDI{
   void convolve(Double_2D & array, double gauss_width, int pixel_cut_off=4);
   
 
-
+  
+  void support_constraint(Complex_2D & c);
 
 
     

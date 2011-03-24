@@ -31,6 +31,12 @@ class FresnelCDI: public PlanarCDI{
   /** the reconstructed white field */
   Complex_2D illumination;
 
+  /** the white field in the sample plane */ 
+  Complex_2D illumination_at_sample;
+
+  /** the transmission function */ 
+  Complex_2D transmission;
+
   /** the beam wavelength */
   double wavelength;
 
@@ -111,11 +117,19 @@ class FresnelCDI: public PlanarCDI{
    * @param result The transmission function is copied into "result".
    * @param inforce_unit_mag Values above 1 (due to artifacts from the
    * reconstruction are reduced to 1). This helps when plotting the
-   * magnitude. By default this is done, but can be switched off by 
-   * passing "false" for this parameter.
+   * magnitude. By default this is not done, but can be switched on by 
+   * passing "true" for this parameter.
    */
-  virtual void get_transmission_function(Complex_2D & result, 
-					 bool inforce_unit_mag=true);
+  virtual void get_transmission_function(Complex_2D & result,
+					 Complex_2D * esw = 0,
+					 bool inforce_unit_mag=false);
+
+
+  virtual void apply_support(Complex_2D & complex);
+
+  virtual void set_transmission_function(Complex_2D & transmission,
+					 Complex_2D * esw = 0);
+
   
   /**
    * This method overrides the one in PlanarCDI by adding/subtracting
