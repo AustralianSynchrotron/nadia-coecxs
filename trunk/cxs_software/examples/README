@@ -54,6 +54,13 @@ white-field reconstructed from data, you will need to run
 FresnelCDI_WF_example.exe first.
 
 
+ComplexConstraint_example.c
+----------------------------
+This example builds on the Fresnel examples by demonstrating how
+complex and other constraints on the transmission function can be
+included in a reconstruction.
+
+
 IDL examples
 ------------
 These can be found in the directory cxs_software/interfaces/idl
