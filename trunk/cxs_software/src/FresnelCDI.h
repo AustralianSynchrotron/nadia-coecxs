@@ -108,6 +108,7 @@ class FresnelCDI: public PlanarCDI{
    */
   virtual void initialise_estimate(int seed=0);
 
+  virtual void auto_set_norm();
 
   /**
    * Get the transmission function from the current estimate of the

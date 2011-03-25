@@ -128,9 +128,13 @@ void TransmissionConstraint::apply_constraint(Complex_2D & transmission){
 	    region_number =  region_map->get(i,j)-1;
 	    current_constraint = complex_constraint_list.at(region_number);
 	    
+	    //cout <<"mag/phase old: "<< phase_old<<" "<< mag_old<<endl;
+
 	    mag_new = current_constraint->get_new_mag(mag_old, phase_old);
 	    phase_new = current_constraint->get_new_phase(mag_old, phase_old);
 	    
+	    //    cout <<"mag/phase old: "<< phase_new<<" "<< mag_new<<endl;
+
 	    transmission.set_mag(i,j,mag_new);
 	    transmission.set_phase(i,j,phase_new);
 	     

@@ -86,6 +86,16 @@ void FresnelCDI::set_experimental_parameters(double beam_wavelength,
 
 }
 
+void FresnelCDI::auto_set_norm(){
+  Double_2D temp(nx,ny);
+  illumination.get_2d(MAG,temp);
+  double wf_norm = temp.get_sum();
+  double int_norm = intensity_sqrt.get_sum();
+  
+  norm = int_norm/wf_norm;
+
+}
+
 void FresnelCDI::initialise_estimate(int seed){
   //initialise the random number generator
   srand(seed);

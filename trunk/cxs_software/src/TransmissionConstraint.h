@@ -1,7 +1,9 @@
 #ifndef TRANS_H
 #define TRANS_H
-
+#include <cstdlib>
 #include <vector>
+#include <iostream>
+
 
 class Double_2D;
 class Complex_2D;
@@ -57,6 +59,7 @@ class ComplexConstraint{
   };
 
   double get_new_mag(double old_mag, double old_phase){
+    //    std::cout << "alpha1="<<alpha1<<std::endl;
     return exp((1-alpha1)*log(old_mag) + alpha1*c_mean*old_phase);
   };
 
