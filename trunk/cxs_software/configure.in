@@ -8,7 +8,7 @@ AC_INIT([CXS_Software], [0.0], [Nadia Davidson <nadiamd@unimelb.edu.au>])
 
 # Checks for programs.
 #AC_PROG_CC
-CXXFLAGS="-O3 $CXXFLAGS"
+CXXFLAGS="-O3 -ffast-math $CXXFLAGS"
 
 AC_PROG_CXX()
 AC_LANG(C++)
