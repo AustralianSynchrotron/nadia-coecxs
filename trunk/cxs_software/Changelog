@@ -16,6 +16,7 @@
 
 ----------------------------------------------------------------
 24/2/2011 Nadia Davidson
+	* rel_0.2
 	* clean up of examples and code in inteface/idl
 	* optimisation of the PlanarCDI code. Fourier transforms
 	are now performed in the Complex_2D class.
@@ -29,6 +30,7 @@
 	reconstruction.
 -----------------------------------------------------------------
 17/3/2011 Nadia Davidson
+	* rel_0.2.5
 	* Fixed an issue with Fresnel simulation. It previously wasn't
 	being done correctly. The simulation example has also been improved 
 	to demonstrate how a transmission function can be set up if the
@@ -38,4 +40,11 @@
 	white-field reconstuction, and also allows FresnelCDI to be
 	initialised (at least partially) randomly.
 	* Soft support edges are now allowed.
+------------------------------------------------------------------
+28/3/2011 Nadia Davidson
+	* rel_0.3
+	* complex constraints can now be enforced during reconstruction:
+	* src/TransmissionConstraint.h added
+	* src/TransmissionConstrain.cxx added
+	* examples/ComplexConstraint.c added
 ------------------------------------------------------------------
