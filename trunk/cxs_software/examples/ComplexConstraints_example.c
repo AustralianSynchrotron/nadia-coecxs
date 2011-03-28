@@ -28,7 +28,6 @@
 #include <cstdlib>
 #include <math.h>
 #include <string>
-#include "google/profiler.h"
 
 using namespace std;
 
@@ -224,8 +223,7 @@ int main(int argc, char * argv[]){
 
   //------------------------------------------------
 
-  ProfilerStart("profile");
-  
+
   /*** run the reconstruction ************/
   
   for(int i=0; i<  total_iterations+1; i++){
@@ -258,8 +256,6 @@ int main(int argc, char * argv[]){
 
   trans.get_2d(PHASE,result);
   write_tiff("trans_phase_recovered.tiff",result);
-
-  ProfilerStop();
 
   //print out the value of c = beta/delta recovered
   //(only useful if we ran example 2.
