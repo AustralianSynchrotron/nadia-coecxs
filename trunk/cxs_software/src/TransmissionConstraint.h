@@ -94,11 +94,20 @@ class ComplexConstraint{
   };
 
   /**
-   * Set the value c = beta/delta. This function is used by
-   * TransmissionConstraint, and does probably not need to be called
-   * by a user.
+   * Set the value C = beta/delta. This function is used by
+   * TransmissionConstraint to set the value of C, and does probably
+   * not need to be called by a user. The function
+   * TransmissionConstraint::apply_constraint() calculated C as:
    *
-   * @param c_mean The value of c = beta/delta.
+   * \f[ 
+   * \bar{C} = \frac{\sum{lnA}}{\sum{\phi}}
+   * \f]
+   *
+   * Where A is the transmission function amplitude, \f$\phi\f$ is
+   * the phase and the summation runs over all values in the
+   * transmission function array for the defined region.
+   *
+   * @param c_mean The value of C = beta/delta.
    */
   void set_c_mean(double c_mean){
     if(!fixed_c)
@@ -135,27 +144,51 @@ class ComplexConstraint{
   };
 
   /** 
-   * Get a new magnitude (amplitude) value based on the complex
-   * constraint.
+   * Get a new magnitude (amplitude) value calculated according to:
    *
-   * @return 
+   * \f[ A' = exp[ (1-\alpha_1)lnA + \alpha_1 \bar{C} \phi ] \f]
+   *
+   * Where A' is the new magnitude, A is the old magnitude, \f$ \phi
+   * \f$ is the old phase, \f$\alpha_1\f$ controls the strength of the
+   * constraint and \f$ \bar{C} \f$ is either the mean beta/delta, as
+   * calculated in the parent TransmissionConstraint object, or the
+   * fixed value passed by the use.
+   *
+   * @return The new magnitude of the transmission function.
    */
   double get_new_mag(double old_mag, double old_phase){
     return exp((1-alpha1)*log(old_mag) + alpha1*c_mean*old_phase);
   };
 
   /** 
-   * Get a new phase value based on the complex constraint.
+   * Get a new phase value according to:
    *
-   * @return 
+   * \f[ 
+   * \phi' = (1-\alpha_2)\phi + \alpha_2 \bar{C^{-1}} \ln A   
+   * \f]
+   *
+   * Where \f$ \phi' \f$ is the new phase, A is the old magnitude, \f$
+   * \phi \f$ is the old phase, \f$\alpha_2\f$ controls the strength of
+   * the constraint and \f$ \bar{C^{-1}} \f$ is the inverse of either
+   * the mean beta/delta, as calculated in the parent
+   * TransmissionConstraint object, or the fixed value passed by the
+   * use.
+   *
+   * @return The new phase of the transmission function.
    */
   double get_new_phase(double old_mag, double old_phase){
     return (1-alpha2)*old_phase + alpha2*log(old_mag)/c_mean;
   };
 
   /**
-   * 
+   *  Get the array which marks which elements of the transmission
+   *  function array should have this constraint applied. Values of 0
+   *  or less are excluded from the constraint. Positive values will
+   *  have the constraint applied. This function is used by the
+   *  TransmissionConstraint object to which it's given.
    *
+   * @return A pointer to the array which maps which regions this
+   * constraint should be applied to.
    */
   Double_2D * get_region(){
     return region;
@@ -204,12 +237,12 @@ class TransmissionConstraint{
   /** the sign of the phase (+1, -1) to be flipped */
   int flip_sign;
 
-  /** a function pointer to a cumstomized contraint */
+  /** a function pointer to a cumstomized constraint */
   void (*custom_constraint)(Complex_2D&); 
 
  public:  
   
-  /** The constructor, no parammeters need to be passed */
+  /** The constructor, no parameters need to be passed */
   TransmissionConstraint();
 
   /** The destructor */
@@ -277,25 +310,36 @@ class TransmissionConstraint{
    * 
    * @param custom_constraint A function pointer (the name of the function)
    */
-  void set_custom_constraint(void (*custom_constraint)(Complex_2D & tranmission)){
+  void set_custom_constraint(void (*custom_constraint)(Complex_2D & transmission)){
     this->custom_constraint = custom_constraint;
   };
 
   
   /**
-   * This is function which is executed each time the support
+   * This is the function which is executed each time the support
    * constraint is applied in Fresnel or Planar CDI reconstruction.
    * The user should not generally need to use this function. An
-   * exception would be if no contraint is applyed during
+   * exception would be if no constraint is applied during
    * reconstruction, but some general clean-up is required on the
    * final Transmission function. For example, applying the unity
    * constraint.
    *
-   * The constraints will be executed in the following order:
-   * - any complex constraints which have been passed to the object
-   * - charge flipping is performed
-   * - unity of the transmision function is enforced
-   * - custom constraints are applied.
+   * Before applying any constraints, the mean values of c=beta/delta
+   * will be calculated for each region defined through
+   * ComplexConstraint objects. The mean is calculated as:
+   *
+   * \f[ 
+   * \bar{C} = \frac{\sum{lnA}}{\sum{\phi}}
+   * \f]
+   *
+   * Where A is the transmission function amplitude, \f$ \phi \f$ is
+   * the phase and the summation runs over all values in the
+   * transmission function array for the defined region.
+   *
+   * The constraints will be executed in the following order: - any
+   * complex constraints which have been passed to the object - charge
+   * flipping is performed - unity of the transmission function is
+   * enforced - custom constraints are applied.
    */
   virtual void apply_constraint(Complex_2D & transmission);
 
