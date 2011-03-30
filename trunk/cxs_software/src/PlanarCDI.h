@@ -270,6 +270,33 @@ class PlanarCDI{
    */ 
   void get_intensity_autocorrelation(Double_2D & autoc);
 
+
+  /**
+   *
+   * @return the number of pixel along the x-axis.
+   */
+  int get_size_x(){
+    return nx;
+  };
+
+  /**
+   *
+   * @return the number of pixel along the y-axis.
+   */
+  int get_size_y(){
+    return ny;
+  };
+
+  void get_exit_surface_wave(Complex_2D & esw){
+    esw.copy(complex);
+  }
+  
+  void set_exit_surface_wave(Complex_2D & esw){
+    complex.copy(esw);
+  }
+  
+
+  
   /**
    * Set the algorithm. By default HIO is used.
    *

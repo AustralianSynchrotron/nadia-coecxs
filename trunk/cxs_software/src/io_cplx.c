@@ -22,7 +22,7 @@ int read_cplx(string file_name, Complex_2D & complex){
   int ny = complex.get_size_y();
 
   //open the input file:
-  FILE * file = fopen(file_name.c_str(), "r+b");
+  FILE * file = fopen(file_name.c_str(), "rb");
 
   //error check.
   if(!file){

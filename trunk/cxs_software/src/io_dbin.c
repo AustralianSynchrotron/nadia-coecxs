@@ -18,7 +18,7 @@ using namespace std;
 int read_dbin(string file_name, int nx, int ny, Double_2D & data){
  
   //open the input file:
-  FILE * file = fopen(file_name.c_str(), "r+b");
+  FILE * file = fopen(file_name.c_str(), "rb");
 
   //error check.
   if(!file){
