@@ -57,9 +57,6 @@ int write_ppm(string file_name, const Double_2D & data, bool log_scale){
    new_file << nx << " " << ny << endl;
    new_file << largest_pixel_value << endl;
 
-   cout << "min="<<min<<endl;
-   cout << "max="<<min<<endl;
-
    for(int j=0; j < ny; ++j){
      for(int i=0; i < nx; ++i){
        
