@@ -54,7 +54,7 @@ void FresnelCDI::set_experimental_parameters(double beam_wavelength,
   double zfs = focal_sample_length;
   double zsd = focal_detector_length - focal_sample_length;
 
-  double zsd_ = 1/(1/zsd - 1/focal_detector_length);
+  //  double zsd_ = 1/(1/zsd - 1/zfd);
 
   double scaling_x = beam_wavelength*zsd/(pixel_length*nx);
   double scaling_y = beam_wavelength*zsd/(pixel_length*ny);
@@ -69,7 +69,7 @@ void FresnelCDI::set_experimental_parameters(double beam_wavelength,
       rho_2_d = pow(pixel_length*(x_mid-i),2) + 
 	pow(pixel_length*(y_mid-j),2);
 
-      phi_B_d = (M_PI*rho_2_d)/(beam_wavelength)*((1/focal_detector_length)-(1/zsd));
+      phi_B_d = (M_PI*rho_2_d)/(beam_wavelength)*((1/zfd) - (1/zsd));
       phi_B_s = -phi_B_d;
 
       B_s.set_real(i,j,cos(phi_B_s));
@@ -93,6 +93,8 @@ void FresnelCDI::auto_set_norm(){
   double int_norm = intensity_sqrt.get_sum();
   
   norm = int_norm/wf_norm;
+
+  cout << "norm="<<norm<<endl;
 
 }
 

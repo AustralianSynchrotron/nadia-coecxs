@@ -103,12 +103,12 @@ int write_tiff(string file_name, const Double_2D & data,
 	       bool log_scale=false);
 
 
-//used to transform an array of doubles from -x_min .... x_max
+//used to transform an array of doubles in the range -x_min .... x_max
 //to fall between 0... pixel_max (which is usually 2^16).
 inline unsigned int io_scale_value(double min, double max, 
 			  int pixel_max, 
 			  double value, bool log_scale){
-  
+
   double grad;
 
   if(log_scale){

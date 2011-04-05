@@ -47,13 +47,18 @@ int write_ppm(string file_name, const Double_2D & data, bool log_scale){
      return FAILURE;
    }
    
+   double min = data.get_min();
+   double max = data.get_max();
+
    new_file << "P2" << endl;
-   new_file << "#"<<file_name<<"\n";
+   new_file << "#"<<file_name<<endl;
+   new_file << "# original range: "<<min<<"-"<<max <<endl; 
+   new_file << "# log scale? "<< log_scale <<endl;
    new_file << nx << " " << ny << endl;
    new_file << largest_pixel_value << endl;
 
-   int min = data.get_min();
-   int max = data.get_max();
+   cout << "min="<<min<<endl;
+   cout << "max="<<min<<endl;
 
    for(int j=0; j < ny; ++j){
      for(int i=0; i < nx; ++i){

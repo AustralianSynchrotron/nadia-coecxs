@@ -217,7 +217,7 @@ int write_tiff(string file_name, const Double_2D & data, bool log_scale){
   double min = data.get_min();
   int max_pixel = 65535; //2^(8bit*2bytes)
 
-  //copy to the image into an array
+  //copy the image into an array
   int w = data.get_size_x();
   int h = data.get_size_y();
   uint16 * grey_image = new uint16[w*h];
