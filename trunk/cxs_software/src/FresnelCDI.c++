@@ -94,8 +94,6 @@ void FresnelCDI::auto_set_norm(){
   
   norm = int_norm/wf_norm;
 
-  cout << "norm="<<norm<<endl;
-
 }
 
 void FresnelCDI::initialise_estimate(int seed){
