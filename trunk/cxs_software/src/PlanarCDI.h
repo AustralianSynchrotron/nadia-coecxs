@@ -102,10 +102,10 @@ class PlanarCDI{
 
    /** temporary Complex_2Ds which are used in the computation of the
       PFS and PF terms for each iteration. */
-  Complex_2D temp_complex_PFS;
-  Complex_2D temp_complex_PF;
-  Complex_2D temp_complex_PS;
-  Complex_2D temp_complex_PSF;
+  Complex_2D * temp_complex_PFS;
+  Complex_2D * temp_complex_PF;
+  Complex_2D * temp_complex_PS;
+  Complex_2D * temp_complex_PSF;
 
   /**the relaxation parameter */
   double beta;
@@ -517,7 +517,7 @@ class PlanarCDI{
   
   void support_constraint(Complex_2D & c);
 
-
+  void reallocate_temp_complex_memory();
     
 };
 

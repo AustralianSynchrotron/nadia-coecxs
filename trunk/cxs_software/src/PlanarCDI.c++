@@ -34,16 +34,10 @@ PlanarCDI::PlanarCDI(Complex_2D & initial_guess, unsigned int n_best)
     nx(initial_guess.get_size_x()),
     ny(initial_guess.get_size_y()),
     //    fft(nx,ny),
-    temp_complex_PFS(nx,ny),
-    temp_complex_PF(nx,ny),
-    temp_complex_PS(nx,ny),
-    temp_complex_PSF(nx,ny),
     beta(0.9),
     support(nx,ny),
     intensity_sqrt(nx,ny),
     n_best(n_best){
-  
-  set_algorithm(HIO);
   
   //initialize the best estimates
   if(n_best>0){
@@ -58,9 +52,15 @@ PlanarCDI::PlanarCDI(Complex_2D & initial_guess, unsigned int n_best)
   //initialize the beam-stop mask to null (not in use)
   beam_stop=0;
 
+  temp_complex_PFS = 0;
+  temp_complex_PF = 0;
+  temp_complex_PS = 0;
+  temp_complex_PSF = 0;
+
   //initialize the complex contraint to null;
   transmission_constraint = NULL; 
-
+  
+  set_algorithm(HIO);
 
 };
 
@@ -69,6 +69,12 @@ PlanarCDI::~PlanarCDI(){
     delete best_array[i];
   if(n_best>0)
     delete [] best_array;
+
+  //free the memory used by all 
+  //the "temp_complex" arrays
+  for(int n=0; n < NTERMS; n++)
+    algorithm_structure[n]=0;
+  reallocate_temp_complex_memory();
 }
 
 Complex_2D * PlanarCDI::get_best_result(double & error, int index){
@@ -292,8 +298,31 @@ void PlanarCDI::set_custom_algorithm(double m1, double m2, double m3,
   algorithm_structure[PS] = -m3 - m6 - m8 + m10;
   algorithm_structure[PF] = -m2 - m5 + m8 + m9;
   algorithm_structure[PI] = -m4 - m7 - m9 - m10;
+
+  reallocate_temp_complex_memory();
   
 }
+
+void PlanarCDI::reallocate_temp_complex_memory(){
+
+  Complex_2D ** temp_array[NTERMS-1] = {&temp_complex_PSF, 
+					&temp_complex_PFS, 
+					&temp_complex_PS, 
+					&temp_complex_PF};
+    
+  for(int n=0; n < NTERMS-1; n++){
+    
+    if(algorithm_structure[n]==0 && *(temp_array[n])!=0){
+      delete *(temp_array[n]);
+      *(temp_array[n])=0;  
+    }
+
+    if(algorithm_structure[n]!=0 && *(temp_array[n])==0)
+      *(temp_array[n])=new Complex_2D(nx,ny);
+  }
+
+}
+
 
 void PlanarCDI::print_algorithm(){
  
@@ -313,35 +342,36 @@ int PlanarCDI::iterate(){
 
   //PFS
   if(algorithm_structure[PFS]!=0){
-    temp_complex_PFS.copy(complex);
-    apply_support(temp_complex_PFS);
-    project_intensity(temp_complex_PFS);
+    temp_complex_PFS->copy(complex);
+    apply_support(*temp_complex_PFS);
+    project_intensity(*temp_complex_PFS);
   }
 
   //F
   if(algorithm_structure[PF]!=0){
-    temp_complex_PF.copy(complex);
-    project_intensity(temp_complex_PF);
+    temp_complex_PF->copy(complex);
+    project_intensity(*temp_complex_PF);
   }
   
   //S
   if(algorithm_structure[PS]!=0){
-    temp_complex_PS.copy(complex);
-    apply_support(temp_complex_PS);
+    temp_complex_PS->copy(complex);
+    apply_support(*temp_complex_PS);
   } 
 
   //SF
   if(algorithm_structure[PSF]!=0){
     if(algorithm_structure[PF]!=0){
-      temp_complex_PSF.copy(temp_complex_PF);
-      apply_support(temp_complex_PSF);
+      temp_complex_PSF->copy(*temp_complex_PF);
+      apply_support(*temp_complex_PSF);
     }
     else{
-      temp_complex_PSF.copy(complex);
-      project_intensity(temp_complex_PSF);
-      apply_support(temp_complex_PSF);
+      temp_complex_PSF->copy(complex);
+      project_intensity(*temp_complex_PSF);
+      apply_support(*temp_complex_PSF);
     }
   }
+
 
   //combine the result of the seperate operators
   double value_real, value_imag;
@@ -354,26 +384,26 @@ int PlanarCDI::iterate(){
 
       //Add the component from the PfPs operator
       if(algorithm_structure[PFS]!=0){
-	value_real+=algorithm_structure[PFS]*temp_complex_PFS.get_real(i,j);
-	value_imag+=algorithm_structure[PFS]*temp_complex_PFS.get_imag(i,j);
+	value_real+=algorithm_structure[PFS]*temp_complex_PFS->get_real(i,j);
+	value_imag+=algorithm_structure[PFS]*temp_complex_PFS->get_imag(i,j);
       }
 
       //Add the component from the Pf operator
       if(algorithm_structure[PF]!=0){
-	value_real+=algorithm_structure[PF]*temp_complex_PF.get_real(i,j);
-	value_imag+=algorithm_structure[PF]*temp_complex_PF.get_imag(i,j);
+	value_real+=algorithm_structure[PF]*temp_complex_PF->get_real(i,j);
+	value_imag+=algorithm_structure[PF]*temp_complex_PF->get_imag(i,j);
       }
 
       //Add the component from the Ps operator
       if(algorithm_structure[PS]!=0){
-	value_real+=algorithm_structure[PS]*temp_complex_PS.get_real(i,j);
-	value_imag+=algorithm_structure[PS]*temp_complex_PS.get_imag(i,j);
+	value_real+=algorithm_structure[PS]*temp_complex_PS->get_real(i,j);
+	value_imag+=algorithm_structure[PS]*temp_complex_PS->get_imag(i,j);
       }
       
       //Add the component from the PsPf operator
       if(algorithm_structure[PSF]!=0){
-	value_real+=algorithm_structure[PSF]*temp_complex_PSF.get_real(i,j);
-	value_imag+=algorithm_structure[PSF]*temp_complex_PSF.get_imag(i,j);
+	value_real+=algorithm_structure[PSF]*temp_complex_PSF->get_real(i,j);
+	value_imag+=algorithm_structure[PSF]*temp_complex_PSF->get_imag(i,j);
       }
       
       complex.set_real(i,j,value_real);
@@ -492,8 +522,10 @@ void PlanarCDI::apply_threshold(Double_2D & array,
 }
 
 void PlanarCDI::set_fftw_type(int type){
-  temp_complex_PFS.set_fftw_type(type);
-  temp_complex_PF.set_fftw_type(type);
+  if(temp_complex_PFS)
+    temp_complex_PFS->set_fftw_type(type);
+  if(temp_complex_PF)
+    temp_complex_PF->set_fftw_type(type);
   complex.set_fftw_type(type);
 }
 
