@@ -32,16 +32,20 @@ class FresnelCDI: public PlanarCDI{
   Complex_2D illumination;
 
   /** the white field in the sample plane */ 
-  Complex_2D illumination_at_sample;
+  Complex_2D * illumination_at_sample;
 
   /** the transmission function */ 
-  Complex_2D transmission;
+  Complex_2D * transmission;
 
   /** the beam wavelength */
   double wavelength;
 
   /** the pixel size */
   double pixel_length;
+
+  double focal_detector_length;
+    
+  double focal_sample_length;
 
   /** normalisation between the illumination with and without the
       sample placed in the beam */
@@ -53,7 +57,7 @@ class FresnelCDI: public PlanarCDI{
 
   /** an array which holds a constants we use when propagating between
   difference planes */
-  Complex_2D B_d;
+  //Complex_2D B_d;
   
  public:
 
@@ -93,7 +97,7 @@ class FresnelCDI: public PlanarCDI{
   /**
    * The destructor for this class
    */
-  virtual ~FresnelCDI(){};
+  virtual ~FresnelCDI();
 
 
   /**
@@ -188,6 +192,8 @@ class FresnelCDI: public PlanarCDI{
 				   double pixel_size);
     
 
+
+  void multiply_factors(Complex_2D & c, int direction);
 
 };
 

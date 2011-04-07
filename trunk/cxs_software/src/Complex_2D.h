@@ -209,10 +209,12 @@ class Complex_2D{
    * @return The value at (x,y)  
    */
   inline double get_phase(int x, int y) const{
-    if( atan2(get_imag(x,y),get_real(x,y)) > M_PI )
-      return atan2(get_imag(x,y),get_real(x,y)) - 2*M_PI;
+    double phase = atan2(get_imag(x,y),get_real(x,y));
     
-    return atan2(get_imag(x,y),get_real(x,y));
+    if( phase > M_PI )
+      return phase - 2*M_PI;
+    
+    return phase;
 
   };
   
@@ -387,7 +389,7 @@ class Complex_2D{
 
   
   /**
-   * Create the fftw plans for forward and backward fat fourier transforms
+   * Create the fftw plans for forward and backward fast fourier transforms
    */
   void initialise_fft();
    

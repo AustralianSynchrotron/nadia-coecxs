@@ -250,7 +250,7 @@ int Complex_2D::check_bounds(int x, int y) const{
      
 
 void Complex_2D::initialise_fft(){
-  //create the plan will eraise the content of the array
+  //creating the plan will erase the content of the array
   //so we need to be a bit tricky here.
 
   //make a new array 
