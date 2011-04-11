@@ -35,23 +35,20 @@ class PhaseDiverseCDI{
   std::vector<double> x_position;
   std::vector<double> y_position;
   
-  std::vector<double> position_refine;
-  std::vector<double> position_refine_stable_itr;
-
   //parameters controlling the feedback
   double beta;
   double gamma;
   std::vector<double> alpha;
   std::vector<double> weight;
   
-  int iterations_per_cycle;
-
   Complex_2D & object;
 
+  int iterations_per_cycle;
+  int scale;
 
  public:
 
-  PhaseDiverseCDI(Complex_2D & object);
+  PhaseDiverseCDI(Complex_2D & object, int granularity=1);
   ~PhaseDiverseCDI();
 
   void iterate();
@@ -90,12 +87,19 @@ class PhaseDiverseCDI{
  private:
 
   void add_to_object(int n_probe, double weight, double old_weight);
-  void update_from_object_with_shift(int n_probe);
-  void update_to_object(int n_probe);
+  int update_from_object_with_shift(int n_probe, double shift=4, int tries=0);
   void update_from_object(int n_probe);
   void get_result(PlanarCDI * local, Complex_2D & result);
   void set_result(PlanarCDI * local, Complex_2D & result);
+  void update_to_object_sub_grid(int i, int j, 
+				 double real_value, 
+				 double imag_value);
+  void update_from_object_sub_grid(int i, int j, 
+				 double & real_value, 
+				 double & imag_value);
+
 
 };
+
 
 #endif

@@ -44,8 +44,8 @@ void get_center(Double_2D & mag, int * x, int * y){
 
 
 
-PhaseDiverseCDI::PhaseDiverseCDI(Complex_2D & object):
-  object(object){
+PhaseDiverseCDI::PhaseDiverseCDI(Complex_2D & object, int granularity):
+  object(object), scale(granularity){
   iterations_per_cycle = 1;
 };
 
@@ -81,12 +81,8 @@ void PhaseDiverseCDI::add_new_position(PlanarCDI * local,
   //fix the weight..
   weight.push_back(1);
 
-  get_result(local,*(single_result.back()));
+  //get_result(local,*(single_result.back()));
   //update_to_object(single_result.size()-1);
-
-
-  position_refine.push_back(4);
-  position_refine_stable_itr.push_back(0);
 
 };
 
@@ -99,7 +95,7 @@ void PhaseDiverseCDI::initialise_estimate(){
   }
 
   for(int i=0; i<singleCDI.size(); i++){
-    update_to_object(i);
+    add_to_object(i,0.5,0.5);
   }
   
 }
@@ -109,7 +105,9 @@ void PhaseDiverseCDI::iterate(){
 
   static int total_iterations = 0;
 
-  bool parallel = false;  
+  cout << "Iteration "<<total_iterations<<endl;
+
+  bool parallel = true;  
     
   Double_2D result(1024,1024);
 
@@ -117,46 +115,43 @@ void PhaseDiverseCDI::iterate(){
 
     int x, y;
 
-    /**
-    char buf[50];
+    if(i!=0 && total_iterations%7==6 && total_iterations<20)
+      update_from_object_with_shift(i);
+    update_from_object(i);
+
+    /**    char buf[50];
     sprintf(buf,"result_%i_abf.tiff",i);
     single_result.at(i)->get_2d(PHASE,result);
-    write_image(buf,result);
-    get_center(result, &x, &y);
-    cout << "data "<<i<< ", pos before is " <<x<<","<<y<<endl;
-    **/
-
-    if(total_iterations>1 && total_iterations<20 && i!=0)
-      update_from_object_with_shift(i);
-    else
-      update_from_object(i);
-    set_result(singleCDI.at(i),*(single_result.at(i)));
-
-    /**
-    sprintf(buf,"result_%i_af.tiff",i);
-    single_result.at(i)->get_2d(PHASE,result);
-    write_image(buf,result);
-    get_center(result, &x, &y);
-    cout << "data "<<i<< ", pos after is " <<x<<","<<y<<endl; 
-    **/
-
+    write_image(buf,result);**/
+    
     for(int j=0; j<iterations_per_cycle; j++){
       singleCDI.at(i)->iterate();
       cout << "This Error="<<singleCDI.at(i)->get_error()<<endl;
     }
 
-    get_result(singleCDI.at(i),*(single_result.at(i)));
+    /**    sprintf(buf,"result_%i_af.tiff",i);
+    single_result.at(i)->get_2d(PHASE,result);    
+    write_image(buf,result);**/
+
+    //   get_center(result, &x, &y);
+    // cout << "data "<<i<< ", pos before is " <<x<<","<<y<<endl;
+
+
+    /**   single_result.at(i)->get_2d(PHASE,result);
+    get_center(result, &x, &y);
+    cout << "data "<<i<< ", pos after is " <<x<<","<<y<<endl; **/
 
     if(!parallel)
       add_to_object(i,weight.at(i),1-weight.at(i));
-    //update_to_object(i);
 
   }
-  
+
   if(parallel){
-    add_to_object(0,0,0.2);
+    double fraction = 1.0/single_result.size();
+    cout << fraction <<endl;
+    add_to_object(0,fraction,0);
     for(int i=0; i<singleCDI.size(); i++){
-      add_to_object(i,0.2,1);
+      add_to_object(i,fraction,1);
     }
   }
 
@@ -184,71 +179,101 @@ void PhaseDiverseCDI::set_result(PlanarCDI * local, Complex_2D & result){
 
 
 
-void PhaseDiverseCDI::update_from_object_with_shift(int n_probe){
- 
-  double step_size = position_refine.at(n_probe);
-  double stable_itrs = position_refine_stable_itr.at(n_probe);
-
-  const int stable_itrs_cut_off = 1;
-
-  if(step_size<1)
-    return;
-
+int PhaseDiverseCDI::update_from_object_with_shift(int n_probe, double step_size, int tries){
+  
   double x = x_position.at(n_probe);
   double y = y_position.at(n_probe);
 
+  cout << "checking probe "<< n_probe << " position, " 
+       << x << "," << y << " with step size " 
+       << step_size << ". Try no.: "<<tries<< endl;
+
+  //done, we found the best position.
+  if(step_size<1.0/scale)
+    return SUCCESS;
+
+  //failed, we moved around a bit, but couldn't find a local minima
+  //in the error metric.
+  if(tries>10){
+    cout << "giving up on probe "<< n_probe << ". Coule not find " 
+	 << "it's position. Returning to the original. " 
+	 << endl;
+      return FAILURE;
+  }
+  
   PlanarCDI * single = singleCDI.at(n_probe);
   
   double best_x=x;
   double best_y=y;
   double best_error=100;
    
+  double new_x;
+  double new_y;
+  double size_x = single_result.at(n_probe)->get_size_x();
+  double size_y = single_result.at(n_probe)->get_size_y();
   
+  //try the 9 positions around the current one
+  //record the one with the lowest error metric.
   for(int i=-1; i<2; i++){
     for(int j=-1; j<2; j++){
 
-      x_position.at(n_probe)=x+i*step_size;
-      y_position.at(n_probe)=y+j*step_size;
-      update_from_object(n_probe);
-      set_result(single,*(single_result.at(n_probe)));
-      single->iterate();
+      new_x=x+i*step_size;
+      new_y=y+j*step_size;
 
-      if(single->get_error()<best_error){
-	best_error = single->get_error();
-	best_x = x+i*step_size;
-	best_y = y+j*step_size;
-      }
+      //checking whether the corrds are still within the 
+      //boundary of the image
+      //      if(new_x>0 && new_x<size_x && new_y>0 && new_y<size_y){
+
+	x_position.at(n_probe)=new_x;
+	y_position.at(n_probe)=new_y;
+	
+	update_from_object(n_probe);
+	set_result(single,*(single_result.at(n_probe)));
+	
+	single->iterate();
+	
+	if(single->get_error()<best_error){
+	  best_error = single->get_error();
+	  best_x = x+i*step_size;
+	  best_y = y+j*step_size;
+	}
+	  // }
     }
   }
   
-  cout << "moving probe "<< n_probe << " by "<<best_x-x<<" in x "
-       << "and "<< best_y-y<<" in y." << endl;
 
-
-  //setting to the best one :
+  //set x and y to the best one :
   x_position.at(n_probe)=best_x;
   y_position.at(n_probe)=best_y;
-  update_from_object(n_probe);
+
+  //recursively call this function with a smaller step size.
+  if(best_x==x && best_y==y)
+    step_size=step_size/2.0;
   
-  if(best_x-x == 0 && best_y-y ==0){
-    if(stable_itrs > stable_itrs_cut_off){
-      position_refine.at(n_probe)=position_refine.at(n_probe)/2.0;
-      position_refine_stable_itr.at(n_probe)=0;
-    }
-    else
-      position_refine_stable_itr.at(n_probe)=stable_itrs+1;
+  int status = update_from_object_with_shift(n_probe, step_size, ++tries);
+
+  if(status == FAILURE){
+    //return to orginal coordinates
+    x_position.at(n_probe) = x ;
+    y_position.at(n_probe) = y;
+    return FAILURE;
   }
 
-  //singleCDI.at(n_probe)->iterate();
-  //cout << "This error="<<singleCDI.at(n_probe)->get_error()<<endl;  
-
-
-
+  
+  cout << "moving probe "<< n_probe << " by " 
+       << x_position.at(n_probe)-x <<" in x "
+       << "and "<< y_position.at(n_probe)-y<<" in y." 
+       << endl;
+  
+  return SUCCESS;
+  
 }
 
 
 void PhaseDiverseCDI::add_to_object(int n_probe, double weight, 
 				    double old_weight){
+
+  get_result(singleCDI.at(n_probe),*(single_result.at(n_probe)));
   
   double x_offset = x_position.at(n_probe);
   double y_offset = y_position.at(n_probe);
@@ -262,8 +287,10 @@ void PhaseDiverseCDI::add_to_object(int n_probe, double weight,
   for(int i_=0; i_< small.get_size_x(); i_++){
     for(int j_=0; j_< small.get_size_y(); j_++){
 
-      i = i_-x_offset;
-      j = j_-y_offset;
+      i = (i_-x_offset)*scale;
+      j = (j_-y_offset)*scale;
+
+      //      cout << "i,j="<<i<<","<<j<<endl;
 
       if(beam.get(i_,j_)>0 && i>=0 && j>=0 && 
 	 i<object.get_size_x() && j<object.get_size_y()){
@@ -274,13 +301,46 @@ void PhaseDiverseCDI::add_to_object(int n_probe, double weight,
 	double new_imag = weight*small.get_imag(i_,j_)
 	  +old_weight*object.get_imag(i,j);
 	
-	object.set_real(i,j,new_real);
-	object.set_imag(i,j,new_imag);
+	update_to_object_sub_grid(i,j,new_real,new_imag); 
+
+	//object.set_real(i,j,new_real);
+	//object.set_imag(i,j,new_imag);
       }
     }
   }
+}
+
+void PhaseDiverseCDI::update_to_object_sub_grid(int i, int j, 
+			       double real_value, 
+			       double imag_value){
+  
+  for(int di=0; di < scale; di++){
+    for(int dj=0; dj < scale; dj++){
+      object.set_real(i+di,j+dj,real_value);
+      object.set_imag(i+di,j+dj,imag_value);
+    }
+  }
+}
+
+void PhaseDiverseCDI::update_from_object_sub_grid(int i, int j, 
+				 double & real_value, 
+				 double & imag_value){
+  
+  real_value=0;
+  imag_value=0;
+
+  for(int di=0; di < scale; di++){
+    for(int dj=0; dj < scale; dj++){
+      real_value+=object.get_real(i+di,j+dj);
+      imag_value+=object.get_imag(i+di,j+dj);
+    }
+  }
+
+  real_value=real_value/(scale*scale);
+  imag_value=imag_value/(scale*scale);
 
 }
+
 
 void PhaseDiverseCDI::update_from_object(int n_probe){
 
@@ -296,66 +356,26 @@ void PhaseDiverseCDI::update_from_object(int n_probe){
   for(int i_=0; i_< small->get_size_x(); i_++){
     for(int j_=0; j_< small->get_size_y(); j_++){
 
-      i = i_-x_offset;
-      j = j_-y_offset;
+      i = (i_-x_offset)*scale;
+      j = (j_-y_offset)*scale;
       
       if(beam->get(i_,j_)>0 && i>=0 && j>=0 && 
 	 i<object.get_size_x() && j<object.get_size_y()){
 
-	double new_real = object.get_real(i,j);
-	  //	  +(1-weight)*object.get_real(i,j);
-
-	double new_imag = object.get_imag(i,j);
-	  //  +(1-weight)*object.get_imag(i,j);
+	double new_real; //= object.get_real(i,j);
+	double new_imag; //= object.get_imag(i,j);
 	
+	update_from_object_sub_grid(i, j, 
+				    new_real, 
+				    new_imag);
+
 	small->set_real(i_,j_,new_real);
 	small->set_imag(i_,j_,new_imag);
       }
     }
   }
 
-};
-
-void PhaseDiverseCDI::update_to_object(int n_probe){
-
-  double x_offset = x_position.at(n_probe);
-  double y_offset = y_position.at(n_probe);
-  Complex_2D * small = single_result.at(n_probe);
-  double w = weight.at(n_probe);
-  Double_2D * beam = beam_shape.at(n_probe);
-  
-
-  /**  Double_2D out_s(small.get_size_x(),
-		  small.get_size_y());
-
-  Double_2D out_o(object.get_size_x(),
-  object.get_size_y());**/
-
-  //round off to a first approx. Will be fixed later.
-  
-  int i, j; //local coors (i,j) are global (object) coors
-
-  //using the local coordinate system
-  for(int i_=0; i_< small->get_size_x(); i_++){
-    for(int j_=0; j_< small->get_size_y(); j_++){
-
-      //      cout << beam.get(i_,j_) <<endl;
-
-      if(beam->get(i_,j_)>0){
-
-	i = i_-x_offset;
-	j = j_-y_offset;
-	
-	double new_real = w*small->get_real(i_,j_)
-	  +(1-w)*object.get_real(i,j);
-	double new_imag = w*small->get_imag(i_,j_)
-	  +(1-w)*object.get_imag(i,j);
-	
-	object.set_real(i,j,new_real);
-	object.set_imag(i,j,new_imag);
-      }
-    }
-  }
-
+  set_result(singleCDI.at(n_probe),*(single_result.at(n_probe)));
 
 };
+

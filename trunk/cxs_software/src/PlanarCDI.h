@@ -74,7 +74,7 @@
 enum { PSF, PFS, PS, PF, PI }; 
 
 /** The different algorithms to choose from */
-enum { ER, BIO, BOO, HIO, DM, SF, ASR, HPR, RAAR};
+enum { ER, BIO, BOO, HIO, DM, SF, ASR, HPR, RAAR, CUSTOM};
 
 
 //forward declarations
@@ -518,6 +518,8 @@ class PlanarCDI{
   void support_constraint(Complex_2D & c);
 
   void reallocate_temp_complex_memory();
+
+  void update_n_best();
     
 };
 

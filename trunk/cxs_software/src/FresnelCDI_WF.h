@@ -45,11 +45,11 @@ class FresnelCDI_WF: public PlanarCDI{
 
    /** an array which holds a constants we use when propagating between
        difference planes */
-  Complex_2D forward_coefficient;
+  Complex_2D coefficient;
   
   /** an array which holds a constants we use when propagating between
       difference planes */
-  Complex_2D backward_coefficient;
+  //  Complex_2D backward_coefficient;
   
  public:
   
@@ -175,6 +175,9 @@ class FresnelCDI_WF: public PlanarCDI{
 			    double m5, double m6, double m7, double m8, 
 			    double m9, double m10){
   };
+
+  
+  void multiply_factors(Complex_2D & c, int direction);
 
 };
 

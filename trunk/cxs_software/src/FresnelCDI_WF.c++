@@ -12,6 +12,9 @@
 
 using namespace std;
 
+#define FORWARD  -1
+#define BACKWARD +1
+
 FresnelCDI_WF::FresnelCDI_WF(Complex_2D & initial_guess,
 			     double beam_wavelength,
 			     double zone_focal_length,
@@ -23,16 +26,16 @@ FresnelCDI_WF::FresnelCDI_WF(Complex_2D & initial_guess,
    zone_to_focal_length(zone_focal_length),
    focal_to_detector_length(focal_detector_length),
    pixel_length(pixel_size),
-   forward_coefficient(nx,ny),
-   backward_coefficient(nx,ny)
+   coefficient(nx/2,ny/2)
+   //   backward_coefficient(nx,ny)
 {
 
 
   //set-up the coefficients
   //it's easier to do it once and reuse the matrix.
 
-  double x_mid = (nx-1)/2;
-  double y_mid = (ny-1)/2;
+  double x_mid = (nx-1)/2.0;
+  double y_mid = (ny-1)/2.0;
 
   double z12 = zone_to_focal_length;
   double z23 = focal_to_detector_length;
@@ -42,8 +45,8 @@ FresnelCDI_WF::FresnelCDI_WF(Complex_2D & initial_guess,
 
   double norm = 1/(sqrt(nx*ny));
 
-  for(int i=0; i<nx; i++){
-    for(int j=0; j<ny; j++){
+  for(int i=0; i<nx/2; i++){
+    for(int j=0; j<ny/2; j++){
 
       double rho_2 = pow(scaling_x*(x_mid-i),2) + pow(scaling_y*(y_mid-j),2);
       //double phi = 2*z12 + 2*z23 + rho_2/z12 + rho_2/z23 ;
@@ -52,11 +55,8 @@ FresnelCDI_WF::FresnelCDI_WF(Complex_2D & initial_guess,
 
       phi*= M_PI/beam_wavelength;
 
-      forward_coefficient.set_real(i,j,sin(phi)*norm);
-      forward_coefficient.set_imag(i,j,-cos(phi)*norm);
-
-      backward_coefficient.set_real(i,j,-sin(-phi)*norm);
-      backward_coefficient.set_imag(i,j,cos(-phi)*norm);
+      coefficient.set_real(i,j,sin(phi)*norm);
+      coefficient.set_imag(i,j,-cos(phi)*norm);
 
     }
   }
@@ -65,6 +65,35 @@ FresnelCDI_WF::FresnelCDI_WF(Complex_2D & initial_guess,
   forward_coefficients_const->get_2d(PHASE,result);
   write_ppm("forward_coefficients_phase.ppm",result);**/
 
+}
+
+
+void FresnelCDI_WF::multiply_factors(Complex_2D & c, int direction){
+  
+  double x_mid = (nx-1)/2.0;
+  double y_mid = (ny-1)/2.0;
+
+  double old_real, old_imag;
+  double coef_real, coef_imag;
+  int i_, j_;
+
+  for(int i=0; i<nx; i++){
+    for(int j=0; j<ny; j++){
+
+      old_real = c.get_real(i,j);
+      old_imag = c.get_imag(i,j);
+
+      int i_ = x_mid - fabs(x_mid - i);
+      int j_ = y_mid - fabs(y_mid - j);
+
+      coef_real = coefficient.get_real(i_,j_);
+      coef_imag = direction*coefficient.get_imag(i_,j_);
+      
+      c.set_real(i,j,old_real*coef_real - old_imag*coef_imag);
+      c.set_imag(i,j,old_imag*coef_real + old_real*coef_imag);
+     
+    }
+  }
 }
 
 
@@ -125,7 +154,8 @@ void FresnelCDI_WF::propagate_from_detector(Complex_2D & c){
   //go to the focal plane
   c.perform_backward_fft();
   c.invert(true);  
-  c.multiply(backward_coefficient);
+  multiply_factors(c, BACKWARD);
+  //  c.multiply(backward_coefficient);
 
   //go back to zone plate plane. 
   c.perform_backward_fft();
@@ -136,7 +166,8 @@ void FresnelCDI_WF::propagate_to_detector(Complex_2D & c){
 
   //go to the focal plane again.
   c.perform_forward_fft();
-  c.multiply(forward_coefficient);
+  //  c.multiply(forward_coefficient);
+  multiply_factors(c, FORWARD);
 
   //and back to the detector plane
   c.invert(true);

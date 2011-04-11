@@ -14,8 +14,8 @@
 
 using namespace std;
 
-#define FORWARD  +1
-#define BACKWARD -1
+#define FORWARD  -1
+#define BACKWARD +1
 
 FresnelCDI::FresnelCDI(Complex_2D & initial_guess,
 		       Complex_2D & white_field,
@@ -28,7 +28,7 @@ FresnelCDI::FresnelCDI(Complex_2D & initial_guess,
   :PlanarCDI(initial_guess,n_best),
    illumination(nx,ny),
    norm(normalisation),
-   B_s(nx/2,ny/2)
+   coefficient(nx/2,ny/2)
    // B_d(ny,ny)
 {
 
@@ -84,8 +84,8 @@ void FresnelCDI::set_experimental_parameters(double beam_wavelength,
 
       phi= factor*((x_mid-i)*(x_mid-i) + (y_mid-j)*(y_mid-j)); 
 
-      B_s.set_real(i,j,cos(phi));
-      B_s.set_imag(i,j,sin(phi));
+      coefficient.set_real(i,j,cos(phi));
+      coefficient.set_imag(i,j,sin(phi));
 
     }
   }
@@ -99,10 +99,8 @@ void FresnelCDI::multiply_factors(Complex_2D & c, int direction){
   double y_mid = (ny-1)/2.0;
 
   double old_real, old_imag;
-  double sin_phi, cos_phi;
+  double coef_real, coef_imag;
   int i_, j_;
-
-
 
   for(int i=0; i<nx; i++){
     for(int j=0; j<ny; j++){
@@ -113,11 +111,11 @@ void FresnelCDI::multiply_factors(Complex_2D & c, int direction){
       int i_ = x_mid - fabs(x_mid - i);
       int j_ = y_mid - fabs(y_mid - j);
 
-      cos_phi = B_s.get_real(i_,j_);
-      sin_phi = direction*B_s.get_imag(i_,j_);
+      coef_real = coefficient.get_real(i_,j_);
+      coef_imag = direction*coefficient.get_imag(i_,j_);
 
-      c.set_real(i,j,old_real*cos_phi - old_imag*sin_phi);
-      c.set_imag(i,j,old_imag*cos_phi + old_real*sin_phi);
+      c.set_real(i,j,old_real*coef_real - old_imag*coef_imag);
+      c.set_imag(i,j,old_imag*coef_real + old_real*coef_imag);
 
     }
   }
@@ -189,7 +187,7 @@ void FresnelCDI::scale_intensity(Complex_2D & c){
 
 void FresnelCDI::propagate_from_detector(Complex_2D & c){
   //  c.multiply(B_d);
-  multiply_factors(c,FORWARD);
+  multiply_factors(c,BACKWARD);
   c.perform_backward_fft();
   c.invert(true);
 }
@@ -198,7 +196,7 @@ void FresnelCDI::propagate_to_detector(Complex_2D & c){
   c.invert(true); 
   c.perform_forward_fft();
   //c.multiply(B_s);
-  multiply_factors(c,BACKWARD);
+  multiply_factors(c,FORWARD);
 }
 
 void FresnelCDI::set_transmission_function(Complex_2D & transmission,

@@ -60,7 +60,8 @@ PlanarCDI::PlanarCDI(Complex_2D & initial_guess, unsigned int n_best)
   //initialize the complex contraint to null;
   transmission_constraint = NULL; 
   
-  set_algorithm(HIO);
+  algorithm=CUSTOM;
+  set_algorithm(ER);
 
 };
 
@@ -243,18 +244,17 @@ void PlanarCDI::scale_intensity(Complex_2D & c){
 
 
 void PlanarCDI::set_algorithm(int alg){
-  /**  if(algorithm==alg){
-    cout << "Warning you are trying to set the algorithm"
-	 << " to the one already in use" << endl; 
-    return;
-    }**/
 
-  algorithm = alg;
-  
+  if(algorithm==alg)
+    return;
+    // cout << "Warning you are trying to set the algorithm"
+    //	 << " to the one already in use" << endl; 
+
   switch(alg){
 
-  case(ER): //checked
-    set_custom_algorithm(0,0,0,1,0,0,0,0,0,0);
+    //no case for ER because this is handled differently
+  case(ER): 
+    set_custom_algorithm(0,0,0,0,0,0,0,0,0,0);
     break;
   case(BIO):
     set_custom_algorithm(0,beta,0,0,0,0,0,0,0,0);
@@ -262,10 +262,10 @@ void PlanarCDI::set_algorithm(int alg){
   case(BOO):
     set_custom_algorithm(0,beta,0,0,0,0,0,0,1,0);
     break;
-  case(HIO): //checked
+  case(HIO):
     set_custom_algorithm(0,beta,1,0,0,0,0,0,0,0);
     break;
-  case(DM): //checked
+  case(DM): 
     set_custom_algorithm(beta,0,-1,0,-1,0,0,0,0,0);
     break;
   case(SF):
@@ -284,6 +284,9 @@ void PlanarCDI::set_algorithm(int alg){
     cout << "Algorithm unknown" <<endl;
   }
 
+  algorithm = alg;
+ 
+
   //  print_algorithm();
 }
 
@@ -292,15 +295,17 @@ void PlanarCDI::set_custom_algorithm(double m1, double m2, double m3,
 				      double m4, double m5, double m6, 
 				      double m7, double m8,
 				      double m9, double m10){
- 
+
   algorithm_structure[PSF]=  m1 + m2 + m3 + m4;
   algorithm_structure[PFS]= -m1 + m5 + m6 + m7;
   algorithm_structure[PS] = -m3 - m6 - m8 + m10;
   algorithm_structure[PF] = -m2 - m5 + m8 + m9;
   algorithm_structure[PI] = -m4 - m7 - m9 - m10;
-
-  reallocate_temp_complex_memory();
   
+  reallocate_temp_complex_memory();
+
+  algorithm = CUSTOM;
+ 
 }
 
 void PlanarCDI::reallocate_temp_complex_memory(){
@@ -325,20 +330,39 @@ void PlanarCDI::reallocate_temp_complex_memory(){
 
 
 void PlanarCDI::print_algorithm(){
- 
-  cout << "Currently using the algorithm: "
-       << "x(k+1) = x(k) + ("
-       << algorithm_structure[PSF]<<"*PsPf + "
-       << algorithm_structure[PFS]<<"*PfPs + "
-       << algorithm_structure[PS]<<"*Ps + "
-       << algorithm_structure[PF]<<"*Pf + "
-       << algorithm_structure[PI]<<"*I"
-       << ")x(k)"<< endl;
+
+  if(algorithm==ER)
+    cout << "Currently using error-reduction: "
+	 << "x(k+1) = Ps Pf x(k)" <<endl;
+  else
+    cout << "Currently using the algorithm: "
+	 << "x(k+1) = x(k) + ("
+	 << algorithm_structure[PSF]<<"*PsPf + "
+	 << algorithm_structure[PFS]<<"*PfPs + "
+	 << algorithm_structure[PS]<<"*Ps + "
+	 << algorithm_structure[PF]<<"*Pf + "
+	 << algorithm_structure[PI]<<"*I"
+	 << ")x(k)"<< endl;
+  
   cout << "Ps - support constraint, Pf - modulus constraint" << endl;
   
 }
 
 int PlanarCDI::iterate(){
+
+  //below is the code for the special case of ER
+  //this is faster than using the generic algorithm code
+  //further down in this function.
+
+  if(algorithm==ER){
+    project_intensity(complex);
+    apply_support(complex);
+    update_n_best();
+    return SUCCESS;
+  }
+
+
+  //start of the generic algorithm code
 
   //PFS
   if(algorithm_structure[PFS]!=0){
@@ -412,6 +436,13 @@ int PlanarCDI::iterate(){
     }
   }
 
+  update_n_best();
+  return SUCCESS;
+}
+
+
+void PlanarCDI::update_n_best(){
+
   // check whether this estimate is as good as the current best
   // this is a bit dodgy since we are actually storing the 
   // estimate just after the best one.
@@ -432,8 +463,7 @@ int PlanarCDI::iterate(){
     best_error_array[place] = current_error;
     best_array[place] = temp_pointer;      
   }
-  
-  return SUCCESS;
+
 }
 
 void PlanarCDI::get_support(Double_2D & object_support){

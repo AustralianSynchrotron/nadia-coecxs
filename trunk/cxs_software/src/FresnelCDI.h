@@ -53,7 +53,7 @@ class FresnelCDI: public PlanarCDI{
 
   /** an array which holds a constants we use when propagating between
   difference planes */
-  Complex_2D B_s; 
+  Complex_2D coefficient; 
 
   /** an array which holds a constants we use when propagating between
   difference planes */
