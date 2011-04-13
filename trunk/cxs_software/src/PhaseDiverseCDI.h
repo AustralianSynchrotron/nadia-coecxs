@@ -39,16 +39,17 @@ class PhaseDiverseCDI{
   double beta;
   double gamma;
   std::vector<double> alpha;
-  std::vector<double> weight;
   
   Complex_2D & object;
+  Double_2D weight_norm;
 
   int iterations_per_cycle;
   int scale;
 
  public:
 
-  PhaseDiverseCDI(Complex_2D & object, int granularity=1);
+  PhaseDiverseCDI(Complex_2D & object, int granularity=1,
+		  double beta=1.0, double gamma=1.0);
   ~PhaseDiverseCDI();
 
   void iterate();
@@ -56,13 +57,13 @@ class PhaseDiverseCDI{
   void add_new_position(PlanarCDI * local, 
 			Double_2D & beam_shape,
 			double x=0, double y=0, 
-			double probe_scaling=1);
+			double alpha=1);
  
   void set_iterations_per_cycle(int iterations){
     iterations_per_cycle = iterations;
   }
 
-  void set_feedback_parameter(double beta){
+  /**  void set_feedback_parameter(double beta){
     this->beta = beta;
   };
 
@@ -80,7 +81,7 @@ class PhaseDiverseCDI{
 		<< "before calling add_new_position?" <<std::endl;
     }
     
-  };
+    };**/
 
   void initialise_estimate();
 
@@ -97,6 +98,8 @@ class PhaseDiverseCDI{
   void update_from_object_sub_grid(int i, int j, 
 				 double & real_value, 
 				 double & imag_value);
+
+  void get_weights(int n_probe, Double_2D & weights);
 
 
 };

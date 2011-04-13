@@ -68,8 +68,8 @@ void FresnelCDI::set_experimental_parameters(double beam_wavelength,
   this->focal_detector_length = focal_detector_length;
   this->focal_sample_length = focal_sample_length;
     
-  double x_mid = (nx-1)/2.0;
-  double y_mid = (ny-1)/2.0;
+  double x_mid = (nx-1)/2;//.0;
+  double y_mid = (ny-1)/2;//.0;
 
   double zfd = focal_detector_length;
   double zfs = focal_sample_length;
@@ -79,8 +79,8 @@ void FresnelCDI::set_experimental_parameters(double beam_wavelength,
 
   double phi;
 
-  for(int i=0; i<nx/2; i++){
-    for(int j=0; j<ny/2; j++){
+  for(int i=0; i<nx/2.0; i++){
+    for(int j=0; j<ny/2.0; j++){
 
       phi= factor*((x_mid-i)*(x_mid-i) + (y_mid-j)*(y_mid-j)); 
 
@@ -95,8 +95,8 @@ void FresnelCDI::set_experimental_parameters(double beam_wavelength,
 
 void FresnelCDI::multiply_factors(Complex_2D & c, int direction){
   
-  double x_mid = (nx-1)/2.0;
-  double y_mid = (ny-1)/2.0;
+  double x_mid = (nx-1)/2;//.0;
+  double y_mid = (ny-1)/2;//.0;
 
   double old_real, old_imag;
   double coef_real, coef_imag;
@@ -228,6 +228,16 @@ void FresnelCDI::set_transmission_function(Complex_2D & transmission,
       esw->set_imag(i,j,ill_r*trans_i + ill_i*trans_r - ill_i);      
     }
   }
+}
+
+const Complex_2D & FresnelCDI::get_illumination_at_sample(){ 
+  if(!illumination_at_sample){
+    illumination_at_sample = new Complex_2D(nx,ny);
+    illumination_at_sample->copy(illumination);
+    propagate_from_detector(*illumination_at_sample);
+  }
+  
+  return *illumination_at_sample;
 }
 
 void FresnelCDI::get_transmission_function(Complex_2D & result, 

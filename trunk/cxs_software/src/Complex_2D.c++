@@ -187,7 +187,7 @@ Complex_2D * Complex_2D::clone() const {
 
 
 //copy another array
-void Complex_2D::copy(Complex_2D & c){
+void Complex_2D::copy(const Complex_2D & c){
 
   //check the bounds
   if(c.get_size_x()!=get_size_x()||
@@ -215,8 +215,9 @@ void Complex_2D::invert(bool scale){
   if(nx%2==1 || ny%2==1)
     cout << "WARNING: The array dimensions are odd "
 	 << "but we have assumed they are even when inverting an "
-	 << "array after FFT. This will probably cause you issues..."<<endl;
-
+	 << "array after FFT. This will probably cause you issues..."
+	 << endl;
+  
   for(int i=0; i < nx; ++i){
     for(int j=0; j < middle_y; ++j){
       

@@ -287,15 +287,13 @@ class PlanarCDI{
     return ny;
   };
 
-  void get_exit_surface_wave(Complex_2D & esw){
-    esw.copy(complex);
+  const Complex_2D & get_exit_surface_wave(){
+    return complex;
   }
   
   void set_exit_surface_wave(Complex_2D & esw){
     complex.copy(esw);
   }
-  
-
   
   /**
    * Set the algorithm. By default HIO is used.
@@ -412,7 +410,10 @@ class PlanarCDI{
    * @param support The content of "support" is overridden with the
    * current support.
    */  
-  void get_support(Double_2D & support);
+  const Double_2D & get_support(Double_2D & support){
+    return support;
+  };
+
 
 
   /**

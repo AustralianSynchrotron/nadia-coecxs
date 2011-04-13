@@ -99,15 +99,11 @@ class tiff_anonymous_array{
       exit(1);
     }          
   }
-
-
-  
 };
 
-/***************************************************************/
+/*********************************************************/
 
-/***************************************************************/
-
+/*********************************************************/
 int read_tiff(string file_name, Double_2D & data){
  
   //open the input file:
@@ -205,7 +201,8 @@ int read_tiff(string file_name, Double_2D & data){
 };
 
 /** write data out to a tiff file **/
-int write_tiff(string file_name, const Double_2D & data, bool log_scale){
+int write_tiff(string file_name, const Double_2D & data, bool log_scale,
+	       double min, double max){
 
   TIFF* tif = TIFFOpen(file_name.c_str(), "w");
   if (!tif) {
@@ -213,8 +210,11 @@ int write_tiff(string file_name, const Double_2D & data, bool log_scale){
     return FAILURE;
   }
 
-  double max = data.get_max();
-  double min = data.get_min();
+  if(min==0 && max==0){
+    max = data.get_max();
+    min = data.get_min();
+  }
+
   int max_pixel = 65535; //2^(8bit*2bytes)
 
   //copy the image into an array

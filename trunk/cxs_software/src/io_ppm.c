@@ -15,7 +15,9 @@ using namespace std;
 /***************************************************************/
 
 /***************************************************************/
-int write_ppm(string file_name, const Double_2D & data, bool log_scale){
+int write_ppm(string file_name, const Double_2D & data, bool log_scale,
+	      double min, double max){
+
 
   int nx = data.get_size_x();
   int ny = data.get_size_y();
@@ -47,9 +49,11 @@ int write_ppm(string file_name, const Double_2D & data, bool log_scale){
      return FAILURE;
    }
    
-   double min = data.get_min();
-   double max = data.get_max();
-
+   if(min==0&&max==0){
+    max = data.get_max();
+    min = data.get_min();
+   }
+   
    new_file << "P2" << endl;
    new_file << "#"<<file_name<<endl;
    new_file << "# original range: "<<min<<"-"<<max <<endl; 

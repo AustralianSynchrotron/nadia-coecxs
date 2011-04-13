@@ -192,6 +192,10 @@ class FresnelCDI: public PlanarCDI{
 				   double pixel_size);
     
 
+  
+  const Complex_2D & get_illumination_at_sample();
+
+ protected:
 
   void multiply_factors(Complex_2D & c, int direction);
 

@@ -466,12 +466,6 @@ void PlanarCDI::update_n_best(){
 
 }
 
-void PlanarCDI::get_support(Double_2D & object_support){
-  for(int i=0; i < nx; i++)
-    for(int j=0; j < ny; j++)
-      object_support.set(i,j,support.get(i,j));
-}
-
 
 void PlanarCDI::apply_shrinkwrap(double gauss_width, double threshold){
   

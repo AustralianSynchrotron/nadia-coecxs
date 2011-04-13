@@ -59,7 +59,8 @@ int read_cplx(string file_name, Complex_2D & complex);
  * @param log_scale Output on log scale? true/false. Default is false.
  */ 
 int write_ppm(string file_name, const Double_2D & data, 
-	      bool log_scale=false);
+	      bool log_scale=false,
+	      double min=0, double max=0);
 
 /** 
  * Write a 2D array into a binary file. The data will be saved in 64
@@ -100,7 +101,8 @@ int write_cplx(string file_name, const Complex_2D & complex);
  * @param log_scale Output on log scale? true/false. Default is false.
  */ 
 int write_tiff(string file_name, const Double_2D & data, 
-	       bool log_scale=false);
+	       bool log_scale=false,
+	       double min=0, double max=0);
 
 
 //used to transform an array of doubles in the range -x_min .... x_max
@@ -124,7 +126,15 @@ inline unsigned int io_scale_value(double min, double max,
   }
   
   grad = (double)pixel_max/(double)(max-min);
-  return grad*(value-min);
+
+  value = grad*(value-min);
+
+  if(value<0)
+    value = min;
+  if(value>pixel_max)
+    value = pixel_max;
+
+  return value;
   
 }
 
@@ -186,17 +196,17 @@ inline void read_image(string file_name, Double_2D & data,
  * @param log_scale Only used for writing tiff and ppm files. By default
  *        images are not written out on a log scale.
  */
-inline void write_image(string file_name, Double_2D & data, bool log_scale=false){
+inline void write_image(string file_name, Double_2D & data, bool log_scale=false, double min=0, double max=0){
   
   int status = FAILURE;
 
   const char * file = file_name.c_str();
   
   if(strstr(file,".tiff\0")!=0 || strstr(file,".tif\0")!=0)
-    status = write_tiff(file_name,data, log_scale);
+    status = write_tiff(file_name,data, log_scale, min, max);
 
   if(strstr(file,".ppm\0")!=0)
-    status = write_ppm(file_name,data, log_scale);    
+    status = write_ppm(file_name,data, log_scale, min, max);    
 
   if(strstr(file,".dbin\0")!=0)
     status = write_dbin(file_name,data);   

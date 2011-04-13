@@ -324,7 +324,7 @@ class Complex_2D{
    * 
    * @param c The Complex_2D which will be copied from.
    */
-  void copy(Complex_2D & c);
+  void copy(const Complex_2D & c);
 
 
   /**
