@@ -116,14 +116,16 @@ void PhaseDiverseCDI::set_up_weight_norm(){
 	double i = (i_-x)*scale;
 	double j = (j_-y)*scale;
       
-	double new_weight = this_single_weights.get(i_,j_);
-	double old_weight = weight_norm->get(i,j);
+	if(i>0&&j>0&&i<nx&&j<ny){
 
-	if(n==0)
-	  weight_norm->set(i,j,new_weight);
-	else
-	  weight_norm->set(i,j,new_weight+old_weight);
-	
+	  double new_weight = this_single_weights.get(i_,j_);
+	  double old_weight = weight_norm->get(i,j);
+
+	  if(n==0)
+	    weight_norm->set(i,j,new_weight);
+	  else
+	    weight_norm->set(i,j,new_weight+old_weight);
+	}
       }
     }
   }
