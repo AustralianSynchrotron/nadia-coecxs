@@ -104,11 +104,14 @@ void PhaseDiverseCDI::set_up_weight_norm(){
     double x = x_position.at(n);
     double y = y_position.at(n);
 
-    Double_2D this_single_weights(nx,ny);
+    int this_size_x = single_result.at(n)->get_size_x();
+    int this_size_y = single_result.at(n)->get_size_y();
+
+    Double_2D this_single_weights(this_size_x,this_size_y);
     get_weights(n,this_single_weights);
     
-    for(int i_=0; i_< nx; i_++){
-      for(int j_=0; j_< ny; j_++){
+    for(int i_=0; i_< this_size_x; i_++){
+      for(int j_=0; j_< this_size_y; j_++){
 	
 	double i = (i_-x)*scale;
 	double j = (j_-y)*scale;
@@ -343,31 +346,33 @@ void PhaseDiverseCDI::add_to_object(int n_probe, double new_fraction,
   //using the local coordinate system
   for(int i_=0; i_< small.get_size_x(); i_++){
     for(int j_=0; j_< small.get_size_y(); j_++){
-
+      
       i = (i_-x_offset)*scale;
       j = (j_-y_offset)*scale;
-
-      double weight = new_fraction*temp_weights.get(i_,j_)/weight_norm->get(i,j);
       
-      if(weight_norm->get(i,j)<=0){
-	weight=0;
-      }
+      if(i>0&&j>0&&i<nx&&j<ny){
+	double weight = new_fraction*temp_weights.get(i_,j_)/weight_norm->get(i,j);
+      
+	if(weight_norm->get(i,j)<=0){
+	  weight=0;
+	}
 
-      if(weight>1){
-      	cout << weight << endl;
-      }
+	if(weight>1){
+	  cout << weight << endl;
+	}
 
-      double new_real = weight*small.get_real(i_,j_)
+	double new_real = weight*small.get_real(i_,j_)
 	  +(1-weight)*object.get_real(i,j);
 	
 	double new_imag = weight*small.get_imag(i_,j_)
 	  +(1-weight)*object.get_imag(i,j);
 	
 	update_to_object_sub_grid(i,j,new_real,new_imag); 
-
+      }
+      
     }
   } 
-
+  
 }
 
 void PhaseDiverseCDI::update_to_object_sub_grid(int i, int j, 
@@ -422,8 +427,7 @@ void PhaseDiverseCDI::update_from_object(int n_probe){
       //      if(beam->get(i_,j_)>0 && i>=0 && j>=0 && 
       //	 i<object.get_size_x() && j<object.get_size_y()){
 
-      if(i>=0 && j>=0 && 
-	 i<object.get_size_x() && j<object.get_size_y()){
+      if(i>=0 && j>=0 && i<nx && j<ny){
 
 	double new_real; //= object.get_real(i,j);
 	double new_imag; //= object.get_imag(i,j);
