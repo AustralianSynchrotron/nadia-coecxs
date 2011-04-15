@@ -116,7 +116,7 @@ void PhaseDiverseCDI::set_up_weight_norm(){
 	double i = (i_-x)*scale;
 	double j = (j_-y)*scale;
       
-	if(i>0&&j>0&&i<nx&&j<ny){
+	if(i>=0&&j>=0&&i<nx&&j<ny){
 
 	  double new_weight = this_single_weights.get(i_,j_);
 	  double old_weight = weight_norm->get(i,j);
@@ -132,17 +132,18 @@ void PhaseDiverseCDI::set_up_weight_norm(){
 };
 
 void PhaseDiverseCDI::initialise_estimate(){
-  
+
   for(int i=0; i<object.get_size_x(); i++){
     for(int j=0; j<object.get_size_y(); j++){
       object.set_real(i,j,1);
+      object.set_imag(i,j,0);
     }
   }
 
   for(int i=0; i<singleCDI.size(); i++){
     add_to_object(i,1,0);
   }
-  
+
 }
 
 
@@ -352,7 +353,7 @@ void PhaseDiverseCDI::add_to_object(int n_probe, double new_fraction,
       i = (i_-x_offset)*scale;
       j = (j_-y_offset)*scale;
       
-      if(i>0&&j>0&&i<nx&&j<ny){
+      if(i>=0&&j>=0&&i<nx&&j<ny){
 	double weight = new_fraction*temp_weights.get(i_,j_)/weight_norm->get(i,j);
       
 	if(weight_norm->get(i,j)<=0){
