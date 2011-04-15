@@ -21,7 +21,7 @@
 #include <math.h>
 #include <string>
 
-#include <google/heap-profiler.h>
+//#include <google/heap-profiler.h>
 
 using namespace std;
 
@@ -217,7 +217,7 @@ int main(int argc, char * argv[]){
   object_estimate[0]->get_2d(MAG,result_2);
   write_image("temp.ppm",result_2);
 
-  HeapProfilerDump("mine2");
+  //  HeapProfilerDump("mine2");
 
   //  my_constraint(temp);
   Double_2D result(object.get_size_x(),object.get_size_y());
