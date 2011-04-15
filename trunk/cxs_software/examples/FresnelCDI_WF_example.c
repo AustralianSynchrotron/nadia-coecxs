@@ -59,7 +59,7 @@ int main(int argc, char * argv[]){
 
   //set the support 
   //this will set a circular support of diameter 165micro
-  proj.set_support(165e-6);
+  proj.set_support(163e-6);
   
   //set the intensity
   proj.set_intensity(data);
@@ -78,7 +78,7 @@ int main(int argc, char * argv[]){
   //current estimate.
   Double_2D result(nx,nx);
 
-  for(int i=0; i<21; i++){
+  for(int i=0; i<26; i++){
 
     cout << "iteration " << i << endl;
 
