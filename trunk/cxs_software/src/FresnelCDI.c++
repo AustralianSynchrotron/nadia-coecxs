@@ -68,8 +68,8 @@ void FresnelCDI::set_experimental_parameters(double beam_wavelength,
   this->focal_detector_length = focal_detector_length;
   this->focal_sample_length = focal_sample_length;
     
-  double x_mid = (nx-1)/2;//.0;
-  double y_mid = (ny-1)/2;//.0;
+  double x_mid = (nx-1)/2.0;
+  double y_mid = (ny-1)/2.0;
 
   double zfd = focal_detector_length;
   double zfs = focal_sample_length;
@@ -95,8 +95,8 @@ void FresnelCDI::set_experimental_parameters(double beam_wavelength,
 
 void FresnelCDI::multiply_factors(Complex_2D & c, int direction){
   
-  double x_mid = (nx-1)/2;//.0;
-  double y_mid = (ny-1)/2;//.0;
+  double x_mid = (nx-1)/2.0;
+  double y_mid = (ny-1)/2.0;
 
   double old_real, old_imag;
   double coef_real, coef_imag;

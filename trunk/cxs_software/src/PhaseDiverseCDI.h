@@ -41,21 +41,25 @@ class PhaseDiverseCDI{
   std::vector<double> alpha;
   
   Complex_2D & object;
-  Double_2D weight_norm;
+  Double_2D * weight_norm;
 
   int iterations_per_cycle;
   int scale;
+  int nx,ny;
+
+  bool parallel; 
 
  public:
 
-  PhaseDiverseCDI(Complex_2D & object, int granularity=1,
-		  double beta=1.0, double gamma=1.0);
+  PhaseDiverseCDI(Complex_2D & object,
+		  double beta=1.0, double gamma=1.0,
+		  bool parallel=false, int granularity=1);
+
   ~PhaseDiverseCDI();
 
   void iterate();
   
   void add_new_position(PlanarCDI * local, 
-			Double_2D & beam_shape,
 			double x=0, double y=0, 
 			double alpha=1);
  
@@ -63,12 +67,20 @@ class PhaseDiverseCDI{
     iterations_per_cycle = iterations;
   }
 
-  /**  void set_feedback_parameter(double beta){
+  void set_feedback_parameter(double beta){
     this->beta = beta;
+    
+    if(!weight_norm)
+      set_up_weight_norm();
+    
   };
 
   void set_amplification_factor(double gamma){
     this->gamma = gamma;
+    
+    if(!weight_norm)
+      set_up_weight_norm();
+ 
   };
 
   void set_probe_scaling(int n_probe, double alpha){
@@ -81,14 +93,17 @@ class PhaseDiverseCDI{
 		<< "before calling add_new_position?" <<std::endl;
     }
     
-    };**/
+    if(!weight_norm)
+      set_up_weight_norm();
+
+  };
 
   void initialise_estimate();
 
  private:
 
   void add_to_object(int n_probe, double weight, double old_weight);
-  int update_from_object_with_shift(int n_probe, double shift=4, int tries=0);
+  int check_position(int n_probe, double shift=4, int tries=0);
   void update_from_object(int n_probe);
   void get_result(PlanarCDI * local, Complex_2D & result);
   void set_result(PlanarCDI * local, Complex_2D & result);
@@ -100,6 +115,8 @@ class PhaseDiverseCDI{
 				 double & imag_value);
 
   void get_weights(int n_probe, Double_2D & weights);
+
+  void set_up_weight_norm();
 
 
 };
