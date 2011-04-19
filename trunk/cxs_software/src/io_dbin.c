@@ -52,7 +52,7 @@ int read_dbin(string file_name, int nx, int ny, Double_2D & data){
 
   for(int i=0; i < nx; ++i){
     for(int j=0; j< ny; ++j){
-      data.set(i,j,buffer[(ny-j-1)*nx+i]);
+      data.set(i,j,buffer[j*nx+i]);
     }
   }
   
@@ -84,7 +84,7 @@ int write_dbin(string file_name, const Double_2D & data){
   double * buffer = new double [nx*ny];
   for(int i=0; i < nx; ++i){
     for(int j=0; j< ny; ++j){
-      buffer[(ny-j-1)*nx+i] = data.get(i,j);
+      buffer[j*nx+i] = data.get(i,j);
     }
   }
 
