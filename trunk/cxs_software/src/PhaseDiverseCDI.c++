@@ -225,7 +225,7 @@ void PhaseDiverseCDI::initialise_estimate(){
   }
 
   for(int i=0; i<singleCDI.size(); i++){
-    add_to_object(i,1,0);
+    add_to_object(i,1);
   }
 
 }
@@ -255,13 +255,13 @@ void PhaseDiverseCDI::iterate(){
     }
 
     if(!parallel)
-      add_to_object(i,beta,0);
+      add_to_object(i,beta);
 
   }
   
   if(parallel){
     for(int i=0; i<singleCDI.size(); i++){
-      add_to_object(i,beta,0);
+      add_to_object(i,beta);
     }
   }
 
@@ -288,6 +288,97 @@ void PhaseDiverseCDI::set_result(PlanarCDI * local, Complex_2D & result){
 }
 
 
+
+//frames need to be in order for this to work.
+void PhaseDiverseCDI::adjust_positions(double step_size, bool forward){
+
+  //make a copy of the tranmission function
+  Complex_2D * pointer_to_object = object;
+  int nx_c = nx;
+  int ny_c = ny;
+  double x_min_c = x_min; 
+  double y_min_c = y_min; 
+    
+  
+  //leave the first frame, as everything will be aligned to it.
+  int n=1;
+  int limit=singleCDI.size();
+  if(!forward){
+    n=singleCDI.size()-2;
+    limit=-1;
+  }
+
+  while(n!=limit){
+    //for(int n=1; n<singleCDI.size(); n++){
+
+    //store some before information for later use
+    double before_x = x_position.at(n);
+    double before_y = y_position.at(n);
+
+    //replace the transmission function with
+    //just the 1st frame information
+
+    Complex_2D temp(1024,1024);
+    object = &temp;
+    nx = 1024;
+    ny = 1024;
+    x_min = -x_position.at(n);
+    y_min = -y_position.at(n);
+    
+    for(int i=0; i<1024; i++){
+      for(int j=0; j<1024; j++){
+	temp.set_real(i,j,1);
+	temp.set_imag(i,j,0);
+      }
+    }
+
+    char name[80];
+    Double_2D pic(1024,1024);
+    object->get_2d(MAG,pic);
+    write_image("pic_0.tiff",pic,false,0,1);
+
+    //if frame m overlaps with frame n
+    //add it to the current array
+
+    if(forward){
+      for(int m=0; m < n; m++){
+	add_to_object(m,1);
+      }
+    }
+    else{
+      for(int m=singleCDI.size()-1; m > n; m--){
+	add_to_object(m,1);
+      }
+    }
+
+    //    char name[80];
+    //Double_2D pic(1024,1024);
+    object->get_2d(MAG,pic);
+    sprintf(name,"pic_%i.tiff",n);
+    write_image(name,pic,false, 0,1);
+
+    check_position(n,step_size,0);
+
+    cout << "moving prob " << n << " from ("
+	 << before_x << "," << before_y << ") "
+	 << "-> (" << x_position.at(n) 
+	 << "," <<  y_position.at(n) << ")."
+	 << endl;
+
+    if(forward)
+      n++;
+    else
+      n--;
+
+  }
+  
+  object = pointer_to_object;
+  nx = nx_c;
+  ny = ny_c;
+  x_min = x_min_c; 
+  y_min = y_min_c; 
+
+}
 
 int PhaseDiverseCDI::check_position(int n_probe, double step_size, int tries){
   
@@ -342,6 +433,9 @@ int PhaseDiverseCDI::check_position(int n_probe, double step_size, int tries){
 	
 	single->iterate();
 	
+	//	cout << "error at ("<<new_x<<","<<new_y
+	//	     << ")"<<" is "<<single->get_error()<<endl;
+
 	if(single->get_error()<best_error){
 	  best_error = single->get_error();
 	  best_x = x+i*step_size;
@@ -410,8 +504,7 @@ void PhaseDiverseCDI::get_weights(int n_probe, Double_2D & weights){
 }
 
 
-void PhaseDiverseCDI::add_to_object(int n_probe, double new_fraction, 
-				    double old_fraction){
+void PhaseDiverseCDI::add_to_object(int n_probe, double new_fraction){
 
   if(!weight_norm)
     set_up_weight_norm();

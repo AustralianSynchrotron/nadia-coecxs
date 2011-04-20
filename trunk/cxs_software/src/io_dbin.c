@@ -22,7 +22,7 @@ int read_dbin(string file_name, int nx, int ny, Double_2D & data){
 
   //error check.
   if(!file){
-    cout << "Could not open the file " << file_name << endl;
+    cout << "Could not open the file " << file_name <<"."<< endl;
     return FAILURE;
   }
 

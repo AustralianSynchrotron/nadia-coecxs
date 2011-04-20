@@ -108,10 +108,11 @@ class PhaseDiverseCDI{
   void initialise_estimate();
   Complex_2D * get_transmission();
   void set_transmission(Complex_2D & new_transmission);
+  void adjust_positions(double step_size=4, bool forwards=true);
 
  private:
 
-  void add_to_object(int n_probe, double weight, double old_weight);
+  void add_to_object(int n_probe, double weight );
   int check_position(int n_probe, double shift=4, int tries=0);
   void update_from_object(int n_probe);
   void get_result(PlanarCDI * local, Complex_2D & result);
