@@ -40,21 +40,28 @@ class PhaseDiverseCDI{
   double gamma;
   std::vector<double> alpha;
   
-  Complex_2D & object;
+  Complex_2D * object;
   Double_2D * weight_norm;
 
   int iterations_per_cycle;
   int scale;
   int nx,ny;
-
+  
+  int x_min;
+  int y_min;
   bool parallel; 
 
  public:
 
-  PhaseDiverseCDI(Complex_2D & object,
-		  double beta=1.0, double gamma=1.0,
-		  bool parallel=false, int granularity=1);
-
+  PhaseDiverseCDI(double beta=1.0, 
+		  double gamma=1.0,
+		  bool parallel=false,
+		  int nx=0,
+		  int ny=0,
+		  int min_x=0,
+		  int min_y=0,
+		  int granularity=1);
+  
   ~PhaseDiverseCDI();
 
   void iterate();
@@ -99,6 +106,8 @@ class PhaseDiverseCDI{
   };
 
   void initialise_estimate();
+  Complex_2D * get_transmission();
+  void set_transmission(Complex_2D & new_transmission);
 
  private:
 
@@ -117,6 +126,8 @@ class PhaseDiverseCDI{
   void get_weights(int n_probe, Double_2D & weights);
 
   void set_up_weight_norm();
+
+  void reallocate_object_memory(int new_nx,int new_ny);
 
 
 };

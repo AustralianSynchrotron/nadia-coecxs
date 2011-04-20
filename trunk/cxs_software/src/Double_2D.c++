@@ -1,5 +1,7 @@
 #include "string.h"
+#include "iostream.h"
 #include "Double_2D.h"
+
   
 Double_2D::Double_2D():nx(0),ny(0){
 }
@@ -22,6 +24,11 @@ void Double_2D::allocate_memory(int x_size, int y_size){
   nx = x_size;
   ny = y_size;
   array = new double[nx*ny];
+  if(!array){
+    std::cout << "Could not allocated memory. Exiting.."<<std::endl;
+    exit(0);
+  }
+
   for(int i=0; i<nx; i++)
     for(int j=0; j<ny; j++)
       array[i*ny+j]=0;
