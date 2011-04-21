@@ -31,7 +31,8 @@ class PhaseDiverseCDI{
 
   std::vector<PlanarCDI*> singleCDI;
   std::vector<Complex_2D*> single_result;
-  std::vector<Double_2D *> beam_shape;
+  //std::vector<Double_2D *> beam_shape;
+  std::vector<Double_2D *> weights;
   std::vector<double> x_position;
   std::vector<double> y_position;
   
@@ -39,9 +40,8 @@ class PhaseDiverseCDI{
   double beta;
   double gamma;
   std::vector<double> alpha;
-  
+
   Complex_2D * object;
-  Double_2D * weight_norm;
 
   int iterations_per_cycle;
   int scale;
@@ -50,6 +50,7 @@ class PhaseDiverseCDI{
   int x_min;
   int y_min;
   bool parallel; 
+  bool weights_set;
 
  public:
 
@@ -75,18 +76,14 @@ class PhaseDiverseCDI{
   }
 
   void set_feedback_parameter(double beta){
-    this->beta = beta;
-    
-    if(!weight_norm)
-      set_up_weight_norm();
-    
+    this->beta = beta;    
+    weights_set = false;
+
   };
 
   void set_amplification_factor(double gamma){
     this->gamma = gamma;
-    
-    if(!weight_norm)
-      set_up_weight_norm();
+    weights_set = false;
  
   };
 
@@ -99,9 +96,7 @@ class PhaseDiverseCDI{
 	   << "Are you trying to set the value of alpha "
 		<< "before calling add_new_position?" <<std::endl;
     }
-    
-    if(!weight_norm)
-      set_up_weight_norm();
+    weights_set = false;
 
   };
 
@@ -109,10 +104,16 @@ class PhaseDiverseCDI{
   Complex_2D * get_transmission();
   void set_transmission(Complex_2D & new_transmission);
   void adjust_positions(double step_size=4, bool forwards=true);
+  double get_final_x_position(int n_probe){
+    return x_position.at(n_probe);}
+  double get_final_y_position(int n_probe){
+    return y_position.at(n_probe);}
+
+
 
  private:
 
-  void add_to_object(int n_probe, double weight );
+  void add_to_object(int n_probe);
   int check_position(int n_probe, double shift=4, int tries=0);
   void update_from_object(int n_probe);
   void get_result(PlanarCDI * local, Complex_2D & result);
@@ -124,13 +125,13 @@ class PhaseDiverseCDI{
 				 double & real_value, 
 				 double & imag_value);
 
-  void get_weights(int n_probe, Double_2D & weights);
+  //void get_weights(int n_probe, Double_2D & weights);
 
-  void set_up_weight_norm();
+  //void set_up_weight_norm();
 
   void reallocate_object_memory(int new_nx,int new_ny);
 
-
+  void set_up_weights();
 };
 
 
