@@ -90,6 +90,12 @@ void FresnelCDI::set_experimental_parameters(double beam_wavelength,
     }
   }
 
+  //redo the illumination at the sample plane.
+  if(illumination_at_sample){
+    delete illumination_at_sample;
+    illumination_at_sample = 0;
+  }
+
 }
 
 
