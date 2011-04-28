@@ -226,6 +226,12 @@ void PhaseDiverseCDI::iterate(){
   }
   
   if(parallel){
+
+    object->scale(1-beta);
+       
+    //  new_real += (1-beta)*object->get_real(i,j);
+    //  new_imag += (1-beta)*object->get_imag(i,j);
+
     for(int i=0; i<singleCDI.size(); i++){
       add_to_object(i);
     }
@@ -501,7 +507,6 @@ void PhaseDiverseCDI::set_up_weights(){
   }
   
   if(parallel){
-
     
     Double_2D weight_norm(object->get_size_x(),object->get_size_y());
     
@@ -550,25 +555,24 @@ void PhaseDiverseCDI::set_up_weights(){
 	  
 	  if(i>=0&&j>=0&&i<nx&&j<ny){
 	    
-
-	    //	    if(weight_norm.get(i,j)<=0){
-	    //  weight=0;
-	    //	    }
-
 	    double old_weight = weights.at(n)->get(i_,j_);
 	    double norm = weight_norm.get(i,j);
 
-	    weights.at(n)->set(i_,j_,old_weight/norm);
+	    if(norm<=0)
+	      weights.at(n)->set(i_,j_,0);
+	    else
+	      weights.at(n)->set(i_,j_,old_weight/norm);
 
 	  }
 	}
       }
     } 
+    //    write_image("weight_norm.tiff",weight_norm);
+ 
   }
 
-  //  write_image("weights.tiff",*(weights.at(0)));
-  
-};
+  //  write_image("weights_2.tiff",*(weights.at(2)));
+ };
 
 
   
@@ -599,14 +603,14 @@ void PhaseDiverseCDI::add_to_object(int n_probe){
 	double weight = weights.at(n_probe)->get(i_,j_);
 	double new_real = weight*small.get_real(i_,j_);
 	double new_imag = weight*small.get_imag(i_,j_);
-
+	
 	if(!parallel){
 	  new_real += (1-weight)*object->get_real(i,j);
 	  new_imag += (1-weight)*object->get_imag(i,j);
 	}
-	else if(n_probe==0){
-	  new_real += (1-beta)*object->get_real(i,j);
-	  new_imag += (1-beta)*object->get_imag(i,j);
+	else{
+	  new_real += object->get_real(i,j);
+	  new_imag += object->get_imag(i,j);
 	}
 	
 	update_to_object_sub_grid(i,j,new_real,new_imag); 
