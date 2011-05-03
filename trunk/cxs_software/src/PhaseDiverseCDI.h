@@ -131,6 +131,8 @@ class PhaseDiverseCDI{
 
   void reallocate_object_memory(int new_nx,int new_ny);
 
+  void scale_object(double factor);
+
   void set_up_weights();
 };
 

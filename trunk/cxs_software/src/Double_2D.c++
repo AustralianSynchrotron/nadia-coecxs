@@ -1,6 +1,5 @@
-#include <string>
-#include <iostream>
-#include <cstdlib>
+#include "string.h"
+#include "iostream.h"
 #include "Double_2D.h"
 
   

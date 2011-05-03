@@ -407,10 +407,9 @@ class PlanarCDI{
    * Get the current support. This might be useful if shrinkwrap has
    * been applied, as it allows you to get the updated support.
    *
-   * @param support The content of "support" is overridden with the
-   * current support.
+   * @return An object reference to the current support.
    */  
-  const Double_2D & get_support(Double_2D & support){
+  const Double_2D & get_support(){
     return support;
   };
 

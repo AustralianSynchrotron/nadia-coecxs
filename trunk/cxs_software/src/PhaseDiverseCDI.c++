@@ -204,8 +204,8 @@ void PhaseDiverseCDI::iterate(){
   cout << "Iteration "<<total_iterations<<endl;
 
   bool parallel = true;  
-    
-  Double_2D result(1024,1024);
+
+
 
   for(int i=0; i<singleCDI.size(); i++){
 
@@ -227,19 +227,74 @@ void PhaseDiverseCDI::iterate(){
   
   if(parallel){
 
-    object->scale(1-beta);
-       
-    //  new_real += (1-beta)*object->get_real(i,j);
-    //  new_imag += (1-beta)*object->get_imag(i,j);
+    //    object->scale(1-beta);
+    scale_object(1-beta); 
 
     for(int i=0; i<singleCDI.size(); i++){
       add_to_object(i);
     }
   }
 
+  //temp
+  /**char buf[50];
+  Double_2D result(nx,ny);
+
+  sprintf(buf,"itr_%i_0.tiff",total_iterations);
+  single_result.at(0)->get_2d(MAG,result);
+  write_image(buf,result,false,0,1.0);
+
+  sprintf(buf,"itr_%i_1.tiff",total_iterations);
+  object->get_2d(MAG,result);
+  write_image(buf,result,false,0,1.0);**/
+
+
   total_iterations++;
 
 };
+
+
+void PhaseDiverseCDI::scale_object(double factor){
+
+  set_up_weights();
+
+  for(int i=0; i<nx; i++){
+    for(int j=0; j<ny; j++){
+
+      double weight = 0;
+	
+      for(int n_probe=0; n_probe<singleCDI.size(); n_probe++){
+
+	int i_ = (i/scale) + x_position.at(n_probe) + x_min;
+	int j_ = (j/scale) + y_position.at(n_probe) + y_min;
+	
+	if(i_>=0&&j_>=0&&i_<weights.at(n_probe)->get_size_x()
+	   &&j_<weights.at(n_probe)->get_size_y()){
+	  
+	  weight+=weights.at(n_probe)->get(i_,j_);
+	  
+	}
+      }
+
+      double new_real;
+      double new_imag;
+
+      if(weight==0){
+	new_real = 1;
+	new_imag = 0;
+      }
+      else{
+	new_real = (factor)*object->get_real(i,j);
+	new_imag = (factor)*object->get_imag(i,j);
+      }
+      
+      object->set_real(i,j,new_real);
+      object->set_imag(i,j,new_imag);
+      
+    }
+  }
+  
+}
+
 
 void PhaseDiverseCDI::get_result(PlanarCDI * local, Complex_2D & result){
   if(typeid(*local)==typeid(FresnelCDI)){
@@ -339,6 +394,12 @@ void PhaseDiverseCDI::adjust_positions(double step_size, bool forward){
 	 << "," <<  y_position.at(n) << ")."
 	 << endl;
 
+    //if we moved the positions, we need to recalculate the 
+    //weights for that frame.
+    if(before_x!=x_position.at(n)||before_y!=y_position.at(n)){
+      weights_set=false;
+    }
+
     if(forward)
       n++;
     else
@@ -352,6 +413,8 @@ void PhaseDiverseCDI::adjust_positions(double step_size, bool forward){
   x_min = x_min_c; 
   y_min = y_min_c; 
   parallel = parallel_c;
+
+  weights_set=false;
 
 }
 
@@ -413,23 +476,24 @@ int PhaseDiverseCDI::check_position(int n_probe, double step_size, int tries){
       add_to_object(n_probe);
       update_from_object(n_probe);
 
-      /**     static int h = 0;
-      char blah[80];
-      Double_2D temp(1024,1024);
-      single_result.at(n_probe)->get_2d(PHASE,temp);
-      sprintf(blah,"blah_%i.tiff",h);
-      write_image(blah,temp);
-      h++;**/
-
       single->iterate();
 	
       //      cout << "error at ("<<new_x<<","<<new_y
       //	   << ")"<<" is "<<single->get_error()<<endl;
-
+	
       if(single->get_error()<best_error){
 	best_error = single->get_error();
 	best_x = x+i*step_size;
 	best_y = y+j*step_size;
+
+	static int h = 0;
+	char blah[80];
+	Double_2D temp(1024,1024);
+	single_result.at(n_probe)->get_2d(PHASE,temp);
+	sprintf(blah,"blah_prob%i_try%i.tiff",n_probe,h);
+	write_image(blah,temp,true,-3.1,0);
+	h++;
+
       }
 
       //reset the object estimate:
@@ -439,6 +503,7 @@ int PhaseDiverseCDI::check_position(int n_probe, double step_size, int tries){
 
     }
   }
+
   delete object_copy;
   delete single_copy;
 
@@ -469,7 +534,6 @@ int PhaseDiverseCDI::check_position(int n_probe, double step_size, int tries){
 }
 
 
-
 void PhaseDiverseCDI::set_up_weights(){
   
   if(weights_set)
@@ -479,11 +543,11 @@ void PhaseDiverseCDI::set_up_weights(){
 
   for(int n_probe=0; n_probe<singleCDI.size(); n_probe++){
     
-    int nx = single_result.at(n_probe)->get_size_x();
-    int ny = single_result.at(n_probe)->get_size_y();
+    int lnx = single_result.at(n_probe)->get_size_x();
+    int lny = single_result.at(n_probe)->get_size_y();
     PlanarCDI * this_CDI = singleCDI.at(n_probe);
     double value;
-    Double_2D illum_mag(nx,ny);
+    Double_2D illum_mag(lnx,lny);
     double max;
 
     if(typeid(*this_CDI)==typeid(FresnelCDI)){
@@ -492,16 +556,25 @@ void PhaseDiverseCDI::set_up_weights(){
       max = illum_mag.get_max();
     }
     
-    for(int i=0; i< nx; i++){
-      for(int j=0; j< ny; j++){
+    //    Double_2D support(lnx,lny);
+    //this_CDI->get_support(support);
+    
+    for(int i_=0; i_< lnx; i_++){
+      for(int j_=0; j_< lny; j_++){
 	
 	if(typeid(*this_CDI)==typeid(FresnelCDI))
-	  value = illum_mag.get(i,j)/max;
+	  value = illum_mag.get(i_,j_)/max;
 	else
 	  value = 1;
 
 	value=beta*alpha.at(n_probe)*pow(value,gamma);
-	weights.at(n_probe)->set(i,j,value);
+
+	if(this_CDI->get_support().get(i_,j_)<=0.0)
+	  value = 0;
+	//else
+	//  cout << support.get(i_,j_) <<endl;
+
+	weights.at(n_probe)->set(i_,j_,value);
       }
     } 
   }
@@ -571,7 +644,7 @@ void PhaseDiverseCDI::set_up_weights(){
  
   }
 
-  //  write_image("weights_2.tiff",*(weights.at(2)));
+  //write_image("weight_0.tiff",*(weights.at(0)));
  };
 
 
@@ -655,6 +728,8 @@ void PhaseDiverseCDI::update_from_object_sub_grid(int i, int j,
 
 void PhaseDiverseCDI::update_from_object(int n_probe){
 
+  set_up_weights();
+
   double x_offset = x_position.at(n_probe);
   double y_offset = y_position.at(n_probe);
   Complex_2D * small = single_result.at(n_probe);
@@ -673,7 +748,8 @@ void PhaseDiverseCDI::update_from_object(int n_probe){
       //      if(beam->get(i_,j_)>0 && i>=0 && j>=0 && 
       //	 i<object->get_size_x() && j<object->get_size_y()){
 
-      if(i>=0 && j>=0 && i<nx && j<ny){
+      if(i>=0 && j>=0 && i<nx && j<ny 
+	 && weights.at(n_probe)->get(i_,j_)!=0){
 
 	double new_real; //= object->get_real(i,j);
 	double new_imag; //= object->get_imag(i,j);
