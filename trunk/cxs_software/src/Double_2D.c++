@@ -1,7 +1,7 @@
 #include "string.h"
-#include "iostream.h"
+#include <iostream>
 #include "Double_2D.h"
-
+#include <cstdlib>
   
 Double_2D::Double_2D():nx(0),ny(0){
 }
