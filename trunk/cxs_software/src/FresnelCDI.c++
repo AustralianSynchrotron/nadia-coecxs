@@ -36,15 +36,14 @@ FresnelCDI::FresnelCDI(Complex_2D & initial_guess,
    //   illumination_at_sample(nx,ny),
    //    transmission(nx,ny),
 
-
   illumination.copy(white_field);
+  illumination_at_sample=0;
+  transmission = 0;
   set_experimental_parameters(beam_wavelength,focal_detector_length,
 			      focal_sample_length,pixel_size);
 
-  illumination_at_sample=0;
-  transmission = 0;
-  
   set_algorithm(ER);
+
 }
 
 FresnelCDI::~FresnelCDI(){
@@ -89,6 +88,11 @@ void FresnelCDI::set_experimental_parameters(double beam_wavelength,
 
     }
   }
+
+  if(!illumination_at_sample)
+    illumination_at_sample = new Complex_2D(nx,ny);
+  illumination_at_sample->copy(illumination);
+  propagate_from_detector(*illumination_at_sample);
 
 }
 
@@ -198,6 +202,7 @@ void FresnelCDI::propagate_to_detector(Complex_2D & c){
   //c.multiply(B_s);
   multiply_factors(c,FORWARD);
 }
+
 
 void FresnelCDI::set_transmission_function(Complex_2D & transmission,
 					   Complex_2D * esw){

@@ -34,6 +34,69 @@ void crop(Double_2D & image, Double_2D & new_image, int x_start, int y_start){
 
 }
 
+void rescale(Double_2D & image, double scale){
+
+  int nx = image.get_size_x();
+  int ny = image.get_size_y();
+
+  int middle_x = nx/2;
+  int middle_y = ny/2;
+
+  Double_2D image_temp(nx,ny);
+
+  for(int i=0; i<nx; i++){
+    for(int j=0; j<ny; j++){
+      
+      double i_ = scale*(i-middle_x) + middle_x;
+      double j_ = scale*(j-middle_y) + middle_y;
+
+      //this is the tricky bit.
+      //use a weighted average
+      double total_weights=0;
+      double weighted_value=0;
+
+      for(double x = (int) i_; x <= i_ + scale; x++ ){
+	for(double y = (int) j_; y <= j_ + scale; y++){
+
+	  //check that we are still in range
+	  if(i_<nx&&i_>=0&&j_<ny&&j_>=0){
+
+	    //subtract the remainders from one.
+	    double x_fraction = 1;
+	    double y_fraction = 1;
+
+	    if(x<i_)
+	      x_fraction = 1 - fmod(i_, 1.0);
+	    if(y<j_)
+	      y_fraction = 1 - fmod(j_, 1.0);
+
+	    if(x > i_ + scale)
+	      x_fraction = fmod(i_, 1.0);
+
+	    if(y > j_ + scale)
+	      y_fraction = fmod(j_, 1.0);
+
+	    //add to the weight
+	    double this_weight = x_fraction*y_fraction;
+
+	    total_weights += this_weight;
+	    weighted_value += this_weight*image.get(x,y);
+	  }
+	}
+      }
+
+      if(total_weights==0)
+	image_temp.set(i,j,0);
+      else
+	image_temp.set(i,j,weighted_value/total_weights);      
+    }
+  }
+
+  image.copy(image_temp);
+
+}
+
+
 //no good
 double calculate_high_frequency_ratio(Double_2D & image){
 
@@ -247,7 +310,7 @@ double calculate_image_entropy(Double_2D & image){
 
   //  double max = 
 
-  /**  cout << endl << "a = [";
+  cout << endl << "a = [";
   for(int c=0; c < BINS; c++){
 
     cout << counts[c];
@@ -257,10 +320,10 @@ double calculate_image_entropy(Double_2D & image){
       cout << "]"<<endl;
       
     if(counts[c]!=0){
-      //cout << " log2(counts[c]) = " <<log2(counts[c])<<endl;
+      //      cout << " log2(counts[c]) = " <<log2(counts[c])<<endl;
       entropy-= counts[c]*log2(counts[c]);
     }
-    }**/
+  }
   
   //cout << "here3 "<<entropy << endl;
   return entropy;
@@ -392,9 +455,14 @@ void convolve(Double_2D & array, double gauss_width,
 
 double sobel_gradient(Double_2D & image){
 
-  convolve(image,1.0,3);
+  image.scale(image.get_sum());
 
-  //  image.scale(image.get_sum());
+  convolve(image,3.0,4);
+
+  char buf[50];
+  static int counter = 0;
+  sprintf(buf,"image_conv_%i.tiff",counter);
+  write_image(buf,image);
 
   double total = 0;
   double value_x ;
@@ -472,7 +540,7 @@ double sobel_gradient(Double_2D & image){
   //double max = output.get_max()<<endl;
 
   //now threshold 
-  double total_t=0.0;
+  /**  double total_t=0.0;
   double number=0.0;
   for(int i=0; i < nx ; i++){
     for(int j=0; j < ny ; j++){
@@ -488,16 +556,18 @@ double sobel_gradient(Double_2D & image){
 
   cout << "count is: " << number << endl;
 
-  char buf[50];
-  static int counter = 0;
+
   cout << "max is: " << max << endl;
-  cout << "normalised max: " << max_total/image.get_sum() << endl;
+  cout << "normalised max: " << max_total/image.get_sum() << endl; **/
 
   sprintf(buf,"sobel_%i.tiff",counter);
   write_image(buf,output);
   counter++;
 
-  return total_t/number;
+  /**
+  cout << "Entropy of gradient is :"<< calculate_image_entropy(output)<<endl;**/
+
+  return output.get_max();
 
 }
 
