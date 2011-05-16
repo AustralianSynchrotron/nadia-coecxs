@@ -6,6 +6,7 @@ class Complex_2D;
 
 void crop(Double_2D & image, Double_2D & new_image, int x_start, int y_start);
 void rescale(Double_2D & image, double scale);
+void align(Double_2D & image1, Double_2D & image2, int & offset_x, int & offset_y, int step_size=8.0, int min_x=0, int max_x=0, int min_y=0, int max_y=0);
 
 double edges(Double_2D & image);
 double line_out(Double_2D & image);
@@ -24,6 +25,7 @@ double sobel_gradient(Double_2D & image);
 double laplace_gradient(Double_2D & image);
 double edge_grad(Double_2D & image, Double_2D & mask);
 double calculate_image_entropy_2(Double_2D & image);
+
 
 #endif
 

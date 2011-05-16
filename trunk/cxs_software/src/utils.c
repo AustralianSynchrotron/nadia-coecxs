@@ -1005,47 +1005,121 @@ double calculate_mean_difference(Double_2D & image){
 }
 
 
-/**
-void  align(Double_2D & image1, Double_2D & image2, 
-	    int & min_x, int & min_y){
+void align(Double_2D & image1, Double_2D & image2, 
+	   int & offset_x, int & offset_y, 
+	   int step_size, int min_x, int max_x,
+	   int min_y, int max_y){
   
+  //divide by 8.... until step_size is 1.
+
+  if(step_size<1.0)
+    return;
+
+  //make a low res. version of the image.
   int nx = image1.get_size_x();
   int ny = image1.get_size_y();
 
   int nx_small = image2.get_size_x();
   int ny_small = image2.get_size_y();
 
-  int x_max = nx-nx_small;
-  int y_max = ny-ny_small;
+  //make a low res. version of the image.
+  int nx_low = nx/step_size;
+  int ny_low = ny/step_size;
 
-  double min_error;
+  int nx_small_low = nx_small/step_size;
+  int ny_small_low = ny_small/step_size;
 
-  //loop 
-  for(int x=0; x<x_max, x++){
-    for(int y=0; y<y_max, y++){
+  if(min_x==max_x&&min_y==max_y){
+    min_x = 1-nx_low; //1-nx_small_low;
+    max_x = nx_low;
+    min_y = 1-ny_low; //1-ny_small_low;
+    max_y = ny_low;
+  }
+
+  Double_2D temp1(nx_low,ny_low);
+  Double_2D temp2(nx_small_low,ny_small_low);
+  
+  for(int x=0; x<nx_low; x++){
+    for(int y=0; y<ny_low; y++){
+      double value =0;
+      for(int i=0; i<step_size ; i++){
+	for(int j=0; j<step_size ; j++){
+	  value+=image1.get(step_size*x+i,step_size*y+j);
+	}
+      }
+      temp1.set(x,y,value/(step_size*step_size));
+    }
+  }
+
+  for(int x=0; x<nx_small_low; x++){
+    for(int y=0; y<ny_small_low; y++){
+      double value =0;
+      for(int i=0; i<step_size ; i++){
+	for(int j=0; j<step_size ; j++){
+	  value+=image2.get(step_size*x+i,step_size*y+j);
+	}
+      }
+      temp2.set(x,y,value/(step_size*step_size));
+    }
+  }
+
+  //now calculate the correlation for the low res. image
+  double max_correlation = 0;
+
+  
+  //loop over possible alignments
+  for(int x=min_x; x<max_x; x++){
+    for(int y=min_y; y<max_y; y++){
       
-      double this_error = 0;
+      double correlation = 0;
+      double pixels = 0;
 
-      for(int i=0; i<nx_small, i++){
-	for(int j=0; j<ny_small, j++){
+      //loop over the image to calculate the correlation metric
+      for(int i=0; i<nx_low; i++){
+	for(int j=0; j<ny_low; j++){
       
-	  double v1=image1.get(i+x,j+y);
-	  double v2=image1.get(i,j);
+	  int i_ = i - x/step_size;
+	  int j_ = j - y/step_size;
 	  
-	  this_error+=(v1-v2)*(v1-v2);
+	  if(i_>=0&&i_<nx_small_low&&j_>=0&&j_<ny_small_low){
+	    correlation+=temp1.get(i,j)*temp2.get(i_,j_);
+	    if(temp1.get(i,j)!=0.0 && temp2.get(i_,j_)!=0.0)
+	      pixels++;
+	  }
 	  
 	}
       }
       
-      if(this_error < min_error){
-	this_error = 
+      correlation=correlation/((double)pixels);
 
-
+      if(correlation > max_correlation){
+	max_correlation = correlation;
+	offset_x = x;
+	offset_y = y;
       }
 	
 
     }
   }
 
+  cout << "min="<<min_x<< "max="<<max_x<<endl;
+  cout << "max_correlation is :"<<max_correlation <<endl;
+  static int counter = 0;
+  char buff[90];
+  sprintf(buff,"temp1_%i.tiff",counter);
+  write_image(buff,temp1);
+  sprintf(buff,"temp2_%i.tiff",counter);
+  write_image(buff,temp2);
+  counter++;
+
+  //now decrease the step size and the search area:
+  align(image1, image2, 
+	offset_x, offset_y, 
+	step_size/2.0, 
+	offset_x-2*step_size, offset_x+2*step_size,
+	offset_y-2*step_size, offset_y+2*step_size);
+
+  return;
+  
 }
-**/
+
