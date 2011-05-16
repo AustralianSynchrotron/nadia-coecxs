@@ -337,7 +337,7 @@ void FresnelCDI::get_transmission_function(Complex_2D & result,
 }
 
 
-double FresnelCDI::refine_sample_to_focal_length(double min, double max,
+/**double FresnelCDI::refine_sample_to_focal_length(double min, double max,
 				     int points_per_scan,
 				     double precision,
 				     int iterations_before_comparison,
@@ -373,7 +373,7 @@ double FresnelCDI::refine_sample_to_focal_length(double min, double max,
   
   //test the images at several points between the min and max.
   //focal lengths.
-  /**  for(double f = min; f <= max; f+=(max-min)/points_per_scan){
+  for(double f = min; f <= max; f+=(max-min)/points_per_scan){
     
     //work out the new length and set it.
     cout << endl << f << endl;
@@ -514,7 +514,7 @@ double FresnelCDI::refine_sample_to_focal_length(double min, double max,
   //recursively call this function until the error is small enough.
 
   //  int min_index = best_index - points_per_scan/4;
-  //int max_index = best_index + points_per_scan/4;**/
+  //int max_index = best_index + points_per_scan/4;
 
   double best_length = refine_sample_to_focal_length(new_min, new_max,
 						     points_per_scan,
@@ -528,4 +528,4 @@ double FresnelCDI::refine_sample_to_focal_length(double min, double max,
   //return the value of focal length found.
   return best_length;
 
-  }
+  }**/
