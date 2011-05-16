@@ -15,7 +15,8 @@ using namespace std;
 #define BINS 100
 #define sgn(x) (( x > 0 ) - ( x < 0 ))
 
-double sgrad(Double_2D & image, int i, int j){
+double sgrad(Double_2D & image, int i, int j, double & dir,
+	     double x=100, double y=100){
 
   if(i<1 || j<1 
      || i > (image.get_size_x()-2)
@@ -40,7 +41,12 @@ double sgrad(Double_2D & image, int i, int j){
   value_y +=  2*image.get(i,j+1);
   value_y +=  1*image.get(i+1,j+1);
   
-  return sqrt(value_x*value_x + value_y*value_y);
+  dir = atan2(value_y,value_x);
+
+  if(x==100&&y==100)
+    return sqrt(value_x*value_x + value_y*value_y);
+  else 
+    return x*value_x + y*value_y;
 }
 
 void crop(Double_2D & image, Double_2D & new_image, int x_start, int y_start){
@@ -344,14 +350,14 @@ double calculate_image_entropy(Double_2D & image){
 
   //  double max = 
 
-  cout << endl << "a = [";
+  //  cout << endl << "a = [";
   for(int c=1; c < BINS; c++){
 
-    cout << counts[c];
+    /**    cout << counts[c];
     if(c!=BINS-1)
       cout << ",";
     else
-    cout << "]"<<endl;
+    cout << "]"<<endl;**/
       
     if(counts[c]!=0){
       //      cout << " log2(counts[c]) = " <<log2(counts[c])<<endl;
@@ -791,11 +797,10 @@ double vollaths_5(Double_2D & image){
     for(int j=1; j < ny ; j++){
       sum_x += image.get(i,j)*image.get(i-1,j);
       sum_y += image.get(i,j)*image.get(i,j-1);
-      total += image.get(i,j)*image.get(i,j);
     }
   }
 
-  return sum_x*sum_y*total/(pow(nx*ny,3));
+  return sum_x*sum_y/(nx*nx*ny*ny); //sum_x*sum_y*total/(pow(nx*ny,3));
 }
 
 double line_out(Double_2D & image){
@@ -833,16 +838,35 @@ double edge_grad(Double_2D & image, Double_2D & mask){
   double value = 0;
   double edge_points = 0;
 
+  Double_2D direction(nx,ny);
+
   for(int x=1 ; x < nx ; x++){
     for(int y=1 ; y < ny ; y++){
       
       if(mask.get(x,y)!=0){
-	value += sgrad(image,x,y);
-	edge_points++;
+	double dir;
+	double this_value = sgrad(image,x,y,dir);
+	double dir_m = mask.get(x,y);
+	double projection = cos(dir)*cos(dir_m)+sin(dir)*sin(dir_m);
+
+	//	cout << "value="<<this_value<<" dir_m="<<dir_m<<"projection="<< projection<<endl;
+
+	value += this_value; //projection*this_value;
+	edge_points++;  //+= projection;
+	direction.set(x,y,dir);
       }
     }
   }
-  return value/edge_points;
+
+  static int counter = 0;
+  char buf[80];
+  sprintf(buf,"edges_grad_%i.tiff",counter);
+  write_image(buf,direction);
+  counter++;
+
+  //  cout << "value="<<value<<" edge_points="<<edge_points<<endl;
+
+  return value/((double) edge_points);
 }
 
 
@@ -856,6 +880,7 @@ double edges(Double_2D & image){
   double threshold = 0.05*image.get_max();
   double value = 0;
   double edge_points = 0;
+  double direction = 0;
 
   for(int x=1 ; x < nx ; x++){
 
@@ -867,8 +892,8 @@ double edges(Double_2D & image){
 	edge_found = true;
 	//image.set(x,y,60000);
 	if(temp.get(x,y)==0.0){
-	  value += sgrad(image,x,y); //fabs(image.get(x,y)-image.get(x-1,y));
-	  temp.set(x,y,1.0);
+	  value += sgrad(image,x,y,direction); //fabs(image.get(x,y)-image.get(x-1,y));
+	  temp.set(x,y,M_PI/2.0);
 	  edge_points++;
 	}
       }
@@ -884,8 +909,8 @@ double edges(Double_2D & image){
       	edge_found = true;
 	//image.set(x,y,60000);
 	if(temp.get(x,y)==0.0){
-	  value += sgrad(image,x,y); //fabs(image.get(x,y)-image.get(x-1,y));
-	  temp.set(x,y,1.0);
+	  value += sgrad(image,x,y,direction); //fabs(image.get(x,y)-image.get(x-1,y));
+	  temp.set(x,y,-M_PI/2.0);
 	  edge_points++;
 	}
       }
@@ -903,13 +928,15 @@ double edges(Double_2D & image){
       if(edge_found==false && image.get(x,y)>threshold ){
 	edge_found = true;
 	//image.set(x,y,60000);
-	if(temp.get(x,y)==0.0){
-	  value += sgrad(image,x,y); //fabs(image.get(x,y)-image.get(x,y-1));
-	  temp.set(x,y,1.0);
+	if(fabs(cos(temp.get(x,y)))<0.01){
+	  value += sgrad(image,x,y,direction); //fabs(image.get(x,y)-image.get(x,y-1));
+	  if(temp.get(x,y)==0)
+	    temp.set(x,y,2.0*M_PI);
+	  else
+	    temp.set(x,y,temp.get(x,y)/2.0);
 	  edge_points++;
 	}
       }
-
     }
     
     edge_found = false;
@@ -921,23 +948,28 @@ double edges(Double_2D & image){
 	//if(edge_found==true && image.get(x,y)<threshold ){
 	//edge_found = false;
 	//image.set(x,y,60000);
-	if(temp.get(x,y)==0.0){
-	  value += sgrad(image,x,y); //fabs(image.get(x,y)-image.get(x,y-1));
-	  temp.set(x,y,1.0);
+	if(fabs(cos(temp.get(x,y)))<0.01){
+	  value += sgrad(image,x,y,direction); //fabs(image.get(x,y)-image.get(x,y-1));
 	  edge_points++;
+	  if(temp.get(x,y)==0)
+	    temp.set(x,y,M_PI);
+	  else
+	    temp.set(x,y,M_PI-(temp.get(x,y)/2.0));
 	}
       }
       
     } 
   }
 
-  static int counter = 0;
+  /**  static int counter = 0;
   char buf[80];
   sprintf(buf,"edges_%i.tiff",counter);
   write_image(buf,temp);
-  counter++;
+  sprintf(buf,"esw_%i.tiff",counter);
+  write_image(buf,image);
+  counter++;**/
 
-  image.copy(temp);
+  //  image.copy(temp);
   
   return value/edge_points;  
 }
@@ -973,3 +1005,47 @@ double calculate_mean_difference(Double_2D & image){
 }
 
 
+/**
+void  align(Double_2D & image1, Double_2D & image2, 
+	    int & min_x, int & min_y){
+  
+  int nx = image1.get_size_x();
+  int ny = image1.get_size_y();
+
+  int nx_small = image2.get_size_x();
+  int ny_small = image2.get_size_y();
+
+  int x_max = nx-nx_small;
+  int y_max = ny-ny_small;
+
+  double min_error;
+
+  //loop 
+  for(int x=0; x<x_max, x++){
+    for(int y=0; y<y_max, y++){
+      
+      double this_error = 0;
+
+      for(int i=0; i<nx_small, i++){
+	for(int j=0; j<ny_small, j++){
+      
+	  double v1=image1.get(i+x,j+y);
+	  double v2=image1.get(i,j);
+	  
+	  this_error+=(v1-v2)*(v1-v2);
+	  
+	}
+      }
+      
+      if(this_error < min_error){
+	this_error = 
+
+
+      }
+	
+
+    }
+  }
+
+}
+**/

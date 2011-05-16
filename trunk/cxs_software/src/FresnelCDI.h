@@ -195,6 +195,15 @@ class FresnelCDI: public PlanarCDI{
   
   const Complex_2D & get_illumination_at_sample();
 
+
+
+  double refine_sample_to_focal_length(double min=0, double max=0,
+				       int points_per_scan=8,
+				       double precision=0,
+				       int iterations_before_comparison=1,
+				       int crop_min_x=0, int crop_min_y=0,
+				       int crop_max_x=0, int crop_max_y=0 );
+
  protected:
 
   void multiply_factors(Complex_2D & c, int direction);
