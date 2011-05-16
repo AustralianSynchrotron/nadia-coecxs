@@ -397,9 +397,9 @@ extern "C" void IDL_get_support(int argc, void * argv[]){
   int nx = esw->get_size_x();
   int ny = esw->get_size_y();
   
-  Double_2D temp(nx,ny);
-  reco->get_support(temp);
-  copy_from_double_2d(temp,(double*) argv[0]); 
+  //  Double_2D temp(nx,ny);
+  //reco->get_support(temp);
+  copy_from_double_2d(reco->get_support(),(double*) argv[0]); 
 
 }
 
