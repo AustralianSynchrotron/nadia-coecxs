@@ -37,7 +37,7 @@ void copy_to_double_2d(Double_2D & cxs_array, double * IDL_array){
   }
 }
 
-void copy_from_double_2d(Double_2D & cxs_array, double * IDL_array){
+void copy_from_double_2d(const Double_2D & cxs_array, double * IDL_array){
 
   int nx = cxs_array.get_size_x();
   int ny = cxs_array.get_size_y();
@@ -64,7 +64,7 @@ void copy_to_complex_2d(Complex_2D & cxs_array, IDL_COMPLEX * IDL_array){
   }
 }
 
-void copy_from_complex_2d(Complex_2D & cxs_array, IDL_COMPLEX * IDL_array){
+void copy_from_complex_2d(const Complex_2D & cxs_array, IDL_COMPLEX * IDL_array){
 
   int nx = cxs_array.get_size_x();
   int ny = cxs_array.get_size_y();  
