@@ -345,8 +345,8 @@ void PhaseDiverseCDI::adjust_positions(double step_size, bool forward){
     //replace the transmission function with
     //just the 1st frame information
 
-    int lnx = single_result.at(0).get_size_x();
-    int lny = single_result.at(0).get_size_y();
+    int lnx = single_result.at(0)->get_size_x();
+    int lny = single_result.at(0)->get_size_y();
 
     Complex_2D temp(lnx,lny);
     object = &temp;
