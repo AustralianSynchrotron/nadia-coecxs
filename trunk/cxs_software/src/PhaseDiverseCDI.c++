@@ -314,8 +314,6 @@ void PhaseDiverseCDI::set_result(PlanarCDI * local, Complex_2D & result){
   
 }
 
-
-
 //frames need to be in order for this to work.
 void PhaseDiverseCDI::adjust_positions(double step_size, bool forward){
 
@@ -347,15 +345,18 @@ void PhaseDiverseCDI::adjust_positions(double step_size, bool forward){
     //replace the transmission function with
     //just the 1st frame information
 
-    Complex_2D temp(1024,1024);
+    int lnx = single_result.at(0).get_size_x();
+    int lny = single_result.at(0).get_size_y();
+
+    Complex_2D temp(lnx,lny);
     object = &temp;
-    nx = 1024;
-    ny = 1024;
+    nx = lnx;
+    ny = lny;
     x_min = -x_position.at(n);
     y_min = -y_position.at(n);
     
-    for(int i=0; i<1024; i++){
-      for(int j=0; j<1024; j++){
+    for(int i=0; i<lnx; i++){
+      for(int j=0; j<lny; j++){
 	temp.set_real(i,j,1);
 	temp.set_imag(i,j,0);
       }
@@ -386,6 +387,12 @@ void PhaseDiverseCDI::adjust_positions(double step_size, bool forward){
     sprintf(name,"pic_%i.tiff",n);
     write_image(name,pic,false, 0,1);**/
 
+    //do an iteration of the frame on it's own.
+    singleCDI.at(n)->iterate();
+    singleCDI.at(n)->iterate();
+
+    get_result(singleCDI.at(n),*(single_result.at(n)));
+
     check_position(n,step_size,0);
 
     cout << "moving prob " << n << " from ("
@@ -396,8 +403,27 @@ void PhaseDiverseCDI::adjust_positions(double step_size, bool forward){
 
     //if we moved the positions, we need to recalculate the 
     //weights for that frame.
-    if(before_x!=x_position.at(n)||before_y!=y_position.at(n)){
+
+    double x_difference = x_position.at(n) - before_x;
+    double y_difference = y_position.at(n) - before_y;
+
+    if( x_difference!=0 || y_difference!=0 ){
       weights_set=false;
+      
+      //change all the consecutive positions accordingly:
+      if(forward){
+	for(int m=n+1; m < singleCDI.size(); m++){
+	  x_position.at(m) +=  x_difference;
+	  y_position.at(m) +=  y_difference;
+	}
+      }
+      else{
+	for(int m=n-1; m >= 0; m--){
+	  x_position.at(m) +=  x_difference;
+	  y_position.at(m) +=  y_difference;
+	}
+      }
+      
     }
 
     if(forward)
@@ -415,6 +441,13 @@ void PhaseDiverseCDI::adjust_positions(double step_size, bool forward){
   parallel = parallel_c;
 
   weights_set=false;
+
+
+  scale_object(1-beta); 
+  
+  for(int i=0; i<singleCDI.size(); i++){
+    add_to_object(i);
+  }
 
 }
 
@@ -434,7 +467,7 @@ int PhaseDiverseCDI::check_position(int n_probe, double step_size, int tries){
   //failed, we moved around a bit, but couldn't find a local minima
   //in the error metric.
   if(tries>10){
-    cout << "giving up on probe "<< n_probe << ". Coule not find " 
+    cout << "Giving up on probe "<< n_probe << ". Could not find " 
 	 << "it's position. Returning to the original. " 
 	 << endl;
       return FAILURE;
@@ -459,7 +492,6 @@ int PhaseDiverseCDI::check_position(int n_probe, double step_size, int tries){
   Complex_2D * single_copy = new Complex_2D(size_x,size_y);
   single_copy->copy(*single_result.at(n_probe));
 
-
   for(int i=-1; i<2; i++){
     for(int j=-1; j<2; j++){
 
@@ -472,32 +504,40 @@ int PhaseDiverseCDI::check_position(int n_probe, double step_size, int tries){
 
       x_position.at(n_probe)=new_x;
       y_position.at(n_probe)=new_y;
-      
+
       add_to_object(n_probe);
       update_from_object(n_probe);
 
-      single->iterate();
-	
-      //      cout << "error at ("<<new_x<<","<<new_y
-      //	   << ")"<<" is "<<single->get_error()<<endl;
-	
-      if(single->get_error()<best_error){
-	best_error = single->get_error();
-	best_x = x+i*step_size;
-	best_y = y+j*step_size;
-
+      if(n_probe==4&&new_x==3294&&new_y==2917){
 	static int h = 0;
 	char blah[80];
 	Double_2D temp(1024,1024);
 	single_result.at(n_probe)->get_2d(PHASE,temp);
-	sprintf(blah,"blah_prob%i_try%i.tiff",n_probe,h);
-	write_image(blah,temp,true,-3.1,0);
+	sprintf(blah,"single_prob%i_try%i.tiff",n_probe,h);
+	write_image(blah,temp,true,-0.1,0);
+
+	object->get_2d(PHASE,temp);
+	sprintf(blah,"object_prob%i_try%i.tiff",n_probe,h);
+	write_image(blah,temp,true,-0.1,0);
+
 	h++;
 
+	cout << "error at ("<<new_x<<","<<new_y
+	     << ")"<<" is "<<single->get_error()<<endl;
+
+      }
+
+      single->iterate();
+	
+      if(single->get_error()<best_error){
+	best_error = single->get_error();
+	best_x = new_x;
+	best_y = new_y;
       }
 
       //reset the object estimate:
       object->copy(*object_copy);
+      //and
       set_result(single,*single_copy);
       single_result.at(n_probe)->copy(*single_copy);
 
