@@ -373,7 +373,7 @@ double FresnelCDI::refine_sample_to_focal_length(double min, double max,
   
   //test the images at several points between the min and max.
   //focal lengths.
-  for(double f = min; f <= max; f+=(max-min)/points_per_scan){
+  /**  for(double f = min; f <= max; f+=(max-min)/points_per_scan){
     
     //work out the new length and set it.
     cout << endl << f << endl;
@@ -514,20 +514,7 @@ double FresnelCDI::refine_sample_to_focal_length(double min, double max,
   //recursively call this function until the error is small enough.
 
   //  int min_index = best_index - points_per_scan/4;
-  //int max_index = best_index + points_per_scan/4;
-
-  /**  if(min_index<0)
-    new_min = min;
-  else
-    new_min = min + (max-min)*min_index/points_per_scan;
-
-  if(max_index>points_per_scan)
-    new_max = max;
-  else
-  new_max = min + (max-min)*max_index/points_per_scan;**/
-
-
-
+  //int max_index = best_index + points_per_scan/4;**/
 
   double best_length = refine_sample_to_focal_length(new_min, new_max,
 						     points_per_scan,
