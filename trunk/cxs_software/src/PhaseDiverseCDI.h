@@ -132,7 +132,9 @@ class PhaseDiverseCDI{
   void reallocate_object_memory(int new_nx,int new_ny);
 
   void scale_object(double factor);
-
+  void get_object_sub_grid(Complex_2D & result,
+			   double x_offset,
+			   double y_offset);
   void set_up_weights();
 };
 

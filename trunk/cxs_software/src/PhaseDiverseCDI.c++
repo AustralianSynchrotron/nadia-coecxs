@@ -13,36 +13,12 @@
 #include "io.h" //
 #include <sstream>
 #include <typeinfo>
+#include "utils.h"
 
 using namespace std;
 
 
-/**void get_center(Double_2D & mag, int * x, int * y){
-  
-  double offset=0;
-  double mean_x = 0;
-  double mean_y = 0;
-  double total = 0;
-
-  for(int i=0; i<mag.get_size_x(); i++){
-    for(int j=0; j<mag.get_size_y(); j++){
-
-      mean_x += fabs(mag.get(i,j)-offset)*i;
-      mean_y += fabs(mag.get(i,j)-offset)*j;
-      
-      total += fabs(mag.get(i,j)-offset);
-
-    }
-  }
-
-  *x = mean_x/total;
-  *y = mean_y/total;
-
-  }**/
-
-
-
-
+//constructor for the class which handles phase diversity.
 PhaseDiverseCDI::PhaseDiverseCDI(
 				 double beta, 
 				 double gamma, 
@@ -69,6 +45,7 @@ PhaseDiverseCDI::PhaseDiverseCDI(
 };
 
 
+//destructor for cleaning up
 PhaseDiverseCDI::~PhaseDiverseCDI(){
 
   while(single_result.size()!=0){
@@ -86,6 +63,9 @@ PhaseDiverseCDI::~PhaseDiverseCDI(){
   
 }
 
+//change the size of the global transmission function 
+//this function is used for dynamically determining the size
+//of the glocal transmission function array.
 void PhaseDiverseCDI::reallocate_object_memory(int new_nx,int new_ny){
 
   if(object)
@@ -98,10 +78,14 @@ void PhaseDiverseCDI::reallocate_object_memory(int new_nx,int new_ny){
 
 }
 
+//return the global transmision function.
 Complex_2D * PhaseDiverseCDI::get_transmission(){
   return object;
 }
 
+
+//set the global transmission function (note that
+//local transmission function will not be automatically updated).
 void PhaseDiverseCDI::set_transmission(Complex_2D & new_transmission){
 
   int new_nx = new_transmission.get_size_x();
@@ -324,7 +308,9 @@ void PhaseDiverseCDI::adjust_positions(double step_size, bool forward){
   double x_min_c = x_min; 
   double y_min_c = y_min; 
   bool parallel_c = parallel;  
-  
+  double beta_c = beta;
+
+  //reset the parameters to make it work in parrallel with weights of one.
   parallel = false;
 
   //leave the first frame, as everything will be aligned to it.
@@ -334,6 +320,28 @@ void PhaseDiverseCDI::adjust_positions(double step_size, bool forward){
     n=singleCDI.size()-2;
     limit=-1;
   }
+
+
+  Complex_2D temp_object(nx,ny);
+  object = &temp_object;
+  for(int i=0; i<nx; i++){
+    for(int j=0; j<ny; j++){
+      temp_object.set_real(i,j,1);
+      temp_object.set_imag(i,j,0);
+    }
+  }
+
+  beta = 1.0;
+  weights_set=false;
+
+  if(forward)
+    add_to_object(0);
+  else
+    add_to_object(singleCDI.size()-1);
+  
+  //  beta = 0.5;
+  //weights_set=false;
+
 
   while(n!=limit){
     //for(int n=1; n<singleCDI.size(); n++){
@@ -349,18 +357,20 @@ void PhaseDiverseCDI::adjust_positions(double step_size, bool forward){
     int lny = single_result.at(0)->get_size_y();
 
     Complex_2D temp(lnx,lny);
+    get_object_sub_grid(temp,before_x,before_y);
+
     object = &temp;
     nx = lnx;
     ny = lny;
     x_min = -x_position.at(n);
     y_min = -y_position.at(n);
     
-    for(int i=0; i<lnx; i++){
+    /**    for(int i=0; i<lnx; i++){
       for(int j=0; j<lny; j++){
 	temp.set_real(i,j,1);
 	temp.set_imag(i,j,0);
       }
-    }
+      }**/
 
     /**    char name[80];
     Double_2D pic(1024,1024);
@@ -370,16 +380,22 @@ void PhaseDiverseCDI::adjust_positions(double step_size, bool forward){
     //if frame m overlaps with frame n
     //add it to the current array
 
-    if(forward){
-      for(int m=0; m < n; m++){
+    /**    if(forward){
+      add_to_object(0);
+      beta=0.5;
+      weights_set=false;
+      for(int m=1; m < n; m++){
 	add_to_object(m);
       }
     }
     else{
-      for(int m=singleCDI.size()-1; m > n; m--){
+      add_to_object(singleCDI.size()-1);
+      beta=0.5;
+      weights_set=false;
+      for(int m=singleCDI.size()-2; m > n; m--){
 	add_to_object(m);
       }
-    }
+      }**/
 
     //    char name[80];
     //Double_2D pic(1024,1024);
@@ -389,26 +405,60 @@ void PhaseDiverseCDI::adjust_positions(double step_size, bool forward){
 
     //do an iteration of the frame on it's own.
     singleCDI.at(n)->iterate();
-    singleCDI.at(n)->iterate();
-
     get_result(singleCDI.at(n),*(single_result.at(n)));
 
-    check_position(n,step_size,0);
+    Double_2D temp_single(lnx,lny);
+    Double_2D temp_others(lnx,lny);
+    for(int i=0; i<lnx; i++){
+      for(int j=0; j<lny; j++){
+	temp_single.set(i,j,
+			1-single_result.at(n)->get_mag(i,j));
+	temp_others.set(i,j,
+			1-object->get_mag(i,j));
+      }
+    }
 
-    cout << "moving prob " << n << " from ("
+    static int counter = 0;
+    char buff[90];
+    sprintf(buff,"temp_single_%i.tiff",counter);
+    write_image(buff,temp_single);
+    sprintf(buff,"temp_object_%i.tiff",counter);
+    write_image(buff,temp_others);
+    counter++;
+
+    int new_x, new_y;
+
+    align(temp_single, temp_others, 
+	  new_x, new_y,
+	  8,
+	  -100,+100,
+	  -100,+100);
+    
+    x_position.at(n) = before_x+new_x;
+    y_position.at(n) = before_y+new_y;
+
+    cout << "cross-correlation: moving prob " << n << " from ("
 	 << before_x << "," << before_y << ") "
 	 << "-> (" << x_position.at(n) 
 	 << "," <<  y_position.at(n) << ")."
 	 << endl;
 
+    /**    check_position(n,4,0);
+    
+    cout << "error: moving prob " << n << " from ("
+	 << before_x << "," << before_y << ") "
+	 << "-> (" << x_position.at(n) 
+	 << "," <<  y_position.at(n) << ")."
+	 << endl;**/
+
     //if we moved the positions, we need to recalculate the 
     //weights for that frame.
 
-    double x_difference = x_position.at(n) - before_x;
-    double y_difference = y_position.at(n) - before_y;
-
-    if( x_difference!=0 || y_difference!=0 ){
-      weights_set=false;
+    /**    double x_difference = x_position.at(n) - before_x;
+	   double y_difference = y_position.at(n) - before_y;
+	   
+	   if( x_difference!=0 || y_difference!=0 ){
+      //      weights_set=false;
       
       //change all the consecutive positions accordingly:
       if(forward){
@@ -424,7 +474,14 @@ void PhaseDiverseCDI::adjust_positions(double step_size, bool forward){
 	}
       }
       
-    }
+      }**/
+
+    object = &temp_object;
+    nx = nx_c;
+    ny = ny_c;
+    x_min = x_min_c; 
+    y_min = y_min_c;
+    add_to_object(n);
 
     if(forward)
       n++;
@@ -433,21 +490,26 @@ void PhaseDiverseCDI::adjust_positions(double step_size, bool forward){
 
   }
   
+  //set all the parameters back to normal
   object = pointer_to_object;
-  nx = nx_c;
+  /**  nx = nx_c;
   ny = ny_c;
   x_min = x_min_c; 
-  y_min = y_min_c; 
+  y_min = y_min_c; **/
   parallel = parallel_c;
+  beta=beta_c;
 
+  //force the weights to be recalculated
   weights_set=false;
 
 
+  //reset the object global transmission function
   scale_object(1-beta); 
   
   for(int i=0; i<singleCDI.size(); i++){
     add_to_object(i);
   }
+
 
 }
 
@@ -487,10 +549,15 @@ int PhaseDiverseCDI::check_position(int n_probe, double step_size, int tries){
   //try the 9 positions around the current one
   //record the one with the lowest error metric.
 
+  //copy some local stuff.
   Complex_2D * object_copy = new Complex_2D(object->get_size_x(),object->get_size_y());
   object_copy->copy(*object);
   Complex_2D * single_copy = new Complex_2D(size_x,size_y);
   single_copy->copy(*single_result.at(n_probe));
+  double beta_c = beta;
+
+  beta = 0.5;
+  weights_set=false;
 
   for(int i=-1; i<2; i++){
     for(int j=-1; j<2; j++){
@@ -569,6 +636,10 @@ int PhaseDiverseCDI::check_position(int n_probe, double step_size, int tries){
        << "and "<< y_position.at(n_probe)-y<<" in y." 
        << endl;
   
+
+  beta = 1.0;
+  weights_set=false;
+
   return SUCCESS;
   
 }
@@ -764,6 +835,42 @@ void PhaseDiverseCDI::update_from_object_sub_grid(int i, int j,
   imag_value=imag_value/(scale*scale);
 
 }
+
+
+void PhaseDiverseCDI::get_object_sub_grid(Complex_2D & result,
+					  double x_offset,
+					  double y_offset){
+  
+  //round off to a first approx. Will be fixed later.
+  int i, j; //local coors (i,j) are global (object) coors
+
+  //using the local coordinate system
+  for(int i_=0; i_< result.get_size_x(); i_++){
+    for(int j_=0; j_< result.get_size_y(); j_++){
+
+      i = (i_-x_offset-x_min)*scale;
+      j = (j_-y_offset-y_min)*scale;
+      
+      if(i>=0 && j>=0 && i<nx && j<ny){
+
+	double new_real; //= object->get_real(i,j);
+	double new_imag; //= object->get_imag(i,j);
+	
+	update_from_object_sub_grid(i, j, 
+				    new_real, 
+				    new_imag);
+
+	result.set_real(i_,j_,new_real);
+	result.set_imag(i_,j_,new_imag);
+
+      }
+    }
+  }
+  
+};
+
+
+
 
 
 void PhaseDiverseCDI::update_from_object(int n_probe){
