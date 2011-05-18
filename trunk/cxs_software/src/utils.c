@@ -1123,3 +1123,325 @@ void align(Double_2D & image1, Double_2D & image2,
   
 }
 
+
+void align_better(Double_2D & image1, Double_2D & image2,
+		  int & offset_x, int & offset_y, 
+		  int min_x, int max_x,
+		  int min_y, int max_y){
+
+  
+  //make a low res. version of the image.
+  int nx = image1.get_size_x();
+  int ny = image1.get_size_y();
+
+  double * in = new double[nx*ny];
+  fftw_complex* out = (fftw_complex*) fftw_malloc(sizeof(fftw_complex)*nx*ny); 
+  fftw_complex* fft = (fftw_complex*) fftw_malloc(sizeof(fftw_complex)*nx*ny); 
+
+  fftw_plan fftw1 = fftw_plan_dft_r2c_2d(nx,ny, in, out,
+				    FFTW_ESTIMATE);
+  
+  fftw_plan fftw2 = fftw_plan_dft_c2r_2d(nx,ny, fft, in,
+				    FFTW_ESTIMATE);
+
+  
+  //copy image to the in array
+  for(int i=0; i < nx ; i++){
+    for(int j=0; j < ny ; j++){
+      in[i*ny + j] = image1.get(i,j);
+    }
+  }
+
+  fftw_execute(fftw1);
+  
+  //copy image to the in array
+  for(int i=0; i < nx ; i++){
+    for(int j=0; j < ny ; j++){
+      fft[i*ny + j][0] = out[i*ny + j][0];
+      fft[i*ny + j][1] = out[i*ny + j][1];
+    }
+    for(int j=0; j < ny ; j++)
+      in[i*ny + j] = image2.get(i,j);
+  }
+  fftw_execute(fftw1);
+  
+  Complex_2D my_fft(nx,ny);
+
+  //copy image to the in array
+  for(int i=0; i < nx ; i++){
+    for(int j=0; j < ny ; j++){
+
+      double rl = fft[i*ny + j][0]*out[i*ny + j][0]+fft[i*ny + j][1]*out[i*ny + j][1];
+      double im = fft[i*ny + j][0]*out[i*ny + j][1]-fft[i*ny + j][1]*out[i*ny + j][0];
+
+      fft[i*ny + j][0] = rl;
+      fft[i*ny + j][1] = im;
+
+      my_fft.set_real(i,j,rl);
+      my_fft.set_imag(i,j,im);
+      
+
+      //      fft[i*ny + j] *= out[i*ny + j];
+    }
+  }
+  fftw_execute(fftw2);
+
+  double max = 0;
+
+  for(int i=0; i < nx ; i++){
+    for(int j=0; j < ny ; j++){
+      if(in[i*ny + j] > max){
+	max = in[i*ny + j];
+
+	offset_x = - i;
+	offset_y = - j;
+
+	//	if(i >=  nx/2.0)
+	//  offset_x = - i + nx;
+	//	else
+	//	  offset_x = - i - nx/2.0;
+
+	//	if(j >=  ny/2.0)
+	//	  offset_y = - j + ny;
+	//	else
+	//	offset_y = - j - ny/2.0;**/
+      }
+    }
+  }
+  
+  //copy image to the in array
+  Double_2D temp_image(nx,ny);
+  for(int i=0; i < nx ; i++){
+    for(int j=0; j < ny ; j++){
+      temp_image.set(i,j,in[i*ny + j]);
+
+
+    }
+  }
+
+  write_image("temp_image.tiff",temp_image);
+  my_fft.get_2d(MAG_SQ,temp_image);
+  write_image("temp_fft.tiff",temp_image);
+
+  fftw_free(out);
+  fftw_free(fft);
+  fftw_destroy_plan(fftw1);
+  fftw_destroy_plan(fftw2);
+  
+}
+
+
+void align_even_better(Double_2D & first_image, Double_2D & second_image,
+		       int & offset_x, int & offset_y, 
+		       int min_x, int max_x,
+		       int min_y, int max_y,
+		       Double_2D & image_weights){
+
+
+
+  int nx = first_image.get_size_x()*2;
+  int ny = second_image.get_size_y()*2;  
+
+  Double_2D image1(nx,ny);
+  Double_2D image2(nx,ny);
+  Double_2D weights(nx,ny);
+  
+  for(int i=0.25*nx; i < 0.75*nx ; i++){
+    for(int j=0.25*nx; j < 0.75*ny ; j++){
+      image1.set(i,j,first_image.get(i-0.25*nx,j-0.25*ny));
+      image2.set(i,j,second_image.get(i-0.25*nx,j-0.25*ny));
+      weights.set(i,j,image_weights.get(i-0.25*nx,j-0.25*ny));
+    }
+  }
+
+  write_image("weights.tiff",weights,false,0,1);
+
+  //  double * w1 = new double[nx*ny];
+  double * wI1 = new double[nx*ny];
+  // double * wII1 = new double[nx*ny];
+  //double * w2 = new double[nx*ny];
+  double * wI2 = new double[nx*ny];
+  //double * wII2 = new double[nx*ny];
+
+  fftw_complex* temp1 = (fftw_complex*) fftw_malloc(sizeof(fftw_complex)*nx*ny); 
+  fftw_complex* temp2 = (fftw_complex*) fftw_malloc(sizeof(fftw_complex)*nx*ny); 
+
+
+  fftw_plan fftw1 = fftw_plan_dft_r2c_2d(nx,ny, wI1, temp1,
+					 //  FFTW_REDFT00, FFTW_REDFT00,
+					 FFTW_ESTIMATE);
+  fftw_plan fftw2 = fftw_plan_dft_r2c_2d(nx,ny, wI2, temp2,
+					 //  FFTW_REDFT00, FFTW_REDFT00,
+					 FFTW_ESTIMATE);
+
+  //backwards
+  fftw_complex* fft_total = (fftw_complex*) fftw_malloc(sizeof(fftw_complex)*nx*ny); 
+  fftw_plan fftw_inv = fftw_plan_dft_c2r_2d(nx,ny, fft_total, wI1,
+					    //  FFTW_REDFT00, FFTW_REDFT00,
+					    FFTW_ESTIMATE);
+  
+  //copy the image information into the temporary arrays
+  for(int i=0; i < nx ; i++){
+    for(int j=0; j < ny ; j++){
+      
+      //      w1[i*ny + j]=weights.get(i,j);
+      wI1[i*ny + j] = weights.get(i,j)*image1.get(i,j);
+      //  wII1[i*ny + j] = weights.get(i,j)*image1.get(i,j)*image1.get(i,j);
+  
+      //      w2[i*ny + j]=weights.get(i,j);
+      wI2[i*ny + j] = weights.get(i,j)*image2.get(i,j);
+      //  wII2[i*ny + j] = weights.get(i,j)*image2.get(i,j)*image2.get(i,j);
+    }
+  }
+
+  //calculate F(w1).F(wII2)*
+  fftw_execute(fftw1);
+  fftw_execute(fftw2);
+
+  //copy image to the in array
+  /** for(int i=0; i < nx ; i++){
+    for(int j=0; j < ny ; j++){
+
+      double rl = temp1[i*ny + j][0]*temp2[i*ny + j][0]+temp1[i*ny + j][1]*temp2[i*ny + j][1];
+      double im = temp1[i*ny + j][0]*temp2[i*ny + j][1]-temp1[i*ny + j][1]*temp2[i*ny + j][0];
+
+      fft_total[i*ny + j][0] += rl;
+      fft_total[i*ny + j][1] += im;
+
+      w1[i*ny + j]=wII1[i*ny + j];
+      wII2[i*ny + j]=w2[i*ny + j];
+    }
+  }
+  //calculate F(w2)*.F(wII1)
+  fftw_execute(fftw1);
+  fftw_execute(fftw2);
+
+  //copy image to the in array
+  for(int i=0; i < nx ; i++){
+    for(int j=0; j < ny ; j++){
+
+      double rl = temp1[i*ny + j][0]*temp2[i*ny + j][0]+temp1[i*ny + j][1]*temp2[i*ny + j][1];
+      double im = temp1[i*ny + j][0]*temp2[i*ny + j][1]-temp1[i*ny + j][1]*temp2[i*ny + j][0];
+
+      fft_total[i*ny + j][0] += rl;
+      fft_total[i*ny + j][1] += im;
+
+      w1[i*ny + j]=wI1[i*ny + j];
+      wII2[i*ny + j]=wI2[i*ny + j];
+    }
+  }
+  
+  //calculate F(wI2)*.F(wI1)
+  fftw_execute(fftw1);
+  fftw_execute(fftw2);
+  **/
+  Complex_2D my_fft(nx,ny);
+
+  //copy image to the in array
+  for(int i=0; i < nx ; i++){
+    for(int j=0; j < ny ; j++){
+
+      double rl = temp1[i*ny + j][0]*temp2[i*ny + j][0]+temp1[i*ny + j][1]*temp2[i*ny + j][1];
+      double im = temp1[i*ny + j][0]*temp2[i*ny + j][1]-temp1[i*ny + j][1]*temp2[i*ny + j][0];
+
+      fft_total[i*ny + j][0] = rl; //-= 2*rl;
+      fft_total[i*ny + j][1] = im; //-= 2*im;
+      if(j>ny/2.0){
+	fft_total[i*ny + j][0] = rl; //-= 2*rl;
+	fft_total[i*ny + j][1] = -im; 
+      }
+
+      my_fft.set_real(i,j,fft_total[i*ny + j][0]); //<--
+      my_fft.set_imag(i,j,fft_total[i*ny + j][1]); //<--
+      
+      wI1[i*ny + j] = weights.get(i,j);
+      wI2[i*ny + j] = weights.get(i,j);
+
+    }
+  }
+
+  fftw_execute(fftw1);
+  fftw_execute(fftw2);
+
+  fftw_execute(fftw_inv);
+
+  for(int i=0; i < nx ; i++){
+    for(int j=0; j < ny ; j++){
+
+      double rl = temp1[i*ny + j][0]*temp2[i*ny + j][0]+temp1[i*ny + j][1]*temp2[i*ny + j][1];
+      double im = temp1[i*ny + j][0]*temp2[i*ny + j][1]-temp1[i*ny + j][1]*temp2[i*ny + j][0];
+     
+      fft_total[i*ny + j][0] = rl; //-= 2*rl;
+      fft_total[i*ny + j][1] = im; //-= 2*im;
+      if(j>ny/2.0){
+	fft_total[i*ny + j][0] = rl; //-= 2*rl;
+	fft_total[i*ny + j][1] = -im; 
+      }
+
+
+      wI2[i*ny + j] = wI1[i*ny + j];
+    }
+  }
+
+  fftw_execute(fftw_inv);
+
+  double max = 0;
+
+  //copy image to an output  array
+  Double_2D temp_image(nx,ny); //<-
+
+  for(int i=0; i < nx ; i++){
+    for(int j=0; j < ny ; j++){
+
+      //cout << wI2[i*ny + j]/wI1[i*ny + j] <<endl;
+      temp_image.set(i,j,wI1[i*ny + j]);
+
+      if(wI1[i*ny + j]>0.0){
+
+	if(wI2[i*ny + j]/wI1[i*ny + j] > max){
+	  max = wI2[i*ny + j]/wI1[i*ny + j];
+
+	  offset_x = - i;
+	  offset_y = - j;
+
+	  if(i >=nx/2.0)
+	    offset_x = - i + nx;
+	//	else
+	//	  offset_x = - i - nx/2.0;
+
+	  if(j >=  ny/2.0)
+	    offset_y = - j + ny;
+
+	//	else
+	//	offset_y = - j - ny/2.0;**/
+
+	  //	  cout <<max<<" "<<i<<" "<<j<<endl;
+	  cout <<wI2[i*ny + j]<<" "<<wI1[i*ny + j]<<endl;
+
+	}
+      }
+
+    }
+  }
+  
+  write_image("temp_image.tiff",temp_image,false);
+  cout <<temp_image.get(759,169)<<endl;
+
+  my_fft.get_2d(MAG_SQ,temp_image);
+  write_image("temp_fft.tiff",temp_image,true);
+
+  //delete w1;
+  //delete w2;
+  delete wI1;
+  delete wI2;
+  //delete wII1;
+  //delete wII2;
+
+  fftw_free(temp1);
+  fftw_free(temp2);
+  fftw_free(fft_total);
+  fftw_destroy_plan(fftw1);
+  fftw_destroy_plan(fftw2);
+  fftw_destroy_plan(fftw_inv);
+  
+}

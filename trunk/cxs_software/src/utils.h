@@ -7,6 +7,16 @@ class Complex_2D;
 void crop(Double_2D & image, Double_2D & new_image, int x_start, int y_start);
 void rescale(Double_2D & image, double scale);
 void align(Double_2D & image1, Double_2D & image2, int & offset_x, int & offset_y, int step_size=8.0, int min_x=0, int max_x=0, int min_y=0, int max_y=0);
+void align_better(Double_2D & image1, Double_2D & image2,
+		  int & offset_x, int & offset_y, 
+		  int min_x, int max_x,
+		  int min_y, int max_y);
+void align_even_better(Double_2D & image1, Double_2D & image2,
+		       int & offset_x, int & offset_y, 
+		       int min_x, int max_x,
+		       int min_y, int max_y,
+		       Double_2D & weights);
+
 
 double edges(Double_2D & image);
 double line_out(Double_2D & image);
