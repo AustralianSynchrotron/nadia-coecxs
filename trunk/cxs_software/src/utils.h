@@ -11,12 +11,14 @@ void align_better(Double_2D & image1, Double_2D & image2,
 		  int & offset_x, int & offset_y, 
 		  int min_x, int max_x,
 		  int min_y, int max_y);
-void align_even_better(Double_2D & image1, Double_2D & image2,
-		       int & offset_x, int & offset_y, 
-		       int min_x, int max_x,
-		       int min_y, int max_y,
-		       Double_2D & weights);
 
+void align_even_better(Double_2D & first_image, Double_2D & second_image,
+		       int & offset_x, int & offset_y,
+		       int min_x=0, int max_x=0,
+		       int min_y=0, int max_y=0,
+		       Double_2D * first_image_weights = 0,
+		       Double_2D * second_image_weights = 0,
+		       double overlap_fraction = 0.01);
 
 double edges(Double_2D & image);
 double line_out(Double_2D & image);
