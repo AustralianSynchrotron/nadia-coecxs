@@ -428,12 +428,20 @@ void PhaseDiverseCDI::adjust_positions(double step_size, bool forward){
 
     int new_x, new_y;
 
-    align(temp_single, temp_others, 
+    /**    align(temp_single, temp_others, 
 	  new_x, new_y,
 	  8,
 	  -100,+100,
-	  -100,+100);
+	  -100,+100);**/
     
+    align_even_better(temp_single, temp_others, 
+		      new_x, new_y,
+		      -200, +200,
+		      -200, +200,
+		      weights.at(n),
+		      &temp_others,
+		      0.2);
+
     x_position.at(n) = before_x+new_x;
     y_position.at(n) = before_y+new_y;
 
@@ -575,7 +583,7 @@ int PhaseDiverseCDI::check_position(int n_probe, double step_size, int tries){
       add_to_object(n_probe);
       update_from_object(n_probe);
 
-      if(n_probe==4&&new_x==3294&&new_y==2917){
+      /**      if(n_probe==4&&new_x==3294&&new_y==2917){
 	static int h = 0;
 	char blah[80];
 	Double_2D temp(1024,1024);
@@ -592,7 +600,7 @@ int PhaseDiverseCDI::check_position(int n_probe, double step_size, int tries){
 	cout << "error at ("<<new_x<<","<<new_y
 	     << ")"<<" is "<<single->get_error()<<endl;
 
-      }
+	     }**/
 
       single->iterate();
 	
