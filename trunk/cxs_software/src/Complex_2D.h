@@ -53,7 +53,7 @@ class Complex_2D{
   //Allow FourierT to access protected members.
   //This is needed for the quick copy method used
   //in the FourierT class.
-  friend class FourierT;
+  //  friend class FourierT;
 
   /* A fftw plan for forward fourier transforms */
   fftw_plan f_forward;
