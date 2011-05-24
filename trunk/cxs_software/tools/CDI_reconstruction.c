@@ -40,6 +40,7 @@
 #include "io.h"
 #include "Complex_2D.h"
 #include "Double_2D.h"
+#include "BaseCDI.h"
 #include "PlanarCDI.h"
 #include "FresnelCDI.h"
 #include "FresnelCDI_WF.h"
@@ -169,7 +170,7 @@ int main(int argc, char * argv[]){
     }
   }
 
-  PlanarCDI * proj = 0;
+  BaseCDI * proj = 0;
   
   //the data file name
   string data_file_name = c.getString("data_file_name");
@@ -352,7 +353,7 @@ int main(int argc, char * argv[]){
 	 i%shrinkwrap_iterations==(shrinkwrap_iterations-1)){
 	proj->apply_shrinkwrap(shrinkwrap_gauss_width, 
 			       shrinkwrap_threshold);
-	
+	cout << "Applying shrink-wrap at iteration "<< i<<endl;
       }
     }
     iterations_itr++;

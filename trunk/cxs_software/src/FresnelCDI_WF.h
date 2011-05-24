@@ -9,11 +9,11 @@
  *
  * This is the class used for reconstructing white-field data prior to
  * running Fresnel reconstruction with FresnelCDI_WF. It inherits most
- * methods from PlanarCDI, so please look at the documentation of this
+ * methods from BaseCDI, so please look at the documentation of this
  * class also. Although there are some differences in the underlying
  * code between this class and the planar case, the interface is
  * generally unchanged. Therefore users should refer to the
- * instructions for PlanarCDI to understand how to use a FresnelCDI_WF
+ * instructions for BaseCDI to understand how to use a FresnelCDI_WF
  * object in their own code. Only the differences relevant to users
  * will be documented here.
  *
@@ -22,12 +22,13 @@
 #ifndef FCDI_WF_H
 #define FCDI_WF_H
 
-#include "PlanarCDI.h"
+#include "BaseCDI.h"
+
 
 //forward declarations
 class Complex_2D;
 
-class FresnelCDI_WF: public PlanarCDI{
+class FresnelCDI_WF: public BaseCDI{
 
  protected:
 
@@ -86,7 +87,7 @@ class FresnelCDI_WF: public PlanarCDI{
 
 
   /**
-   * The iterate() method of PlanarCDI is overridden here with 3-plane
+   * The iterate() method of BaseCDI is overridden here with 3-plane
    * propagation.
    */
   int iterate();  
@@ -107,7 +108,7 @@ class FresnelCDI_WF: public PlanarCDI{
 
 
   /**
-   * This method overrides the one in PlanarCDI. The white-field is
+   * This method overrides the one in BaseCDI. The white-field is
    * initialised to be zero outside the support (note that we assume
    * here that the support for the zone plate is approx. the same size
    * and shape as the support region of the white-field in the detector

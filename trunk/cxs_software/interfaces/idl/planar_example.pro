@@ -18,32 +18,26 @@ data = cxs_read_tiff(1024,1024,'../../examples/image_files/planar_data.tif')
 ; parameter of beta=0.9
 cxs_init_planar, data, support
 
-;Perform an iteration
-a = cxs_iterate()
+;Set the algorithm to hybrid input-out
+cxs_set_algorithm, 'HIO'
 
-; Apply shrink wrap (default Gaussian width = 1.5 pixels,
-; threshold = 0.1 time the maximum pixel value). And then 
-; perform 50 more iteration. Do this 3 times.
-FOR I=0,3 DO BEGIN cxs_apply_shrinkwrap & a = cxs_iterate(50) & ENDFOR
-
-cxs_apply_shrinkwrap
-
-a = cxs_iterate(49)
+; Perform 50 iterations and then 
+; apply shrink wrap (default Gaussian width = 1.5 pixels,
+; threshold = 0.1 time the maximum pixel value). 
+; Do this 5 times (250 iterations in total).
+FOR I=0,4 DO BEGIN a = cxs_iterate(50) & cxs_apply_shrinkwrap & ENDFOR
 
 ; Change to the error-reduction algorithm 
 cxs_set_algorithm, 'ER'
 
-;Perform an iteration
+; Do another 150 iterations with shrink-wrap applied every 50 iterations
+FOR I=0,2 DO BEGIN a = cxs_iterate(50) & cxs_apply_shrinkwrap & ENDFOR
+
+; Do one last iteration to get the final result
 a = cxs_iterate()
 
-FOR I=0,1 DO BEGIN cxs_apply_shrinkwrap & a = cxs_iterate(50) & ENDFOR
-
-cxs_apply_shrinkwrap
-
-a = cxs_iterate(49)
-
 ; Apply shrink-wrap again. Lets be less tight this time
-;cxs_apply_shrinkwrap, 1, 0.05 
+; cxs_apply_shrinkwrap, 1, 0.05 
 
 ; Do one more iteration
 ;a = cxs_iterate()

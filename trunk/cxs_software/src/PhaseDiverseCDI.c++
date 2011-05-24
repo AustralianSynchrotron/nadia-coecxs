@@ -8,7 +8,7 @@
 #include "Complex_2D.h"
 #include "Double_2D.h"
 #include "FresnelCDI.h"
-#include "PlanarCDI.h"
+#include "BaseCDI.h"
 #include "PhaseDiverseCDI.h"
 #include "io.h" //
 #include <sstream>
@@ -106,7 +106,7 @@ void PhaseDiverseCDI::set_transmission(Complex_2D & new_transmission){
   
 }
 
-void PhaseDiverseCDI::add_new_position(PlanarCDI * local,
+void PhaseDiverseCDI::add_new_position(BaseCDI * local,
 				       double x, 
 				       double y,
 				       double alpha){
@@ -280,7 +280,7 @@ void PhaseDiverseCDI::scale_object(double factor){
 }
 
 
-void PhaseDiverseCDI::get_result(PlanarCDI * local, Complex_2D & result){
+void PhaseDiverseCDI::get_result(BaseCDI * local, Complex_2D & result){
   if(typeid(*local)==typeid(FresnelCDI)){
     ((FresnelCDI*)local)->get_transmission_function(result);
   }
@@ -288,7 +288,7 @@ void PhaseDiverseCDI::get_result(PlanarCDI * local, Complex_2D & result){
     result.copy(local->get_exit_surface_wave());
 };
 
-void PhaseDiverseCDI::set_result(PlanarCDI * local, Complex_2D & result){
+void PhaseDiverseCDI::set_result(BaseCDI * local, Complex_2D & result){
   
   if(typeid(*local)==typeid(FresnelCDI)){
     ((FresnelCDI*)local)->set_transmission_function(result);
@@ -418,13 +418,13 @@ void PhaseDiverseCDI::adjust_positions(double step_size, bool forward){
       }
     }
 
-    static int counter = 0;
+    /**    static int counter = 0;
     char buff[90];
     sprintf(buff,"temp_single_%i.tiff",counter);
     write_image(buff,temp_single);
     sprintf(buff,"temp_object_%i.tiff",counter);
     write_image(buff,temp_others);
-    counter++;
+    counter++;**/
 
     int new_x, new_y;
 
@@ -436,8 +436,8 @@ void PhaseDiverseCDI::adjust_positions(double step_size, bool forward){
     
     align_even_better(temp_single, temp_others, 
 		      new_x, new_y,
-		      -200, +200,
-		      -200, +200,
+		      -100, +100,
+		      -100, +100,
 		      weights.at(n),
 		      &temp_others,
 		      0.2);
@@ -543,7 +543,7 @@ int PhaseDiverseCDI::check_position(int n_probe, double step_size, int tries){
       return FAILURE;
   }
   
-  PlanarCDI * single = singleCDI.at(n_probe);
+  BaseCDI * single = singleCDI.at(n_probe);
   
   double best_x=x;
   double best_y=y;
@@ -664,7 +664,7 @@ void PhaseDiverseCDI::set_up_weights(){
     
     int lnx = single_result.at(n_probe)->get_size_x();
     int lny = single_result.at(n_probe)->get_size_y();
-    PlanarCDI * this_CDI = singleCDI.at(n_probe);
+    BaseCDI * this_CDI = singleCDI.at(n_probe);
     double value;
     Double_2D illum_mag(lnx,lny);
     double max;

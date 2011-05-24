@@ -11,13 +11,14 @@
 //cxs software headers
 #include "Complex_2D.h"
 #include "Double_2D.h"
+#include "BaseCDI.h"
 #include "PlanarCDI.h"
 #include "FresnelCDI.h"
 #include "FresnelCDI_WF.h"
 #include "io.h"
 
 Complex_2D * esw = 0;
-PlanarCDI * reco = 0;
+BaseCDI * reco = 0;
 int total_iters = 0;
 using namespace std;
 
@@ -131,9 +132,7 @@ extern "C" void IDL_read_ppm(int argc, void * argv[])
   Double_2D temp(nx,ny);
   read_ppm(filename.s,temp);
   copy_from_double_2d(temp, (double*) argv[3]);
-
 }
-
 
 
 extern "C" void IDL_read_cplx(int argc, void * argv[])
@@ -329,7 +328,7 @@ extern "C" void IDL_iterate(int argc, void * argv[]){
 extern "C" void IDL_set_algorithm(int argc, void * argv[]){
   check_objects();
   IDL_STRING alg_name = *(IDL_STRING*)argv[0];
-  int alg = PlanarCDI::getAlgFromName(alg_name.s);
+  int alg = BaseCDI::getAlgFromName(alg_name.s);
   reco->set_algorithm(alg);
 }
 
@@ -384,11 +383,23 @@ extern "C" void IDL_get_best_result(int argc, void * argv[]){
 
 extern "C" void IDL_get_intensity_autocorrelation(int argc, void * argv[]){
   check_objects();
+
+  if(typeid(*reco)!=typeid(PlanarCDI)){
+    
+    ostringstream oss (ostringstream::out);
+    oss << "Sorry, can't get the autocorrelation function for "
+	<< "anything other than "<< typeid(PlanarCDI).name() <<" reconstuction. "
+	<< "You are doing "<<typeid(*reco).name() 
+	<< " reconstruction." << endl;
+    IDL_Message(IDL_M_GENERIC, IDL_MSG_INFO, oss.str().c_str());    
+    return;
+  }
+  
   int nx = esw->get_size_x();
   int ny = esw->get_size_y();
   
   Double_2D temp(nx,ny);
-  reco->get_intensity_autocorrelation(temp);
+  ((PlanarCDI*)reco)->get_intensity_autocorrelation(temp);
   copy_from_double_2d(temp,(double*) argv[0]);
 }
 
@@ -485,3 +496,19 @@ extern "C" void IDL_scale_intensity(int argc, void * argv[]){
   reco->scale_intensity(temp);
   copy_from_complex_2d(temp,(IDL_COMPLEX*) argv[1]); 
 }
+
+
+
+//------------------------------------------------------------//
+// Complex contraint code
+//------------------------------------------------------------//
+
+
+
+//------------------------------------------------------------//
+// Phase diverse code
+//------------------------------------------------------------//
+
+
+
+

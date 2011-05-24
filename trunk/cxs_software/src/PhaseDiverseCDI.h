@@ -7,11 +7,11 @@
  *
  * The class used for performing Fresnel CDI reconstruction (for
  * white-field reconstruction see FresnelCDI_WF). It inherits most
- * methods from PlanarCDI, so please look at the documentation of this
+ * methods from BaseCDI, so please look at the documentation of this
  * class also. Although there are some differences in the underlying
  * code between this class and the planar case, the interface is
  * generally unchanged. Therefore users should refer to the
- * instructions for PlanarCDI to understand how to use a FresnelCDI
+ * instructions for BaseCDI to understand how to use a FresnelCDI
  * object in their own code. Only the differences relevant to users
  * will be documented here.
  *
@@ -20,7 +20,7 @@
 #ifndef PHASED_H
 #define PHASED_H
 
-#include "PlanarCDI.h"
+#include "BaseCDI.h"
 #include <vector>
 
 //forward declarations
@@ -29,7 +29,7 @@ class PhaseDiverseCDI{
 
  protected:
 
-  std::vector<PlanarCDI*> singleCDI;
+  std::vector<BaseCDI*> singleCDI;
   std::vector<Complex_2D*> single_result;
   //std::vector<Double_2D *> beam_shape;
   std::vector<Double_2D *> weights;
@@ -67,7 +67,7 @@ class PhaseDiverseCDI{
 
   void iterate();
   
-  void add_new_position(PlanarCDI * local, 
+  void add_new_position(BaseCDI * local, 
 			double x=0, double y=0, 
 			double alpha=1);
  
@@ -116,8 +116,8 @@ class PhaseDiverseCDI{
   void add_to_object(int n_probe);
   int check_position(int n_probe, double shift=4, int tries=0);
   void update_from_object(int n_probe);
-  void get_result(PlanarCDI * local, Complex_2D & result);
-  void set_result(PlanarCDI * local, Complex_2D & result);
+  void get_result(BaseCDI * local, Complex_2D & result);
+  void set_result(BaseCDI * local, Complex_2D & result);
   void update_to_object_sub_grid(int i, int j, 
 				 double real_value, 
 				 double imag_value);

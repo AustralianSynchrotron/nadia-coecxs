@@ -24,6 +24,7 @@
 #include <cstdlib>
 #include <math.h>
 #include <string>
+#include "TransmissionConstraint.h"
 
 using namespace std;
 
@@ -34,8 +35,8 @@ int main(int argc, char * argv[]){
   /** All of this part is just reading files and setting constants **/
 
   //number of output iterations
-  int output_iterations = 25;
-  int total_iterations = 200;
+  int output_iterations = 10;
+  int total_iterations = 10;
 
   //load an image file for the sample
   Double_2D object;
@@ -82,7 +83,7 @@ int main(int argc, char * argv[]){
   //set the experimental parameters (all are in meters)
   double wavelength = 4.892e-10; //wavelength
   double fd = 0.8932; //focal to detector
-  double fs = 2.16e-3; //focal to sample
+  double fs = 1.794e-3; //focal to sample
   double ps = 13.5e-6; //pixel size
 
   //create the projection object which will be used later to
@@ -193,29 +194,47 @@ int main(int argc, char * argv[]){
   /******************************************************/
   /*******************************************************/
 
+  FresnelCDI proj2(object_estimate, //estimate
+		   wf, //white field 
+		   wavelength, //wavelength
+		   fd, //focal-to-detector
+		   0.00214, //focal-to-sample
+		   ps, //pixel size
+		   1.0); //normalisation of white-field to sample data
+  
+
 
   //set the support and intensity
-  proj.set_support(support);  
-  proj.set_intensity(result);
+  proj2.set_support(support);  
+  proj2.set_intensity(result);
   
   //set the algorithm
-  proj.set_algorithm(ER);
+  proj2.set_algorithm(ER);
   
   //Initialise the current object ESW
-  proj.initialise_estimate(0);
+  proj2.initialise_estimate(0);
   
   //set a complex contraint for the transmission function
-  //proj.set_complex_contraint_function(charge_flip);
+  //proj2.set_complex_contraint_function(charge_flip);
   
   /*** run the reconstruction ************/
+
+  TransmissionConstraint tc1;
+  tc1.set_enforce_unity(true);
+  tc1.set_charge_flipping(false);
+
+  /*** run the reconstruction ************/
+  //  proj2.set_complex_constraint(tc1);
+
+  //  cout << proj2.refine_sample_to_focal_length(0.0016,0.002,20,0.00005,8)<<endl;
   
   for(int i=0; i<  total_iterations+1; i++){
 
     cout << "iteration " << i << endl;
 
     //apply the iterations  
-    proj.iterate(); 
-    cout << "Error: " << proj.get_error() << endl;
+    proj2.iterate(); 
+    cout << "Error: " << proj2.get_error() << endl;
 
     if(i%output_iterations==0){
 
@@ -226,14 +245,14 @@ int main(int argc, char * argv[]){
       write_tiff(temp_str.str(),result);
     
       //uncomment to apply the shrinkwrap algorithm
-      //      proj.apply_shrinkwrap();
+      //      proj2.apply_shrinkwrap();
     }
   }
 
   //get the reconstructed transmission function for 
   //the final iteration
   Complex_2D trans(nx,ny);
-  proj.get_transmission_function(trans);
+  proj2.get_transmission_function(trans);
 
   //and write the magnitude and phase of it to an image file
   trans.get_2d(MAG,result);

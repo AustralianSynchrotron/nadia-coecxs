@@ -21,7 +21,7 @@ FresnelCDI_WF::FresnelCDI_WF(Complex_2D & initial_guess,
 			     double focal_detector_length,
 			     double pixel_size,
 			     int n_best)
-  :PlanarCDI(initial_guess,n_best),
+  :BaseCDI(initial_guess,n_best),
    wavelength(beam_wavelength),
    zone_to_focal_length(zone_focal_length),
    focal_to_detector_length(focal_detector_length),

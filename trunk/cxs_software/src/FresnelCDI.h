@@ -7,11 +7,11 @@
  *
  * The class used for performing Fresnel CDI reconstruction (for
  * white-field reconstruction see FresnelCDI_WF). It inherits most
- * methods from PlanarCDI, so please look at the documentation of this
+ * methods from BaseCDI, so please look at the documentation of this
  * class also. Although there are some differences in the underlying
  * code between this class and the planar case, the interface is
  * generally unchanged. Therefore users should refer to the
- * instructions for PlanarCDI to understand how to use a FresnelCDI
+ * instructions for BaseCDI to understand how to use a FresnelCDI
  * object in their own code. Only the differences relevant to users
  * will be documented here.
  *
@@ -20,11 +20,11 @@
 #ifndef FCDI_H
 #define FCDI_H
 
-#include "PlanarCDI.h"
+#include "BaseCDI.h"
 
 //forward declarations
 class Complex_2D;
-class FresnelCDI: public PlanarCDI{
+class FresnelCDI: public BaseCDI{
 
  protected:
 
@@ -137,7 +137,7 @@ class FresnelCDI: public PlanarCDI{
 
   
   /**
-   * This method overrides the one in PlanarCDI by adding/subtracting
+   * This method overrides the one in BaseCDI by adding/subtracting
    * the white-field before/after applying the intensity constraint.
    *
    * @param c The Complex_2D object to apply the intensity constraint

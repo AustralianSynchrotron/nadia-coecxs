@@ -9,8 +9,8 @@
 ; Please replace the file-name with your 
 ; "cxs_software/example/image_files" directory if you are not
 ; running this example on osiris.
-s = cxs_read_tiff(1024,1024,'/data/nadia/cxs_software_rel_0/cxs_software/examples/image_files/FCDI_wf_support.tiff')
-d = cxs_read_dbin(1024,1024,'/data/nadia/cxs_software_rel_0/cxs_software/examples/image_files/FCDI_wf_data.dbin')
+s = cxs_read_tiff(1024,1024,'../../examples/image_files/FCDI_wf_support.tiff')
+d = cxs_read_dbin(1024,1024,'../../examples/image_files/FCDI_wf_data.dbin')
 
 ; Set-up everything ready for reconstruction of the 
 ; white-field phase. You need to pass the data, support
@@ -22,8 +22,8 @@ white_field = cxs_iterate(20)
 
 
 ; Now load the files of the sample support and data with the sample in place
-s = cxs_read_tiff(1024,1024,'/data/nadia/cxs_software_rel_0/cxs_software/examples/image_files/FCDI_support.tiff')
-d = cxs_read_dbin(1024,1024,'/data/nadia/cxs_software_rel_0/cxs_software/examples/image_files/FCDI_data.dbin')
+s = cxs_read_tiff(1024,1024,'../../examples/image_files/FCDI_support.tiff')
+d = cxs_read_dbin(1024,1024,'../../examples/image_files/FCDI_data.dbin')
 
 ; and set-up everything ready for the sample reconstruction.
 cxs_init_fresnel, d, s, white_field, 4.892e-10, 0.9078777, 2.16e-3, 13.5e-6, 0.95

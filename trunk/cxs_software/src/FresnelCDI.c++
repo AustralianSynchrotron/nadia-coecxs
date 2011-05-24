@@ -26,7 +26,7 @@ FresnelCDI::FresnelCDI(Complex_2D & initial_guess,
 		       double pixel_size,
 		       double normalisation,
 		       int n_best)
-  :PlanarCDI(initial_guess,n_best),
+  :BaseCDI(initial_guess,n_best),
    illumination(nx,ny),
    norm(normalisation),
    coefficient(nx/2,ny/2)
@@ -213,7 +213,7 @@ void FresnelCDI::scale_intensity(Complex_2D & c){
   //write_image("after_r.tiff",result);
   //c.get_2d(MAG_SQ,result);
   //write_image("after_mag.tiff",result);
-  PlanarCDI::scale_intensity(c);
+  BaseCDI::scale_intensity(c);
 
   c.add(illumination,-norm);//subtract the white field
 
