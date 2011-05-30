@@ -191,6 +191,8 @@ class FresnelCDI: public BaseCDI{
 				   double focal_sample_length,
 				   double pixel_size);
     
+  
+  void set_norm(double new_normalisation);
 
   
   const Complex_2D & get_illumination_at_sample();

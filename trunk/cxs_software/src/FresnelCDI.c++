@@ -30,14 +30,11 @@ FresnelCDI::FresnelCDI(Complex_2D & initial_guess,
    illumination(nx,ny),
    norm(normalisation),
    coefficient(nx/2,ny/2)
-   // B_d(ny,ny)
 {
 
-
-   //   illumination_at_sample(nx,ny),
-   //    transmission(nx,ny),
-
   illumination.copy(white_field);
+  illumination.scale(norm);
+  
   illumination_at_sample=0;
   transmission = 0;
   set_experimental_parameters(beam_wavelength,focal_detector_length,
@@ -136,39 +133,59 @@ void FresnelCDI::auto_set_norm(){
   double wf_norm = temp.get_sum();
   double int_norm = intensity_sqrt.get_sum();
   
-  norm = int_norm/wf_norm;
-
+  set_norm(int_norm/wf_norm);
+  
 }
+
+void FresnelCDI::set_norm(double new_normalisation){
+
+  double old_normalisation = norm;
+  norm = new_normalisation;
+  illumination.scale(new_normalisation/old_normalisation);
+  
+  if(illumination_at_sample)
+    illumination_at_sample->scale(new_normalisation/old_normalisation);
+  
+}
+
+
 
 void FresnelCDI::initialise_estimate(int seed){
 
   //initialise the random number generator
   srand(seed);
-  
   Complex_2D random_trans(nx,ny);
+  /**  Double_2D temp(nx,ny);
+  illumination_at_sample->get_2d(REAL,temp);
+  double max = temp.get_max();**/
 
   for(int i=0; i<nx; i++){
     for(int j=0; j<ny; j++){
-      double amp = 1-0.5*rand()/((double) RAND_MAX);
-      double phase = 0;//0.5*M_PI*rand()/((double) RAND_MAX) - 0.5*M_PI;
+      double real = 1-0.2*rand()/((double) RAND_MAX);
+      double imag = 0; //0.2*M_PI*rand()/((double) RAND_MAX) - 0.2*M_PI;
 
-      random_trans.set_mag(i,j,amp);
-      random_trans.set_phase(i,j,phase);
-      
+      random_trans.set_real(i,j,real);
+      random_trans.set_imag(i,j,imag);
+
+      //complex.set_real(i,j,max*rand()/((double) RAND_MAX));
+      //complex.set_imag(i,j,0);//max*rand()/((double) RAND_MAX));
     }
   }
   
   set_transmission_function(random_trans,&complex);
   apply_support(complex);
 
-  /**for(int i=0; i<nx; i++){
+  /**  for(int i=0; i<nx; i++){
     for(int j=0; j<ny; j++){
-      
+      complex.set_phase(i,j,0.0);
+    }
+    }**/
+
       //do a simple initialisation
-      
+      /**    
       //make the magnitude the difference of the intensity and
       //white-field
-      double amp = intensity_sqrt.get(i,j)-norm*illumination.get_mag(i,j);
+      double amp = intensity_sqrt.get(i,j)-illumination.get_mag(i,j);
       
       //perterb the phase a bit about zero to allow random starts.
       double phase = 0.2*2*M_PI*(0.5-rand()/((double) RAND_MAX) );
@@ -207,7 +224,7 @@ void FresnelCDI::scale_intensity(Complex_2D & c){
   //c.get_2d(PHASE,result);
   //write_image("before_p.tiff",result);
   
-  c.add(illumination,norm); //add the white field
+  c.add(illumination); //add the white field
 
   //c.get_2d(REAL,result);
   //write_image("after_r.tiff",result);
@@ -215,7 +232,7 @@ void FresnelCDI::scale_intensity(Complex_2D & c){
   //write_image("after_mag.tiff",result);
   BaseCDI::scale_intensity(c);
 
-  c.add(illumination,-norm);//subtract the white field
+  c.add(illumination,-1.0);//subtract the white field
 
 }
 
@@ -239,11 +256,12 @@ void FresnelCDI::set_transmission_function(Complex_2D & transmission,
   if(!esw)
     esw=&complex;
 
-  if(!illumination_at_sample){
+  get_illumination_at_sample();
+  /**  if(!illumination_at_sample){
     illumination_at_sample = new Complex_2D(nx,ny);
     illumination_at_sample->copy(illumination);
     propagate_from_detector(*illumination_at_sample);
-  }
+    }**/
 
   double ill_r;
   double trans_r;
@@ -252,9 +270,9 @@ void FresnelCDI::set_transmission_function(Complex_2D & transmission,
   
   for(int i=0; i<nx; i++){
     for(int j=0; j<nx; j++){
-      ill_r = norm*illumination_at_sample->get_real(i,j);
+      ill_r = illumination_at_sample->get_real(i,j);
       trans_r = transmission.get_real(i,j);
-      ill_i = norm*illumination_at_sample->get_imag(i,j);
+      ill_i = illumination_at_sample->get_imag(i,j);
       trans_i = transmission.get_imag(i,j);
    
       // ESW = TL - L
@@ -288,11 +306,13 @@ void FresnelCDI::get_transmission_function(Complex_2D & result,
   if(!esw)
     esw=&complex;
 
-  if(!illumination_at_sample){
+  /**  if(!illumination_at_sample){
     illumination_at_sample = new Complex_2D(nx,ny);
     illumination_at_sample->copy(illumination);
     propagate_from_detector(*illumination_at_sample);
-  }
+    }**/
+
+  get_illumination_at_sample();
 
   double ill_r;
   double esw_r;
@@ -307,9 +327,9 @@ void FresnelCDI::get_transmission_function(Complex_2D & result,
     for(int j=0; j<nx; j++){
       if(norm!=0&&illumination_at_sample->get_mag(i,j)!=0){
 
-	ill_r = norm*illumination_at_sample->get_real(i,j);
+	ill_r = illumination_at_sample->get_real(i,j);
 	esw_r = esw->get_real(i,j);
-	ill_i = norm*illumination_at_sample->get_imag(i,j);
+	ill_i = illumination_at_sample->get_imag(i,j);
 	esw_i = esw->get_imag(i,j);
 
 	denom = ill_r*ill_r + ill_i*ill_i;
