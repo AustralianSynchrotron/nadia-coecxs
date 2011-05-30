@@ -9,8 +9,8 @@
 ; Please replace the file-name with your 
 ; "cxs_software/example/image_files" directory if you are not
 ; running this example on osiris.
-s = cxs_read_tiff(1024,1024,'../../examples/image_files/FCDI_wf_support.tiff')
 d = cxs_read_dbin(1024,1024,'../../examples/image_files/FCDI_wf_data.dbin')
+s = cxs_get_round_support(1024,1024,330)
 
 ; Set-up everything ready for reconstruction of the 
 ; white-field phase. You need to pass the data, support
@@ -20,13 +20,16 @@ cxs_init_fresnel_wf, d, s, 4.892e-10, 16.353e-3, 0.9078777, 13.5e-6
 ; Perform 20 iterations.
 white_field = cxs_iterate(20)
 
-
 ; Now load the files of the sample support and data with the sample in place
-s = cxs_read_tiff(1024,1024,'../../examples/image_files/FCDI_support.tiff')
+;s = cxs_read_tiff(1024,1024,'../../examples/image_files/FCDI_support.tiff')
 d = cxs_read_dbin(1024,1024,'../../examples/image_files/FCDI_data.dbin')
+s = cxs_get_round_support(1024,1024,320)
 
 ; and set-up everything ready for the sample reconstruction.
-cxs_init_fresnel, d, s, white_field, 4.892e-10, 0.9078777, 2.16e-3, 13.5e-6, 0.95
+cxs_init_fresnel, d, s, white_field, 4.892e-10, 0.9078777, 2.16e-3, 13.5e-6, 1.0
+
+cxs_set_charge_flipping, 1
+cxs_set_trans_unity_constraint, 0
 
 ; Perform 20 iterations
 a = cxs_iterate(20)
@@ -42,15 +45,13 @@ cxs_clear_memory
 ; Now you can play with "a" however you like in IDL.
 
 ; e.g. get the phase and display it:
-phase = ATAN(a, /PHASE)
-window, XSIZE=512, YSIZE=512
-TVSCL, rebin(phase,512,512)
+;phase = ATAN(a, /PHASE)
+;window, XSIZE=512, YSIZE=512
+;TVSCL, rebin(phase,512,512)
 
 ; or the magnitude:
-; TVSCL, rebin(abs(a),512,512)
+TVSCL, rebin(abs(a),512,512)
 
 ; or save the result to a file:
 ; write_cplx(a , 'result_of_my_FCDI_CDI.cplx')
-
-
 

@@ -373,6 +373,53 @@ n = size(array)
 a = call_external(lib_name(),'IDL_set_support',n[1],n[2],double(array))
 end
 
+
+
+
+;+
+; NAME:
+;       CXS_GET_ROUND_SUPPORT
+;
+; PURPOSE: 
+;       This function will return a simple array with a central
+;       circular region where each element has the value 1.0. Outside
+;       the value returned is zero. This function has been written to
+;       allow each create of the support array. For example when
+;       reconstructing the white-field for Fresnel CDI reconstruction.
+;       Note that it does not actually call any method from the cxs
+;       software library.
+;
+; CALLING SEQUENCE:
+;
+;	CXS_GET_ROUND_SUPPORT, nx, ny, radius
+;
+; INPUTS:
+;
+;       n_x: 
+;             The number of pixels in the horizontal direction of the
+;             output array.
+;       n_y: 
+;             The number of pixels in the vertical direction of the
+;             output array.
+;       radius: 
+;             The radius of the circle in pixels.
+;
+; RETURN:
+;       A two dimensional array which can be used to set the support
+;       for any of the CDI reconstructions.
+;
+; EXAMPLE:
+;
+;       cxs_get_round_support, 1024, 1024, 0.25*1024
+;-
+function cxs_get_round_support, n_x, n_y, radius
+  result = make_array(n_x,n_y,/DOUBLE)
+  b = call_external(lib_name() ,'IDL_get_round_support',n_x,n_y,double(radius),result) 
+  show, result
+  return, result
+end
+
+
 ;+
 ; NAME:
 ;       CXS_SET_BEAM_STOP
@@ -1159,7 +1206,7 @@ end
 ;-
 function cxs_read_ppm, nx, ny, filename
 result = make_array(nx,ny, /DOUBLE)
-b = call_external(lib_name() ,'IDL_read_ppm',nx,ny,filename,result)
+b = call_external(lib_name() ,'IDL_read_ppm',long(nx),long(ny),filename,result)
 show, result
 return, result
 end
@@ -1195,7 +1242,7 @@ end
 ;-
 function cxs_read_dbin, nx, ny, filename
 result = make_array(nx,ny, /DOUBLE)
-b = call_external(lib_name() ,'IDL_read_dbin',nx,ny,filename,result)
+b = call_external(lib_name() ,'IDL_read_dbin',long(nx),long(ny),filename,result)
 show, result
 return, result
 end
@@ -1232,7 +1279,7 @@ end
 ;-
 function cxs_read_tiff, nx, ny, filename
 result = make_array(nx,ny, /DOUBLE)
-b = call_external(lib_name() ,'IDL_read_tiff',nx,ny,filename,result)
+b = call_external(lib_name() ,'IDL_read_tiff',long(nx),long(ny),filename,result)
 show, result
 return, result
 end
@@ -1269,7 +1316,7 @@ end
 ;-
 function cxs_read_cplx, nx, ny, filename
 result = make_array(nx,ny, /COMPLEX)
-b = call_external(lib_name() ,'IDL_read_cplx',nx,ny,filename,result)
+b = call_external(lib_name() ,'IDL_read_cplx',long(nx),long(ny),filename,result)
 show, abs(result)
 return, result
 end
@@ -1329,4 +1376,74 @@ n = size(array)
 b = call_external(lib_name() ,'IDL_write_dbin',n[1],n[2],double(array), filename)
 end
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; Complex Constraint Code
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+;+
+; NAME:
+;       CXS_SET_CHARGE_FLIPPING
+;
+; PURPOSE: For use with FresnelCDI reconstruction. Enabeling this
+;       procedure will constrain the transmission function phase to
+;       lie between -PI and 0. During each iteration (directly after
+;       applying the support constraint), the phase of the
+;       transmission function will be flipped if it is positive
+;       (i.e. if the phase, phi, lies between 0 and PI it will be
+;       reset to -phi). If this procedure is called for a PlanarCDI
+;       reconstruction, the contraint will be applied to the
+;       exit-surface-wave.
+;
+; CALLING SEQUENCE:
+;
+;       CXS_SET_CHARGE_FLIPPING, enable
+;
+; INPUTS:
+;
+;       enable:
+;             This should be either 0 - turn off or 1 - turn on.
+;
+; EXAMPLE:
+;       CXS_SET_CHARGE_FLIPPING, 1
+;-
+pro cxs_set_charge_flipping, enable
+  b = call_external(lib_name() ,'IDL_set_charge_flipping',long(enable))
+end
+
+;+
+; NAME:
+;       CXS_SET_TRANS_UNITY_CONSTRAINT
+;
+; PURPOSE: For use with FresnelCDI reconstruction. Enabeling this
+;       procedure will constrain the transmission function magnitude
+;       to lie 0 and 1. During each iteration (directly after applying
+;       the support constraint), the magnitude of the transmission
+;       function will be reset to 1 at locations where it is greater
+;       than 1.
+;
+; CALLING SEQUENCE:
+;
+;       CXS_SET_TRANS_UNITY_CONSTRAINT, enable
+;
+; INPUTS:
+;
+;       enable:
+;             This should be either 0 - turn off or 1 - turn on.
+;
+; EXAMPLE:
+;       CXS_SET_TRANS_UNITY_CONSTRAINT, 1
+;-
+pro cxs_set_trans_unity_constraint, enable
+  b = call_external(lib_name() ,'IDL_set_trans_unity_constraint',long(enable))
+end
+
+
+
+pro cxs_add_complex_constraint_region, region, alpha1, alpha2, fixed_c
+  IF N_Params() EQ 3 THEN $
+     b = call_external(lib_name() ,'IDL_add_complex_constraint_region', $
+                       region, float(alpha1), float(alpha2)) $
+  ELSE $
+     b = call_external(lib_name() ,'IDL_add_complex_constraint_region', $
+                       region, float(alpha1), float(alpha2), float(fixed_c))  
+end

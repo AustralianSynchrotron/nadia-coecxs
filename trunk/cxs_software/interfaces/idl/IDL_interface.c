@@ -15,10 +15,14 @@
 #include "PlanarCDI.h"
 #include "FresnelCDI.h"
 #include "FresnelCDI_WF.h"
+#include "TransmissionConstraint.h"
 #include "io.h"
 
 Complex_2D * esw = 0;
 BaseCDI * reco = 0;
+TransmissionConstraint * constraint = 0;
+std::vector<ComplexConstraint *> constraint_regions;
+
 int total_iters = 0;
 using namespace std;
 
@@ -113,12 +117,13 @@ extern "C" IDL_LONG IDL_get_array_y_size(int argc, void *argv[]){
 
 extern "C" void IDL_read_dbin(int argc, void * argv[])
 {
+
   int ny = *(int*) argv[0];
   int nx = *(int*) argv[1];
 
   IDL_STRING filename = *(IDL_STRING*)argv[2];
   Double_2D temp(nx,ny);
-  read_dbin(filename.s,nx,ny,temp);
+  int status = read_dbin(filename.s,nx,ny,temp);
   copy_from_double_2d(temp, (double*) argv[3]);
 
 }
@@ -159,6 +164,7 @@ extern "C" void IDL_read_tiff(int argc, void * argv[])
 
 extern "C" void IDL_write_dbin(int argc, void * argv[])
 {
+
   int ny = *(int*) argv[0];
   int nx = *(int*) argv[1];
   
@@ -166,6 +172,7 @@ extern "C" void IDL_write_dbin(int argc, void * argv[])
   Double_2D temp(nx,ny);
   copy_to_double_2d(temp, (double*) argv[2]);
   write_dbin(filename.s,temp);
+
 }
 
 extern "C" void IDL_write_cplx(int argc, void * argv[])
@@ -200,6 +207,15 @@ extern "C" void IDL_deallocate_memory(int argc, void * argv[])
     delete esw ;
     esw = 0 ;
   }
+
+  if(constraint!=0){
+    delete constraint;
+    constraint = 0;
+  }
+  
+  for(int i=0; i<constraint_regions.size(); i++)
+    constraint_regions.pop_back();
+
 }
 
 
@@ -273,6 +289,27 @@ extern "C" void IDL_set_support(int argc, void * argv[]){
 
   reco->set_support(temp_2D);
 }
+
+//this doesn't actually call any of the cxs library code
+extern "C" void IDL_get_round_support(int argc, void * argv[]){
+
+  int ny = *(int*) argv[0];
+  int nx = *(int*) argv[1];
+
+  int radius = *(double*) argv[2]; 
+  Double_2D temp_2D(nx,ny);
+  for(int i=0; i < nx; i++){
+    for(int j=0; j < ny; j++){
+      int i_ = i-nx/2;
+      int j_ = j-ny/2;     
+      if((i_*i_+j_*j_) < radius*radius)
+	temp_2D.set(i,j,1.0);
+    }
+  }
+  copy_from_double_2d(temp_2D,(double*) argv[3]); 
+
+}
+
 
 extern "C" void IDL_set_beam_stop(int argc, void * argv[]){
 
@@ -502,6 +539,58 @@ extern "C" void IDL_scale_intensity(int argc, void * argv[]){
 //------------------------------------------------------------//
 // Complex contraint code
 //------------------------------------------------------------//
+
+//args: true/false
+extern "C" void IDL_set_trans_unity_constraint(int argc, void * argv[]){
+  check_objects();
+  if(!constraint){
+    constraint = new TransmissionConstraint();
+    reco->set_complex_constraint(*constraint);
+  }
+
+  constraint->set_enforce_unity( *(bool*) argv[0] );
+
+}
+
+//args: true/false 
+extern "C" void IDL_set_charge_flipping(int argc, void * argv[]){
+  check_objects();
+  if(!constraint){
+    constraint = new TransmissionConstraint();
+    reco->set_complex_constraint(*constraint);
+  }
+  
+  constraint->set_charge_flipping( *(bool*) argv[0] );
+
+}
+
+//args: region, alpha1, alpha2, fixed c (optional)
+extern "C" void IDL_add_complex_constraint_region(int argc, void * argv[]){
+
+  //first check that the appropriate memory has already been allocated
+  check_objects();
+  if(!constraint){
+    constraint = new TransmissionConstraint();
+    reco->set_complex_constraint(*constraint);
+  }
+  
+  //copy the input into the right format.
+  Double_2D temp_region(reco->get_size_x(),reco->get_size_y());
+  copy_to_double_2d(temp_region,(double*) argv[0]); 
+  double alpha1 = *(double*) argv[1];
+  double alpha2 = *(double*) argv[2];
+
+  //create the new constraint
+  ComplexConstraint * new_region;
+  new_region = new ComplexConstraint(temp_region, alpha1, alpha2);
+  constraint->add_complex_constraint(*new_region);
+  constraint_regions.push_back(new_region);
+
+  //if a fixed value for c=beta/delta has been given:
+  if(argc==4)
+    new_region->set_fixed_c(*(double*) argv[3]);
+
+}
 
 
 
