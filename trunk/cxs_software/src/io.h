@@ -111,6 +111,9 @@ inline unsigned int io_scale_value(double min, double max,
 			  int pixel_max, 
 			  double value, bool log_scale){
 
+  if(min==max)
+    return max;
+
   double grad;
 
   if(log_scale){
