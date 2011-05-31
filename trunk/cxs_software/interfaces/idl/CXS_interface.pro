@@ -1438,12 +1438,71 @@ pro cxs_set_trans_unity_constraint, enable
 end
 
 
-
+;+
+; NAME:
+;       CXS_ADD_COMPLEX_CONSTRAINT_REGION
+;
+; PURPOSE: For use with FresnelCDI reconstruction. Calling this
+;       procedure will constrain the transmission function magnitude
+;       and phase using the method from the paper "Use of a complex
+;       constraint in coherent diffractive imaging", J. N. Clark
+;       et. al., 2010. The notation used there is also used
+;       here. Users should have knowledge of this or similar papers
+;       before using the procedure.
+;
+;       A section of the reconstructed transmission function will be
+;       updated according to a restriction on the value of c (c =
+;       beta/delta). If the material is of a known element, then c can
+;       be fixed to the know value, and the phase and magnitude of the
+;       transmission function updated accordingly. Alternatively, c
+;       can be left to float, and calculated for each iteration from a
+;       mean over the defined region. The parameters alpha1 and alpha2
+;       are used to control the strength of the constraint. This
+;       procedure should be called once before each region of
+;       homogenious material.
+;
+; CALLING SEQUENCE:
+;
+;       CXS_ADD_COMPLEX_CONSTRAINT_REGION, region, alpha1, alpha2 [, fixed_c]
+;
+; INPUTS:
+;
+;       region:
+;             A 2 array of doubles which is used to indicate which
+;             pixels the constraint should be applied to. 0 -
+;             indicated the array element does not belong to the
+;             region. Any other value indicated that it does.
+;
+;       alpha1:
+;             Constraint strength parameter for the amplitude (double
+;             type).
+;
+;       alpha2:
+;             Constraint strength parameter for the phase (double
+;             type).
+;             
+;       fixed_c:
+;             Optional parameter to fix the value of c = beta/delta
+;             (double type).
+;
+; EXAMPLE:
+;       Setting a complex constraint for two image regions.
+;       For the second, the value of c=beta/delta is fixed.
+;
+;       r1 =  cxs_read_tiff(1024,1024,'region_1.tiff')
+;       r2 =  cxs_read_tiff(1024,1024,'region_2.tiff')
+;
+;       delta = 6.45e-4;
+;       beta = 1.43e-4;
+;
+;       cxs_add_complex_constraint_region, r1, 0.5, 0.5
+;       cxs_add_complex_constraint_region, r2,   1,   0, beta/delta
+;-
 pro cxs_add_complex_constraint_region, region, alpha1, alpha2, fixed_c
   IF N_Params() EQ 3 THEN $
      b = call_external(lib_name() ,'IDL_add_complex_constraint_region', $
-                       region, float(alpha1), float(alpha2)) $
+                       region, double(alpha1), double(alpha2)) $
   ELSE $
      b = call_external(lib_name() ,'IDL_add_complex_constraint_region', $
-                       region, float(alpha1), float(alpha2), float(fixed_c))  
+                       region, double(alpha1), double(alpha2), double(fixed_c))  
 end

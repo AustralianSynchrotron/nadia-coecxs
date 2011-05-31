@@ -36,8 +36,8 @@ a = cxs_iterate(20)
 
 ; Now get the transmission function based on the result of the
 ; final iteration.
-a = cxs_get_transmission_function()
-cxs_clear_memory
+;a = cxs_get_transmission_function()
+;cxs_clear_memory
 
 ; We are finished with the white-field reconstruction now, so
 ; let free some memory
@@ -50,7 +50,7 @@ cxs_clear_memory
 ;TVSCL, rebin(phase,512,512)
 
 ; or the magnitude:
-TVSCL, rebin(abs(a),512,512)
+;TVSCL, rebin(abs(a),512,512)
 
 ; or save the result to a file:
 ; write_cplx(a , 'result_of_my_FCDI_CDI.cplx')
