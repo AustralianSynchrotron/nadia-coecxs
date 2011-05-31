@@ -33,6 +33,8 @@ TransmissionConstraint::~TransmissionConstraint(){
   
 void TransmissionConstraint::add_complex_constraint(ComplexConstraint & new_constraint){
 
+  //  cout << "Adding ComplexConstraint region"<<endl;
+
     int nx = new_constraint.get_region()->get_size_x();
     int ny = new_constraint.get_region()->get_size_y();
 
@@ -133,18 +135,18 @@ void TransmissionConstraint::apply_constraint(Complex_2D & transmission){
 	    mag_new = current_constraint->get_new_mag(mag_old, phase_old);
 	    phase_new = current_constraint->get_new_phase(mag_old, phase_old);
 	    
-	    //    cout <<"mag/phase old: "<< phase_new<<" "<< mag_new<<endl;
+	    //	cout <<"mag/phase old: "<< phase_new<<" "<< mag_new<<endl;
 
 	    transmission.set_mag(i,j,mag_new);
 	    transmission.set_phase(i,j,phase_new);
 	     
 	    mag_old=mag_new;
-	    phase_old=transmission.get_phase(i,j);
+	    //phase_old=transmission.get_phase(i,j);
 
 	  }
-
-	  if(do_charge_flip && flip_sign*phase_old>0){
-	    transmission.set_phase(i,j,-1*phase_old);
+	  
+	  if(do_charge_flip && flip_sign*transmission.get_imag(i,j)>0){
+	    transmission.set_imag(i,j,-1*transmission.get_imag(i,j));
 	  }
 
 	  //restrict the transmission function to unit if requested
