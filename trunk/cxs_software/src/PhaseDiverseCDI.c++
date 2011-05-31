@@ -8,7 +8,7 @@
 #include "Complex_2D.h"
 #include "Double_2D.h"
 #include "FresnelCDI.h"
-#include "BaseCDI.h"
+#include "PlanarCDI.h"
 #include "PhaseDiverseCDI.h"
 #include "io.h" //
 #include <sstream>
@@ -187,10 +187,6 @@ void PhaseDiverseCDI::iterate(){
 
   cout << "Iteration "<<total_iterations<<endl;
 
-  bool parallel = true;  
-
-
-
   for(int i=0; i<singleCDI.size(); i++){
 
     int x, y;
@@ -200,8 +196,20 @@ void PhaseDiverseCDI::iterate(){
     update_from_object(i);
 
     for(int j=0; j<iterations_per_cycle; j++){
+
+      //temp
+      /**     char buf[50];
+      Double_2D result(nx,ny);
+      Complex_2D trans(nx,ny);
+
+      sprintf(buf,"itr_%i_%i_1.tiff",i,j);
+      ((FresnelCDI*)singleCDI.at(i))->get_transmission_function(trans);
+      trans.get_2d(MAG,result);
+      write_image(buf,result,false,0,1.0);**/
+      
       singleCDI.at(i)->iterate();
       cout << "This Error="<<singleCDI.at(i)->get_error()<<endl;
+
     }
 
     if(!parallel)
@@ -211,26 +219,12 @@ void PhaseDiverseCDI::iterate(){
   
   if(parallel){
 
-    //    object->scale(1-beta);
     scale_object(1-beta); 
 
     for(int i=0; i<singleCDI.size(); i++){
       add_to_object(i);
     }
   }
-
-  //temp
-  /**char buf[50];
-  Double_2D result(nx,ny);
-
-  sprintf(buf,"itr_%i_0.tiff",total_iterations);
-  single_result.at(0)->get_2d(MAG,result);
-  write_image(buf,result,false,0,1.0);
-
-  sprintf(buf,"itr_%i_1.tiff",total_iterations);
-  object->get_2d(MAG,result);
-  write_image(buf,result,false,0,1.0);**/
-
 
   total_iterations++;
 
@@ -252,27 +246,23 @@ void PhaseDiverseCDI::scale_object(double factor){
 	int j_ = (j/scale) + y_position.at(n_probe) + y_min;
 	
 	if(i_>=0&&j_>=0&&i_<weights.at(n_probe)->get_size_x()
-	   &&j_<weights.at(n_probe)->get_size_y()){
-	  
+	   &&j_<weights.at(n_probe)->get_size_y())
 	  weight+=weights.at(n_probe)->get(i_,j_);
-	  
-	}
+  	
       }
 
-      double new_real;
-      double new_imag;
+	  // double new_real;
+	  //double new_imag;
 
       if(weight==0){
-	new_real = 1;
-	new_imag = 0;
+	object->set_real(i,j,1.0);
+	object->set_imag(i,j,0.0);
       }
       else{
-	new_real = (factor)*object->get_real(i,j);
-	new_imag = (factor)*object->get_imag(i,j);
-      }
-      
-      object->set_real(i,j,new_real);
-      object->set_imag(i,j,new_imag);
+	object->set_real(i,j,factor*object->get_real(i,j));
+	object->set_imag(i,j,factor*object->get_imag(i,j));
+      }	  //      object->set_real(i,j,new_real);
+	  //  object->set_imag(i,j,new_imag);
       
     }
   }
@@ -428,19 +418,20 @@ void PhaseDiverseCDI::adjust_positions(double step_size, bool forward){
 
     int new_x, new_y;
 
-    /**    align(temp_single, temp_others, 
+    /** align(temp_single, temp_others, 
 	  new_x, new_y,
 	  8,
 	  -100,+100,
-	  -100,+100);**/
+	  -100,+100); **/
     
     align_even_better(temp_single, temp_others, 
 		      new_x, new_y,
-		      -100, +100,
-		      -100, +100,
-		      weights.at(n),
+		      -20, +20,
+		      -20, +20,
+		      &temp_single,
+		      //weights.at(n),
 		      &temp_others,
-		      0.2);
+		      0.2); 
 
     x_position.at(n) = before_x+new_x;
     y_position.at(n) = before_y+new_y;
@@ -451,7 +442,7 @@ void PhaseDiverseCDI::adjust_positions(double step_size, bool forward){
 	 << "," <<  y_position.at(n) << ")."
 	 << endl;
 
-    /**    check_position(n,4,0);
+    /**    check_position(n,8,0);
     
     cout << "error: moving prob " << n << " from ("
 	 << before_x << "," << before_y << ") "
@@ -763,7 +754,7 @@ void PhaseDiverseCDI::set_up_weights(){
  
   }
 
-  //write_image("weight_0.tiff",*(weights.at(0)));
+  write_image("weight_0.tiff",*(weights.at(0)));
  };
 
 
@@ -799,6 +790,7 @@ void PhaseDiverseCDI::add_to_object(int n_probe){
 	if(!parallel){
 	  new_real += (1-weight)*object->get_real(i,j);
 	  new_imag += (1-weight)*object->get_imag(i,j);
+
 	}
 	else{
 	  new_real += object->get_real(i,j);
@@ -806,6 +798,8 @@ void PhaseDiverseCDI::add_to_object(int n_probe){
 	}
 	
 	update_to_object_sub_grid(i,j,new_real,new_imag); 
+
+	
       }
       
     }
@@ -839,8 +833,8 @@ void PhaseDiverseCDI::update_from_object_sub_grid(int i, int j,
     }
   }
 
-  real_value=real_value/(scale*scale);
-  imag_value=imag_value/(scale*scale);
+  real_value=real_value/((double)scale*scale);
+  imag_value=imag_value/((double)scale*scale);
 
 }
 

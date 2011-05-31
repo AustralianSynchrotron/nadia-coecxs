@@ -126,8 +126,8 @@ class FresnelCDI: public BaseCDI{
    * passing "true" for this parameter.
    */
   virtual void get_transmission_function(Complex_2D & result,
-					 Complex_2D * esw = 0,
-					 bool inforce_unit_mag=false);
+					 Complex_2D * esw = 0);
+					 //bool inforce_unit_mag=false);
 
 
   virtual void apply_support(Complex_2D & complex);
@@ -209,6 +209,7 @@ class FresnelCDI: public BaseCDI{
  protected:
 
   void multiply_factors(Complex_2D & c, int direction);
+  void check_illumination_at_sample();
 
 };
 

@@ -18,6 +18,7 @@
 
 #include <math.h>
 #include "fftw3.h"
+#include "Double_2D.h"
 
 /** the function failed */
 #define FAILURE 0
@@ -40,7 +41,7 @@
 /** magnitudes squared */
 #define MAG_SQ 4
 
-class Double_2D;
+//class Double_2D;
 
 class Complex_2D{
 

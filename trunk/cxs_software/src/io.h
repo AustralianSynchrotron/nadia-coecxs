@@ -3,9 +3,10 @@
 
 #include <cstring>
 #include <cmath>
+#include "Double_2D.h"
 
 class Complex_2D;
-class Double_2D;
+//class Double_2D;
 
 #define FAILURE 0
 

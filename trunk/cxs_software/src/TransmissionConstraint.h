@@ -9,9 +9,9 @@
 #include <cstdlib>
 #include <vector>
 #include <iostream>
+#include "Double_2D.h"
 
-
-class Double_2D;
+//class Double_2D;
 class Complex_2D;
 
 

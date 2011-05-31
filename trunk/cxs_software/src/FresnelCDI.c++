@@ -256,7 +256,7 @@ void FresnelCDI::set_transmission_function(Complex_2D & transmission,
   if(!esw)
     esw=&complex;
 
-  get_illumination_at_sample();
+  check_illumination_at_sample();
   /**  if(!illumination_at_sample){
     illumination_at_sample = new Complex_2D(nx,ny);
     illumination_at_sample->copy(illumination);
@@ -283,19 +283,21 @@ void FresnelCDI::set_transmission_function(Complex_2D & transmission,
   }
 }
 
-const Complex_2D & FresnelCDI::get_illumination_at_sample(){ 
+void FresnelCDI::check_illumination_at_sample(){ 
   if(!illumination_at_sample){
     illumination_at_sample = new Complex_2D(nx,ny);
     illumination_at_sample->copy(illumination);
     propagate_from_detector(*illumination_at_sample);
   }
-  
+}
+
+const Complex_2D & FresnelCDI::get_illumination_at_sample(){ 
+  check_illumination_at_sample();
   return *illumination_at_sample;
 }
 
 void FresnelCDI::get_transmission_function(Complex_2D & result, 
-					   Complex_2D * esw,
-					   bool inforce_unity_mag){
+					   Complex_2D * esw){
 
   //divide the estimate by the illuminating wavefield and add unity.
  
@@ -305,46 +307,45 @@ void FresnelCDI::get_transmission_function(Complex_2D & result,
 
   if(!esw)
     esw=&complex;
-
-  /**  if(!illumination_at_sample){
-    illumination_at_sample = new Complex_2D(nx,ny);
-    illumination_at_sample->copy(illumination);
-    propagate_from_detector(*illumination_at_sample);
-    }**/
-
-  get_illumination_at_sample();
+  check_illumination_at_sample();
 
   double ill_r;
   double esw_r;
   double ill_i;
   double esw_i;
   
+  //  double combined_r;
+  //double combined_i;
+
   double real_numerator;
   double imag_numerator;
   double denom;
 
   for(int i=0; i<nx; i++){
-    for(int j=0; j<nx; j++){
-      if(norm!=0&&illumination_at_sample->get_mag(i,j)!=0){
-
-	ill_r = illumination_at_sample->get_real(i,j);
+    for(int j=0; j<ny; j++){
+   
+      ill_r = illumination_at_sample->get_real(i,j);
+      ill_i = illumination_at_sample->get_imag(i,j);
+      denom = ill_r*ill_r + ill_i*ill_i;
+      
+      if(denom!=0){
+  
 	esw_r = esw->get_real(i,j);
-	ill_i = illumination_at_sample->get_imag(i,j);
 	esw_i = esw->get_imag(i,j);
 
-	denom = ill_r*ill_r + ill_i*ill_i;
 	real_numerator = ill_r*(esw_r+ill_r) + ill_i*(esw_i+ill_i);
 	imag_numerator = ill_r*(esw_i+ill_i) - ill_i*(esw_r+ill_r);
 
 	result.set_real(i,j,real_numerator/denom);
 	result.set_imag(i,j,imag_numerator/denom);
 	
-	if(inforce_unity_mag && result.get_mag(i,j) > 1)
-	  result.set_mag(i,j,1);      
+	
+	//	if(inforce_unity_mag && result.get_mag(i,j) > 1)
+	//	  result.set_mag(i,j,1);      
       }
       else{
-	result.set_real(i,j,0);
-	result.set_imag(i,j,0);
+	result.set_real(i,j,1.0);
+	result.set_imag(i,j,0.0);
 
       }
     }

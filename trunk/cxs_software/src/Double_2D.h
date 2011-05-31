@@ -19,10 +19,11 @@
 
 #include "string.h"
 
-class Double_2D{
+template <class T>
+class Real_2D{
 
   /** the underlying 2-D array */
-  double * array;
+  T * array;
   
   /** the size in x */
   int nx;
@@ -36,20 +37,27 @@ class Double_2D{
    * A constructor which creates an empty array (of no size).  Note
    * that memory has not been allocated if this method is used.
    */
-  Double_2D();
-
+  Real_2D():nx(0),ny(0){};
+  
   /**
    * Constructor that creates a 2D object with the given dimensions.
    * 
    * @param x_size The number of samplings in the horizontal direction
    * @param y_size The number of samplings in the vertical direction
    */
-  Double_2D(int x_size, int y_size);
+  Real_2D(int x_size, int y_size){
+    allocate_memory(x_size,y_size);
+  };
   
   /**
    * Destructor. Memory is deallocated here.
    */
-  ~Double_2D();
+  ~Real_2D(){
+    if(nx > 0 ){
+      delete [] array;
+    }  
+    
+  };
      
   /**
    * Allocate memory for the array. This should only be used if
@@ -58,18 +66,31 @@ class Double_2D{
    * @param x_size The number of samplings in the horizontal direction
    * @param y_size The number of samplings in the vertical direction
    */ 
-  void allocate_memory(int x_size, int y_size);
+  void allocate_memory(int x_size, int y_size){
+    nx = x_size;
+    ny = y_size;
+    array = new T[nx*ny];
+    /**    if(!array){
+      std::cout << "Could not allocated memory. Exiting.."<<std::endl;
+      exit();
+      }**/
+    
+    for(int i=0; i<nx; i++)
+      for(int j=0; j<ny; j++)
+	array[i*ny+j]=0;
+  };
   
 
   /**
-   * Copy the contents of another Double_2D array to this one.  Note
+   * Copy the contents of another Real_2D array to this one.  Note
    * that this is a quick copy method and no bounds checking is done.
    * 
    * @param double_array The array to copy from
    */
-  void copy(const Double_2D & double_array);
+  void copy(const Real_2D<T> & other_array){
+    memcpy(array,other_array.array, sizeof(T)*nx*ny);
+  };
   
-
   /**
    * Set the value at positions (x,y) WARNING: no bound checking is
    * done!
@@ -78,7 +99,7 @@ class Double_2D{
    * @param y The vertical position
    * @param value The value to set
    */
-  inline void set(int x, int y, double value){
+  inline void set(int x, int y, T value){
     array[x*ny+y]=value;
   };
 
@@ -91,7 +112,7 @@ class Double_2D{
    * @param y The vertical position
    * @return The value at (x,y)
    */
-  inline double get(int x, int y) const {
+  inline T get(int x, int y) const {
     return array[x*ny+y];
   };
 
@@ -123,7 +144,13 @@ class Double_2D{
    * @return The sum of all values in the array
    *  
    */
-  double get_sum() const;
+  T get_sum() const{
+    T total = 0;
+    for(int i=0; i<nx; i++)
+      for(int j=0; j<ny; j++)
+	total+=array[i*ny+j];
+    return total;
+  };
 
 
   /**
@@ -132,22 +159,48 @@ class Double_2D{
    * @return The maximum value in the array
    *  
    */
-  double get_max() const;
+  T get_max() const{
+    if(nx==0||ny==0)
+      return 0;
+    
+    T max = array[0];
+    for(int i=0; i<nx; i++){
+      for(int j=0; j<ny; j++){
+	if(array[i*ny+j]>max)
+	  max = array[i*ny+j];
+      }
+    }
+    return max;
+    
+  };
 
   /**
    * Get the minimum of all values in the array. 
    * 
    * @return The minimum value in the array 
    */
-  double get_min() const;
+  T get_min() const {
+    if(nx==0||ny==0)
+      return 0;
+
+    T min = array[0];
+    for(int i=0; i<nx; i++){
+      for(int j=0; j<ny; j++){
+	if(array[i*ny+j]<min)
+	  min = array[i*ny+j];
+      }
+    }
+    return min;
+    
+  };
 
 
-  void add(const Double_2D & other_array, double norm=1.0){
+  void add(const Real_2D<T> & other_array, double norm=1.0){
     for(int i=0; i< nx; i++)
       for(int j=0; j< ny; j++)
 	array[i*ny+j]+=norm*other_array.get(i,j);
   }
-
+  
   void scale(double scale_by){
     for(int i=0; i< nx; i++)
       for(int j=0; j< ny; j++)
@@ -156,5 +209,10 @@ class Double_2D{
 
 
 };
+
+
+typedef Real_2D<double> Double_2D;
+
+
 
 #endif
