@@ -1315,3 +1315,306 @@ void align_even_better(Double_2D & first_image, Double_2D & second_image,
   fftw_destroy_plan(fftw_inv);
   
 }
+
+
+double interp_value(double x, double y,
+		    double f00,
+		    double f10,
+		    double f01,
+		    double f11){
+  
+  return f00*(1-x)*(1-y) + f10*x*(1-y) + f01*(1-x)*y + f11*x*y; 
+
+}
+
+
+void interpolate( Complex_2D & original, Complex_2D & big){
+
+  int nx = original.get_size_x();
+  int ny = original.get_size_y();
+ 
+  int bnx = big.get_size_x();
+  int bny = big.get_size_y();
+
+  if(bnx % nx !=0 || bny % ny !=0 ){
+
+    cerr<< "In interpolate(Complex_2D & original, Complex_2D & small) " 
+	<< "the size of 'big' must be an integer "
+	<< "multiple of the size of 'original'" << endl;
+    exit(0);
+  }
+
+  int scale_x = bnx/nx;
+  int scale_y = bny/ny;
+
+
+  //if we are close to the edge of the image there's no enough
+  //information to interpolate, so just get the pixel value to
+  //the non-interpolated value.
+  //if(lower_i<0 || lower_j<0 || lower_i >= (nx-1) || lower_j >= (ny-1) ){
+  //  double value = original.get(i,j);
+  //  big.set(new_i+di,new_j+dj,value);
+  //  sum+=value;
+  // }
+  
+  for(int i=1; i<nx-1; i++){
+    for(int j=1; j<ny-1; j++){
+
+      double sum = 0;
+
+      int new_i = i*scale_x;
+      int new_j = j*scale_y;
+
+      double f00r=original.get_real(i,j);
+      double f10r=original.get_real(i+1,j);
+      double f01r=original.get_real(i,j+1);
+      double f11r=original.get_real(i+1,j+1);
+
+      double f00i=original.get_imag(i,j);
+      double f10i=original.get_imag(i+1,j);
+      double f01i=original.get_imag(i,j+1);
+      double f11i=original.get_imag(i+1,j+1);
+
+      for(int di=0; di < scale_x; di++){
+	for(int dj=0; dj < scale_y; dj++){
+	  
+	  double x = (di + 0.5*((scale_x+1) % 2)) /((double) scale_x);
+	  double y = (dj + 0.5*((scale_y+1) % 2)) /((double) scale_y);
+
+	  double value_r = f00r*(1-x)*(1-y) + f10r*x*(1-y) + f01r*(1-x)*y + f11r*x*y;
+	  big.set_real(new_i+di+scale_x/2, new_j+dj+scale_y/2, value_r);
+
+	  double value_i = f00i*(1-x)*(1-y) + f10i*x*(1-y) + f01i*(1-x)*y + f11i*x*y;
+	  big.set_imag(new_i+di+scale_x/2, new_j+dj+scale_y/2, value_i);
+
+	}
+      }
+	  /**	  double x = 0.5 + (di+0.5)/((double) scale_x);
+	  double y = 0.5 + (dj+0.5)/((double) scale_y);
+
+	  int lower_i;// = i-1;
+	  int lower_j;// = j-1;
+	  
+	  if(x>1){
+	    x -= 1;
+	    lower_i = i;
+	  }
+	  else{
+	    lower_i = i-1;
+	  }
+
+	  if(y>1){
+	    y -= 1;
+	    lower_j = j;
+	  }
+	  else{
+	    lower_j = j-1;
+	  }
+
+	  //	  else{
+	  double f00=original.get(lower_i,lower_j);
+	  double f10=original.get(lower_i+1,lower_j);
+	  double f01=original.get(lower_i,lower_j+1);
+	  double f11=original.get(lower_i+1,lower_j+1);
+	  
+	  //do the actual interpolation.
+	  double value = f00*(1-x)*(1-y) + f10*x*(1-y) + f01*(1-x)*y + f11*x*y;
+	  big.set(new_i+di,new_j+dj,value);
+	  sum+=value; **/
+	  
+	    //	  }
+      //	}
+      // }
+      
+      /**      if(sum!=0){
+	double norm = (original.get(i,j)*scale_x*scale_y)/sum;
+	
+	//loop again to normalise
+	for(int di=0; di < scale_x; di++){
+	  for(int dj=0; dj < scale_y; dj++){
+	    double new_value = big.get(new_i+di,new_j+dj)*norm;
+	    big.set(new_i+di,new_j+dj,new_value);
+	  }
+	}
+	} **/
+    }
+  }
+  
+}
+
+
+/**void interpolate( Complex_2D & original, Complex_2D & big){
+
+  int nx = original.get_size_x();
+  int ny = original.get_size_y();
+
+  int bnx = big.get_size_x();
+  int bny = big.get_size_y();
+
+  Double_2D original_real(nx,ny);
+  Double_2D original_imag(nx,ny);
+
+  Double_2D big_real(bnx,bny);
+  Double_2D big_imag(bnx,bny);
+
+  original.get_2d(REAL,original_real);
+  original.get_2d(IMAG,original_imag);
+
+  interpolate(original_real,big_real);
+  interpolate(original_imag,big_imag);
+
+  for(int i=0; i < bnx; i++){
+    for(int j=0; j < bny; j++){
+      big.set_real(i,j,big_real.get(i,j));
+      big.set_imag(i,j,big_imag.get(i,j));
+    }
+  }
+
+  //  big.copy(original);**/
+
+  /**  if(big.get_size_x() % original.get_size_x() !=0 ||
+     big.get_size_y() % original.get_size_y() !=0 ){
+
+    cerr<< "In interpolate(Complex_2D & original, Complex_2D & small) " 
+	<< "the size of 'big' must be an integer "
+	<< "multiple of the size of 'original'" << endl;
+    exit(0);
+  }
+
+  int scale_x = big.get_size_x()/original.get_size_x();
+  int scale_y = big.get_size_y()/original.get_size_y();
+
+  for(int i=0; i<original.get_size_x(); i++){
+    for(int j=0; j<original.get_size_y(); j++){
+
+      double sum_r = 0;
+      double sum_i = 0;
+
+      for(int di=0; di < scale_x; di++){
+	for(int dj=0; dj < scale_y; dj++){
+	  
+	  double position_x = 0.5 + (di+0.5)/((double) scale_x);
+	  double position_y = 0.5 + (dj+0.5)/((double) scale_y);
+
+	  int lower_i = i-1;
+	  int lower_j = j-1;
+	  
+	  if(position_x>1){
+	    position_x -= 1;
+	    lower_i++;
+	  }
+
+	  if(position_y>1){
+	    position_y -= 1;
+	    lower_j++;
+	  }
+
+	  if(lower_i < 0 || lower_j < 0 || 
+	     lower_i >= (original.get_size_x()-1) ||
+	     lower_j >= (original.get_size_y()-1) ){
+	    
+	    double real_value = original.get_real(i,j);
+	    double imag_value = original.get_imag(i,j);
+
+	    big.set_real(i*scale_x+di,j*scale_y+dj,real_value);
+	    big.set_imag(i*scale_x+di,j*scale_y+dj,imag_value);
+	    sum_r+=real_value;
+	    sum_i+=imag_value;
+	  }
+	  else{
+	    double f00r=original.get_real(lower_i,lower_j);
+	    double f00i=original.get_imag(lower_i,lower_j);
+	    
+	    double f10r=original.get_real(lower_i+1,lower_j);
+	    double f10i=original.get_imag(lower_i+1,lower_j);
+
+	    double f01r=original.get_real(lower_i,lower_j+1);
+	    double f01i=original.get_imag(lower_i,lower_j+1);
+
+	    double f11r=original.get_real(lower_i+1,lower_j+1);
+	    double f11i=original.get_imag(lower_i+1,lower_j+1);
+
+	    double real_value = interp_value(position_x,position_y,				    
+					     f00r,f10r,f01r,f11r);
+	    
+	    
+	    double imag_value = interp_value(position_x,position_y,				    
+					     f00i,f10i,f01i,f11i);
+	    
+	    big.set_real(i*scale_x+di,j*scale_y+dj,real_value);
+	    big.set_imag(i*scale_x+di,j*scale_y+dj,imag_value);
+
+	    sum_r+=real_value;
+	    sum_i+=imag_value;
+
+	  }
+	}
+      }
+	
+      double norm_r = 1;
+      double norm_i = 1;
+      
+      if(sum_r!=0)
+	norm_r = (original.get_real(i,j)*scale_x*scale_y)/sum_r;
+	
+      if(sum_i!=0)
+	norm_i = (original.get_imag(i,j)*scale_x*scale_y)/sum_i;
+	
+      //loop again to normalise
+      for(int di=0; di < scale_x; di++){
+	for(int dj=0; dj < scale_y; dj++){
+	  big.set_real(i*scale_x+di,j*scale_y+dj,
+		       big.get_real(i*scale_x+di,j*scale_y+dj)*norm_r);
+	  big.set_imag(i*scale_x+di,j*scale_y+dj,
+		       big.get_imag(i*scale_x+di,j*scale_y+dj)*norm_i);
+	}
+      }
+      
+    }
+    } **/
+   
+//}
+
+void shrink( Complex_2D & original, Complex_2D & small){
+
+  int nx = original.get_size_x();
+  int ny = original.get_size_y();
+  int snx = small.get_size_x();
+  int sny = small.get_size_y();
+
+  //small.copy(original);
+  if( (nx % snx) !=0 || (ny % sny) !=0 ){
+
+    cerr<< "In shrink(Complex_2D & original, Complex_2D & small) " 
+	<< "the size of 'original' must be an integer "
+	<< "multiple of the size of 'small'" << endl;
+    exit(0);
+  }
+
+  int scale_x = nx/snx;
+  int scale_y = ny/sny;
+
+  for(int i=0; i < snx; i++){
+    for(int j=0; j < sny; j++){
+
+      double real_value=0;
+      double imag_value=0;
+
+      for(int di=0; di < scale_x; di++){
+	for(int dj=0; dj < scale_y; dj++){
+	  int new_i = i*scale_x+di;
+	  int new_j = j*scale_y+dj;
+	  real_value+=original.get_real(new_i,new_j);
+	  imag_value+=original.get_imag(new_i,new_j);
+	}
+      }
+      
+      double scale = scale_x*scale_y;
+      small.set_real(i,j,real_value/scale);
+      small.set_imag(i,j,imag_value/scale);
+    }
+  }
+
+}
+
+

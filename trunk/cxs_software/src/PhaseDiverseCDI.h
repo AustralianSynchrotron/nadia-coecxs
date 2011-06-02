@@ -31,7 +31,6 @@ class PhaseDiverseCDI{
 
   std::vector<BaseCDI*> singleCDI;
   std::vector<Complex_2D*> single_result;
-  //std::vector<Double_2D *> beam_shape;
   std::vector<Double_2D *> weights;
   std::vector<double> x_position;
   std::vector<double> y_position;
@@ -57,10 +56,6 @@ class PhaseDiverseCDI{
   PhaseDiverseCDI(double beta=1.0, 
 		  double gamma=1.0,
 		  bool parallel=false,
-		  int nx=0,
-		  int ny=0,
-		  int min_x=0,
-		  int min_y=0,
 		  int granularity=1);
   
   ~PhaseDiverseCDI();
@@ -101,11 +96,16 @@ class PhaseDiverseCDI{
   };
 
   void initialise_estimate();
+  
   Complex_2D * get_transmission();
+  
   void set_transmission(Complex_2D & new_transmission);
+  
   void adjust_positions(double step_size=4, bool forwards=true);
+  
   double get_final_x_position(int n_probe){
     return x_position.at(n_probe);}
+  
   double get_final_y_position(int n_probe){
     return y_position.at(n_probe);}
 
@@ -118,24 +118,40 @@ class PhaseDiverseCDI{
   void update_from_object(int n_probe);
   void get_result(BaseCDI * local, Complex_2D & result);
   void set_result(BaseCDI * local, Complex_2D & result);
-  void update_to_object_sub_grid(int i, int j, 
+  /**  void update_to_object_sub_grid(int i, int j, 
 				 double real_value, 
 				 double imag_value);
   void update_from_object_sub_grid(int i, int j, 
 				 double & real_value, 
-				 double & imag_value);
-
-  //void get_weights(int n_probe, Double_2D & weights);
-
-  //void set_up_weight_norm();
+				 double & imag_value);**/
 
   void reallocate_object_memory(int new_nx,int new_ny);
 
   void scale_object(double factor);
+  
   void get_object_sub_grid(Complex_2D & result,
 			   double x_offset,
 			   double y_offset);
   void set_up_weights();
+
+
+  inline int get_global_x_pos(int x, double x_offset){
+    return (x-x_offset-x_min); //*scale;
+  }
+ 
+  inline int get_global_y_pos(int y, double y_offset){
+    return (y-y_offset-y_min);
+  }
+
+  inline int get_local_x_pos(int x, double x_offset){
+    return x + x_offset + x_min;
+  }
+
+  inline int get_local_y_pos(int y, double y_offset){
+    return y + y_offset + y_min; //y/scale + y_offset + y_min;
+  }
+
+
 };
 
 
