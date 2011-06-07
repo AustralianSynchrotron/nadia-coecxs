@@ -41,8 +41,9 @@ double edge_grad(Double_2D & image, Double_2D & mask);
 double calculate_image_entropy_2(Double_2D & image);
 
 void interpolate( Complex_2D & original, Complex_2D & big);
+void interpolate(Double_2D & original, Double_2D & big);
 void shrink( Complex_2D & original, Complex_2D & small);
-
+void shrink( Double_2D & original, Double_2D & small);
 
 
 #endif

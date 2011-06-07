@@ -244,8 +244,8 @@ void PhaseDiverseCDI::scale_object(double factor){
 
       while(not_in_image&&n_probe<frames){
 
-	int i_ = (i/scale) + x_position.at(n_probe) + x_min; //get_local_x_pos(i,x_position.at(n_probe));  
-	int j_ = (j/scale) + y_position.at(n_probe) + y_min; //get_local_y_pos(j,y_position.at(n_probe));
+	int i_ = get_local_x_pos(i/scale, x_position.at(n_probe));  
+	int j_ = get_local_y_pos(j/scale, y_position.at(n_probe));
 	
 	if(i_>=0&&j_>=0&&i_<weights.at(n_probe)->get_size_x()
 	   &&j_<weights.at(n_probe)->get_size_y())
@@ -311,7 +311,6 @@ void PhaseDiverseCDI::adjust_positions(double step_size, bool forward){
     limit=-1;
   }
 
-
   Complex_2D temp_object(nx,ny);
   object = &temp_object;
   for(int i=0; i<nx; i++){
@@ -328,119 +327,128 @@ void PhaseDiverseCDI::adjust_positions(double step_size, bool forward){
     add_to_object(0);
   else
     add_to_object(singleCDI.size()-1);
-  
+ 
   //  beta = 0.5;
   //weights_set=false;
 
-
   while(n!=limit){
     //for(int n=1; n<singleCDI.size(); n++){
+
+    cout << "at the beginning" << endl;
 
     //store some before information for later use
     double before_x = x_position.at(n);
     double before_y = y_position.at(n);
 
-    //replace the transmission function with
-    //just the 1st frame information
-
     int lnx = single_result.at(0)->get_size_x();
     int lny = single_result.at(0)->get_size_y();
 
-    Complex_2D temp(lnx,lny);
-    get_object_sub_grid(temp,before_x,before_y);
-
-    object = &temp;
-    nx = lnx;
-    ny = lny;
-    x_min = -x_position.at(n);
-    y_min = -y_position.at(n);
-    
-    /**    for(int i=0; i<lnx; i++){
-      for(int j=0; j<lny; j++){
-	temp.set_real(i,j,1);
-	temp.set_imag(i,j,0);
-      }
-      }**/
-
-    /**    char name[80];
-    Double_2D pic(1024,1024);
+    /**char name[80];
+    Double_2D pic(2048,2048);
     object->get_2d(MAG,pic);
-    write_image("pic_0.tiff",pic,false,0,1);**/
-
-    //if frame m overlaps with frame n
-    //add it to the current array
-
-    /**    if(forward){
-      add_to_object(0);
-      beta=0.5;
-      weights_set=false;
-      for(int m=1; m < n; m++){
-	add_to_object(m);
-      }
-    }
-    else{
-      add_to_object(singleCDI.size()-1);
-      beta=0.5;
-      weights_set=false;
-      for(int m=singleCDI.size()-2; m > n; m--){
-	add_to_object(m);
-      }
-      }**/
-
-    //    char name[80];
-    //Double_2D pic(1024,1024);
-    /**    object->get_2d(MAG,pic);
     sprintf(name,"pic_%i.tiff",n);
     write_image(name,pic,false, 0,1);**/
+
+    cout << "something here"<<endl;
 
     //do an iteration of the frame on it's own.
     singleCDI.at(n)->iterate();
     get_result(singleCDI.at(n),*(single_result.at(n)));
+    
+    cout << "and after"<<endl;
 
-    Double_2D temp_single(lnx,lny);
-    Double_2D temp_others(lnx,lny);
-    for(int i=0; i<lnx; i++){
-      for(int j=0; j<lny; j++){
-	temp_single.set(i,j,
-			1-single_result.at(n)->get_mag(i,j));
-	temp_others.set(i,j,
-			1-object->get_mag(i,j));
+    //this array will store a copy of the local frame with 1-mag.
+    Double_2D * temp_single = new Double_2D(lnx,lny);
+
+    //this array will store a copy of the global frame with 1-mag.
+    Double_2D * temp_others = new Double_2D(lnx*scale,lny*scale);
+    
+    cout << "made it just before"<<endl;
+
+    for(int i=0; i<lnx*scale; i++){
+      for(int j=0; j<ny*scale; j++){
+	
+	int i_ = i - before_x*scale -  x_min*scale;
+	int j_ = j - before_y*scale -  y_min*scale;
+	
+	if( i_>=0 && j_>=0 && i_<nx && j_<ny ){
+	  double obj_mag = object->get_mag(i_,j_);
+	  if(obj_mag<1)
+	    temp_others->set(i,j,1-obj_mag);
+	}
+	if(i<lnx && j<lny && single_result.at(n)->get_mag(i,j) <1 )
+	  temp_single->set(i,j,1-single_result.at(n)->get_mag(i,j));
       }
     }
+
+    cout << "made it here"<<endl;
+
+    Double_2D * temp_single_int = 0; 
+    Double_2D * weight_single_int = 0;  
+
+    if(scale==1){
+      temp_single_int = temp_single;
+      weight_single_int = weights.at(n);
+    }
+    else{
+      temp_single_int = new Double_2D(lnx*scale,lny*scale);
+      weight_single_int = new Double_2D(lnx*scale,lny*scale);
+      interpolate(*temp_single,*temp_single_int);
+      interpolate(*weights.at(n),*weight_single_int);
+    }
+
+    cout << "and here!"<<endl;
+
+    delete temp_single;
+    delete temp_others;
 
     /**    static int counter = 0;
     char buff[90];
     sprintf(buff,"temp_single_%i.tiff",counter);
-    write_image(buff,temp_single);
+    write_image(buff,temp_single_int,false);
     sprintf(buff,"temp_object_%i.tiff",counter);
-    write_image(buff,temp_others);
+    write_image(buff,temp_others,false);
     counter++;**/
 
     int new_x, new_y;
-
-    /** align(temp_single, temp_others, 
-	  new_x, new_y,
-	  8,
-	  -100,+100,
-	  -100,+100); **/
-    
-    align_even_better(temp_single, temp_others, 
+   
+    align_even_better(*temp_single_int, *temp_others, 
 		      new_x, new_y,
 		      -20, +20,
 		      -20, +20,
-		      &temp_single,
+		      //&temp_single,
+		      weight_single_int,
 		      //weights.at(n),
-		      &temp_others,
+		      temp_others,
 		      0.2); 
 
-    x_position.at(n) = before_x+new_x;
-    y_position.at(n) = before_y+new_y;
+    x_position.at(n) = before_x+new_x/scale;
+    y_position.at(n) = before_y+new_y/scale;
 
     cout << "cross-correlation: moving prob " << n << " from ("
 	 << before_x << "," << before_y << ") "
 	 << "-> (" << x_position.at(n) 
 	 << "," <<  y_position.at(n) << ")."
 	 << endl;
+
+
+    if(scale!=1){
+      delete temp_single_int;
+      delete weight_single_int;
+    }
+    
+    //replace the transmission function with
+    //just the 1st frame information
+    
+    /**nx = lnx*scale;
+    ny = lny*scale;
+    
+    Complex_2D * temp =  new Complex_2D(nx,ny);
+    get_object_sub_grid(temp,before_x,before_y);
+    
+    object = &temp;
+    x_min = -x_position.at(n);
+    y_min = -y_position.at(n);**/
 
     /**    check_position(n,8,0);
     
@@ -453,34 +461,13 @@ void PhaseDiverseCDI::adjust_positions(double step_size, bool forward){
     //if we moved the positions, we need to recalculate the 
     //weights for that frame.
 
-    /**    double x_difference = x_position.at(n) - before_x;
-	   double y_difference = y_position.at(n) - before_y;
-	   
-	   if( x_difference!=0 || y_difference!=0 ){
-      //      weights_set=false;
-      
-      //change all the consecutive positions accordingly:
-      if(forward){
-	for(int m=n+1; m < singleCDI.size(); m++){
-	  x_position.at(m) +=  x_difference;
-	  y_position.at(m) +=  y_difference;
-	}
-      }
-      else{
-	for(int m=n-1; m >= 0; m--){
-	  x_position.at(m) +=  x_difference;
-	  y_position.at(m) +=  y_difference;
-	}
-      }
-      
-      }**/
-
-    object = &temp_object;
+    //return to normal
+    /** object = &temp_object;
     nx = nx_c;
     ny = ny_c;
     x_min = x_min_c; 
     y_min = y_min_c;
-    add_to_object(n);
+    add_to_object(n); **/
 
     if(forward)
       n++;
@@ -491,7 +478,7 @@ void PhaseDiverseCDI::adjust_positions(double step_size, bool forward){
   
   //set all the parameters back to normal
   object = pointer_to_object;
-  /**  nx = nx_c;
+  /** nx = nx_c;
   ny = ny_c;
   x_min = x_min_c; 
   y_min = y_min_c; **/
@@ -627,7 +614,7 @@ int PhaseDiverseCDI::check_position(int n_probe, double step_size, int tries){
     //return to orginal coordinates
     x_position.at(n_probe) = x ;
     y_position.at(n_probe) = y;
-    return FAILURE;
+   return FAILURE;
   }
 
   cout << "moving probe "<< n_probe << " by " 
@@ -772,131 +759,129 @@ void PhaseDiverseCDI::add_to_object(int n_probe){
   double x_offset = x_position.at(n_probe);
   double y_offset = y_position.at(n_probe);
   
-  Complex_2D * small = 0;
-  if(scale!=1){
-    small = new Complex_2D(single_result.at(n_probe)->get_size_x()*scale,
-			   single_result.at(n_probe)->get_size_y()*scale);
-    interpolate( *(single_result.at(n_probe)), *small);  
-  }
-  else
-    small = single_result.at(n_probe);
-	      
+  Complex_2D * small = single_result.at(n_probe);
   Double_2D & this_weight = *(weights.at(n_probe));
   
   int lnx = small->get_size_x();
   int lny = small->get_size_y();
   
-  //round off to a first approx. Will be fixed later.
-  int i, j; //local coors (i,j) are global (object) coors
+  //pretabulate the spacings 
+  double * sub_pos = new double[scale];
+  for(int di=0; di < scale; di++){
+    sub_pos[di] = (di + 0.5*((scale+1) % 2)) /((double) scale);
+  }
 
-  //using the local coordinate system
-  for(int i_=0; i_< lnx; i_++){
-    for(int j_=0; j_< lny; j_++){
+  //using the local (small) coordinate system
+  for(int i_=1; i_< lnx-1; i_++){
+    for(int j_=1; j_< lny-1; j_++){
       
-      double weight = this_weight.get(i_/scale,j_/scale);
-      
+      double weight = this_weight.get(i_,j_);
+
       if(weight!=0){
 
-	i = i_ - x_offset*scale -x_min*scale; //get_global_x_pos(i_,x_offset); //(i_-x_offset-x_min)*scale;
-	j = j_ - y_offset*scale -y_min*scale; //get_global_y_pos(j_,y_offset); //(j_-y_offset-y_min)*scale;
-	
-	//	i = (i_-x_offset-x_min)*scale;
-	//	j = (j_-y_offset-y_min)*scale;
-      
+	int i = get_global_x_pos(i_,x_offset)*scale;
+	int j = get_global_y_pos(j_,y_offset)*scale;
+
 	if(i>=0&&j>=0&&i<nx&&j<ny){
 
-	  double new_real = weight*small->get_real(i_,j_)
-	    +object->get_real(i,j);
+	  //double sum = 0;
+	  double f00r=small->get_real(i_,j_);
+	  double f00i=small->get_imag(i_,j_);
 	  
-	  double new_imag = weight*small->get_imag(i_,j_)
-	    +object->get_imag(i,j);
-	  
-	  if(!parallel){
-	    new_real -= weight*object->get_real(i,j);
-	    new_imag -= weight*object->get_imag(i,j);
+	  if(scale!=1){
+
+	    double f10r=small->get_real(i_+1,j_);
+	    double f01r=small->get_real(i_,j_+1);
+	    double f11r=small->get_real(i_+1,j_+1);
+	    
+	    double f10i=small->get_imag(i_+1,j_);
+	    double f01i=small->get_imag(i_,j_+1);
+	    double f11i=small->get_imag(i_+1,j_+1);
+	    
+	    for(int di=0; di < scale; di++){
+	      for(int dj=0; dj < scale; dj++){
+
+		double x = sub_pos[di];
+		double y = sub_pos[dj];
+		
+		double x_1 = 1-x;
+		double y_1 = 1-y;
+		
+		double value_r = f00r*(x_1)*(y_1) + f10r*x*(y_1) 
+		  + f01r*(x_1)*y + f11r*x*y;
+		double value_i = f00i*(x_1)*(y_1) + f10i*x*(y_1) 
+		  + f01i*(x_1)*y + f11i*x*y;
+		
+		
+		double new_i = (i_+0.5-x_offset-x_min)*scale + di;
+		double new_j = (j_+0.5-y_offset-y_min)*scale + dj;
+		
+		double new_real = weight*value_r 
+		  + object->get_real(new_i, new_j);
+		double new_imag = weight*value_i 
+		  + object->get_imag(new_i, new_j);	  
+		
+		if(!parallel){
+		  new_real -= weight*object->get_real(new_i, new_j);
+		  new_imag -= weight*object->get_imag(new_i, new_j);
+		}
+		
+		object->set_real(new_i, new_j,new_real);
+		object->set_imag(new_i, new_j,new_imag); 
+	      
+	      }
+	    }
 	  }
-	  
-	  object->set_real(i,j,new_real);
-	  object->set_imag(i,j,new_imag);
-	  
-	  //update_to_object_sub_grid(i,j,new_real,new_imag);
+	  else{
+
+	    double new_real = weight*f00r + object->get_real(i,j);
+	    double new_imag = weight*f00i + object->get_imag(i,j);	  
+	    
+	    if(!parallel){
+	      new_real -= weight*object->get_real(i, j);
+	      new_imag -= weight*object->get_imag(i, j);
+	    }
+	    
+	    object->set_real(i, j, new_real);
+	    object->set_imag(i, j, new_imag); 
+
+	  }
+
 	}
       }
       
     }
   } 
 
-  if(scale!=1)
-    delete small;
+  delete [] sub_pos;
   
 }
-
-
-
-/** void PhaseDiverseCDI::update_to_object_sub_grid(int i, int j, 
-						double real_value, 
-						double imag_value,
-						
-
-){
-  
-  for(int di=0; di < scale; di++){
-    for(int dj=0; dj < scale; dj++){
-      object->set_real(i+di,j+dj,real_value);
-      object->set_imag(i+di,j+dj,imag_value);
-    }
-  }
-}
-
-void PhaseDiverseCDI::update_from_object_sub_grid(int i, int j, 
-				 double & real_value, 
-				 double & imag_value){
-  
-  real_value=0;
-  imag_value=0;
-
-  for(int di=0; di < scale; di++){
-    for(int dj=0; dj < scale; dj++){
-      real_value+=object->get_real(i+di,j+dj);
-      imag_value+=object->get_imag(i+di,j+dj);
-    }
-  }
-
-  real_value=real_value/((double)scale*scale);
-  imag_value=imag_value/((double)scale*scale);
-
-  }**/
-
 
 void PhaseDiverseCDI::get_object_sub_grid(Complex_2D & result,
 					  double x_offset,
 					  double y_offset){
   
   
-
-  //using the local coordinate system
-  for(int i_=0; i_< result.get_size_x(); i_++){
-    for(int j_=0; j_< result.get_size_y(); j_++){
-
-      //local coors (i,j) are global (object) coors  
-      int i = get_global_x_pos(i_,x_offset);
-      int j = get_global_y_pos(j_,y_offset);
-      
-      if(i>=0 && j>=0 && i<nx && j<ny){
-
-	double new_real = object->get_real(i,j); 
-	double new_imag = object->get_imag(i,j); 
+    //using the local coordinate system
+    for(int i_=0; i_< result.get_size_x(); i_++){
+      for(int j_=0; j_< result.get_size_y(); j_++){
 	
-	/**	update_from_object_sub_grid(i, j, 
-				    new_real, 
-				    new_imag);**/
-
-	result.set_real(i_,j_,new_real);
-	result.set_imag(i_,j_,new_imag);
-
+	//local coors (i,j) are global (object) coors  
+	int i = i_ - x_offset*scale - x_min*scale;
+	int j = j_ - y_offset*scale - y_min*scale;
+	
+	if(i>=0 && j>=0 && i<nx && j<ny){
+	  result.set_real(i_, j_, object->get_real(i,j));
+	  result.set_imag(i_, j_, object->get_imag(i,j));
+	}
+	else{
+	  result.set_real(i_, j_, 1);
+	  result.set_imag(i_, j_, 0);
+	}
       }
     }
-  }
+
+
   
 };
 
@@ -910,25 +895,12 @@ void PhaseDiverseCDI::update_from_object(int n_probe){
 
   double x_offset = x_position.at(n_probe);
   double y_offset = y_position.at(n_probe);
-
-  Complex_2D * small = single_result.at(n_probe);
-  Complex_2D * scaled_object = 0;
-
-  if(scale!=1){
-    scaled_object = new Complex_2D(object->get_size_x()/scale,
-				   object->get_size_y()/scale);
-    shrink(*object, *scaled_object);  
-  }
-  else
-    scaled_object = object;
   
+  Complex_2D * small = single_result.at(n_probe);
   Double_2D & this_weight = *weights.at(n_probe);
 
   int lnx = small->get_size_x();
   int lny = small->get_size_y();
-  
-  //round off to a first approx. Will be fixed later.
-  int i, j; //local coors (i,j) are global (object) coors
 
   //using the local coordinate system
   for(int i_=0; i_< lnx; i_++){
@@ -936,21 +908,34 @@ void PhaseDiverseCDI::update_from_object(int n_probe){
 	
 	if(this_weight.get(i_,j_)!=0){
 
-	  i = get_global_x_pos(i_,x_offset); //(i_-x_offset-x_min)*scale;
-	  j = get_global_y_pos(j_,y_offset); //(j_-y_offset-y_min)*scale;
+	  int i = get_global_x_pos(i_,x_offset)*scale;
+	  int j = get_global_y_pos(j_,y_offset)*scale;
 
-	  //	  i = (i_-x_offset-x_min)*scale;
-	  //  j = (j_-y_offset-y_min)*scale;
-      
 	  if(i>=0 && j>=0 && i<nx && j<ny){
 	    
-	    double new_real = scaled_object->get_real(i,j);
-	    double new_imag = scaled_object->get_imag(i,j);
-	    
-	    //update_from_object_sub_grid(i,j,new_real,new_imag);
-	  
-	    small->set_real(i_,j_,new_real);
-	    small->set_imag(i_,j_,new_imag);
+	    double real_value = 0;
+	    double imag_value = 0;
+
+	    if(scale!=1){
+
+	      for(int di=0; di < scale; di++){
+		for(int dj=0; dj < scale; dj++){
+		  int new_i = i+di;
+		  int new_j = j+dj;
+		  real_value+=object->get_real(new_i,new_j);
+		  imag_value+=object->get_imag(new_i,new_j);
+		}
+	      }
+	      
+	      double norm = 1/((double)(scale*scale));
+	      
+	      small->set_real(i_,j_,real_value*norm);
+	      small->set_imag(i_,j_,imag_value*norm);
+	    }
+	    else{
+	      small->set_real(i_,j_,object->get_real(i,j));
+	      small->set_imag(i_,j_,object->get_imag(i,j)); 
+	    }
 	  }
 	}
       }
@@ -958,8 +943,6 @@ void PhaseDiverseCDI::update_from_object(int n_probe){
 
 
   set_result(singleCDI.at(n_probe),*(single_result.at(n_probe)));
-  if(scale!=1)
-    delete scaled_object;
   
 };
  

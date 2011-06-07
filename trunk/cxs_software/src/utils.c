@@ -1132,6 +1132,8 @@ void align_even_better(Double_2D & first_image, Double_2D & second_image,
 		       Double_2D * second_image_weights,
 		       double overlap_fraction){
 
+  const int MAX_PIXELS = 1024;
+
   int nx_1 = first_image.get_size_x();
   int ny_1 = first_image.get_size_y();
   int nx_2 = second_image.get_size_x();
@@ -1147,6 +1149,53 @@ void align_even_better(Double_2D & first_image, Double_2D & second_image,
   else
     ny = ny_2*2;
 
+  //if the image is too big for this to work we'll
+  //shrink is down, align the shrunken images using this method,
+  //and then apply the shifting alignment method.
+  if(nx > MAX_PIXELS*2 || ny > MAX_PIXELS*2){
+
+    //get smaller versions of the images
+    Double_2D * small_first = new Double_2D(MAX_PIXELS, MAX_PIXELS);
+    Double_2D * small_second = new Double_2D(MAX_PIXELS,MAX_PIXELS);
+
+    Double_2D * small_weight_first = new Double_2D(MAX_PIXELS, MAX_PIXELS);
+    Double_2D * small_weight_second = new Double_2D(MAX_PIXELS,MAX_PIXELS);
+
+    shrink(first_image, *small_first);
+    shrink(second_image, *small_second);
+    shrink(*first_image_weights, *small_weight_first);
+    shrink(*second_image_weights, *small_weight_second);
+
+    //apply this alignment method with the smaller images
+    align_even_better(*small_first, *small_second,
+		      offset_x, offset_y,
+		      min_x, max_x,
+		      min_y, max_y,
+		      small_weight_first,
+		      small_weight_second,
+		      overlap_fraction);   
+
+    delete small_first;
+    delete small_second;
+
+    delete small_weight_first;
+    delete small_weight_second;
+
+    cout << "done small alignment" <<endl;
+
+    //apply this shifting alignment method to get the final precision.
+    align(first_image, second_image, 
+	  offset_x, offset_y, 1 , 
+	  -nx/MAX_PIXELS,nx/MAX_PIXELS,
+	  -ny/MAX_PIXELS,ny/MAX_PIXELS);
+
+    cout << "done fine adjusting: -" << (nx/MAX_PIXELS) << endl;
+    
+    return;
+  }
+  
+  cout << "here 0"<<endl;
+
   //check these boundaries later
   if(min_x==max_x || min_y==max_y){
     min_x = 1-nx/2.0; 
@@ -1155,13 +1204,15 @@ void align_even_better(Double_2D & first_image, Double_2D & second_image,
     max_y = ny/2.0;
   }
 
-  Double_2D image1(nx,ny);
+  /**Double_2D image1(nx,ny);
   Double_2D image2(nx,ny);
 
   Double_2D weights1(nx,ny);
   Double_2D weights2(nx,ny);
 
-  for(int i=0.5*(nx-nx_1); i < 0.5*(nx+nx_1); i++){
+  cout << "here 1"<<endl; **/
+
+  /**  for(int i=0.5*(nx-nx_1); i < 0.5*(nx+nx_1); i++){
     for(int j=0.5*(ny-ny_1); j < 0.5*(ny+ny_1); j++){
       int i_ = i-0.5*(nx-nx_1);
       int j_ = j-0.5*(ny-ny_1);
@@ -1178,10 +1229,15 @@ void align_even_better(Double_2D & first_image, Double_2D & second_image,
 	  weights2.set(i,j,1.0);
       }
     }
-  }
+    }**/
+
+  cout << "here 2"<<endl;
 
   double * temp_img_1 = new double[nx*ny];
   double * temp_img_2 = new double[nx*ny];
+
+  double * temp_img_1_weight = new double[nx*ny];
+  double * temp_img_2_weight = new double[nx*ny];
 
   fftw_complex* temp_fft_1 = (fftw_complex*) fftw_malloc(sizeof(fftw_complex)*nx*ny); 
   fftw_complex* temp_fft_2 = (fftw_complex*) fftw_malloc(sizeof(fftw_complex)*nx*ny); 
@@ -1192,24 +1248,62 @@ void align_even_better(Double_2D & first_image, Double_2D & second_image,
   fftw_plan fftw2 = fftw_plan_dft_r2c_2d(nx,ny, temp_img_2, temp_fft_2,
 					 FFTW_ESTIMATE);
 
+  fftw_plan fftw1_w = fftw_plan_dft_r2c_2d(nx,ny, temp_img_1_weight, temp_fft_1,
+					 FFTW_ESTIMATE);
+  fftw_plan fftw2_w = fftw_plan_dft_r2c_2d(nx,ny, temp_img_2_weight, temp_fft_2,
+					 FFTW_ESTIMATE);
+
   //backwards
   fftw_complex* fft_total = (fftw_complex*) fftw_malloc(sizeof(fftw_complex)*nx*ny); 
   fftw_plan fftw_inv = fftw_plan_dft_c2r_2d(nx,ny, fft_total, temp_img_1,
 					    FFTW_ESTIMATE);
+
+  double weight_sum = 0 ;
   
   //copy the image information into the temporary arrays
   for(int i=0; i < nx ; i++){
     for(int j=0; j < ny ; j++){
-      temp_img_1[i*ny + j] = weights1.get(i,j)*image1.get(i,j);
-      temp_img_2[i*ny + j] = weights2.get(i,j)*image2.get(i,j);
+   
+      temp_img_1[i*ny + j] = 0.0;
+      temp_img_2[i*ny + j] = 0.0;
+
+      temp_img_1_weight[i*ny + j] = 0.0;
+      temp_img_2_weight[i*ny + j] = 0.0;
+
+      if(i>=0.5*(nx-nx_1) && i < 0.5*(nx+nx_1) &&
+	 j>=0.5*(ny-ny_1) && j < 0.5*(ny+ny_1)){
+	    
+	    int i_ = i-0.5*(nx-nx_1);
+	    int j_ = j-0.5*(ny-ny_1);
+	    
+	    //image1.set(i,j,first_image.get(i_,j_));
+	    if(!first_image_weights || first_image_weights->get(i_,j_)>0){
+	      temp_img_1[i*ny + j] = first_image.get(i_,j_);
+	      temp_img_1_weight[i*ny + j] = 1.0;
+	    }
+	    
+	    if(i_<nx_2&&j_<ny_2 && (!second_image_weights || second_image_weights->get(i_,j_)>0)){
+	      temp_img_2[i*ny + j] = second_image.get(i_,j_);
+	      temp_img_2_weight[i*ny + j] = 1.0;
+	    }
+
+	    if(nx_1*ny_1 < nx_2*ny_2)
+	      weight_sum+=temp_img_1_weight[i*ny + j];
+	    else
+	      weight_sum+=temp_img_2_weight[i*ny + j];
+	    
+	 }
     }
   }
 
+  cout << "here 4"<<endl;
 
   fftw_execute(fftw1);
   fftw_execute(fftw2);
 
-  Complex_2D my_fft(nx,ny);
+  //  Complex_2D my_fft(nx,ny);
+
+  cout << "here 5"<<endl;
 
   //copy image to the in array
   for(int i=0; i < nx ; i++){
@@ -1223,18 +1317,18 @@ void align_even_better(Double_2D & first_image, Double_2D & second_image,
       fft_total[i*ny + j][0] = rl; 
       fft_total[i*ny + j][1] = im; 
 
-      temp_img_1[i*ny + j] = weights1.get(i,j);
-      temp_img_2[i*ny + j] = weights2.get(i,j);
+      //      temp_img_1[i*ny + j] = weights1.get(i,j);
+      //   temp_img_2[i*ny + j] = weights2.get(i,j);
 
     }
   }
 
-  fftw_execute(fftw1);
-  fftw_execute(fftw2);
+  cout << "here 6"<<endl;
+
+  fftw_execute(fftw1_w);
+  fftw_execute(fftw2_w);
 
   fftw_execute(fftw_inv);
-
-  double weight_sum = 0 ;
 
   for(int i=0; i < nx ; i++){
     for(int j=0; j < ny ; j++){
@@ -1249,10 +1343,6 @@ void align_even_better(Double_2D & first_image, Double_2D & second_image,
 
       temp_img_2[i*ny + j] = temp_img_1[i*ny + j]/(nx*ny);
 
-      if(nx_1*ny_1 < nx_2*ny_2)
-	weight_sum+=weights1.get(i,j);
-      else
-	weight_sum+=weights2.get(i,j);
     }
   }
 
@@ -1303,9 +1393,11 @@ void align_even_better(Double_2D & first_image, Double_2D & second_image,
   //  write_image("temp_image.tiff",temp_image,false);
   //cout <<temp_image.get_max()<<endl;
 
+  delete [] temp_img_1;
+  delete [] temp_img_2;
+  delete [] temp_img_1_weight;
+  delete [] temp_img_2_weight;
 
-  delete temp_img_1;
-  delete temp_img_2;
   fftw_free(temp_fft_1);
   fftw_free(temp_fft_2);
   fftw_free(fft_total);
@@ -1314,18 +1406,99 @@ void align_even_better(Double_2D & first_image, Double_2D & second_image,
   fftw_destroy_plan(fftw2);
   fftw_destroy_plan(fftw_inv);
   
+
 }
 
+////////////////////////////////
 
-double interp_value(double x, double y,
-		    double f00,
-		    double f10,
-		    double f01,
-		    double f11){
+void interpolate( Double_2D & original, Double_2D & big){
+
+  int nx = original.get_size_x();
+  int ny = original.get_size_y();
+ 
+  int bnx = big.get_size_x();
+  int bny = big.get_size_y();
+
+  if(bnx % nx !=0 || bny % ny !=0 ){
+
+    cerr<< "In interpolate(Complex_2D & original, Complex_2D & small) " 
+	<< "the size of 'big' must be an integer "
+	<< "multiple of the size of 'original'" << endl;
+    exit(0);
+  }
+
+  int scale_x = bnx/nx;
+  int scale_y = bny/ny;
+
+  //if we are close to the edge of the image there's no enough
+  //information to interpolate, so just get the pixel value to
+  //the non-interpolated value.
+  //if(lower_i<0 || lower_j<0 || lower_i >= (nx-1) || lower_j >= (ny-1) ){
+  //  double value = original.get(i,j);
+  //  big.set(new_i+di,new_j+dj,value);
+  //  sum+=value;
+  // }
+
+  double ** x_pos = new double*[scale_x];
+  double ** y_pos = new double*[scale_y];
+
+  //pretabulate the spacings 
+  for(int di=0; di < scale_x; di++){
+    x_pos[di] = new double[scale_y];
+    y_pos[di] = new double[scale_x];
+    
+    for(int dj=0; dj < scale_y; dj++){
+      x_pos[di][dj] = (di + 0.5*((scale_x+1) % 2)) /((double) scale_x);
+      y_pos[di][dj] = (dj + 0.5*((scale_y+1) % 2)) /((double) scale_y);
+    }
+  }
+
+  for(int i=1; i<nx-1; i++){
+    for(int j=1; j<ny-1; j++){
+
+      double sum = 0;
+
+      //      int new_i = i*scale_x;
+      //      int new_j = j*scale_y;
+
+      double f00=original.get(i,j);
+      double f10=original.get(i+1,j);
+      double f01=original.get(i,j+1);
+      double f11=original.get(i+1,j+1);
+
+      double new_i = (i+0.5)*scale_x ;
+      double new_j = (j+0.5)*scale_y ;
+
+      for(int di=0; di < scale_x; di++){
+	for(int dj=0; dj < scale_y; dj++){
+
+	  //double x = (di + 0.5*((scale_x+1) % 2)) /((double) scale_x);
+	  //double y = (dj + 0.5*((scale_y+1) % 2)) /((double) scale_y);
+
+	  double x = x_pos[di][dj];
+	  double y = y_pos[di][dj];
+
+	  double x_1 = 1-x;
+	  double y_1 = 1-y;
+
+	  double value = f00*(x_1)*(y_1) + f10*x*(y_1) + f01*(x_1)*y + f11*x*y;
+	  big.set(new_i + di , new_j + dj , value);
+
+	}
+      }
+    }
+  }
+
+  for(int di=0; di < scale_x; di++){
+    delete [] x_pos[di];
+    delete [] y_pos[di];
+  }
+  delete [] x_pos;
+  delete [] y_pos;
   
-  return f00*(1-x)*(1-y) + f10*x*(1-y) + f01*(1-x)*y + f11*x*y; 
-
 }
+
+
 
 
 void interpolate( Complex_2D & original, Complex_2D & big){
@@ -1356,14 +1529,28 @@ void interpolate( Complex_2D & original, Complex_2D & big){
   //  big.set(new_i+di,new_j+dj,value);
   //  sum+=value;
   // }
-  
+
+  double ** x_pos = new double*[scale_x];
+  double ** y_pos = new double*[scale_x];
+
+  //pretabulate the spacings 
+  for(int di=0; di < scale_x; di++){
+    x_pos[di] = new double[scale_y];
+    y_pos[di] = new double[scale_y];
+    
+    for(int dj=0; dj < scale_y; dj++){
+      x_pos[di][dj] = (di + 0.5*((scale_x+1) % 2)) /((double) scale_x);
+      y_pos[di][dj] = (dj + 0.5*((scale_y+1) % 2)) /((double) scale_y);
+    }
+  }
+
   for(int i=1; i<nx-1; i++){
     for(int j=1; j<ny-1; j++){
 
       double sum = 0;
 
-      int new_i = i*scale_x;
-      int new_j = j*scale_y;
+      //      int new_i = i*scale_x;
+      //      int new_j = j*scale_y;
 
       double f00r=original.get_real(i,j);
       double f10r=original.get_real(i+1,j);
@@ -1375,17 +1562,26 @@ void interpolate( Complex_2D & original, Complex_2D & big){
       double f01i=original.get_imag(i,j+1);
       double f11i=original.get_imag(i+1,j+1);
 
+      double new_i = (i+0.5)*scale_x ;
+      double new_j = (j+0.5)*scale_y ;
+
       for(int di=0; di < scale_x; di++){
 	for(int dj=0; dj < scale_y; dj++){
-	  
-	  double x = (di + 0.5*((scale_x+1) % 2)) /((double) scale_x);
-	  double y = (dj + 0.5*((scale_y+1) % 2)) /((double) scale_y);
 
-	  double value_r = f00r*(1-x)*(1-y) + f10r*x*(1-y) + f01r*(1-x)*y + f11r*x*y;
-	  big.set_real(new_i+di+scale_x/2, new_j+dj+scale_y/2, value_r);
+	  //double x = (di + 0.5*((scale_x+1) % 2)) /((double) scale_x);
+	  //double y = (dj + 0.5*((scale_y+1) % 2)) /((double) scale_y);
 
-	  double value_i = f00i*(1-x)*(1-y) + f10i*x*(1-y) + f01i*(1-x)*y + f11i*x*y;
-	  big.set_imag(new_i+di+scale_x/2, new_j+dj+scale_y/2, value_i);
+	  double x = x_pos[di][dj];
+	  double y = y_pos[di][dj];
+
+	  double x_1 = 1-x;
+	  double y_1 = 1-y;
+
+	  double value_r = f00r*(x_1)*(y_1) + f10r*x*(y_1) + f01r*(x_1)*y + f11r*x*y;
+	  big.set_real(new_i + di , new_j + dj , value_r);
+
+	  double value_i = f00i*(x_1)*(y_1) + f10i*x*(y_1) + f01i*(x_1)*y + f11i*x*y;
+	  big.set_imag(new_i + di, new_j + dj, value_i);
 
 	}
       }
@@ -1439,141 +1635,16 @@ void interpolate( Complex_2D & original, Complex_2D & big){
 	} **/
     }
   }
+
+  for(int di=0; di < scale_x; di++){
+    delete [] x_pos[di];
+    delete [] y_pos[di];
+  }
+  delete [] x_pos;
+  delete [] y_pos;
   
 }
 
-
-/**void interpolate( Complex_2D & original, Complex_2D & big){
-
-  int nx = original.get_size_x();
-  int ny = original.get_size_y();
-
-  int bnx = big.get_size_x();
-  int bny = big.get_size_y();
-
-  Double_2D original_real(nx,ny);
-  Double_2D original_imag(nx,ny);
-
-  Double_2D big_real(bnx,bny);
-  Double_2D big_imag(bnx,bny);
-
-  original.get_2d(REAL,original_real);
-  original.get_2d(IMAG,original_imag);
-
-  interpolate(original_real,big_real);
-  interpolate(original_imag,big_imag);
-
-  for(int i=0; i < bnx; i++){
-    for(int j=0; j < bny; j++){
-      big.set_real(i,j,big_real.get(i,j));
-      big.set_imag(i,j,big_imag.get(i,j));
-    }
-  }
-
-  //  big.copy(original);**/
-
-  /**  if(big.get_size_x() % original.get_size_x() !=0 ||
-     big.get_size_y() % original.get_size_y() !=0 ){
-
-    cerr<< "In interpolate(Complex_2D & original, Complex_2D & small) " 
-	<< "the size of 'big' must be an integer "
-	<< "multiple of the size of 'original'" << endl;
-    exit(0);
-  }
-
-  int scale_x = big.get_size_x()/original.get_size_x();
-  int scale_y = big.get_size_y()/original.get_size_y();
-
-  for(int i=0; i<original.get_size_x(); i++){
-    for(int j=0; j<original.get_size_y(); j++){
-
-      double sum_r = 0;
-      double sum_i = 0;
-
-      for(int di=0; di < scale_x; di++){
-	for(int dj=0; dj < scale_y; dj++){
-	  
-	  double position_x = 0.5 + (di+0.5)/((double) scale_x);
-	  double position_y = 0.5 + (dj+0.5)/((double) scale_y);
-
-	  int lower_i = i-1;
-	  int lower_j = j-1;
-	  
-	  if(position_x>1){
-	    position_x -= 1;
-	    lower_i++;
-	  }
-
-	  if(position_y>1){
-	    position_y -= 1;
-	    lower_j++;
-	  }
-
-	  if(lower_i < 0 || lower_j < 0 || 
-	     lower_i >= (original.get_size_x()-1) ||
-	     lower_j >= (original.get_size_y()-1) ){
-	    
-	    double real_value = original.get_real(i,j);
-	    double imag_value = original.get_imag(i,j);
-
-	    big.set_real(i*scale_x+di,j*scale_y+dj,real_value);
-	    big.set_imag(i*scale_x+di,j*scale_y+dj,imag_value);
-	    sum_r+=real_value;
-	    sum_i+=imag_value;
-	  }
-	  else{
-	    double f00r=original.get_real(lower_i,lower_j);
-	    double f00i=original.get_imag(lower_i,lower_j);
-	    
-	    double f10r=original.get_real(lower_i+1,lower_j);
-	    double f10i=original.get_imag(lower_i+1,lower_j);
-
-	    double f01r=original.get_real(lower_i,lower_j+1);
-	    double f01i=original.get_imag(lower_i,lower_j+1);
-
-	    double f11r=original.get_real(lower_i+1,lower_j+1);
-	    double f11i=original.get_imag(lower_i+1,lower_j+1);
-
-	    double real_value = interp_value(position_x,position_y,				    
-					     f00r,f10r,f01r,f11r);
-	    
-	    
-	    double imag_value = interp_value(position_x,position_y,				    
-					     f00i,f10i,f01i,f11i);
-	    
-	    big.set_real(i*scale_x+di,j*scale_y+dj,real_value);
-	    big.set_imag(i*scale_x+di,j*scale_y+dj,imag_value);
-
-	    sum_r+=real_value;
-	    sum_i+=imag_value;
-
-	  }
-	}
-      }
-	
-      double norm_r = 1;
-      double norm_i = 1;
-      
-      if(sum_r!=0)
-	norm_r = (original.get_real(i,j)*scale_x*scale_y)/sum_r;
-	
-      if(sum_i!=0)
-	norm_i = (original.get_imag(i,j)*scale_x*scale_y)/sum_i;
-	
-      //loop again to normalise
-      for(int di=0; di < scale_x; di++){
-	for(int dj=0; dj < scale_y; dj++){
-	  big.set_real(i*scale_x+di,j*scale_y+dj,
-		       big.get_real(i*scale_x+di,j*scale_y+dj)*norm_r);
-	  big.set_imag(i*scale_x+di,j*scale_y+dj,
-		       big.get_imag(i*scale_x+di,j*scale_y+dj)*norm_i);
-	}
-      }
-      
-    }
-    } **/
-   
-//}
 
 void shrink( Complex_2D & original, Complex_2D & small){
 
@@ -1617,4 +1688,45 @@ void shrink( Complex_2D & original, Complex_2D & small){
 
 }
 
+void shrink( Double_2D & original, Double_2D & small){
+
+  int nx = original.get_size_x();
+  int ny = original.get_size_y();
+  int snx = small.get_size_x();
+  int sny = small.get_size_y();
+
+  //small.copy(original);
+  if( (nx % snx) !=0 || (ny % sny) !=0 ){
+
+    cerr<< "In shrink(Complex_2D & original, Complex_2D & small) " 
+	<< "the size of 'original' must be an integer "
+	<< "multiple of the size of 'small'" << endl;
+    exit(0);
+  }
+
+  int scale_x = nx/snx;
+  int scale_y = ny/sny;
+
+  for(int i=0; i < snx; i++){
+    for(int j=0; j < sny; j++){
+
+      double value=0;
+
+      for(int di=0; di < scale_x; di++){
+	for(int dj=0; dj < scale_y; dj++){
+	  int new_i = i*scale_x+di;
+	  int new_j = j*scale_y+dj;
+	  value+=original.get(new_i,new_j);
+	}
+      }
+      
+      double scale = scale_x*scale_y;
+      small.set(i,j,value/scale);
+    }
+  }
+
+}
+
+
+////////////////////////////////
 
