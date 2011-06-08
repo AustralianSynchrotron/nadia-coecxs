@@ -1029,6 +1029,9 @@ void align(Double_2D & image1, Double_2D & image2,
   int nx_small_low = nx_small/step_size;
   int ny_small_low = ny_small/step_size;
 
+  cout << "min_x="<<min_x<<" max_x="<<max_x<<endl;
+  cout << "min_y="<<min_y<<" max_y="<<max_y<<endl;
+
   if(min_x==max_x&&min_y==max_y){
     min_x = 1-nx_low; //1-nx_small_low;
     max_x = nx_low;
@@ -1038,7 +1041,7 @@ void align(Double_2D & image1, Double_2D & image2,
 
   Double_2D temp1(nx_low,ny_low);
   Double_2D temp2(nx_small_low,ny_small_low);
-  
+
   for(int x=0; x<nx_low; x++){
     for(int y=0; y<ny_low; y++){
       double value =0;
@@ -1066,10 +1069,11 @@ void align(Double_2D & image1, Double_2D & image2,
   //now calculate the correlation for the low res. image
   double max_correlation = 0;
 
-  
   //loop over possible alignments
   for(int x=min_x; x<max_x; x++){
     for(int y=min_y; y<max_y; y++){
+
+//      cout << "x="<<x<<" y="<<y<<endl;  
       
       double correlation = 0;
       double pixels = 0;
@@ -1102,15 +1106,15 @@ void align(Double_2D & image1, Double_2D & image2,
     }
   }
 
-  cout << "min="<<min_x<< "max="<<max_x<<endl;
-  cout << "max_correlation is :"<<max_correlation <<endl;
-  static int counter = 0;
+  //  cout << "min="<<min_x<< "max="<<max_x<<endl;
+  // cout << "max_correlation is :"<<max_correlation <<endl;
+  /**  static int counter = 0;
   char buff[90];
   sprintf(buff,"temp1_%i.tiff",counter);
   write_image(buff,temp1);
   sprintf(buff,"temp2_%i.tiff",counter);
   write_image(buff,temp2);
-  counter++;
+  counter++;**/
 
   //now decrease the step size and the search area:
   align(image1, image2, 
@@ -1131,6 +1135,7 @@ void align_even_better(Double_2D & first_image, Double_2D & second_image,
 		       Double_2D * first_image_weights,
 		       Double_2D * second_image_weights,
 		       double overlap_fraction){
+
 
   const int MAX_PIXELS = 1024;
 
@@ -1158,19 +1163,32 @@ void align_even_better(Double_2D & first_image, Double_2D & second_image,
     Double_2D * small_first = new Double_2D(MAX_PIXELS, MAX_PIXELS);
     Double_2D * small_second = new Double_2D(MAX_PIXELS,MAX_PIXELS);
 
-    Double_2D * small_weight_first = new Double_2D(MAX_PIXELS, MAX_PIXELS);
-    Double_2D * small_weight_second = new Double_2D(MAX_PIXELS,MAX_PIXELS);
+    Double_2D * small_weight_first = 0; 
+    Double_2D * small_weight_second = 0; 
 
     shrink(first_image, *small_first);
     shrink(second_image, *small_second);
-    shrink(*first_image_weights, *small_weight_first);
-    shrink(*second_image_weights, *small_weight_second);
 
+    write_image("first_small.tiff",*small_first);
+    write_image("second_small.tiff",*small_second);
+
+    if(first_image_weights){
+      small_weight_first = new Double_2D(MAX_PIXELS, MAX_PIXELS);
+      shrink(*first_image_weights, *small_weight_first);
+    }
+
+    if(second_image_weights){
+      small_weight_second = new Double_2D(MAX_PIXELS,MAX_PIXELS);
+      shrink(*second_image_weights, *small_weight_second);
+    }
     //apply this alignment method with the smaller images
+
+    cout << "before: "<<offset_x<<" ,"<<offset_y<<endl;
+
     align_even_better(*small_first, *small_second,
 		      offset_x, offset_y,
-		      min_x, max_x,
-		      min_y, max_y,
+		      min_x/2, max_x/2,
+		      min_y/2, max_y/2,
 		      small_weight_first,
 		      small_weight_second,
 		      overlap_fraction);   
@@ -1181,21 +1199,19 @@ void align_even_better(Double_2D & first_image, Double_2D & second_image,
     delete small_weight_first;
     delete small_weight_second;
 
-    cout << "done small alignment" <<endl;
+    cout << "after small fft align: "<<offset_x*2<<" ,"<<offset_y*2<<endl;
 
     //apply this shifting alignment method to get the final precision.
     align(first_image, second_image, 
-	  offset_x, offset_y, 1 , 
-	  -nx/MAX_PIXELS,nx/MAX_PIXELS,
-	  -ny/MAX_PIXELS,ny/MAX_PIXELS);
+	  offset_x, offset_y, 1, 
+	  offset_x*2-0.5*nx/MAX_PIXELS, offset_x*2+0.5*nx/MAX_PIXELS,
+	  offset_y*2-0.5*ny/MAX_PIXELS, offset_y*2+0.5*ny/MAX_PIXELS);
 
-    cout << "done fine adjusting: -" << (nx/MAX_PIXELS) << endl;
-    
+    cout << "after my align: "<<offset_x<<" ,"<<offset_y<<endl;
+
     return;
   }
   
-  cout << "here 0"<<endl;
-
   //check these boundaries later
   if(min_x==max_x || min_y==max_y){
     min_x = 1-nx/2.0; 
@@ -1231,7 +1247,8 @@ void align_even_better(Double_2D & first_image, Double_2D & second_image,
     }
     }**/
 
-  cout << "here 2"<<endl;
+  //copy image to an output  array
+  //  Double_2D temp_image(nx,ny); //<-
 
   double * temp_img_1 = new double[nx*ny];
   double * temp_img_2 = new double[nx*ny];
@@ -1242,24 +1259,28 @@ void align_even_better(Double_2D & first_image, Double_2D & second_image,
   fftw_complex* temp_fft_1 = (fftw_complex*) fftw_malloc(sizeof(fftw_complex)*nx*ny); 
   fftw_complex* temp_fft_2 = (fftw_complex*) fftw_malloc(sizeof(fftw_complex)*nx*ny); 
 
-
+  //plans for fourier transforming the images
   fftw_plan fftw1 = fftw_plan_dft_r2c_2d(nx,ny, temp_img_1, temp_fft_1,
 					 FFTW_ESTIMATE);
   fftw_plan fftw2 = fftw_plan_dft_r2c_2d(nx,ny, temp_img_2, temp_fft_2,
 					 FFTW_ESTIMATE);
 
+  //plans for fourier transforming the image weights
   fftw_plan fftw1_w = fftw_plan_dft_r2c_2d(nx,ny, temp_img_1_weight, temp_fft_1,
 					 FFTW_ESTIMATE);
   fftw_plan fftw2_w = fftw_plan_dft_r2c_2d(nx,ny, temp_img_2_weight, temp_fft_2,
 					 FFTW_ESTIMATE);
 
-  //backwards
+  //plan for backwards fourier transform
   fftw_complex* fft_total = (fftw_complex*) fftw_malloc(sizeof(fftw_complex)*nx*ny); 
   fftw_plan fftw_inv = fftw_plan_dft_c2r_2d(nx,ny, fft_total, temp_img_1,
 					    FFTW_ESTIMATE);
 
   double weight_sum = 0 ;
   
+  //  double max_weight_1 = first_image_weights->get_max();
+  // double max_weight_2 = second_image_weights->get_max();
+
   //copy the image information into the temporary arrays
   for(int i=0; i < nx ; i++){
     for(int j=0; j < ny ; j++){
@@ -1277,12 +1298,13 @@ void align_even_better(Double_2D & first_image, Double_2D & second_image,
 	    int j_ = j-0.5*(ny-ny_1);
 	    
 	    //image1.set(i,j,first_image.get(i_,j_));
-	    if(!first_image_weights || first_image_weights->get(i_,j_)>0){
+	    if(!first_image_weights || first_image_weights->get(i_,j_)>0.1*max_weight_1){
 	      temp_img_1[i*ny + j] = first_image.get(i_,j_);
 	      temp_img_1_weight[i*ny + j] = 1.0;
 	    }
 	    
-	    if(i_<nx_2&&j_<ny_2 && (!second_image_weights || second_image_weights->get(i_,j_)>0)){
+	    if(i_<nx_2 && j_<ny_2 && 
+	       (!second_image_weights || second_image_weights->get(i_,j_)>0.1*max_weight_2)){
 	      temp_img_2[i*ny + j] = second_image.get(i_,j_);
 	      temp_img_2_weight[i*ny + j] = 1.0;
 	    }
@@ -1292,23 +1314,27 @@ void align_even_better(Double_2D & first_image, Double_2D & second_image,
 	    else
 	      weight_sum+=temp_img_2_weight[i*ny + j];
 	    
-	 }
+      }
+
+      //copy image to an output  array
+      //  temp_image.set(i,j,temp_img_2_weight[i*ny + j]); //<-
+
+
+
     }
   }
 
-  cout << "here 4"<<endl;
-
+  //perform the two fourier transforms of the images
   fftw_execute(fftw1);
   fftw_execute(fftw2);
 
   //  Complex_2D my_fft(nx,ny);
 
-  cout << "here 5"<<endl;
-
-  //copy image to the in array
+  //multiply the result of the two image transforms together
   for(int i=0; i < nx ; i++){
     for(int j=0; j < ny ; j++){
 
+      //conjugate the second images transform while multiplying
       double rl = temp_fft_1[i*ny + j][0]*temp_fft_2[i*ny + j][0]
 	+temp_fft_1[i*ny + j][1]*temp_fft_2[i*ny + j][1];
       double im = temp_fft_1[i*ny + j][0]*temp_fft_2[i*ny + j][1]
@@ -1323,13 +1349,15 @@ void align_even_better(Double_2D & first_image, Double_2D & second_image,
     }
   }
 
-  cout << "here 6"<<endl;
-
+  //perform the two fourier transforms of the image weights
   fftw_execute(fftw1_w);
   fftw_execute(fftw2_w);
 
+  //perform the inverse transform for the images F^-1(F(A)*F(B))
+  //where A and B are the images and F(A)(B?) is conjugated.
   fftw_execute(fftw_inv);
 
+  //multiply tha transformed weights together
   for(int i=0; i < nx ; i++){
     for(int j=0; j < ny ; j++){
 
@@ -1346,14 +1374,13 @@ void align_even_better(Double_2D & first_image, Double_2D & second_image,
     }
   }
 
+  //invert the weight.
   fftw_execute(fftw_inv);
 
   double max = 0;
 
   double overlap_factor = weight_sum*nx*ny;
 
-  //copy image to an output  array
-  //  Double_2D temp_image(nx,ny); //<-
 
   for(int i=0; i < nx ; i++){
     for(int j=0; j < ny ; j++){
@@ -1361,7 +1388,7 @@ void align_even_better(Double_2D & first_image, Double_2D & second_image,
 
       if(temp_img_1[i*ny + j]/overlap_factor > overlap_fraction){
 
-	//	temp_image.set(i,j, temp_img_2[i*ny + j]/temp_img_1[i*ny + j]);
+	//	temp_image.set(i,j,temp_img_1[i*ny + j]);// //temp_img_2[i*ny + j])/temp_img_1[i*ny + j]);
 
 	if(temp_img_2[i*ny + j]/temp_img_1[i*ny + j] > max){
 
@@ -1390,7 +1417,7 @@ void align_even_better(Double_2D & first_image, Double_2D & second_image,
     }
   }
   
-  //  write_image("temp_image.tiff",temp_image,false);
+  //  write_image("temp_image.tiff",temp_image,true);
   //cout <<temp_image.get_max()<<endl;
 
   delete [] temp_img_1;

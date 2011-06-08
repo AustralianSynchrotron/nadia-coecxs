@@ -45,12 +45,12 @@ PhaseDiverseCDI::~PhaseDiverseCDI(){
     Complex_2D * temp = single_result.back();
     single_result.pop_back();
     delete temp;
-
+    
     Double_2D * temp_d = weights.back();
     weights.pop_back();
     delete temp_d;
   }
-
+  
   if(object)
     delete object;
   
@@ -100,6 +100,8 @@ void PhaseDiverseCDI::set_transmission(Complex_2D & new_transmission){
   
 }
 
+//add a new frame to the reconstruction
+//the size of the global sample will be adjusted automatically.
 void PhaseDiverseCDI::add_new_position(BaseCDI * local,
 				       double x, 
 				       double y,
@@ -107,10 +109,11 @@ void PhaseDiverseCDI::add_new_position(BaseCDI * local,
   
   weights_set = false;
 
-
+  //get the size of the frame which is being added
   int lnx = local->get_size_x() ;
   int lny = local->get_size_y() ;
   
+  //add it to the list of frames with it's position.
   singleCDI.push_back(local);
   x_position.push_back(x);
   y_position.push_back(y);
@@ -120,6 +123,8 @@ void PhaseDiverseCDI::add_new_position(BaseCDI * local,
 
   cout << "Added position "<<singleCDI.size()-1<<endl;
   
+  //if this is the first frame we will need to create the 
+  //global transmission object as well
   if(!object){
     x_min = -x;
     y_min = -y;
@@ -133,10 +138,10 @@ void PhaseDiverseCDI::add_new_position(BaseCDI * local,
   int extra_x=0;
   int extra_y=0;
 
-  int global_x_min = get_global_x_pos(0,x)*scale;  //-x-x_min;
-  int global_y_min = get_global_y_pos(0,y)*scale;  //-y-y_min;
-  int global_x_max = get_global_x_pos(lnx,x)*scale; //lnx-x-x_min;
-  int global_y_max = get_global_y_pos(lny,y)*scale; //lny-y-y_min;
+  int global_x_min = get_global_x_pos(0,x)*scale;  
+  int global_y_min = get_global_y_pos(0,y)*scale;  
+  int global_x_max = get_global_x_pos(lnx,x)*scale; 
+  int global_y_max = get_global_y_pos(lny,y)*scale; 
 
   if(global_x_min<0){
     x_min = -x;
@@ -151,6 +156,7 @@ void PhaseDiverseCDI::add_new_position(BaseCDI * local,
   if(global_y_max>ny)
     extra_y += global_y_max-ny;
 
+  //if required, increase the global object size
   if(extra_x || extra_y)
     reallocate_object_memory(nx+extra_x, ny+extra_y);
 
@@ -158,9 +164,11 @@ void PhaseDiverseCDI::add_new_position(BaseCDI * local,
 
 
 
-
+//initialise the global estimate based on the starting point
+//for each sub-frame.
 void PhaseDiverseCDI::initialise_estimate(){
 
+  //start by setting the magnitude to 1 and phase to 0
   for(int i=0; i<nx; i++){
     for(int j=0; j<ny; j++){
       object->set_real(i,j,1);
@@ -168,6 +176,8 @@ void PhaseDiverseCDI::initialise_estimate(){
     }
   }
 
+  //add the transmission from each frame
+  //to the global object.
   for(int i=0; i<singleCDI.size(); i++){
     add_to_object(i);
   }
@@ -175,13 +185,14 @@ void PhaseDiverseCDI::initialise_estimate(){
 
 }
 
-
+//do a 'big' iteration.
 void PhaseDiverseCDI::iterate(){
 
   static int total_iterations = 0;
 
   cout << "Iteration "<<total_iterations<<endl;
 
+  //for each frame do a 'small' iteration.
   for(int i=0; i<singleCDI.size(); i++){
 
     int x, y;
@@ -190,6 +201,8 @@ void PhaseDiverseCDI::iterate(){
     //  check_position(i);
     update_from_object(i);
 
+    //if the user wanted do a few iterations before updating to the
+    //global object.
     for(int j=0; j<iterations_per_cycle; j++){
 
       //temp
@@ -211,14 +224,20 @@ void PhaseDiverseCDI::iterate(){
 
     }
 
+    //if we are running in series mode, update the
+    //small transmission to the large transmission function
+    //after each 'small' iteration
     if(!parallel)
       add_to_object(i);
 
   }
   
+  //if we are running in parallel mode, wait until at least one
+  //'small' iteration have been performed for each frame. Then
+  //merge the results to form the new global transmission function. 
   if(parallel){
 
-    scale_object(1-beta); 
+    scale_object(1-beta);
 
     for(int i=0; i<singleCDI.size(); i++){
       add_to_object(i);
@@ -230,35 +249,44 @@ void PhaseDiverseCDI::iterate(){
 };
 
 
+//scale each element in the global transmission object.
+//note that the region outside the sample will not be scaled.
+//this function is only used when performing the reconstruction
+//in parallel mode.
 void PhaseDiverseCDI::scale_object(double factor){
 
   set_up_weights();
 
   int frames = singleCDI.size();
 
+  //loop over each element in the global transmission function.
   for(int i=0; i<nx; i++){
     for(int j=0; j<ny; j++){
 
       bool not_in_image = true;
       int n_probe = 0;
 
+      //loop over each frame and check their weight function to determine
+      //if the current pixel is included inside the sample or not.
       while(not_in_image&&n_probe<frames){
 
 	int i_ = get_local_x_pos(i/scale, x_position.at(n_probe));  
 	int j_ = get_local_y_pos(j/scale, y_position.at(n_probe));
 	
-	if(i_>=0&&j_>=0&&i_<weights.at(n_probe)->get_size_x()
+	if(i_>=0&&j_>=0
+	   &&i_<weights.at(n_probe)->get_size_x()
 	   &&j_<weights.at(n_probe)->get_size_y())
 	  not_in_image=(weights.at(n_probe)->get(i_,j_)==0); 
 	
-	n_probe++;
-
+	n_probe++;	
       }
 
+      //in the case the pixel is outside, set the magntiude 
+      //to 1 and phase to 0.
       if(not_in_image){
 	object->set_real(i,j,1.0);
 	object->set_imag(i,j,0.0);
-      }
+      } //otherwise scale the value of the pixel.
       else{
 	object->set_real(i,j,factor*object->get_real(i,j));
 	object->set_imag(i,j,factor*object->get_imag(i,j));
@@ -269,7 +297,9 @@ void PhaseDiverseCDI::scale_object(double factor){
   
 }
 
-
+//update the array 'result' with the contents of either the
+//transmission function (for FresnelCDI) of the exit-surface-wave
+//(for plane-wave).
 void PhaseDiverseCDI::get_result(BaseCDI * local, Complex_2D & result){
   if(typeid(*local)==typeid(FresnelCDI)){
     ((FresnelCDI*)local)->get_transmission_function(result);
@@ -278,6 +308,7 @@ void PhaseDiverseCDI::get_result(BaseCDI * local, Complex_2D & result){
     result.copy(local->get_exit_surface_wave());
 };
 
+//copy the array 'result' back to the CDI object 
 void PhaseDiverseCDI::set_result(BaseCDI * local, Complex_2D & result){
   
   if(typeid(*local)==typeid(FresnelCDI)){
@@ -334,8 +365,6 @@ void PhaseDiverseCDI::adjust_positions(double step_size, bool forward){
   while(n!=limit){
     //for(int n=1; n<singleCDI.size(); n++){
 
-    cout << "at the beginning" << endl;
-
     //store some before information for later use
     double before_x = x_position.at(n);
     double before_y = y_position.at(n);
@@ -349,22 +378,16 @@ void PhaseDiverseCDI::adjust_positions(double step_size, bool forward){
     sprintf(name,"pic_%i.tiff",n);
     write_image(name,pic,false, 0,1);**/
 
-    cout << "something here"<<endl;
-
     //do an iteration of the frame on it's own.
     singleCDI.at(n)->iterate();
     get_result(singleCDI.at(n),*(single_result.at(n)));
     
-    cout << "and after"<<endl;
-
     //this array will store a copy of the local frame with 1-mag.
-    Double_2D * temp_single = new Double_2D(lnx,lny);
+    Double_2D temp_single(lnx,lny);
 
     //this array will store a copy of the global frame with 1-mag.
-    Double_2D * temp_others = new Double_2D(lnx*scale,lny*scale);
+    Double_2D temp_others(lnx*scale,lny*scale);
     
-    cout << "made it just before"<<endl;
-
     for(int i=0; i<lnx*scale; i++){
       for(int j=0; j<ny*scale; j++){
 	
@@ -374,56 +397,58 @@ void PhaseDiverseCDI::adjust_positions(double step_size, bool forward){
 	if( i_>=0 && j_>=0 && i_<nx && j_<ny ){
 	  double obj_mag = object->get_mag(i_,j_);
 	  if(obj_mag<1)
-	    temp_others->set(i,j,1-obj_mag);
+	    temp_others.set(i,j,1-obj_mag);
 	}
-	if(i<lnx && j<lny && single_result.at(n)->get_mag(i,j) <1 )
-	  temp_single->set(i,j,1-single_result.at(n)->get_mag(i,j));
+	if(i<lnx && j<lny && single_result.at(n)->get_mag(i,j) <1 ){
+	  double new_value = 1-single_result.at(n)->get_mag(i,j);
+	  temp_single.set(i,j,new_value);
+	}
       }
     }
 
-    cout << "made it here"<<endl;
 
     Double_2D * temp_single_int = 0; 
     Double_2D * weight_single_int = 0;  
 
     if(scale==1){
-      temp_single_int = temp_single;
-      weight_single_int = weights.at(n);
+      temp_single_int = &temp_single;
+      weight_single_int = singleCDI.at(n)->get_support();
     }
     else{
       temp_single_int = new Double_2D(lnx*scale,lny*scale);
       weight_single_int = new Double_2D(lnx*scale,lny*scale);
-      interpolate(*temp_single,*temp_single_int);
-      interpolate(*weights.at(n),*weight_single_int);
+      interpolate(temp_single,*temp_single_int);
+      interpolate(*weights.at(n),singleCDI.at(n)->get_support());
     }
 
-    cout << "and here!"<<endl;
-
-    delete temp_single;
-    delete temp_others;
+    cout << "here"<<endl;
 
     /**    static int counter = 0;
     char buff[90];
     sprintf(buff,"temp_single_%i.tiff",counter);
-    write_image(buff,temp_single_int,false);
+    write_image(buff,*temp_single_int,false);
+
+    cout << "not here"<<endl;
+
     sprintf(buff,"temp_object_%i.tiff",counter);
     write_image(buff,temp_others,false);
     counter++;**/
 
-    int new_x, new_y;
-   
-    align_even_better(*temp_single_int, *temp_others, 
+    int new_x=0;
+    int new_y=0;
+
+    align_even_better(*temp_single_int, temp_others, 
 		      new_x, new_y,
-		      -20, +20,
-		      -20, +20,
-		      //&temp_single,
+		      -50, +50,
+		      -50, +50,
+		      //temp_single_int,
 		      weight_single_int,
 		      //weights.at(n),
-		      temp_others,
+		      &temp_others,
 		      0.2); 
 
-    x_position.at(n) = before_x+new_x/scale;
-    y_position.at(n) = before_y+new_y/scale;
+    x_position.at(n) = before_x + new_x/((double)scale);
+    y_position.at(n) = before_y + new_y/((double)scale);
 
     cout << "cross-correlation: moving prob " << n << " from ("
 	 << before_x << "," << before_y << ") "
@@ -431,11 +456,13 @@ void PhaseDiverseCDI::adjust_positions(double step_size, bool forward){
 	 << "," <<  y_position.at(n) << ")."
 	 << endl;
 
-
+    //clean up a bit
     if(scale!=1){
       delete temp_single_int;
       delete weight_single_int;
     }
+    //    delete temp_others;
+    //  delete temp_single;
     
     //replace the transmission function with
     //just the 1st frame information
@@ -466,8 +493,10 @@ void PhaseDiverseCDI::adjust_positions(double step_size, bool forward){
     nx = nx_c;
     ny = ny_c;
     x_min = x_min_c; 
-    y_min = y_min_c;
-    add_to_object(n); **/
+    y_min = y_min_c; **/
+
+    weights_set=false;
+    add_to_object(n);
 
     if(forward)
       n++;
@@ -749,47 +778,66 @@ void PhaseDiverseCDI::set_up_weights(){
 
 
   
-
-
+/**
+ * Update the result of the 'n_probe'th sub-frame to the
+ * global object. This is a rather complicated, messy looking
+ * function. But fast code has been prefered to clean code in this
+ * case. 
+ **/
 void PhaseDiverseCDI::add_to_object(int n_probe){
   
+  //get the result from the local FresnelCDI or PlanarCDI
   get_result(singleCDI.at(n_probe),*(single_result.at(n_probe)));  
   set_up_weights();
   
   double x_offset = x_position.at(n_probe);
   double y_offset = y_position.at(n_probe);
   
+  //'small' holds the local frame result
   Complex_2D * small = single_result.at(n_probe);
+
+  //'this_weight' holds the local frame weighting function
   Double_2D & this_weight = *(weights.at(n_probe));
   
   int lnx = small->get_size_x();
   int lny = small->get_size_y();
   
-  //pretabulate the spacings 
+  //pretabulate the spacings (only used if sub-pixel reconstruction
+  //is performed i.e. scale>1)
   double * sub_pos = new double[scale];
   for(int di=0; di < scale; di++){
     sub_pos[di] = (di + 0.5*((scale+1) % 2)) /((double) scale);
   }
 
-  //using the local (small) coordinate system
+  //i_, j_ - the local (small) coordinate system
   for(int i_=1; i_< lnx-1; i_++){
     for(int j_=1; j_< lny-1; j_++){
       
       double weight = this_weight.get(i_,j_);
 
+      //don't even bother to do anything is the weight at this pixel is zero.
       if(weight!=0){
 
+	//get the pixel positions in the global (object) frame.
 	int i = get_global_x_pos(i_,x_offset)*scale;
 	int j = get_global_y_pos(j_,y_offset)*scale;
 
+	//bounds check
 	if(i>=0&&j>=0&&i<nx&&j<ny){
 
 	  //double sum = 0;
+
+	  //get the value at the local pixel.
 	  double f00r=small->get_real(i_,j_);
 	  double f00i=small->get_imag(i_,j_);
 	  
+	  //if we are doing sub-pixel positioning, 
+	  //(ie scale > 1) then we need to interpolate
+	  //the 'small' array so it uses the same scale 
+	  //as the object array.
 	  if(scale!=1){
 
+	    //get the values in the surrounding pixels
 	    double f10r=small->get_real(i_+1,j_);
 	    double f01r=small->get_real(i_,j_+1);
 	    double f11r=small->get_real(i_+1,j_+1);
@@ -798,6 +846,7 @@ void PhaseDiverseCDI::add_to_object(int n_probe){
 	    double f01i=small->get_imag(i_,j_+1);
 	    double f11i=small->get_imag(i_+1,j_+1);
 	    
+	    //loop over the sub-pixel elements
 	    for(int di=0; di < scale; di++){
 	      for(int dj=0; dj < scale; dj++){
 
@@ -807,33 +856,39 @@ void PhaseDiverseCDI::add_to_object(int n_probe){
 		double x_1 = 1-x;
 		double y_1 = 1-y;
 		
+		//work out the interpolated value for each
+		//sub-pixel point
 		double value_r = f00r*(x_1)*(y_1) + f10r*x*(y_1) 
 		  + f01r*(x_1)*y + f11r*x*y;
 		double value_i = f00i*(x_1)*(y_1) + f10i*x*(y_1) 
 		  + f01i*(x_1)*y + f11i*x*y;
 		
-		
+		//work out the global position for each sub-pixel point
 		double new_i = (i_+0.5-x_offset-x_min)*scale + di;
 		double new_j = (j_+0.5-y_offset-y_min)*scale + dj;
 		
+		//calculate the new value in the object (also using the pixel weight).
 		double new_real = weight*value_r 
 		  + object->get_real(new_i, new_j);
 		double new_imag = weight*value_i 
 		  + object->get_imag(new_i, new_j);	  
 		
+		//if in series mode...
 		if(!parallel){
 		  new_real -= weight*object->get_real(new_i, new_j);
 		  new_imag -= weight*object->get_imag(new_i, new_j);
 		}
 		
+		//set the final values
 		object->set_real(new_i, new_j,new_real);
 		object->set_imag(new_i, new_j,new_imag); 
 	      
 	      }
 	    }
 	  }
-	  else{
+	  else{ //if we are not doing sub-pixel positioning
 
+	    //just work out the value in the simple way.
 	    double new_real = weight*f00r + object->get_real(i,j);
 	    double new_imag = weight*f00i + object->get_imag(i,j);	  
 	    
@@ -857,7 +912,7 @@ void PhaseDiverseCDI::add_to_object(int n_probe){
   
 }
 
-void PhaseDiverseCDI::get_object_sub_grid(Complex_2D & result,
+/**void PhaseDiverseCDI::get_object_sub_grid(Complex_2D & result,
 					  double x_offset,
 					  double y_offset){
   
@@ -880,15 +935,14 @@ void PhaseDiverseCDI::get_object_sub_grid(Complex_2D & result,
 	}
       }
     }
-
-
   
-};
+    };**/
 
 
 
 
-
+//update the result from the 'n_probe'th frame using the
+//global object function.
 void PhaseDiverseCDI::update_from_object(int n_probe){
 
   set_up_weights();
@@ -896,28 +950,36 @@ void PhaseDiverseCDI::update_from_object(int n_probe){
   double x_offset = x_position.at(n_probe);
   double y_offset = y_position.at(n_probe);
   
+  //small will hold a sub-array of the global object.
   Complex_2D * small = single_result.at(n_probe);
+
   Double_2D & this_weight = *weights.at(n_probe);
 
   int lnx = small->get_size_x();
   int lny = small->get_size_y();
 
-  //using the local coordinate system
+  //i_,j_ - local coordinate system
+  //i , j - global coordinate system
   for(int i_=0; i_< lnx; i_++){
       for(int j_=0; j_< lny; j_++){
 	
+	//only do something if the weight is non-zero. ie.
+	//the 'n_probe'th frame contains information about this pixel.
 	if(this_weight.get(i_,j_)!=0){
 
 	  int i = get_global_x_pos(i_,x_offset)*scale;
 	  int j = get_global_y_pos(j_,y_offset)*scale;
 
+	  //bounds check
 	  if(i>=0 && j>=0 && i<nx && j<ny){
 	    
 	    double real_value = 0;
 	    double imag_value = 0;
 
+	    //if we're doing sub-pixel reconstruction
+	    //shrink the global (object) array down
+	    //to the same dimensions as the local (single) one. 
 	    if(scale!=1){
-
 	      for(int di=0; di < scale; di++){
 		for(int dj=0; dj < scale; dj++){
 		  int new_i = i+di;
@@ -928,11 +990,12 @@ void PhaseDiverseCDI::update_from_object(int n_probe){
 	      }
 	      
 	      double norm = 1/((double)(scale*scale));
-	      
+	      //normalise to set the average (instead of the sum)
 	      small->set_real(i_,j_,real_value*norm);
 	      small->set_imag(i_,j_,imag_value*norm);
 	    }
-	    else{
+	    else{ //if we're not doing sub-pixel positioning, the
+	          //just copy the global (object).
 	      small->set_real(i_,j_,object->get_real(i,j));
 	      small->set_imag(i_,j_,object->get_imag(i,j)); 
 	    }
@@ -941,7 +1004,7 @@ void PhaseDiverseCDI::update_from_object(int n_probe){
       }
   }	    
 
-
+  //set the result in the FresnelCDI or PlanarCDI object.
   set_result(singleCDI.at(n_probe),*(single_result.at(n_probe)));
   
 };
