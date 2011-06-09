@@ -1250,31 +1250,17 @@ void align_even_better(Double_2D & first_image, Double_2D & second_image,
   //copy image to an output  array
   //  Double_2D temp_image(nx,ny); //<-
 
-  double * temp_img_1 = new double[nx*ny];
-  double * temp_img_2 = new double[nx*ny];
+  Double_2D temp_img_1(nx,ny);
+  Double_2D temp_img_2(nx,ny);
 
-  double * temp_img_1_weight = new double[nx*ny];
-  double * temp_img_2_weight = new double[nx*ny];
+  Double_2D temp_img_1_weight(nx,ny);
+  Double_2D temp_img_2_weight(nx,ny);
 
-  fftwf_complex* temp_fft_1 = (fftwf_complex*) fftwf_malloc(sizeof(fftwf_complex)*nx*ny); 
-  fftwf_complex* temp_fft_2 = (fftwf_complex*) fftwf_malloc(sizeof(fftwf_complex)*nx*ny); 
-
-  //plans for fourier transforming the images
-  fftwf_plan fftw1 = fftwf_plan_dft_r2c_2d(nx,ny, temp_img_1, temp_fft_1,
-					 FFTW_ESTIMATE);
-  fftwf_plan fftw2 = fftwf_plan_dft_r2c_2d(nx,ny, temp_img_2, temp_fft_2,
-					 FFTW_ESTIMATE);
-
-  //plans for fourier transforming the image weights
-  fftwf_plan fftw1_w = fftwf_plan_dft_r2c_2d(nx,ny, temp_img_1_weight, temp_fft_1,
-					 FFTW_ESTIMATE);
-  fftwf_plan fftw2_w = fftwf_plan_dft_r2c_2d(nx,ny, temp_img_2_weight, temp_fft_2,
-					 FFTW_ESTIMATE);
+  Complex_2D temp_fft_1(nx,ny);
+  Complex_2D temp_fft_2(nx,ny);
 
   //plan for backwards fourier transform
-  fftwf_complex* fft_total = (fftwf_complex*) fftwf_malloc(sizeof(fftwf_complex)*nx*ny); 
-  fftwf_plan fftwf_inv = fftwf_plan_dft_c2r_2d(nx,ny, fft_total, temp_img_1,
-					    FFTW_ESTIMATE);
+  //Complex_2D fft_total(nx,ny);
 
   double weight_sum = 0 ;
   
@@ -1285,12 +1271,6 @@ void align_even_better(Double_2D & first_image, Double_2D & second_image,
   for(int i=0; i < nx ; i++){
     for(int j=0; j < ny ; j++){
    
-      temp_img_1[i*ny + j] = 0.0;
-      temp_img_2[i*ny + j] = 0.0;
-
-      temp_img_1_weight[i*ny + j] = 0.0;
-      temp_img_2_weight[i*ny + j] = 0.0;
-
       if(i>=0.5*(nx-nx_1) && i < 0.5*(nx+nx_1) &&
 	 j>=0.5*(ny-ny_1) && j < 0.5*(ny+ny_1)){
 	    
@@ -1299,20 +1279,20 @@ void align_even_better(Double_2D & first_image, Double_2D & second_image,
 	    
 	    //image1.set(i,j,first_image.get(i_,j_));
 	    if(!first_image_weights || first_image_weights->get(i_,j_)>0){
-	      temp_img_1[i*ny + j] = first_image.get(i_,j_);
-	      temp_img_1_weight[i*ny + j] = 1.0;
+	      temp_img_1.set(i,j,first_image.get(i_,j_));
+	      temp_img_1_weight.set(i,j,1.0);
 	    }
 	    
 	    if(i_<nx_2 && j_<ny_2 && 
 	       (!second_image_weights || second_image_weights->get(i_,j_)>0)){
-	      temp_img_2[i*ny + j] = second_image.get(i_,j_);
-	      temp_img_2_weight[i*ny + j] = 1.0;
+	      temp_img_2.set(i,j,second_image.get(i_,j_));
+	      temp_img_2_weight.set(i,j,1.0);
 	    }
 
 	    if(nx_1*ny_1 < nx_2*ny_2)
-	      weight_sum+=temp_img_1_weight[i*ny + j];
+	      weight_sum+=temp_img_1_weight.get(i,j);
 	    else
-	      weight_sum+=temp_img_2_weight[i*ny + j];
+	      weight_sum+=temp_img_2_weight.get(i,j);
 	    
       }
 
@@ -1325,13 +1305,15 @@ void align_even_better(Double_2D & first_image, Double_2D & second_image,
   }
 
   //perform the two fourier transforms of the images
-  fftwf_execute(fftw1);
-  fftwf_execute(fftw2);
+  temp_fft_1.perform_forward_fft_real(temp_img_1);
+  temp_fft_2.perform_forward_fft_real(temp_img_2);
 
-  //  Complex_2D my_fft(nx,ny);
+  temp_fft_2.conjugate();
+  temp_fft_1.multiply(temp_fft_1);
+
 
   //multiply the result of the two image transforms together
-  for(int i=0; i < nx ; i++){
+  /**for(int i=0; i < nx ; i++){
     for(int j=0; j < ny ; j++){
 
       //conjugate the second images transform while multiplying
@@ -1346,19 +1328,22 @@ void align_even_better(Double_2D & first_image, Double_2D & second_image,
       //      temp_img_1[i*ny + j] = weights1.get(i,j);
       //   temp_img_2[i*ny + j] = weights2.get(i,j);
 
-    }
-  }
-
-  //perform the two fourier transforms of the image weights
-  fftwf_execute(fftw1_w);
-  fftwf_execute(fftw2_w);
+      }
+      }**/
 
   //perform the inverse transform for the images F^-1(F(A)*F(B))
   //where A and B are the images and F(A)(B?) is conjugated.
-  fftwf_execute(fftwf_inv);
+  temp_fft_1.perform_backward_fft_real(temp_img_2);
+  
+  //perform the two fourier transforms of the image weights
+  temp_fft_1.perform_forward_fft_real(temp_img_1_weight);
+  temp_fft_2.perform_forward_fft_real(temp_img_2_weight);
+
+  temp_fft_2.conjugate();
+  temp_fft_1.multiply(temp_fft_1);
 
   //multiply tha transformed weights together
-  for(int i=0; i < nx ; i++){
+  /**for(int i=0; i < nx ; i++){
     for(int j=0; j < ny ; j++){
 
       double rl = temp_fft_1[i*ny + j][0]*temp_fft_2[i*ny + j][0]
@@ -1372,10 +1357,10 @@ void align_even_better(Double_2D & first_image, Double_2D & second_image,
       temp_img_2[i*ny + j] = temp_img_1[i*ny + j]/(nx*ny);
 
     }
-  }
+    }**/
 
   //invert the weight.
-  fftwf_execute(fftwf_inv);
+  temp_fft_1.perform_backward_fft_real(temp_img_1);
 
   double max = 0;
 
@@ -1386,11 +1371,11 @@ void align_even_better(Double_2D & first_image, Double_2D & second_image,
     for(int j=0; j < ny ; j++){
 
 
-      if(temp_img_1[i*ny + j]/overlap_factor > overlap_fraction){
+      if(temp_img_1.get(i,j)/overlap_factor > overlap_fraction){
 
 	//	temp_image.set(i,j,temp_img_1[i*ny + j]);// //temp_img_2[i*ny + j])/temp_img_1[i*ny + j]);
 
-	if(temp_img_2[i*ny + j]/temp_img_1[i*ny + j] > max){
+	if(temp_img_2.get(i,j)/temp_img_1.get(i,j) > max){
 
 	  int temp_i = - i;
 	  int temp_j = - j;
@@ -1404,7 +1389,7 @@ void align_even_better(Double_2D & first_image, Double_2D & second_image,
 	  if(temp_i>=min_x && temp_i<max_x &&
 	     temp_j>=min_y && temp_j<max_y){
 	    
-	    max = temp_img_2[i*ny + j]/temp_img_1[i*ny + j];
+	    max = temp_img_2.get(i,j)/temp_img_1.get(i,j);
 	    offset_x = temp_i;
 	    offset_y = temp_j;
 	  }
@@ -1420,7 +1405,7 @@ void align_even_better(Double_2D & first_image, Double_2D & second_image,
   //  write_image("temp_image.tiff",temp_image,true);
   //cout <<temp_image.get_max()<<endl;
 
-  delete [] temp_img_1;
+  /**  delete [] temp_img_1;
   delete [] temp_img_2;
   delete [] temp_img_1_weight;
   delete [] temp_img_2_weight;
@@ -1431,8 +1416,7 @@ void align_even_better(Double_2D & first_image, Double_2D & second_image,
 
   fftwf_destroy_plan(fftw1);
   fftwf_destroy_plan(fftw2);
-  fftwf_destroy_plan(fftwf_inv);
-  
+  fftwf_destroy_plan(fftwf_inv);**/ 
 
 }
 
