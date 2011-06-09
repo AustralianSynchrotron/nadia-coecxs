@@ -3,7 +3,6 @@
 #include <math.h>
 #include <string>
 #include <stdlib.h>
-#include <fftw3.h>
 #include <cstdlib> 
 #include "Complex_2D.h"
 #include "Double_2D.h"
@@ -408,17 +407,19 @@ void PhaseDiverseCDI::adjust_positions(double step_size, bool forward){
 
 
     Double_2D * temp_single_int = 0; 
-    Double_2D * weight_single_int = 0;  
+    Double_2D * weight_single_int = new Double_2D(lnx*scale,lny*scale);;  
 
     if(scale==1){
       temp_single_int = &temp_single;
-      weight_single_int = singleCDI.at(n)->get_support();
+      weight_single_int->copy(singleCDI.at(n)->get_support());
     }
     else{
       temp_single_int = new Double_2D(lnx*scale,lny*scale);
-      weight_single_int = new Double_2D(lnx*scale,lny*scale);
+      cout << "before I 1"<<endl;
       interpolate(temp_single,*temp_single_int);
-      interpolate(*weights.at(n),singleCDI.at(n)->get_support());
+      cout << "before I 2"<<endl;
+      interpolate(singleCDI.at(n)->get_support(),*weight_single_int);
+      cout << "before I 3"<<endl;
     }
 
     cout << "here"<<endl;
@@ -519,11 +520,11 @@ void PhaseDiverseCDI::adjust_positions(double step_size, bool forward){
 
 
   //reset the object global transmission function
-  scale_object(1-beta); 
+  //  scale_object(1-beta); 
   
-  for(int i=0; i<singleCDI.size(); i++){
+  /**  for(int i=0; i<singleCDI.size(); i++){
     add_to_object(i);
-  }
+    }**/
 
 
 }

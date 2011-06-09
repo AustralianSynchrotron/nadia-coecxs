@@ -134,7 +134,7 @@ void rescale(Double_2D & image, double scale){
 
 
 //no good
-double calculate_high_frequency_ratio(Double_2D & image){
+/**double calculate_high_frequency_ratio(Double_2D & image){
 
   double value = 0;
   double total = 0;
@@ -180,7 +180,7 @@ double calculate_high_frequency_ratio(Double_2D & image){
 
   return value;
 
-}
+  }**/
 
 //calculate the chi2 between different images
 double diff_of_squares(Double_2D & image1, Double_2D & image2){
@@ -1256,24 +1256,24 @@ void align_even_better(Double_2D & first_image, Double_2D & second_image,
   double * temp_img_1_weight = new double[nx*ny];
   double * temp_img_2_weight = new double[nx*ny];
 
-  fftw_complex* temp_fft_1 = (fftw_complex*) fftw_malloc(sizeof(fftw_complex)*nx*ny); 
-  fftw_complex* temp_fft_2 = (fftw_complex*) fftw_malloc(sizeof(fftw_complex)*nx*ny); 
+  fftwf_complex* temp_fft_1 = (fftwf_complex*) fftwf_malloc(sizeof(fftwf_complex)*nx*ny); 
+  fftwf_complex* temp_fft_2 = (fftwf_complex*) fftwf_malloc(sizeof(fftwf_complex)*nx*ny); 
 
   //plans for fourier transforming the images
-  fftw_plan fftw1 = fftw_plan_dft_r2c_2d(nx,ny, temp_img_1, temp_fft_1,
+  fftwf_plan fftw1 = fftwf_plan_dft_r2c_2d(nx,ny, temp_img_1, temp_fft_1,
 					 FFTW_ESTIMATE);
-  fftw_plan fftw2 = fftw_plan_dft_r2c_2d(nx,ny, temp_img_2, temp_fft_2,
+  fftwf_plan fftw2 = fftwf_plan_dft_r2c_2d(nx,ny, temp_img_2, temp_fft_2,
 					 FFTW_ESTIMATE);
 
   //plans for fourier transforming the image weights
-  fftw_plan fftw1_w = fftw_plan_dft_r2c_2d(nx,ny, temp_img_1_weight, temp_fft_1,
+  fftwf_plan fftw1_w = fftwf_plan_dft_r2c_2d(nx,ny, temp_img_1_weight, temp_fft_1,
 					 FFTW_ESTIMATE);
-  fftw_plan fftw2_w = fftw_plan_dft_r2c_2d(nx,ny, temp_img_2_weight, temp_fft_2,
+  fftwf_plan fftw2_w = fftwf_plan_dft_r2c_2d(nx,ny, temp_img_2_weight, temp_fft_2,
 					 FFTW_ESTIMATE);
 
   //plan for backwards fourier transform
-  fftw_complex* fft_total = (fftw_complex*) fftw_malloc(sizeof(fftw_complex)*nx*ny); 
-  fftw_plan fftw_inv = fftw_plan_dft_c2r_2d(nx,ny, fft_total, temp_img_1,
+  fftwf_complex* fft_total = (fftwf_complex*) fftwf_malloc(sizeof(fftwf_complex)*nx*ny); 
+  fftwf_plan fftwf_inv = fftwf_plan_dft_c2r_2d(nx,ny, fft_total, temp_img_1,
 					    FFTW_ESTIMATE);
 
   double weight_sum = 0 ;
@@ -1298,13 +1298,13 @@ void align_even_better(Double_2D & first_image, Double_2D & second_image,
 	    int j_ = j-0.5*(ny-ny_1);
 	    
 	    //image1.set(i,j,first_image.get(i_,j_));
-	    if(!first_image_weights || first_image_weights->get(i_,j_)>0.1*max_weight_1){
+	    if(!first_image_weights || first_image_weights->get(i_,j_)>0){
 	      temp_img_1[i*ny + j] = first_image.get(i_,j_);
 	      temp_img_1_weight[i*ny + j] = 1.0;
 	    }
 	    
 	    if(i_<nx_2 && j_<ny_2 && 
-	       (!second_image_weights || second_image_weights->get(i_,j_)>0.1*max_weight_2)){
+	       (!second_image_weights || second_image_weights->get(i_,j_)>0)){
 	      temp_img_2[i*ny + j] = second_image.get(i_,j_);
 	      temp_img_2_weight[i*ny + j] = 1.0;
 	    }
@@ -1325,8 +1325,8 @@ void align_even_better(Double_2D & first_image, Double_2D & second_image,
   }
 
   //perform the two fourier transforms of the images
-  fftw_execute(fftw1);
-  fftw_execute(fftw2);
+  fftwf_execute(fftw1);
+  fftwf_execute(fftw2);
 
   //  Complex_2D my_fft(nx,ny);
 
@@ -1350,12 +1350,12 @@ void align_even_better(Double_2D & first_image, Double_2D & second_image,
   }
 
   //perform the two fourier transforms of the image weights
-  fftw_execute(fftw1_w);
-  fftw_execute(fftw2_w);
+  fftwf_execute(fftw1_w);
+  fftwf_execute(fftw2_w);
 
   //perform the inverse transform for the images F^-1(F(A)*F(B))
   //where A and B are the images and F(A)(B?) is conjugated.
-  fftw_execute(fftw_inv);
+  fftwf_execute(fftwf_inv);
 
   //multiply tha transformed weights together
   for(int i=0; i < nx ; i++){
@@ -1375,7 +1375,7 @@ void align_even_better(Double_2D & first_image, Double_2D & second_image,
   }
 
   //invert the weight.
-  fftw_execute(fftw_inv);
+  fftwf_execute(fftwf_inv);
 
   double max = 0;
 
@@ -1425,20 +1425,20 @@ void align_even_better(Double_2D & first_image, Double_2D & second_image,
   delete [] temp_img_1_weight;
   delete [] temp_img_2_weight;
 
-  fftw_free(temp_fft_1);
-  fftw_free(temp_fft_2);
-  fftw_free(fft_total);
+  fftwf_free(temp_fft_1);
+  fftwf_free(temp_fft_2);
+  fftwf_free(fft_total);
 
-  fftw_destroy_plan(fftw1);
-  fftw_destroy_plan(fftw2);
-  fftw_destroy_plan(fftw_inv);
+  fftwf_destroy_plan(fftw1);
+  fftwf_destroy_plan(fftw2);
+  fftwf_destroy_plan(fftwf_inv);
   
 
 }
 
 ////////////////////////////////
 
-void interpolate( Double_2D & original, Double_2D & big){
+void interpolate(const Double_2D & original, Double_2D & big){
 
   int nx = original.get_size_x();
   int ny = original.get_size_y();
@@ -1528,7 +1528,7 @@ void interpolate( Double_2D & original, Double_2D & big){
 
 
 
-void interpolate( Complex_2D & original, Complex_2D & big){
+void interpolate( const Complex_2D & original, Complex_2D & big){
 
   int nx = original.get_size_x();
   int ny = original.get_size_y();
@@ -1673,7 +1673,7 @@ void interpolate( Complex_2D & original, Complex_2D & big){
 }
 
 
-void shrink( Complex_2D & original, Complex_2D & small){
+void shrink( const Complex_2D & original, Complex_2D & small){
 
   int nx = original.get_size_x();
   int ny = original.get_size_y();
@@ -1715,7 +1715,7 @@ void shrink( Complex_2D & original, Complex_2D & small){
 
 }
 
-void shrink( Double_2D & original, Double_2D & small){
+void shrink( const Double_2D & original, Double_2D & small){
 
   int nx = original.get_size_x();
   int ny = original.get_size_y();

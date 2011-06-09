@@ -20,6 +20,8 @@
 #include "fftw3.h"
 #include "Double_2D.h"
 
+//class Double_2D;
+
 /** the function failed */
 #define FAILURE 0
 
@@ -45,16 +47,28 @@
 
 class Complex_2D{
 
-  /** "array" holds the data */
-  fftw_complex *array;
-
   /** nx/ny are number of samplings in x/y */
   int nx, ny;
 
-  //Allow FourierT to access protected members.
-  //This is needed for the quick copy method used
-  //in the FourierT class.
-  //  friend class FourierT;
+  /* A flag which is passed to fftw when plans are created */
+  int fftw_type;
+
+
+#ifdef SINGLE_PRECISION
+
+  /** "array" holds the data */
+  fftwf_complex *array;
+
+  /* A fftw plan for forward fourier transforms */
+  fftwf_plan f_forward;
+
+  /* A fftw plan for backward fourier transforms */
+  fftwf_plan f_backward;
+
+#else //If we are using double precision
+
+  /** "array" holds the data */
+  fftw_complex *array;
 
   /* A fftw plan for forward fourier transforms */
   fftw_plan f_forward;
@@ -62,8 +76,8 @@ class Complex_2D{
   /* A fftw plan for backward fourier transforms */
   fftw_plan f_backward;
 
-  /* A flag which is passed to fftw when plans are created */
-  int fftw_type;
+#endif
+
   
  public:
 
@@ -348,6 +362,9 @@ class Complex_2D{
    */
   void invert(bool scale=false);
 
+  void conjugate();
+
+
   /**
    * Forward fourier transform the Complex_2D object. The
    * Complex_2D is not scaled to give the same normalisation as 
@@ -365,6 +382,12 @@ class Complex_2D{
    *
    */
   void perform_backward_fft();
+
+  
+
+  void perform_backward_fft_real(Double_2D & result);
+
+  void perform_forward_fft_real(Double_2D & input);
 
   /**
    * A flag which is passed to fftw when plans are created. It maybe

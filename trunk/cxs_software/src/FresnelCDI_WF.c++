@@ -3,7 +3,6 @@
 #include <math.h>
 #include <string>
 #include <stdlib.h>
-#include <fftw3.h>
 #include <cstdlib> 
 #include "Complex_2D.h"
 #include "FresnelCDI_WF.h"

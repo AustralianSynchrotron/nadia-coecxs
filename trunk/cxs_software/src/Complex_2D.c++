@@ -1,6 +1,5 @@
 #include <iostream>  
 #include "Complex_2D.h"
-#include "Double_2D.h"
 #include <stdlib.h>
 //#include <string.h>
 #include <cstring>
@@ -12,9 +11,13 @@ Complex_2D::Complex_2D(int x_size, int y_size){
   //set the array size
   nx = x_size;
   ny = y_size;
-  
+
   //allocate memory for the array
-  array = (fftw_complex*) fftw_malloc(sizeof(fftw_complex)*nx*ny);
+#ifdef SINGLE_PRECISION
+  array = (fftwf_complex*) fftwf_malloc(sizeof(fftwf_complex)*nx*ny);
+#else
+  array = (fftw_complex*) fftw_malloc(sizeof(fftwf_complex)*nx*ny);
+#endif
 
   //initalise the fftw plans to null (not created yet. We will
   //create them when needed to avoid unnecessary time overhead).
@@ -25,6 +28,18 @@ Complex_2D::Complex_2D(int x_size, int y_size){
 
 Complex_2D::~Complex_2D(){
 
+#ifdef SINGLE_PRECISION
+  //free the memory of the array.
+  fftwf_free(array);
+
+  //free the memory of the fftw plans (but
+  //only if it was actually allocated).
+  if(f_forward)
+    fftwf_destroy_plan(f_forward);
+  if(f_backward)
+    fftwf_destroy_plan(f_backward);
+
+#else
   //free the memory of the array.
   fftw_free(array);
 
@@ -34,6 +49,8 @@ Complex_2D::~Complex_2D(){
     fftw_destroy_plan(f_forward);
   if(f_backward)
     fftw_destroy_plan(f_backward);
+
+#endif
 }
 
 //set the value at positions x,y. See Complex_2D.h for more info.
@@ -171,6 +188,16 @@ double Complex_2D::get_norm() const {
   return sqrt(norm_squared);
 }
 
+void Complex_2D::conjugate() {
+  
+  for(int i=0; i < nx; ++i){
+    for(int j=0; j < ny; ++j){
+      set_imag(i,j,-1*get_imag(i,j));
+    }
+  }
+
+}
+
 //make a new complex 2d that has idential values to this one
 Complex_2D * Complex_2D::clone() const {
 
@@ -198,7 +225,12 @@ void Complex_2D::copy(const Complex_2D & c){
   }
   
   //copy
+
+#ifdef SINGLE_PRECISION
+  std::memcpy(array,c.array,sizeof(fftwf_complex)*nx*ny);
+#else
   std::memcpy(array,c.array,sizeof(fftw_complex)*nx*ny);
+#endif
 }
 
 
@@ -254,7 +286,23 @@ void Complex_2D::initialise_fft(){
   //creating the plan will erase the content of the array
   //so we need to be a bit tricky here.
 
+#ifdef SINGLE_PRECISION
   //make a new array 
+  fftwf_complex * tmp_array;
+  tmp_array = (fftwf_complex*) fftwf_malloc(sizeof(fftwf_complex)*nx*ny);
+  
+  //make the plans
+  f_backward = fftwf_plan_dft_2d(nx, ny, tmp_array, tmp_array, 
+				FFTW_BACKWARD, fftw_type);
+  f_forward = fftwf_plan_dft_2d(nx, ny,tmp_array,tmp_array, 
+			       FFTW_FORWARD, fftw_type);
+  
+  //now copy the array contents into the tmp_array,
+  //free the old memory and update the pointer.
+  std::memcpy(tmp_array,array,sizeof(fftwf_complex)*nx*ny);
+  fftwf_free(array);
+
+#else
   fftw_complex * tmp_array;
   tmp_array = (fftw_complex*) fftw_malloc(sizeof(fftw_complex)*nx*ny);
   
@@ -268,6 +316,9 @@ void Complex_2D::initialise_fft(){
   //free the old memory and update the pointer.
   std::memcpy(tmp_array,array,sizeof(fftw_complex)*nx*ny);
   fftw_free(array);
+
+#endif
+
   array = tmp_array;
 
 }
@@ -277,7 +328,12 @@ void Complex_2D::perform_forward_fft(){
   //make a new forward fft plan if we haven't made one already.
   if(f_forward==0 )
     initialise_fft();  
+
+#ifdef SINGLE_PRECISION
+  fftwf_execute(f_forward);
+#else
   fftw_execute(f_forward);
+#endif
 }
 
 
@@ -286,5 +342,44 @@ void Complex_2D::perform_backward_fft(){
   //make a new backward fft plan if we haven't made one already.
   if(f_backward==0)
     initialise_fft();
+#ifdef SINGLE_PRECISION
+  fftwf_execute(f_backward);
+#else
   fftw_execute(f_backward);
+#endif
 }
+
+
+//this object is fourier transformed and the result placed in 'result'
+void Complex_2D::perform_backward_fft_real(Double_2D & result){
+
+#ifdef SINGLE_PRECISION
+  fftwf_plan fftw;
+  fftw = fftwf_plan_dft_c2r_2d(nx,ny,array,result.array,FFTW_ESTIMATE); 
+  fftwf_execute(fftw);
+  fftwf_destroy_plan(fftw);
+#else
+  fftw_plan fftw;
+  fftw = fftw_plan_dft_c2r_2d(nx,ny,array,result.array,FFTW_ESTIMATE); 
+  fftw_execute(fftw);
+  fftw_destroy_plan(fftw);  
+#endif
+}
+
+//'result' is fourier transformed and the result placed in this object
+void  Complex_2D::perform_forward_fft_real(Double_2D & input){
+#ifdef SINGLE_PRECISION
+  fftwf_plan fftw;
+  fftw = fftwf_plan_dft_r2c_2d(nx,ny,input.array,array,FFTW_ESTIMATE); 
+  fftwf_execute(fftw);
+  fftwf_destroy_plan(fftw);
+#else
+  fftw_plan fftw;
+  fftw = fftw_plan_dft_r2c_2d(nx,ny,input.array,array,FFTW_ESTIMATE); 
+  fftw_execute(fftw);
+  fftw_destroy_plan(fftw);
+#endif    
+}
+
+
+

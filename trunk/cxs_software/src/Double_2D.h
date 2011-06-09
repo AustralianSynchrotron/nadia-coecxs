@@ -22,6 +22,8 @@
 template <class T>
 class Real_2D{
 
+ protected:
+
   /** the underlying 2-D array */
   T * array;
   
@@ -32,6 +34,8 @@ class Real_2D{
   int ny;
 
  public:
+
+  friend class Complex_2D ; 
 
   /**
    * A constructor which creates an empty array (of no size).  Note
@@ -210,9 +214,11 @@ class Real_2D{
 
 };
 
-
+#ifdef SINGLE_PRECISION
+typedef Real_2D<float> Double_2D;
+#else
 typedef Real_2D<double> Double_2D;
-
+#endif
 
 
 #endif
