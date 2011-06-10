@@ -319,7 +319,20 @@ void PhaseDiverseCDI::set_result(BaseCDI * local, Complex_2D & result){
 }
 
 //frames need to be in order for this to work.
-void PhaseDiverseCDI::adjust_positions(double step_size, bool forward){
+void PhaseDiverseCDI::adjust_positions(int type, bool forward, 
+				       int x_min, int x_max,
+				       int y_min, int y_max,
+				       double step_size){
+
+  if(type!=CROSS_CORRELATION || type!=MINIMUM_ERROR){
+    cerr << "The alignment type given to"
+	 << " PhaseDiverseCDI::adjust_positions is not"
+	 << " a known type. Please consider using"
+	 << " PhaseDiverseCDI::CROSS_CORRELATION or "
+	 << " PhaseDiverseCDI::MINIMUM_ERROR." 
+	 << endl;
+    return;
+  }
 
   //make a copy of the tranmission function
   Complex_2D * pointer_to_object = object;
@@ -380,139 +393,146 @@ void PhaseDiverseCDI::adjust_positions(double step_size, bool forward){
     //do an iteration of the frame on it's own.
     singleCDI.at(n)->iterate();
     get_result(singleCDI.at(n),*(single_result.at(n)));
-    
-    //this array will store a copy of the local frame with 1-mag.
-    Double_2D temp_single(lnx,lny);
 
-    //this array will store a copy of the global frame with 1-mag.
-    Double_2D temp_others(lnx*scale,lny*scale);
-    
-    for(int i=0; i<lnx*scale; i++){
-      for(int j=0; j<ny*scale; j++){
-	
-	int i_ = i - before_x*scale -  x_min*scale;
-	int j_ = j - before_y*scale -  y_min*scale;
-	
-	if( i_>=0 && j_>=0 && i_<nx && j_<ny ){
-	  double obj_mag = object->get_mag(i_,j_);
-	  if(obj_mag<1)
-	    temp_others.set(i,j,1-obj_mag);
-	}
-	if(i<lnx && j<lny && single_result.at(n)->get_mag(i,j) <1 ){
-	  double new_value = 1-single_result.at(n)->get_mag(i,j);
-	  temp_single.set(i,j,new_value);
+    if(type==CROSS_CORRELATION){
+      
+      //this array will store a copy of the local frame with 1-mag.
+      Double_2D temp_single(lnx,lny);
+
+      //this array will store a copy of the global frame with 1-mag.
+      Double_2D temp_others(lnx*scale,lny*scale);
+      
+      for(int i=0; i<lnx*scale; i++){
+	for(int j=0; j<ny*scale; j++){
+	  
+	  int i_ = i - before_x*scale -  x_min*scale;
+	  int j_ = j - before_y*scale -  y_min*scale;
+	  
+	  if( i_>=0 && j_>=0 && i_<nx && j_<ny ){
+	    double obj_mag = object->get_mag(i_,j_);
+	    if(obj_mag<1)
+	      temp_others.set(i,j,1-obj_mag);
+	  }
+	  if(i<lnx && j<lny && single_result.at(n)->get_mag(i,j) <1 ){
+	    double new_value = 1-single_result.at(n)->get_mag(i,j);
+	    temp_single.set(i,j,new_value);
+	  }
 	}
       }
+      
+      
+      Double_2D * temp_single_int = 0; 
+      Double_2D * weight_single_int = new Double_2D(lnx*scale,lny*scale);;  
+      
+      if(scale==1){
+	temp_single_int = &temp_single;
+	weight_single_int->copy(singleCDI.at(n)->get_support());
+      }
+      else{
+	temp_single_int = new Double_2D(lnx*scale,lny*scale);
+	interpolate(temp_single,*temp_single_int);
+	interpolate(singleCDI.at(n)->get_support(),*weight_single_int);
+      }
+
+      /** static int counter = 0;
+	  char buff[90];
+	  sprintf(buff,"temp_single_%i.tiff",counter);
+	  write_image(buff,*temp_single_int,false);
+	  
+	  cout << "not here"<<endl;
+	  
+	  sprintf(buff,"temp_object_%i.tiff",counter);
+	  write_image(buff,temp_others,false);
+	  counter++;**/
+      
+      int new_x=0;
+      int new_y=0;
+
+      align_even_better(*temp_single_int, temp_others, 
+			new_x, new_y,
+			x_min, x_max,
+			y_min, y_max,
+			weight_single_int,
+			&temp_others);
+      
+      x_position.at(n) = before_x + new_x/((double)scale);
+      y_position.at(n) = before_y + new_y/((double)scale);
+
+      cout << "moving prob " << n << " from ("
+	   << before_x << "," << before_y << ") "
+	   << "-> (" << x_position.at(n) 
+	   << "," <<  y_position.at(n) << ")."
+	   << endl;
+      
+      //clean up a bit
+      if(scale!=1){
+	delete temp_single_int;
+	delete weight_single_int;
+      }
+
+
     }
 
-
-    Double_2D * temp_single_int = 0; 
-    Double_2D * weight_single_int = new Double_2D(lnx*scale,lny*scale);;  
-
-    if(scale==1){
-      temp_single_int = &temp_single;
-      weight_single_int->copy(singleCDI.at(n)->get_support());
+    if(type==MINIMUM_ERROR){
+      
+      Complex_2D temp(lnx*scale,lny*scale);
+      
+      for(int i=0; i<lnx*scale; i++){
+	for(int j=0; j<ny*scale; j++){
+	  
+	  int i_ = i - before_x*scale -  x_min*scale;
+	  int j_ = j - before_y*scale -  y_min*scale;
+	  
+	  if( i_>=0 && j_>=0 && i_<nx && j_<ny ){
+	    
+	    temp.set_real(i,j,object->get_real(i_,j_));
+	    temp.set_imag(i,j,object->get_imag(i_,j_));
+	  }
+	  
+	}
+      }
+      
+      object = &temp;
+      
+      nx = lnx*scale;
+      ny = lny*scale;
+      
+      x_min = -x_position.at(n);
+      y_min = -y_position.at(n);
+      
+      check_position(n,step_size, x_min, x_max, y_min, y_max);
+      
+      cout << "moving prob " << n << " from ("
+	   << before_x << "," << before_y << ") "
+	   << "-> (" << x_position.at(n) 
+	   << "," <<  y_position.at(n) << ")."
+	   << endl;      
+      
+      //return to normal
+      object = &temp_object;
+      nx = nx_c;
+      ny = ny_c;
+      x_min = x_min_c; 
+      y_min = y_min_c;
     }
-    else{
-      temp_single_int = new Double_2D(lnx*scale,lny*scale);
-      cout << "before I 1"<<endl;
-      interpolate(temp_single,*temp_single_int);
-      cout << "before I 2"<<endl;
-      interpolate(singleCDI.at(n)->get_support(),*weight_single_int);
-      cout << "before I 3"<<endl;
-    }
-
-    cout << "here"<<endl;
-
-    static int counter = 0;
-    char buff[90];
-    sprintf(buff,"temp_single_%i.tiff",counter);
-    write_image(buff,*temp_single_int,false);
-
-    cout << "not here"<<endl;
-
-    sprintf(buff,"temp_object_%i.tiff",counter);
-    write_image(buff,temp_others,false);
-    counter++;
-
-    int new_x=0;
-    int new_y=0;
-
-    align_even_better(*temp_single_int, temp_others, 
-		      new_x, new_y,
-		      -50, +50,
-		      -50, +50,
-		      //temp_single_int,
-		      weight_single_int,
-		      //weights.at(n),
-		      &temp_others,
-		      0.2); 
-
-    x_position.at(n) = before_x + new_x/((double)scale);
-    y_position.at(n) = before_y + new_y/((double)scale);
-
-    cout << "cross-correlation: moving prob " << n << " from ("
-	 << before_x << "," << before_y << ") "
-	 << "-> (" << x_position.at(n) 
-	 << "," <<  y_position.at(n) << ")."
-	 << endl;
-
-    //clean up a bit
-    if(scale!=1){
-      delete temp_single_int;
-      delete weight_single_int;
-    }
-    //    delete temp_others;
-    //  delete temp_single;
-    
-    //replace the transmission function with
-    //just the 1st frame information
-    
-    /**nx = lnx*scale;
-    ny = lny*scale;
-    
-    Complex_2D * temp =  new Complex_2D(nx,ny);
-    get_object_sub_grid(temp,before_x,before_y);
-    
-    object = &temp;
-    x_min = -x_position.at(n);
-    y_min = -y_position.at(n);**/
-
-    /**    check_position(n,8,0);
-    
-    cout << "error: moving prob " << n << " from ("
-	 << before_x << "," << before_y << ") "
-	 << "-> (" << x_position.at(n) 
-	 << "," <<  y_position.at(n) << ")."
-	 << endl;**/
-
-    //if we moved the positions, we need to recalculate the 
-    //weights for that frame.
-
-    //return to normal
-    /**object = &temp_object;
-    nx = nx_c;
-    ny = ny_c;
-    x_min = x_min_c; 
-    y_min = y_min_c;**/
 
     weights_set=false;
     add_to_object(n);
-
+	
     if(forward)
       n++;
     else
       n--;
-
+    
   }
   
   //set all the parameters back to normal
   object = pointer_to_object;
 
-  /** nx = nx_c;
+  nx = nx_c;
   ny = ny_c;
-  x_min = x_min_c; 
-  y_min = y_min_c; **/
+  x_min = x_min_c;
+  y_min = y_min_c;
   parallel = parallel_c;
   beta=beta_c;
 
@@ -530,7 +550,10 @@ void PhaseDiverseCDI::adjust_positions(double step_size, bool forward){
 
 }
 
-int PhaseDiverseCDI::check_position(int n_probe, double step_size, int tries){
+int PhaseDiverseCDI::check_position(int n_probe, double step_size, 
+				    int min_x, int max_x,
+				    int min_y, int max_y,
+				    int tries){
   
   double x = x_position.at(n_probe);
   double y = y_position.at(n_probe);
@@ -545,7 +568,7 @@ int PhaseDiverseCDI::check_position(int n_probe, double step_size, int tries){
 
   //failed, we moved around a bit, but couldn't find a local minima
   //in the error metric.
-  if(tries>10){
+  if(tries>10 || x < min_x || x > max_x || y < min_y || y > max_y ){
     cout << "Giving up on probe "<< n_probe << ". Could not find " 
 	 << "it's position. Returning to the original. " 
 	 << endl;

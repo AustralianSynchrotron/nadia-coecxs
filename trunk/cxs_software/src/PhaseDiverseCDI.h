@@ -119,6 +119,8 @@ class PhaseDiverseCDI{
 
  public:
 
+  enum {CROSS_CORRELATION,MINIMUM_ERROR};
+
   /** 
    * Construct a PhaseDiverseCDI object for phase diverse or
    * ptychographic reconstruction. The data should be entered later
@@ -242,8 +244,11 @@ class PhaseDiverseCDI{
    *
    * more to come....
    */
-  void adjust_positions(double step_size=4, bool forwards=true);
-  
+  void adjust_positions(int type=CROSS_CORRELATION, 
+			bool forwards=true,
+			int x_min=-50, int x_max=+50,
+			int y_min=-50, int y_max=+50,
+			double step_size=4);
 
   /**
    * Get the current position of the 'n_probe'th frame.
@@ -340,9 +345,11 @@ class PhaseDiverseCDI{
   /**
    * Needs some work......
    */
-  int check_position(int n_probe, double shift=4, int tries=0);
-
-  
+  int check_position(int n_probe, double step_size=4, 
+		     int min_x=-50, int max_x=50,
+		     int min_y=-50, int max_y=50,
+		     int tries = 0);
+    
   /**
    * get the global pixel "x" corrdinate using a local frame "x" and
    * the frame offset.
