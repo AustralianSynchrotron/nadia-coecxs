@@ -1157,7 +1157,7 @@ void align_even_better(Double_2D & first_image, Double_2D & second_image,
   //if the image is too big for this to work we'll
   //shrink is down, align the shrunken images using this method,
   //and then apply the shifting alignment method.
-  if(nx > MAX_PIXELS*2 || ny > MAX_PIXELS*2){
+  /**  if(nx > MAX_PIXELS*2 || ny > MAX_PIXELS*2){
 
     //get smaller versions of the images
     Double_2D * small_first = new Double_2D(MAX_PIXELS, MAX_PIXELS);
@@ -1210,7 +1210,7 @@ void align_even_better(Double_2D & first_image, Double_2D & second_image,
     cout << "after my align: "<<offset_x<<" ,"<<offset_y<<endl;
 
     return;
-  }
+    }**/
   
   //check these boundaries later
   if(min_x==max_x || min_y==max_y){
@@ -1219,33 +1219,6 @@ void align_even_better(Double_2D & first_image, Double_2D & second_image,
     min_y = 1-ny/2.0;
     max_y = ny/2.0;
   }
-
-  /**Double_2D image1(nx,ny);
-  Double_2D image2(nx,ny);
-
-  Double_2D weights1(nx,ny);
-  Double_2D weights2(nx,ny);
-
-  cout << "here 1"<<endl; **/
-
-  /**  for(int i=0.5*(nx-nx_1); i < 0.5*(nx+nx_1); i++){
-    for(int j=0.5*(ny-ny_1); j < 0.5*(ny+ny_1); j++){
-      int i_ = i-0.5*(nx-nx_1);
-      int j_ = j-0.5*(ny-ny_1);
-      
-      image1.set(i,j,first_image.get(i_,j_));
-      if(!first_image_weights || first_image_weights->get(i_,j_)>0)
-	weights1.set(i,j,1.0);
-
-      if(i_<nx_2&&j_<ny_2){
-	
-	image2.set(i,j,second_image.get(i_,j_));
-	
-	if(!second_image_weights || second_image_weights->get(i_,j_)>0)
-	  weights2.set(i,j,1.0);
-      }
-    }
-    }**/
 
   //copy image to an output  array
   //  Double_2D temp_image(nx,ny); //<-
@@ -1296,11 +1269,6 @@ void align_even_better(Double_2D & first_image, Double_2D & second_image,
 	    
       }
 
-      //copy image to an output  array
-      //  temp_image.set(i,j,temp_img_2_weight[i*ny + j]); //<-
-
-
-
     }
   }
 
@@ -1308,28 +1276,9 @@ void align_even_better(Double_2D & first_image, Double_2D & second_image,
   temp_fft_1.perform_forward_fft_real(temp_img_1);
   temp_fft_2.perform_forward_fft_real(temp_img_2);
 
-  temp_fft_2.conjugate();
-  temp_fft_1.multiply(temp_fft_1);
-
-
   //multiply the result of the two image transforms together
-  /**for(int i=0; i < nx ; i++){
-    for(int j=0; j < ny ; j++){
-
-      //conjugate the second images transform while multiplying
-      double rl = temp_fft_1[i*ny + j][0]*temp_fft_2[i*ny + j][0]
-	+temp_fft_1[i*ny + j][1]*temp_fft_2[i*ny + j][1];
-      double im = temp_fft_1[i*ny + j][0]*temp_fft_2[i*ny + j][1]
-	-temp_fft_1[i*ny + j][1]*temp_fft_2[i*ny + j][0];
-
-      fft_total[i*ny + j][0] = rl; 
-      fft_total[i*ny + j][1] = im; 
-
-      //      temp_img_1[i*ny + j] = weights1.get(i,j);
-      //   temp_img_2[i*ny + j] = weights2.get(i,j);
-
-      }
-      }**/
+  temp_fft_1.conjugate();
+  temp_fft_1.multiply(temp_fft_2);
 
   //perform the inverse transform for the images F^-1(F(A)*F(B))
   //where A and B are the images and F(A)(B?) is conjugated.
@@ -1339,25 +1288,8 @@ void align_even_better(Double_2D & first_image, Double_2D & second_image,
   temp_fft_1.perform_forward_fft_real(temp_img_1_weight);
   temp_fft_2.perform_forward_fft_real(temp_img_2_weight);
 
-  temp_fft_2.conjugate();
-  temp_fft_1.multiply(temp_fft_1);
-
-  //multiply tha transformed weights together
-  /**for(int i=0; i < nx ; i++){
-    for(int j=0; j < ny ; j++){
-
-      double rl = temp_fft_1[i*ny + j][0]*temp_fft_2[i*ny + j][0]
-	+temp_fft_1[i*ny + j][1]*temp_fft_2[i*ny + j][1];
-      double im = temp_fft_1[i*ny + j][0]*temp_fft_2[i*ny + j][1]
-	-temp_fft_1[i*ny + j][1]*temp_fft_2[i*ny + j][0];
-     
-      fft_total[i*ny + j][0] = rl; 
-      fft_total[i*ny + j][1] = im; 
-
-      temp_img_2[i*ny + j] = temp_img_1[i*ny + j]/(nx*ny);
-
-    }
-    }**/
+  temp_fft_1.conjugate();
+  temp_fft_1.multiply(temp_fft_2);
 
   //invert the weight.
   temp_fft_1.perform_backward_fft_real(temp_img_1);
@@ -1366,6 +1298,7 @@ void align_even_better(Double_2D & first_image, Double_2D & second_image,
 
   double overlap_factor = weight_sum*nx*ny;
 
+  Double_2D temp_image(nx,ny);
 
   for(int i=0; i < nx ; i++){
     for(int j=0; j < ny ; j++){
@@ -1373,7 +1306,7 @@ void align_even_better(Double_2D & first_image, Double_2D & second_image,
 
       if(temp_img_1.get(i,j)/overlap_factor > overlap_fraction){
 
-	//	temp_image.set(i,j,temp_img_1[i*ny + j]);// //temp_img_2[i*ny + j])/temp_img_1[i*ny + j]);
+	//temp_image.set(i,j,temp_img_2.get(i,j));// //temp_img_2[i*ny + j])/temp_img_1[i*ny + j]);
 
 	if(temp_img_2.get(i,j)/temp_img_1.get(i,j) > max){
 
@@ -1402,21 +1335,8 @@ void align_even_better(Double_2D & first_image, Double_2D & second_image,
     }
   }
   
-  //  write_image("temp_image.tiff",temp_image,true);
+  //write_image("temp_image.tiff",temp_image,false);
   //cout <<temp_image.get_max()<<endl;
-
-  /**  delete [] temp_img_1;
-  delete [] temp_img_2;
-  delete [] temp_img_1_weight;
-  delete [] temp_img_2_weight;
-
-  fftwf_free(temp_fft_1);
-  fftwf_free(temp_fft_2);
-  fftwf_free(fft_total);
-
-  fftwf_destroy_plan(fftw1);
-  fftwf_destroy_plan(fftw2);
-  fftwf_destroy_plan(fftwf_inv);**/ 
 
 }
 

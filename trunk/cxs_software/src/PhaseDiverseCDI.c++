@@ -424,7 +424,7 @@ void PhaseDiverseCDI::adjust_positions(double step_size, bool forward){
 
     cout << "here"<<endl;
 
-    /**    static int counter = 0;
+    static int counter = 0;
     char buff[90];
     sprintf(buff,"temp_single_%i.tiff",counter);
     write_image(buff,*temp_single_int,false);
@@ -433,7 +433,7 @@ void PhaseDiverseCDI::adjust_positions(double step_size, bool forward){
 
     sprintf(buff,"temp_object_%i.tiff",counter);
     write_image(buff,temp_others,false);
-    counter++;**/
+    counter++;
 
     int new_x=0;
     int new_y=0;
@@ -490,11 +490,11 @@ void PhaseDiverseCDI::adjust_positions(double step_size, bool forward){
     //weights for that frame.
 
     //return to normal
-    /** object = &temp_object;
+    /**object = &temp_object;
     nx = nx_c;
     ny = ny_c;
     x_min = x_min_c; 
-    y_min = y_min_c; **/
+    y_min = y_min_c;**/
 
     weights_set=false;
     add_to_object(n);
@@ -508,6 +508,7 @@ void PhaseDiverseCDI::adjust_positions(double step_size, bool forward){
   
   //set all the parameters back to normal
   object = pointer_to_object;
+
   /** nx = nx_c;
   ny = ny_c;
   x_min = x_min_c; 
@@ -907,7 +908,63 @@ void PhaseDiverseCDI::add_to_object(int n_probe){
       }
       
     }
-  } 
+  }
+
+  /**  Double_2D temp(nx,ny);
+  object->get_2d(MAG,temp);
+  write_image("before_norm.tiff",temp,false,0,1);
+
+  // normalise 
+  if(scale!=1){
+    for(int i_=1; i_< lnx-1; i_++){
+      for(int j_=1; j_< lny-1; j_++){
+      
+	double weight = this_weight.get(i_,j_);
+	
+	//don't even bother to do anything is the weight at this pixel is zero.
+	if(weight!=0){
+	  
+	  //get the pixel positions in the global (object) frame.
+	  int i = get_global_x_pos(i_,x_offset)*scale;
+	  int j = get_global_y_pos(j_,y_offset)*scale;
+	  
+	  //bounds check
+	  if(i>=0&&j>=0&&i<nx&&j<ny){ 
+
+	    double weight_r = 0;
+	    double weight_i = 0;
+
+	    for(int di=0; di < scale; di++){
+	      for(int dj=0; dj < scale; dj++){
+		//add to the sum for each pixel 
+		//so we can normalise later
+		weight_r+=object->get_real(i+di,j+dj);
+		weight_i+=object->get_imag(i+di,j+dj);	
+	      }
+	    }
+	
+	    //	    cout << weight_i << " " <<  small->get_imag(i_,j_) << " ";
+	    if(weight_r!=0&&weight_i!=0){
+	      weight_r=small->get_real(i_,j_)*scale*scale/weight_r;
+	      weight_i=small->get_imag(i_,j_)*scale*scale/weight_i;
+	      
+	      //	      cout << weight_i <<endl;
+	      
+	      for(int di=0; di < scale; di++){
+		for(int dj=0; dj < scale; dj++){
+		  object->set_real(i+di,j+dj,weight_r*object->get_real(i+di,j+dj));
+		  object->set_imag(i+di,j+dj,weight_i*object->get_imag(i+di,j+dj));
+		}
+	      }   
+	    }
+	  }
+	}
+      }
+    }
+    } **/
+
+  //  object->get_2d(MAG,temp);
+  //write_image("after_norm.tiff",temp,false,0,1);
 
   delete [] sub_pos;
   
