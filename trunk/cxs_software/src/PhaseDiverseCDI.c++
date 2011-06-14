@@ -697,6 +697,7 @@ void PhaseDiverseCDI::set_up_weights(){
     int lnx = single_result.at(n_probe)->get_size_x();
     int lny = single_result.at(n_probe)->get_size_y();
     BaseCDI * this_CDI = singleCDI.at(n_probe);
+    int frames = singleCDI.size();
     double value;
     Double_2D illum_mag(lnx,lny);
     double max;
@@ -718,14 +719,18 @@ void PhaseDiverseCDI::set_up_weights(){
 	else
 	  value = 1;
 
-	value=beta*alpha.at(n_probe)*pow(value,gamma);
+	value=alpha.at(n_probe)*pow(value,gamma);
 
 	if(this_CDI->get_support().get(i_,j_)<=0.0)
 	  value = 0;
 	//else
 	//  cout << support.get(i_,j_) <<endl;
 
+	if(!parallel)
+	  value*=beta;
+	
 	weights.at(n_probe)->set(i_,j_,value);
+
       }
     } 
   }
@@ -734,7 +739,7 @@ void PhaseDiverseCDI::set_up_weights(){
     
     Double_2D weight_norm(object->get_size_x(),object->get_size_y());
     
-    for(int n=0; n<singleCDI.size(); n++){
+    for(int n=0; n<frames; n++){
       
       double x = x_position.at(n);
       double y = y_position.at(n);
@@ -763,7 +768,7 @@ void PhaseDiverseCDI::set_up_weights(){
       }
     }
     
-    for(int n=0; n<singleCDI.size(); n++){
+    for(int n=0; n<frames; n++){
       
       double x = x_position.at(n);
       double y = y_position.at(n);
@@ -783,12 +788,12 @@ void PhaseDiverseCDI::set_up_weights(){
 	  if(i>=0&&j>=0&&i<nx&&j<ny){
 	    
 	    double old_weight = weights.at(n)->get(i_,j_);
-	    double norm = weight_norm.get(i,j);
+	    double norm = weight_norm.get(i,j)*frames;
 
 	    if(norm<=0)
 	      weights.at(n)->set(i_,j_,0);
 	    else
-	      weights.at(n)->set(i_,j_,old_weight/norm);
+	      weights.at(n)->set(i_,j_,beta*old_weight/norm);
 
 	  }
 	}
