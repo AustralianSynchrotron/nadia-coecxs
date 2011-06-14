@@ -320,11 +320,11 @@ void PhaseDiverseCDI::set_result(BaseCDI * local, Complex_2D & result){
 
 //frames need to be in order for this to work.
 void PhaseDiverseCDI::adjust_positions(int type, bool forward, 
-				       int x_min, int x_max,
-				       int y_min, int y_max,
+				       int min_x, int max_x,
+				       int min_y, int max_y,
 				       double step_size){
 
-  if(type!=CROSS_CORRELATION || type!=MINIMUM_ERROR){
+  if(type!=CROSS_CORRELATION && type!=MINIMUM_ERROR){
     cerr << "The alignment type given to"
 	 << " PhaseDiverseCDI::adjust_positions is not"
 	 << " a known type. Please consider using"
@@ -371,24 +371,15 @@ void PhaseDiverseCDI::adjust_positions(int type, bool forward,
   else
     add_to_object(singleCDI.size()-1);
  
-  //  beta = 0.5;
-  //weights_set=false;
-
   while(n!=limit){
     //for(int n=1; n<singleCDI.size(); n++){
 
-    //store some before information for later use
+    //store some information for later use
     double before_x = x_position.at(n);
     double before_y = y_position.at(n);
 
     int lnx = single_result.at(0)->get_size_x();
     int lny = single_result.at(0)->get_size_y();
-
-    /**char name[80];
-    Double_2D pic(2048,2048);
-    object->get_2d(MAG,pic);
-    sprintf(name,"pic_%i.tiff",n);
-    write_image(name,pic,false, 0,1);**/
 
     //do an iteration of the frame on it's own.
     singleCDI.at(n)->iterate();
@@ -400,13 +391,19 @@ void PhaseDiverseCDI::adjust_positions(int type, bool forward,
       Double_2D temp_single(lnx,lny);
 
       //this array will store a copy of the global frame with 1-mag.
+      //in a sub-grid.
       Double_2D temp_others(lnx*scale,lny*scale);
       
+      cout << "before_x="<< before_x<<" before_y="<< before_y<<endl;
+      cout << "x_min="<<x_min<<" y_min="<< y_min<<endl;
+
       for(int i=0; i<lnx*scale; i++){
-	for(int j=0; j<ny*scale; j++){
-	  
+	for(int j=0; j<lny*scale; j++){
+
 	  int i_ = i - before_x*scale -  x_min*scale;
 	  int j_ = j - before_y*scale -  y_min*scale;
+
+	  //	  cout << "j1:"<<j_<<" j2:"<<j<<endl;
 	  
 	  if( i_>=0 && j_>=0 && i_<nx && j_<ny ){
 	    double obj_mag = object->get_mag(i_,j_);
@@ -420,9 +417,25 @@ void PhaseDiverseCDI::adjust_positions(int type, bool forward,
 	}
       }
       
+
+      static int counter = 0;
+      char buff[90];
+      //sprintf(buff,"temp_single_%i.tiff",counter);
+      //write_image(buff,*temp_single_int,false);
+      //cout << "not here"<<endl;
       
+      sprintf(buff,"temp_object_%i.tiff",counter);
+      write_image(buff,temp_others,false);
+      counter++;
+
+      char name[80];
+      Double_2D pic(nx,ny);
+      object->get_2d(MAG,pic);
+      sprintf(name,"pic_%i.tiff",n);
+      write_image(name,pic,false, 0,1);
+
       Double_2D * temp_single_int = 0; 
-      Double_2D * weight_single_int = new Double_2D(lnx*scale,lny*scale);;  
+      Double_2D * weight_single_int = new Double_2D(lnx*scale,lny*scale);
       
       if(scale==1){
 	temp_single_int = &temp_single;
@@ -434,24 +447,13 @@ void PhaseDiverseCDI::adjust_positions(int type, bool forward,
 	interpolate(singleCDI.at(n)->get_support(),*weight_single_int);
       }
 
-      /** static int counter = 0;
-	  char buff[90];
-	  sprintf(buff,"temp_single_%i.tiff",counter);
-	  write_image(buff,*temp_single_int,false);
-	  
-	  cout << "not here"<<endl;
-	  
-	  sprintf(buff,"temp_object_%i.tiff",counter);
-	  write_image(buff,temp_others,false);
-	  counter++;**/
-      
       int new_x=0;
       int new_y=0;
 
       align_even_better(*temp_single_int, temp_others, 
 			new_x, new_y,
-			x_min, x_max,
-			y_min, y_max,
+			min_x, max_x,
+			min_y, max_y,
 			weight_single_int,
 			&temp_others);
       
@@ -478,7 +480,7 @@ void PhaseDiverseCDI::adjust_positions(int type, bool forward,
       Complex_2D temp(lnx*scale,lny*scale);
       
       for(int i=0; i<lnx*scale; i++){
-	for(int j=0; j<ny*scale; j++){
+	for(int j=0; j<lny*scale; j++){
 	  
 	  int i_ = i - before_x*scale -  x_min*scale;
 	  int j_ = j - before_y*scale -  y_min*scale;
@@ -500,7 +502,7 @@ void PhaseDiverseCDI::adjust_positions(int type, bool forward,
       x_min = -x_position.at(n);
       y_min = -y_position.at(n);
       
-      check_position(n,step_size, x_min, x_max, y_min, y_max);
+      check_position(n,step_size, min_x, max_x, min_y, max_y);
       
       cout << "moving prob " << n << " from ("
 	   << before_x << "," << before_y << ") "
@@ -691,14 +693,15 @@ void PhaseDiverseCDI::set_up_weights(){
     return;
   else
     weights_set=true;
+  
+  int frames = singleCDI.size();
 
-  for(int n_probe=0; n_probe<singleCDI.size(); n_probe++){
+  for(int n_probe=0; n_probe<frames; n_probe++){
     
     int lnx = single_result.at(n_probe)->get_size_x();
     int lny = single_result.at(n_probe)->get_size_y();
     BaseCDI * this_CDI = singleCDI.at(n_probe);
-    int frames = singleCDI.size();
-    double value;
+      double value;
     Double_2D illum_mag(lnx,lny);
     double max;
 
@@ -788,7 +791,7 @@ void PhaseDiverseCDI::set_up_weights(){
 	  if(i>=0&&j>=0&&i<nx&&j<ny){
 	    
 	    double old_weight = weights.at(n)->get(i_,j_);
-	    double norm = weight_norm.get(i,j)*frames;
+	    double norm = weight_norm.get(i,j);
 
 	    if(norm<=0)
 	      weights.at(n)->set(i_,j_,0);

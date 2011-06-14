@@ -150,7 +150,7 @@ class PhaseDiverseCDI{
    * @param parallel true - run in parallel mode, false - run in series
    *        mode. By default series mode is set.
    * @param granularity  A factor which controls sub-pixel alignment. 
-   *   1=regular, 2 = 2 'global' pixels for every 1 'local' pixel.
+   *   1 = regular, 2 = 2 'global' pixels for every 1 'local' pixel.
    *   i.e. 2 allows alignment to within half a pixel. 
    *   NOTE: This is not currently working properly!
    */
@@ -166,7 +166,7 @@ class PhaseDiverseCDI{
 
 
   /**
-   *
+   *  
    *
    */
   void add_new_position(BaseCDI * local, 
@@ -378,14 +378,14 @@ class PhaseDiverseCDI{
    *                 with respect to the other frames.
    */
   inline int get_global_x_pos(int x, double x_offset){
-    return (x-x_offset-x_min); 
+    return x-x_offset-x_min; 
   }
  
   /**
    * See get_global_x_pos
    */
   inline int get_global_y_pos(int y, double y_offset){
-    return (y-y_offset-y_min);
+    return y-y_offset-y_min;
   }
 
   /**

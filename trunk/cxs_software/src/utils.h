@@ -20,7 +20,7 @@ void align_even_better(Double_2D & first_image, Double_2D & second_image,
 		       int min_y=0, int max_y=0,
 		       Double_2D * first_image_weights = 0,
 		       Double_2D * second_image_weights = 0,
-		       double overlap_fraction = 0.01);
+		       double overlap_fraction = 0.2);
 
 double edges(Double_2D & image);
 double line_out(Double_2D & image);
