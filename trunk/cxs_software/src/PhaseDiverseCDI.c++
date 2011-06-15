@@ -334,13 +334,22 @@ void PhaseDiverseCDI::adjust_positions(int type, bool forward,
     return;
   }
 
+  bool parallel_c = parallel; 
+
+  //if we are running in series, switch to parallel mode and do 1 full iteration:
+  if(!parallel){
+    weights_set=false;
+    for(int i=0; i<10; i++)
+      iterate();
+  }
+
   //make a copy of the tranmission function
   Complex_2D * pointer_to_object = object;
   int nx_c = nx;
   int ny_c = ny;
   double x_min_c = x_min; 
   double y_min_c = y_min; 
-  bool parallel_c = parallel;  
+
   double beta_c = beta;
 
   //reset the parameters to make it work in parrallel with weights of one.
@@ -366,11 +375,15 @@ void PhaseDiverseCDI::adjust_positions(int type, bool forward,
   beta = 1.0;
   weights_set=false;
 
-  if(forward)
-    add_to_object(0);
-  else
-    add_to_object(singleCDI.size()-1);
- 
+  double n_first_frame = 0;
+
+  if(!forward)
+    n_first_frame = singleCDI.size()-1;
+
+  //  singleCDI.at(n_first_frame)->iterate();
+  get_result(singleCDI.at(n_first_frame),*(single_result.at(n_first_frame)));
+  add_to_object(n_first_frame);
+  
   while(n!=limit){
     //for(int n=1; n<singleCDI.size(); n++){
 
@@ -382,11 +395,11 @@ void PhaseDiverseCDI::adjust_positions(int type, bool forward,
     int lny = single_result.at(0)->get_size_y();
 
     //do an iteration of the frame on it's own.
-    singleCDI.at(n)->iterate();
+    //singleCDI.at(n)->iterate();
     get_result(singleCDI.at(n),*(single_result.at(n)));
 
     if(type==CROSS_CORRELATION){
-      
+
       //this array will store a copy of the local frame with 1-mag.
       Double_2D temp_single(lnx,lny);
 
@@ -394,17 +407,12 @@ void PhaseDiverseCDI::adjust_positions(int type, bool forward,
       //in a sub-grid.
       Double_2D temp_others(lnx*scale,lny*scale);
       
-      cout << "before_x="<< before_x<<" before_y="<< before_y<<endl;
-      cout << "x_min="<<x_min<<" y_min="<< y_min<<endl;
-
       for(int i=0; i<lnx*scale; i++){
 	for(int j=0; j<lny*scale; j++){
 
 	  int i_ = i - before_x*scale -  x_min*scale;
 	  int j_ = j - before_y*scale -  y_min*scale;
 
-	  //	  cout << "j1:"<<j_<<" j2:"<<j<<endl;
-	  
 	  if( i_>=0 && j_>=0 && i_<nx && j_<ny ){
 	    double obj_mag = object->get_mag(i_,j_);
 	    if(obj_mag<1)
@@ -418,21 +426,12 @@ void PhaseDiverseCDI::adjust_positions(int type, bool forward,
       }
       
 
-      static int counter = 0;
-      char buff[90];
-      //sprintf(buff,"temp_single_%i.tiff",counter);
-      //write_image(buff,*temp_single_int,false);
-      //cout << "not here"<<endl;
-      
-      sprintf(buff,"temp_object_%i.tiff",counter);
-      write_image(buff,temp_others,false);
-      counter++;
-
       char name[80];
       Double_2D pic(nx,ny);
       object->get_2d(MAG,pic);
       sprintf(name,"pic_%i.tiff",n);
       write_image(name,pic,false, 0,1);
+
 
       Double_2D * temp_single_int = 0; 
       Double_2D * weight_single_int = new Double_2D(lnx*scale,lny*scale);
@@ -446,6 +445,16 @@ void PhaseDiverseCDI::adjust_positions(int type, bool forward,
 	interpolate(temp_single,*temp_single_int);
 	interpolate(singleCDI.at(n)->get_support(),*weight_single_int);
       }
+
+      /**static int counter = 0;
+      char buff[90];
+      sprintf(buff,"temp_single_%i.tiff",counter);
+      write_image(buff,*temp_single_int,false);
+      //cout << "not here"<<endl;
+      
+      sprintf(buff,"temp_object_%i.tiff",counter);
+      write_image(buff,temp_others,false);
+      counter++;**/
 
       int new_x=0;
       int new_y=0;
@@ -570,7 +579,8 @@ int PhaseDiverseCDI::check_position(int n_probe, double step_size,
 
   //failed, we moved around a bit, but couldn't find a local minima
   //in the error metric.
-  if(tries>10 || x < min_x || x > max_x || y < min_y || y > max_y ){
+
+  if(tries > 10 || x < (x+min_x) || x > (x+max_x) || y < (y+min_y) || y > (y+max_y) ){
     cout << "Giving up on probe "<< n_probe << ". Could not find " 
 	 << "it's position. Returning to the original. " 
 	 << endl;
@@ -664,7 +674,10 @@ int PhaseDiverseCDI::check_position(int n_probe, double step_size,
   if(best_x==x && best_y==y)
     step_size=step_size/2.0;
   
-  int status = check_position(n_probe, step_size, ++tries);
+  int status = check_position(n_probe, step_size, 
+			      min_x, max_x,
+			      min_y, max_y,
+			      ++tries);
 
   if(status == FAILURE){
     //return to orginal coordinates
@@ -701,7 +714,7 @@ void PhaseDiverseCDI::set_up_weights(){
     int lnx = single_result.at(n_probe)->get_size_x();
     int lny = single_result.at(n_probe)->get_size_y();
     BaseCDI * this_CDI = singleCDI.at(n_probe);
-      double value;
+    double value;
     Double_2D illum_mag(lnx,lny);
     double max;
 
