@@ -1005,7 +1005,7 @@ double calculate_mean_difference(Double_2D & image){
 }
 
 
-void align(Double_2D & image1, Double_2D & image2, 
+void slow_align(Double_2D & image1, Double_2D & image2, 
 	   int & offset_x, int & offset_y, 
 	   int step_size, int min_x, int max_x,
 	   int min_y, int max_y){
@@ -1117,25 +1117,25 @@ void align(Double_2D & image1, Double_2D & image2,
   counter++;**/
 
   //now decrease the step size and the search area:
-  align(image1, image2, 
-	offset_x, offset_y, 
-	step_size/2.0, 
-	offset_x-2*step_size, offset_x+2*step_size,
-	offset_y-2*step_size, offset_y+2*step_size);
+  slow_align(image1, image2, 
+	     offset_x, offset_y, 
+	     step_size/2.0, 
+	     offset_x-2*step_size, offset_x+2*step_size,
+	     offset_y-2*step_size, offset_y+2*step_size);
 
   return;
   
 }
 
 
-void align_even_better(Double_2D & first_image, Double_2D & second_image,
-		       int & offset_x, int & offset_y,
-		       int min_x, int max_x,
-		       int min_y, int max_y,
-		       Double_2D * first_image_weights,
-		       Double_2D * second_image_weights,
-		       double overlap_fraction){
-
+void align(Double_2D & first_image, Double_2D & second_image,
+	   int & offset_x, int & offset_y,
+	   int min_x, int max_x,
+	   int min_y, int max_y,
+	   Double_2D * first_image_weights,
+	   Double_2D * second_image_weights,
+	   double overlap_fraction){
+  
 
   const int MAX_PIXELS = 1024;
 

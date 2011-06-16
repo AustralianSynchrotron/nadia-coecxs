@@ -336,12 +336,14 @@ void PhaseDiverseCDI::adjust_positions(int type, bool forward,
 
   bool parallel_c = parallel; 
 
-  //if we are running in series, switch to parallel mode and do 1 full iteration:
-  if(!parallel){
+  //if we are running in series, switch to 
+  //parallel mode and do 1 full iteration:
+  /** if(!parallel){
+    parallel = true;
     weights_set=false;
     for(int i=0; i<10; i++)
       iterate();
-  }
+      }**/
 
   //make a copy of the tranmission function
   Complex_2D * pointer_to_object = object;
@@ -380,12 +382,11 @@ void PhaseDiverseCDI::adjust_positions(int type, bool forward,
   if(!forward)
     n_first_frame = singleCDI.size()-1;
 
-  //  singleCDI.at(n_first_frame)->iterate();
+  singleCDI.at(n_first_frame)->iterate();
   get_result(singleCDI.at(n_first_frame),*(single_result.at(n_first_frame)));
   add_to_object(n_first_frame);
   
   while(n!=limit){
-    //for(int n=1; n<singleCDI.size(); n++){
 
     //store some information for later use
     double before_x = x_position.at(n);
@@ -395,7 +396,7 @@ void PhaseDiverseCDI::adjust_positions(int type, bool forward,
     int lny = single_result.at(0)->get_size_y();
 
     //do an iteration of the frame on it's own.
-    //singleCDI.at(n)->iterate();
+    singleCDI.at(n)->iterate();
     get_result(singleCDI.at(n),*(single_result.at(n)));
 
     if(type==CROSS_CORRELATION){
@@ -426,12 +427,12 @@ void PhaseDiverseCDI::adjust_positions(int type, bool forward,
       }
       
 
-      char name[80];
+      /**      char name[80];
       Double_2D pic(nx,ny);
       object->get_2d(MAG,pic);
       sprintf(name,"pic_%i.tiff",n);
       write_image(name,pic,false, 0,1);
-
+      **/
 
       Double_2D * temp_single_int = 0; 
       Double_2D * weight_single_int = new Double_2D(lnx*scale,lny*scale);
@@ -446,7 +447,7 @@ void PhaseDiverseCDI::adjust_positions(int type, bool forward,
 	interpolate(singleCDI.at(n)->get_support(),*weight_single_int);
       }
 
-      /**static int counter = 0;
+      /**      static int counter = 0;
       char buff[90];
       sprintf(buff,"temp_single_%i.tiff",counter);
       write_image(buff,*temp_single_int,false);
@@ -454,26 +455,26 @@ void PhaseDiverseCDI::adjust_positions(int type, bool forward,
       
       sprintf(buff,"temp_object_%i.tiff",counter);
       write_image(buff,temp_others,false);
-      counter++;**/
+      counter++; **/
 
       int new_x=0;
       int new_y=0;
 
-      align_even_better(*temp_single_int, temp_others, 
-			new_x, new_y,
-			min_x, max_x,
-			min_y, max_y,
-			weight_single_int,
-			&temp_others);
+      align(*temp_single_int, temp_others, 
+	    new_x, new_y,
+	    min_x, max_x,
+	    min_y, max_y,
+	    weight_single_int,
+	    &temp_others);
       
       x_position.at(n) = before_x + new_x/((double)scale);
       y_position.at(n) = before_y + new_y/((double)scale);
 
-      cout << "moving prob " << n << " from ("
+      /**      cout << "moving prob " << n << " from ("
 	   << before_x << "," << before_y << ") "
 	   << "-> (" << x_position.at(n) 
 	   << "," <<  y_position.at(n) << ")."
-	   << endl;
+	   << endl; **/
       
       //clean up a bit
       if(scale!=1){
@@ -484,6 +485,7 @@ void PhaseDiverseCDI::adjust_positions(int type, bool forward,
 
     }
 
+    //if we are using the minimum error algorithm
     if(type==MINIMUM_ERROR){
       
       Complex_2D temp(lnx*scale,lny*scale);
@@ -513,19 +515,20 @@ void PhaseDiverseCDI::adjust_positions(int type, bool forward,
       
       check_position(n,step_size, min_x, max_x, min_y, max_y);
       
-      cout << "moving prob " << n << " from ("
-	   << before_x << "," << before_y << ") "
-	   << "-> (" << x_position.at(n) 
-	   << "," <<  y_position.at(n) << ")."
-	   << endl;      
-      
-      //return to normal
+       //return to normal
       object = &temp_object;
       nx = nx_c;
       ny = ny_c;
       x_min = x_min_c; 
       y_min = y_min_c;
     }
+
+    cout << "moving prob " << n << " from ("
+	 << before_x << "," << before_y << ") "
+	 << "-> (" << x_position.at(n) 
+	 << "," <<  y_position.at(n) << ")."
+	 << endl;
+   
 
     weights_set=false;
     add_to_object(n);
@@ -569,9 +572,9 @@ int PhaseDiverseCDI::check_position(int n_probe, double step_size,
   double x = x_position.at(n_probe);
   double y = y_position.at(n_probe);
 
-  cout << "checking probe "<< n_probe << " position, " 
+  /**  cout << "checking probe "<< n_probe << " position, " 
        << x << "," << y << " with step size " 
-       << step_size << ". Try no.: "<<tries<< endl;
+       << step_size << ". Try no.: "<<tries<< endl;**/
 
   //done, we found the best position.
   if(step_size<1.0/scale)
@@ -686,10 +689,10 @@ int PhaseDiverseCDI::check_position(int n_probe, double step_size,
    return FAILURE;
   }
 
-  cout << "moving probe "<< n_probe << " by " 
+  /**  cout << "moving probe "<< n_probe << " by " 
        << x_position.at(n_probe)-x <<" in x "
        << "and "<< y_position.at(n_probe)-y<<" in y." 
-       << endl;
+       << endl; **/
   
 
   beta = 1.0;

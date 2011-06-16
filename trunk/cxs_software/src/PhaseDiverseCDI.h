@@ -257,11 +257,55 @@ class PhaseDiverseCDI{
   //////////////////////////////////////////
 
   /**
-   * Align the frames. The transverse positions will be automatically
-   * adjusted. The new positions can be retrieved using the
-   * "get_final_x(y)_position" functions.
+   * Align the frames with respect to each other. The transverse positions will be 
+   * automatically adjusted and the new positions used for the remainder of the 
+   * reconstruction run. If needed, the new positions can be retrieved using the
+   * "get_final_x(y)_position" functions. 
    *
-   * more to come....
+   * Two methods to align the frames are provided:
+   *
+   *   - PhaseDiverse::CROSS_CORRELATION - implements the
+   *     cross-correlation method using the magnitude of the
+   *     transmission/exit-surface-wave.  There is pleanty of
+   *     documentation describing how cross-correlation can be used
+   *     for alignment. see http://en.wikipedia.org/wiki/Cross-correlation 
+   *     for example. We use the fourier transform implementation.
+   *     This method is useful if the relative positions are
+   *     unknown to great than 10 pixels. It is also much faster than
+   *     the alternative.
+   *   
+   *   - PhaseDiverse::MINIMUM_ERROR - aligns the frames by looking for the 
+   *     position which gives the smallest error in the detector plane.
+   *     The error metric is described in PlanarCDI.h. The algorithm works by
+   *     checking the error in the 9 positions centered on the current positions: 
+   *     (x-step_size, y-step_size), (x, y-step_size),  (x+step_size, y-step_size),
+   *     (x-step_size, y) etc. Where "step_size" is an input parameter which
+   *     has a default of 4 pixels. The position with the minimum error becomes 
+   *     the new position, the step_size is decreased to half, and the procedure 
+   *     is repeated. The algorithm ends when the step size is less than a pixel.
+   *     This method of frame alignment is good for small refinement, but is less
+   *     reliable if the relative differences are not known to within about 
+   *     10-20 pixels. It is also significatly slower.
+   * 
+   * @param type either PhaseDiverse::CROSS_CORRELATION or 
+   *             PhaseDiverse::MINIMUM_ERROR. PhaseDiverse::CROSS_CORRELATION
+   *             is the default.
+   * @param forwards By default the alignment is done in order of the frames, with the
+   *                 second being aligned the the first, followed by the third to
+   *                 the second and so on. In you needed to run the alignment in reverse 
+   *                 e.g. aligning initially to the last frame, then this parameter 
+   *                 should be false. You might use this, for example, if you want to check
+   *                 that the alignment is consistent in both forward and backward directions.
+   * @param x_min Positions below x+x_min pixels are not allowed. For 
+   *                 PhaseDiverse::CROSS_CORRELATION, the algorithm will only search within 
+   *                 the range x+x_min to x+x_max. For PhaseDiverse::MINIMUM_ERROR,
+   *                 if a position below x_min is encountered, the algorithm aborts and
+   *                 returns the positions to their original value.                
+   * @param x_max See x_min.
+   * @param y_min See y_min.
+   * @param y_max See y_max.
+   * @param step_size The initial step size to use in the case of PhaseDiverse::MINIMUM_ERROR.
+   *
    */
   void adjust_positions(int type=CROSS_CORRELATION, 
 			bool forwards=true,
@@ -362,7 +406,18 @@ class PhaseDiverseCDI{
   void set_up_weights();
 
   /**
-   * Needs some work......
+   * A position alignment function. See "adjust_positions" above for more detail.
+   *
+   * @param n_probe The index to the local frame which needs to be aligned
+   * @param step_size Check the 8 positions located around the current positions using a
+   *                  step size of "step_size" pixels.
+   * @param min_x The minimum distance horizontally, in pixel, for which the re-alignment
+   *              will check.
+   * @param max_x See min_x.
+   * @param min_y See min_y.
+   * @param max_y See max_y.
+   * @param tries How many times has this function been called for this positions. After 10
+   *              tries the algorithm gives up and returns to the original position.
    */
   int check_position(int n_probe, double step_size=4, 
 		     int min_x=-50, int max_x=50,
