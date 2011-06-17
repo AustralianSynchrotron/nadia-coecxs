@@ -601,7 +601,6 @@ EGREP
 GREP
 CXXCPP
 do_idl
-do_single
 SET_MAKE
 OBJEXT
 EXEEXT
@@ -661,7 +660,7 @@ with_z_lib
 with_df_lib
 with_sz_lib
 with_jpeg_lib
-enable_single_precision
+enable_double_precision
 '
       ac_precious_vars='build_alias
 host_alias
@@ -1284,8 +1283,8 @@ Optional Features:
   --disable-option-checking  ignore unrecognized --enable/--with options
   --disable-FEATURE       do not include FEATURE (same as --enable-FEATURE=no)
   --enable-FEATURE[=ARG]  include FEATURE [ARG=yes]
- --enable-single-precision
-			using floating point numbers rather than doubles in the reconstructions
+ --enable-double-precision
+			use double rather than single precision in the reconstructions
 
 Optional Packages:
   --with-PACKAGE[=ARG]    use PACKAGE [ARG=yes]
@@ -2726,24 +2725,22 @@ fi
 #AC_ARG_WITH(idl-lib, [  --with-idl_lib
 #		  specify the directory where the idl library can be found])
 
-# Check whether --enable-single-precision was given.
-if test "${enable_single_precision+set}" = set; then :
-  enableval=$enable_single_precision;
+# Check whether --enable-double-precision was given.
+if test "${enable_double_precision+set}" = set; then :
+  enableval=$enable_double_precision;
 fi
 
 
-FFTW_LIB=fftw3
-FFTW_LIB_FUNC=fftw_plan_dft_2d
+FFTW_LIB=fftw3f
+FFTW_LIB_FUNC=fftwf_plan_dft_2d
 
-if test "$enable_single_precision" = "yes"
+if test "$enable_double_precision" = "yes"
 then
-	SINGLE_FLAG="DO_=TRUE"
-	do_single=$SINGLE_FLAG
-
-	FFTW_LIB=fftw3f
-	FFTW_LIB_FUNC=fftwf_plan_dft_2d
-	CXXFLAGS="$CXXFLAGS -DSINGLE_PRECISION"
+	FFTW_LIB=fftw3
+	FFTW_LIB_FUNC=fftw_plan_dft_2d
+	CXXFLAGS="$CXXFLAGS -DDOUBLE_PRECISION"
 fi
+
 
 #enable_idl_lib=yes
 
