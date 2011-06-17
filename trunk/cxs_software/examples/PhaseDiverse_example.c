@@ -1,6 +1,11 @@
 /**
  * @file PhaseDiverse_example.c
  *
+ * This example file shows how phase-diverse / ptychographic
+ * reconstruction can be performed. The example uses data from Corey
+ * Putkunz which can be found on osiris at
+ * /data/cputkunz/phase_diverse_cdi/example_data.tar.gz
+ * 
  *
  * @author Nadia Davidson <nadiamd@unimelb.edu.au> 
  *
@@ -23,8 +28,6 @@
 #include "utils.h"
 
 using namespace std;
-
-
 
 /**********************************/
 
@@ -53,7 +56,7 @@ int main(int argc, char * argv[]){
   }
 
   //Make a new PhaseDiverseCDI object
-  PhaseDiverseCDI pd(1,3,true);
+  PhaseDiverseCDI pd;
 
   //how many frames make up the reconstruction
   const int frames = 7;
