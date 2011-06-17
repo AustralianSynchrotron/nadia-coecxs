@@ -28,8 +28,9 @@ s = cxs_get_round_support(1024,1024,320)
 ; and set-up everything ready for the sample reconstruction.
 cxs_init_fresnel, d, s, white_field, 4.892e-10, 0.9078777, 2.16e-3, 13.5e-6, 1.0
 
+; examples of extra constraint 
 cxs_set_charge_flipping, 1
-cxs_set_trans_unity_constraint, 0
+cxs_set_trans_unity_constraint, 1
 
 ; Perform 20 iterations
 a = cxs_iterate(20)
