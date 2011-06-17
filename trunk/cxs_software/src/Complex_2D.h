@@ -54,7 +54,7 @@ class Complex_2D{
   int fftw_type;
 
 
-#ifdef SINGLE_PRECISION
+#ifndef DOUBLE_PRECISION
 
   /** "array" holds the data */
   fftwf_complex *array;

@@ -13,7 +13,7 @@ Complex_2D::Complex_2D(int x_size, int y_size){
   ny = y_size;
 
   //allocate memory for the array
-#ifdef SINGLE_PRECISION
+#ifndef DOUBLE_PRECISION
   array = (fftwf_complex*) fftwf_malloc(sizeof(fftwf_complex)*nx*ny);
 #else
   array = (fftw_complex*) fftw_malloc(sizeof(fftwf_complex)*nx*ny);
@@ -28,7 +28,7 @@ Complex_2D::Complex_2D(int x_size, int y_size){
 
 Complex_2D::~Complex_2D(){
 
-#ifdef SINGLE_PRECISION
+#ifndef DOUBLE_PRECISION
   //free the memory of the array.
   fftwf_free(array);
 
@@ -226,7 +226,7 @@ void Complex_2D::copy(const Complex_2D & c){
   
   //copy
 
-#ifdef SINGLE_PRECISION
+#ifndef DOUBLE_PRECISION
   std::memcpy(array,c.array,sizeof(fftwf_complex)*nx*ny);
 #else
   std::memcpy(array,c.array,sizeof(fftw_complex)*nx*ny);
@@ -286,7 +286,7 @@ void Complex_2D::initialise_fft(){
   //creating the plan will erase the content of the array
   //so we need to be a bit tricky here.
 
-#ifdef SINGLE_PRECISION
+#ifndef DOUBLE_PRECISION
   //make a new array 
   fftwf_complex * tmp_array;
   tmp_array = (fftwf_complex*) fftwf_malloc(sizeof(fftwf_complex)*nx*ny);
@@ -329,7 +329,7 @@ void Complex_2D::perform_forward_fft(){
   if(f_forward==0 )
     initialise_fft();  
 
-#ifdef SINGLE_PRECISION
+#ifndef DOUBLE_PRECISION
   fftwf_execute(f_forward);
 #else
   fftw_execute(f_forward);
@@ -342,7 +342,7 @@ void Complex_2D::perform_backward_fft(){
   //make a new backward fft plan if we haven't made one already.
   if(f_backward==0)
     initialise_fft();
-#ifdef SINGLE_PRECISION
+#ifndef DOUBLE_PRECISION
   fftwf_execute(f_backward);
 #else
   fftw_execute(f_backward);
@@ -353,7 +353,7 @@ void Complex_2D::perform_backward_fft(){
 //this object is fourier transformed and the result placed in 'result'
 void Complex_2D::perform_backward_fft_real(Double_2D & result){
 
-#ifdef SINGLE_PRECISION
+#ifndef DOUBLE_PRECISION
   fftwf_plan fftw;
   fftw = fftwf_plan_dft_c2r_2d(nx,ny,array,result.array,FFTW_ESTIMATE); 
   fftwf_execute(fftw);
@@ -368,7 +368,7 @@ void Complex_2D::perform_backward_fft_real(Double_2D & result){
 
 //'result' is fourier transformed and the result placed in this object
 void  Complex_2D::perform_forward_fft_real(Double_2D & input){
-#ifdef SINGLE_PRECISION
+#ifndef DOUBLE_PRECISION
   fftwf_plan fftw;
   fftw = fftwf_plan_dft_r2c_2d(nx,ny,input.array,array,FFTW_ESTIMATE); 
   fftwf_execute(fftw);

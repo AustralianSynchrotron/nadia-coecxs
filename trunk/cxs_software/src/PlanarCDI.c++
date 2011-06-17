@@ -37,6 +37,8 @@ void PlanarCDI::initialise_estimate(int seed){
   //initialise the random number generator
   srand(seed);
 
+  int max_value = (1.0/sqrt(2.0))*intensity_sqrt.get_max();
+
   for(int i=0; i<nx; i++){
     for(int j=0; j<ny; j++){
 
@@ -45,8 +47,8 @@ void PlanarCDI::initialise_estimate(int seed){
 	complex.set_value(i,j,IMAG,0);
       }
       else{
-	double r = support.get(i,j)*(255.0*rand()/(double) RAND_MAX);
-	double im = support.get(i,j)*(255.0*rand()/(double) RAND_MAX);
+	double r = support.get(i,j)*(max_value*rand()/(double) RAND_MAX);
+	double im = support.get(i,j)*(max_value*rand()/(double) RAND_MAX);
 	
 	complex.set_value(i,j,REAL,r); 
 	complex.set_value(i,j,IMAG,im);

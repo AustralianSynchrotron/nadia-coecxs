@@ -214,7 +214,7 @@ class Real_2D{
 
 };
 
-#ifdef SINGLE_PRECISION
+#ifndef DOUBLE_PRECISION
 typedef Real_2D<float> Double_2D;
 #else
 typedef Real_2D<double> Double_2D;
