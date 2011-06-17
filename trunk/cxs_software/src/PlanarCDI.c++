@@ -37,7 +37,7 @@ void PlanarCDI::initialise_estimate(int seed){
   //initialise the random number generator
   srand(seed);
 
-  int max_value = (1.0/sqrt(2.0))*intensity_sqrt.get_max();
+  int max_value = intensity_sqrt.get_max();
 
   for(int i=0; i<nx; i++){
     for(int j=0; j<ny; j++){
