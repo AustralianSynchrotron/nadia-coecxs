@@ -15,13 +15,19 @@
 #include "PlanarCDI.h"
 #include "FresnelCDI.h"
 #include "FresnelCDI_WF.h"
+#include "PhaseDiverseCDI.h"
 #include "TransmissionConstraint.h"
 #include "io.h"
 
-Complex_2D * esw = 0;
+Complex_2D* esw = 0;
 BaseCDI * reco = 0;
 TransmissionConstraint * constraint = 0;
 std::vector<ComplexConstraint *> constraint_regions;
+
+PhaseDiverseCDI * phaseDiv = 0;
+
+std::vector<Complex_2D*> phaseDiv_complex;
+std::vector<BaseCDI*> phaseDiv_cdi;
 
 int total_iters = 0;
 using namespace std;
@@ -31,8 +37,8 @@ using namespace std;
 //methods for converting between the IDL types and the C++ types.
 void copy_to_double_2d(Double_2D & cxs_array, double * IDL_array){
 
-  int nx = cxs_array.get_size_x();
-  int ny = cxs_array.get_size_y();
+  int ny = cxs_array.get_size_x();
+  int nx = cxs_array.get_size_y();
 
   for(int i=0; i<nx; i++){
     for(int j=0; j<ny; j++){
@@ -44,8 +50,8 @@ void copy_to_double_2d(Double_2D & cxs_array, double * IDL_array){
 
 void copy_from_double_2d(const Double_2D & cxs_array, double * IDL_array){
 
-  int nx = cxs_array.get_size_x();
-  int ny = cxs_array.get_size_y();
+  int ny = cxs_array.get_size_x();
+  int nx = cxs_array.get_size_y();
 
   for(int i=0; i<nx; i++){
     for(int j=0; j<ny; j++){
@@ -57,8 +63,8 @@ void copy_from_double_2d(const Double_2D & cxs_array, double * IDL_array){
 
 void copy_to_complex_2d(Complex_2D & cxs_array, IDL_COMPLEX * IDL_array){
 
-  int nx = cxs_array.get_size_x();
-  int ny = cxs_array.get_size_y();
+  int ny = cxs_array.get_size_x();
+  int nx = cxs_array.get_size_y();
 
   for(int i=0; i<nx; i++){
     for(int j=0; j<ny; j++){
@@ -71,8 +77,8 @@ void copy_to_complex_2d(Complex_2D & cxs_array, IDL_COMPLEX * IDL_array){
 
 void copy_from_complex_2d(const Complex_2D & cxs_array, IDL_COMPLEX * IDL_array){
 
-  int nx = cxs_array.get_size_x();
-  int ny = cxs_array.get_size_y();  
+  int ny = cxs_array.get_size_x();
+  int nx = cxs_array.get_size_y();  
 
   for(int i=0; i<nx; i++){
     for(int j=0; j<ny; j++){
@@ -198,6 +204,7 @@ extern "C" void IDL_write_cplx(int argc, void * argv[])
 
 extern "C" void IDL_deallocate_memory(int argc, void * argv[])
 {
+
   if(reco!=0){
     delete reco ;
     reco = 0 ;
@@ -216,13 +223,24 @@ extern "C" void IDL_deallocate_memory(int argc, void * argv[])
   for(int i=0; i<constraint_regions.size(); i++)
     constraint_regions.pop_back();
 
+  if(phaseDiv!=0){
+    delete phaseDiv;
+    phaseDiv = 0;
+  }
+  
+  for(int i=0; i<phaseDiv_complex.size(); i++)
+    phaseDiv_complex.pop_back();
+  
+  for(int i=0; i<phaseDiv_cdi.size(); i++)
+    phaseDiv_cdi.pop_back();
+
 }
 
 
 void common_init(int argc, void * argv[], int max_args){
-
-
-  IDL_deallocate_memory(0,0);
+  
+  if(phaseDiv==0)
+    IDL_deallocate_memory(0,0);
 
   total_iters = 0;
 
@@ -296,14 +314,15 @@ extern "C" void IDL_get_round_support(int argc, void * argv[]){
   int ny = *(int*) argv[0];
   int nx = *(int*) argv[1];
 
-  int radius = *(double*) argv[2]; 
+  double radius = *(double*) argv[2]; 
   Double_2D temp_2D(nx,ny);
-  for(int i=0; i < nx; i++){
-    for(int j=0; j < ny; j++){
-      int i_ = i-nx/2;
-      int j_ = j-ny/2;     
-      if((i_*i_+j_*j_) < radius*radius)
-	temp_2D.set(i,j,1.0);
+  double i0 = (nx-1)/2.0;
+  double j0 = (ny-1)/2.0;
+  for(int i=0; i<nx; i++){
+    for(int j=0; j<ny; j++){
+      if(sqrt((i-i0)*(i-i0)+(j-j0)*(j-j0)) 
+	 < radius*sqrt(j0*j0+i0*i0))
+	temp_2D.set(i,j,100);
     }
   }
   copy_from_double_2d(temp_2D,(double*) argv[3]); 
@@ -595,9 +614,159 @@ extern "C" void IDL_add_complex_constraint_region(int argc, void * argv[]){
 
 
 //------------------------------------------------------------//
-// Phase diverse code
+// Binding to the PhaseDiverseCDI functions
 //------------------------------------------------------------//
 
+void check_pd(){
+  if(phaseDiv==0){
+    IDL_Message(IDL_M_GENERIC, IDL_MSG_INFO,
+		"ERROR: trying to use phase diverse functions before initialising.");
+    exit(0);
+  }
+}
+
+void check_pd_trans(){
+
+  check_pd();
+
+  if(phaseDiv && phaseDiv->get_transmission()==0){
+    IDL_Message(IDL_M_GENERIC, IDL_MSG_INFO,
+		"ERROR: trying to use phase diverse functions before adding frames.");
+    exit(0);
+  }
+}
+
+
+extern "C" void IDL_phase_diverse_init(int argc, void * argv[]){
+
+  double beta = *(double*) argv[0];
+  double gamma = *(double*) argv[1];
+  bool parallel = *(bool*) argv[2];
+
+  if(phaseDiv==0)
+    phaseDiv = new PhaseDiverseCDI(beta, gamma, parallel);
+  else
+    IDL_Message(IDL_M_GENERIC, IDL_MSG_INFO,
+    "Warning: trying to intialise the phase diverse code more than once.");
+  
+}
+
+//double x=0, double y=0, double alpha=1
+extern "C" void IDL_phase_diverse_add_position(int argc, void * argv[]){
+  check_pd();
+
+  double x = *(double*) argv[0];
+  double y = *(double*) argv[1];
+  double alpha = *(double*) argv[2];
+
+  BaseCDI * local = reco;
+  Complex_2D * local_esw = esw;
+
+  phaseDiv->add_new_position(local, x, y, alpha);
+
+  //book keeping..
+  phaseDiv_cdi.push_back(local);
+  phaseDiv_complex.push_back(local_esw);
+  
+  reco = 0;
+  esw = 0;
+}
+
+extern "C" void IDL_phase_diverse_init_estimate(int argc, void * argv[]){
+
+  check_pd_trans();
+  phaseDiv->initialise_estimate();
+
+  //return the result
+  Complex_2D * result = phaseDiv->get_transmission();
+  copy_from_complex_2d(*result ,(IDL_COMPLEX*) argv[0]); 
+
+}
+
+extern "C" void IDL_phase_diverse_iterate(int argc, void * argv[]){
+  check_pd_trans();
+  int iterations = *(IDL_LONG*) argv[0];
+
+  for(int i=0; i<iterations; i++){
+
+    //redirect stardard out to a buffer and put in IDL message format
+    streambuf * backup = cout.rdbuf(); //store a pointer to the stdout buffer
+    streambuf * str_buffer = new stringbuf(); //create a new string buffer
+    cout.rdbuf(str_buffer);  //redirect stdout to the string buffer
+
+    //do the actual iteration.
+    phaseDiv->iterate(); 
+
+    cout.rdbuf(backup);  //restore cout to stdout
+    //pass the string to IDL
+    IDL_Message(IDL_M_GENERIC, IDL_MSG_INFO, ( (stringbuf*) str_buffer)->str().c_str());
+    //clean up
+    delete str_buffer;
+  }
+
+  //return the result
+  Complex_2D * result = phaseDiv->get_transmission();
+  copy_from_complex_2d(*result ,(IDL_COMPLEX*) argv[1]); 
+}
+
+//Allows the dimensions of the image to be passed back to the IDL code
+extern "C" IDL_LONG IDL_get_phase_diverse_array_x_size(int argc, void *argv[]){
+  check_pd_trans();
+  return phaseDiv->get_transmission()->get_size_x();
+}
+
+extern "C" IDL_LONG IDL_get_phase_diverse_array_y_size(int argc, void *argv[]){
+  check_pd_trans();
+  return phaseDiv->get_transmission()->get_size_y();
+}
+
+
+extern "C" void IDL_phase_diverse_iterations_per_cycle(int argc, void * argv[]){
+  check_pd();
+  int iterations = *(IDL_LONG*) argv[0];
+  phaseDiv->set_iterations_per_cycle(iterations);
+}
+
+
+extern "C" void IDL_phase_diverse_set_transmission(int argc, void * argv[]){
+  check_pd();
+  int nx = *(IDL_LONG*) argv[0];
+  int ny = *(IDL_LONG*) argv[1];
+  
+  Complex_2D new_transmission(nx,ny);
+  copy_to_complex_2d(new_transmission ,(IDL_COMPLEX*) argv[2]); 
+
+  phaseDiv->set_transmission(new_transmission);
+}
+
+extern "C" void IDL_phase_diverse_adjust_positions(int argc, void * argv[]){
+  check_pd_trans();
+  
+  int type = *(IDL_LONG*) argv[0]; //0 - cross correlation, 1 - error minimisation.
+  bool forward = *(bool*) argv[1];
+  int x_min = *(IDL_LONG*) argv[2]; 
+  int x_max = *(IDL_LONG*) argv[3]; 
+  int y_min = *(IDL_LONG*) argv[4]; 
+  int y_max = *(IDL_LONG*) argv[5]; 
+  double step_size = *(double*) argv[6];
+
+  phaseDiv->adjust_positions(type,forward, 
+			     x_min, x_max, 
+			     y_min, y_max, 
+			     step_size);
+  
+}
+
+extern "C" double IDL_phase_diverse_get_final_x_position(int argc, void * argv[]){
+  check_pd_trans();
+  //*(double*) argv[1] = phaseDiv->get_final_x_position (*(IDL_LONG*)argv[0] );
+  return phaseDiv->get_final_x_position (*(IDL_LONG*)argv[0] );
+}
+
+extern "C" double IDL_phase_diverse_get_final_y_position(int argc, void * argv[]){
+  check_pd_trans();
+  return phaseDiv->get_final_y_position( *(IDL_LONG*)argv[0] );
+}
 
 
 

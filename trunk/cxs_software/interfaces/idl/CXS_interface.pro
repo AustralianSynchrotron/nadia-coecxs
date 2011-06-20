@@ -24,22 +24,32 @@ function pixels
 return, 512
 end
 
-function nx
+;dimensions are reversed.
+function ny
 return, call_external(lib_name(),'IDL_get_array_x_size')
 end
 
-function ny
+function nx
 return, call_external(lib_name(),'IDL_get_array_y_size')
 end
 
 
+;pro show, image
+;n =  size(image)
+;if ( (n[2] MOD pixels()) eq 0.0 ) and ((n[1] MOD pixels()) eq 0.0 ) then begin
+;   window, XSIZE=pixels(), YSIZE=pixels()
+;   TVSCL, rebin(image,pixels(),pixels())
+;endif
+;end
+
 pro show, image
-n =  size(image)
-if ( (n[2] MOD pixels()) eq 0.0 ) and ((n[1] MOD pixels()) eq 0.0 ) then begin
-   window, XSIZE=pixels(), YSIZE=pixels()
-   TVSCL, rebin(image,pixels(),pixels())
-endif
+  n =  size(image)
+  new_x = pixels()
+  new_y = n[2]*new_x/n[1]
+  window, XSIZE=new_x, YSIZE=new_y
+  TVSCL, CONGRID( image, new_x, new_y)
 end
+
 
 pro check_size, array
 n = size(array)
@@ -414,7 +424,8 @@ end
 ;-
 function cxs_get_round_support, n_x, n_y, radius
   result = make_array(n_x,n_y,/DOUBLE)
-  b = call_external(lib_name() ,'IDL_get_round_support',n_x,n_y,double(radius),result) 
+  b = call_external(lib_name() ,'IDL_get_round_support', $
+                    long(n_x),long(n_y),double(radius),result) 
   show, result
   return, result
 end
@@ -1505,4 +1516,103 @@ pro cxs_add_complex_constraint_region, region, alpha1, alpha2, fixed_c
   ELSE $
      b = call_external(lib_name() ,'IDL_add_complex_constraint_region', $
                        region, double(alpha1), double(alpha2), double(fixed_c))  
+end
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;   Phase Diverse Code
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;
+
+;
+function cxs_phase_diverse_init_estimate
+  ;dimensions are reversed.
+  nx = call_external(lib_name(),'IDL_get_phase_diverse_array_x_size')
+  ny = call_external(lib_name(),'IDL_get_phase_diverse_array_y_size')
+  result = make_array(nx,ny,/COMPLEX)
+  b = call_external(lib_name(),'IDL_phase_diverse_init_estimate',result)
+  show, ABS(result)
+  return, result
+end
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;
+;
+pro cxs_init_phase_diverse, beta = beta, gamma = gamma , parallel = parallel
+
+  ; set default values
+  if not keyword_set(beta) then beta = 1.0
+  if not keyword_set(gamma) then gamma = 1.0
+  if not keyword_set(parallel) then parallel = 0
+
+  b = call_external(lib_name(),'IDL_phase_diverse_init', $
+                    double(beta), double(gamma), long(parallel))
+
+end
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;
+;
+pro cxs_phase_diverse_add_position, x, y, alpha = alpha
+  ; set default values
+  if not keyword_set(alpha) then alpha = 1.0
+  b = call_external(lib_name(),'IDL_phase_diverse_add_position', $
+                    double(x), double(y), double(alpha))
+end
+
+function cxs_phase_diverse_iterate, iterations
+  ; dimensions are reversed in IDL compared to the library.
+  nx = call_external(lib_name(),'IDL_get_phase_diverse_array_x_size')
+  ny = call_external(lib_name(),'IDL_get_phase_diverse_array_y_size')
+  result = make_array(nx,ny,/COMPLEX)
+  IF N_Params() EQ 0 THEN $
+     iterations = 1
+  b = call_external(lib_name() ,'IDL_phase_diverse_iterate',long(iterations),result) 
+  show, ABS(result)
+  return, result
+end
+
+
+pro cxs_phase_diverse_iterations_per_cycle, iterations
+  b = call_external(lib_name(),'IDL_phase_diverse_iterations_per_cycle', long(iterations))
+end
+
+pro cxs_phase_diverse_set_transmission, array
+  n = size(array)
+  b = call_external(lib_name(),'IDL_phase_diverse_set_transmission', long(n[2]), long(n[1]), double(array))
+end
+
+pro cxs_phase_diverse_adjust_positions, type=type, forward=forward, $
+                                        x_min=x_min, x_max=x_max, $
+                                        y_min=y_min, y_max=y_max, $
+                                        step_size=step_size
+  
+  if not keyword_set(type) then type = 0
+  if not keyword_set(forward) then forward = 1
+  if not keyword_set(x_min) then x_min = -50
+  if not keyword_set(x_max) then x_max = 50
+  if not keyword_set(y_min) then y_min = -50
+  if not keyword_set(y_max) then y_max = 50
+  if not keyword_set(step_size) then step_size = 4
+  
+  b = call_external(lib_name(),'IDL_phase_diverse_adjust_positions', $
+                    long(type), long(forward), $
+                    long(x_min),  long(x_max), $
+                    long(y_min),  long(y_max), $
+                    double(step_size))
+  
+end
+
+function cxs_phase_diverse_get_final_x_position, nprobe
+  return, call_external(lib_name(), $
+                        'IDL_phase_diverse_get_final_x_position', $
+                        long(nprobe))
+end
+
+function cxs_phase_diverse_get_final_y_position, nprobe
+  return, call_external(lib_name(), $
+                        'IDL_phase_diverse_get_final_y_position', $
+                        long(nprobe))
 end
