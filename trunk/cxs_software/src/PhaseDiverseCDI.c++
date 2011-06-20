@@ -219,7 +219,8 @@ void PhaseDiverseCDI::iterate(){
 	}**/
       
       singleCDI.at(i)->iterate();
-      cout << "This Error="<<singleCDI.at(i)->get_error()<<endl;
+      cout << "Error for frame "<<i<<" is "
+	   << singleCDI.at(i)->get_error() << endl;
 
     }
 

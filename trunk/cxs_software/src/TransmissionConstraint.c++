@@ -145,14 +145,13 @@ void TransmissionConstraint::apply_constraint(Complex_2D & transmission){
 
 	  }
 	  
-	  if(do_charge_flip && flip_sign*transmission.get_imag(i,j)>0){
+	  if(do_charge_flip && flip_sign*transmission.get_imag(i,j)>0)
 	    transmission.set_imag(i,j,-1*transmission.get_imag(i,j));
-	  }
+      
 
 	  //restrict the transmission function to unit if requested
-	  if(do_enforce_unity && mag_old>1){
+	  if(do_enforce_unity && mag_old>1)
 	    transmission.set_mag(i,j,1);
-	  }
 
 	}
       }

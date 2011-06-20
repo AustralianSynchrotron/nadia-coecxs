@@ -353,7 +353,6 @@ void FresnelCDI::get_transmission_function(Complex_2D & result,
   if(transmission_constraint){
     transmission_constraint->apply_constraint(result);
   }
-  
 }
 
 
