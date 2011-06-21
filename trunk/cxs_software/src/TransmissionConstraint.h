@@ -247,6 +247,24 @@ class TransmissionConstraint{
 
   /** The destructor */
   ~TransmissionConstraint();
+  
+
+ /** 
+  * delete all the complex constraints associated with
+  * this TransmissionConstraint. Use with care! 
+  **/
+  void delete_complex_constraint_regions(){
+    
+    while(!complex_constraint_list.empty()) {
+      delete complex_constraint_list.back();
+      complex_constraint_list.pop_back();
+    }
+    
+    delete region_map;
+    region_map = 0;
+    
+  }
+
 
   /**
    * A complex constraint. See ComplexConstraint for details of this
