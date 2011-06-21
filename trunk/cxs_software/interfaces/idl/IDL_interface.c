@@ -670,7 +670,20 @@ extern "C" void IDL_phase_diverse_add_position(int argc, void * argv[]){
   Complex_2D * local_esw = esw;
   TransmissionConstraint * local_con = constraint;
 
+  //redirect stardard out to a buffer and put in IDL message format
+  streambuf * backup = cout.rdbuf(); //store a pointer to the stdout buffer
+  streambuf * str_buffer = new stringbuf(); //create a new string buffer
+  cout.rdbuf(str_buffer);  //redirect stdout to the string buffer
+
+  //add the new position
   phaseDiv->add_new_position(local, x, y, alpha);
+  
+  cout.rdbuf(backup);  //restore cout to stdout
+  //pass the string to IDL
+  IDL_Message(IDL_M_GENERIC, IDL_MSG_INFO, ( (stringbuf*) str_buffer)->str().c_str());
+  //clean up
+  delete str_buffer;
+
 
   //book keeping..
   phaseDiv_cdi.push_back(local);
@@ -761,11 +774,26 @@ extern "C" void IDL_phase_diverse_adjust_positions(int argc, void * argv[]){
   int y_max = *(IDL_LONG*) argv[5]; 
   double step_size = *(double*) argv[6];
 
+  //redirect stardard out to a buffer and put in IDL message format
+  streambuf * backup = cout.rdbuf(); //store a pointer to the stdout buffer
+  streambuf * str_buffer = new stringbuf(); //create a new string buffer
+  cout.rdbuf(str_buffer);  //redirect stdout to the string buffer
+
+
+  //adjust the positions
   phaseDiv->adjust_positions(type,forward, 
 			     x_min, x_max, 
 			     y_min, y_max, 
 			     step_size);
+
   
+  cout.rdbuf(backup);  //restore cout to stdout
+  //pass the string to IDL
+  IDL_Message(IDL_M_GENERIC, IDL_MSG_INFO, ( (stringbuf*) str_buffer)->str().c_str());
+  //clean up
+  delete str_buffer;
+
+
 }
 
 extern "C" double IDL_phase_diverse_get_final_x_position(int argc, void * argv[]){
