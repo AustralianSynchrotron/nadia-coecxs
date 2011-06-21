@@ -36,20 +36,26 @@ Config::Config(string file_name){
       if(pos!=string::npos){
 	line = line.substr(0,pos);
       }
-
+      
       //now we get the key part and value part of the string
       pos = line.find("=");
+
+      //if '=' is not used as the key-value separator, 
+      //look for a space instead.
+      if(pos=string::npos)
+	pos = line.find(" "); 
+
       if(pos!=string::npos){
-      string key_temp = line.substr(0,pos);
+	string key_temp = line.substr(0,pos);
 
-      //now get rid of white space      
-      istringstream key_stream(key_temp);
-      string key;      
-      key_stream >> key;
-
-      string value = line.substr(pos+1);
-
-      mapping.insert(pair<string,string>(key,value));
+	//now get rid of white space      
+	istringstream key_stream(key_temp);
+	string key;      
+	key_stream >> key;
+	
+	string value = line.substr(pos+1);
+	
+	mapping.insert(pair<string,string>(key,value));
       }
     }
     

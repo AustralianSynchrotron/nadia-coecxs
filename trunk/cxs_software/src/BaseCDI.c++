@@ -68,9 +68,10 @@ BaseCDI::BaseCDI(Complex_2D & initial_guess, unsigned int n_best)
 BaseCDI::~BaseCDI(){
   for(int i=0; i<n_best; i++)
     delete best_array[i];
-  if(n_best>0)
+  if(n_best>0){
     delete [] best_array;
-
+    delete [] best_error_array;
+  }
   //free the memory used by all 
   //the "temp_complex" arrays
   for(int n=0; n < NTERMS; n++)

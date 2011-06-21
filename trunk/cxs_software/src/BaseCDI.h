@@ -469,8 +469,12 @@ class BaseCDI{
     transmission_constraint = &trans_constraint;
   }
 
-
-
+  
+  void reset_best(){
+    for(int i=0; i<n_best; i++)
+      best_error_array[i]=1;
+  }
+  
  protected:
 
   /**

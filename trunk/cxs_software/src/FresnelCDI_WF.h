@@ -8,7 +8,7 @@
  * reconstruction.
  *
  * This is the class used for reconstructing white-field data prior to
- * running Fresnel reconstruction with FresnelCDI_WF. It inherits most
+ * running Fresnel reconstruction with FresnelCDI. It inherits most
  * methods from BaseCDI, so please look at the documentation of this
  * class also. Although there are some differences in the underlying
  * code between this class and the planar case, the interface is

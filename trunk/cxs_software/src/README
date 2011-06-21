@@ -4,4 +4,7 @@ library should be automatically compiled when typing "make" in the
 base directory of the package. The resulting library can be found in
 the ../lib directory.
 
-Nadia Davidson - nadiamd@unimelb.edu.au - 5/1/2011
+Extensive documentation can be found under "doxygen documentation"
+on the project website.
+
+Nadia Davidson - nadiamd@unimelb.edu.au - 21/6/2011

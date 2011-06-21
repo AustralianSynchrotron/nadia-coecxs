@@ -152,7 +152,7 @@ void Complex_2D::add(Complex_2D & c2, double scale){
 void Complex_2D::multiply(Complex_2D & c2, double scale){
 
   if(nx!=c2.get_size_x() || ny!=c2.get_size_y()){
-    cout << "in Complex_2D::add, the dimensions of the "
+    cout << "in Complex_2D::multiply, the dimensions of the "
       "input Complex_2D do not match the dimensions of "
       "this Complex_2D object" << endl;
     exit(1);
