@@ -53,10 +53,10 @@ s = CXS_GET_ROUND_SUPPORT(1024,1024,0.5)
 
 ;Make a new PhaseDiverseCDI object
 ; CXS_INIT_FRESNEL
-CXS_INIT_PHASE_DIVERSE, parallel=1
+CXS_INIT_PHASE_DIVERSE, beta=1, gamma=3
 
 
-FOR I=0,1 DO BEGIN $
+FOR I=0,6 DO BEGIN $
    d = CXS_READ_DBIN(1024,1024,data[I]) & $
    w = CXS_READ_CPLX(1024,1024,white_field[I]) & $
 
@@ -93,13 +93,15 @@ b = CXS_PHASE_DIVERSE_ITERATE(5)
 ; Now you can play with "a" however you like in IDL.
 
 ; e.g. get the phase and display it:
-;phase = ATAN(b, /PHASE)
-;window, XSIZE=512, YSIZE=512
-;TVSCL, rebin(phase,512,512)
+
+phase = ATAN(b, /PHASE)
+show, phase 
 
 ; or the magnitude:
 ; TVSCL, rebin(abs(a),512,512)
 
 ; or save the result to a file:
-; cxs_write_cplx(a , 'result_of_my_FCDI_CDI.cplx')
+; cxs_write_cplx(a, 'result_of_my_FCDI_CDI.cplx')
+
+CXS_CLEAR_MEMORY
 

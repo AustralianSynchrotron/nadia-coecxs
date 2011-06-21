@@ -22,12 +22,11 @@
 Complex_2D* esw = 0;
 BaseCDI * reco = 0;
 TransmissionConstraint * constraint = 0;
-std::vector<ComplexConstraint *> constraint_regions;
 
 PhaseDiverseCDI * phaseDiv = 0;
-
 std::vector<Complex_2D*> phaseDiv_complex;
 std::vector<BaseCDI*> phaseDiv_cdi;
+std::vector<TransmissionConstraint*> phaseDiv_constraint;
 
 int total_iters = 0;
 using namespace std;
@@ -216,23 +215,31 @@ extern "C" void IDL_deallocate_memory(int argc, void * argv[])
   }
 
   if(constraint!=0){
+    constraint->delete_complex_constraint_regions();
     delete constraint;
     constraint = 0;
   }
   
-  for(int i=0; i<constraint_regions.size(); i++)
-    constraint_regions.pop_back();
-
   if(phaseDiv!=0){
     delete phaseDiv;
     phaseDiv = 0;
   }
   
-  for(int i=0; i<phaseDiv_complex.size(); i++)
+  while(!phaseDiv_complex.empty()){
+    delete phaseDiv_complex.back();
     phaseDiv_complex.pop_back();
+  }
   
-  for(int i=0; i<phaseDiv_cdi.size(); i++)
+  while(!phaseDiv_cdi.empty()){
+    delete phaseDiv_cdi.back();
     phaseDiv_cdi.pop_back();
+  }
+  
+  while(!phaseDiv_constraint.empty()){
+    phaseDiv_constraint.back()->delete_complex_constraint_regions();
+    delete phaseDiv_constraint.back();
+    phaseDiv_constraint.pop_back();
+  }
 
 }
 
@@ -603,7 +610,7 @@ extern "C" void IDL_add_complex_constraint_region(int argc, void * argv[]){
   ComplexConstraint * new_region;
   new_region = new ComplexConstraint(temp_region, alpha1, alpha2);
   constraint->add_complex_constraint(*new_region);
-  constraint_regions.push_back(new_region);
+  //  constraint_regions.push_back(new_region);
 
   //if a fixed value for c=beta/delta has been given:
   if(argc==4)
@@ -661,15 +668,19 @@ extern "C" void IDL_phase_diverse_add_position(int argc, void * argv[]){
 
   BaseCDI * local = reco;
   Complex_2D * local_esw = esw;
+  TransmissionConstraint * local_con = constraint;
 
   phaseDiv->add_new_position(local, x, y, alpha);
 
   //book keeping..
   phaseDiv_cdi.push_back(local);
   phaseDiv_complex.push_back(local_esw);
+  phaseDiv_constraint.push_back(local_con);
   
   reco = 0;
   esw = 0;
+  constraint = 0;
+
 }
 
 extern "C" void IDL_phase_diverse_init_estimate(int argc, void * argv[]){
