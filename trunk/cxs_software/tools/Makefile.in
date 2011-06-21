@@ -1,6 +1,7 @@
 export LD_RUN_PATH=@LD_RUN_PATH@:@BASE@/lib
 
-SOURCE_TOOLS=hdf2ppm.c tiff2ppm.c CDI_reconstruction.c dbin2ppm.c cplx2ppm.c cplx2dbin.c dbin2tiff.c
+SOURCE_TOOLS=hdf2ppm.c tiff2ppm.c CDI_reconstruction.c dbin2ppm.c \
+             cplx2ppm.c cplx2dbin.c dbin2tiff.c PhaseDiverseFresnelRec.c
 EXEC_TOOLS=$(SOURCE_TOOLS:.c=.exe)
 
 LIB_SO=../lib/libCOECXS.so
