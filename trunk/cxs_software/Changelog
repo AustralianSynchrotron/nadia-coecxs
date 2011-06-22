@@ -48,3 +48,21 @@
 	* src/TransmissionConstrain.cxx added
 	* examples/ComplexConstraint.c added
 ------------------------------------------------------------------
+22/6/2011 Nadia Davidson
+	* rel_0.4
+	* src/PhaseDiverseCDI.c++ and src/PhaseDiverseCDI.h added. These
+	  allow phase-diver and ptycographic reconstructions to be carried
+	  out. Note however, this is only working for Fresnel data
+	  current, and needs some testing with plane-wave data.
+	* example/PhaseDiverse_example.c has been added
+	* tools/PhaseDiverseFresnelRec.c has been added
+	* interfaces/idl/phase_diverse_example.pro has been added and the
+	  IDL interface has been modified to allow for phase-diversity.
+	* src/BaseCDI.c++ and src/BaseCDI.h have been added to replace
+	  PlanarCDI as the base class. No major change in functionality 
+	  was introduced.
+	* configure.in and configure was modified (and some src/ files) to
+	  make fftwf (the floating point fftw library) the default. The old
+	  configuration can still be used through the configure option
+	  --enable-double-precision
+-------------------------------------------------------------------
