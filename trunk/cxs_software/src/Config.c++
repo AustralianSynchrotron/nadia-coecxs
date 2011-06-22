@@ -42,7 +42,7 @@ Config::Config(string file_name){
 
       //if '=' is not used as the key-value separator, 
       //look for a space instead.
-      if(pos=string::npos)
+      if(pos==string::npos)
 	pos = line.find(" "); 
 
       if(pos!=string::npos){
