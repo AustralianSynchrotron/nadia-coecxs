@@ -95,7 +95,7 @@ int main(int argc, char * argv[]){
   
   //load the support to use in the reconstruction
   Double_2D support;
-  read_image("image_files/FCDI_simulation_support.tiff", support);
+  read_image("image_files/FCDI_support.tiff", support);
   //make sure the object and support are the same dimensions
   if(support.get_size_x() != nx || support.get_size_y() != ny){
     cout << "dimensions do not match....exiting" <<endl;
@@ -111,7 +111,7 @@ int main(int argc, char * argv[]){
   //set the experimental parameters (all are in meters)
   double wavelength = 4.892e-10; //wavelength
   double fd = 0.8932; //focal to detector
-  double fs = 2.16e-3; //focal to sample
+  double fs = 1.794e-3; //2.16e-3; //focal to sample
   double ps = 13.5e-6; //pixel size
 
   //create the Complex_2D object which will be used to store
