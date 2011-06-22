@@ -53,8 +53,8 @@ void print_usage(){
        << "frame before updating the global transmission function. Default=1" <<endl << endl
        << "<beta>           "<<endl<<"the relaxation parameter. How much of the new results will "
        << "be added to the current transmission function estimate. Default = 1 (100%)" <<endl << endl
-       << "<gamma>          "<<endl<<"Integer amplification factor. See Corey's paper DOI: 10.1103/PhysRevLett.106.013903"
-       << "Default = 1" <<endl << endl
+       << "<gamma>          "<<endl<<"Integer amplification factor. See Corey's paper DOI: "
+       <<"10.1103/PhysRevLett.106.013903. Default = 1" <<endl << endl
        << "<running-mode>   "<<endl<<"0 - serial or 1- parallel. For serial mode, "
        << "a frame is iterated, the result is updated to the global function. "
        << "The new global function become the starting point for the next frame, "
