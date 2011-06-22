@@ -83,7 +83,7 @@ int main(int argc, char * argv[]){
   //set the experimental parameters (all are in meters)
   double wavelength = 4.892e-10; //wavelength
   double fd = 0.8932; //focal to detector
-  double fs = 1.794e-3; //focal to sample
+  double fs = 2.5e-3; //focal to sample
   double ps = 13.5e-6; //pixel size
 
   //create the projection object which will be used later to
@@ -198,7 +198,7 @@ int main(int argc, char * argv[]){
 		   wf, //white field 
 		   wavelength, //wavelength
 		   fd, //focal-to-detector
-		   0.00214, //focal-to-sample
+		   0.0025, //focal-to-sample
 		   ps, //pixel size
 		   1.0); //normalisation of white-field to sample data
   
@@ -224,10 +224,6 @@ int main(int argc, char * argv[]){
   tc1.set_charge_flipping(false);
 
   /*** run the reconstruction ************/
-  //  proj2.set_complex_constraint(tc1);
-
-  //  cout << proj2.refine_sample_to_focal_length(0.0016,0.002,20,0.00005,8)<<endl;
-  
   for(int i=0; i<  total_iterations+1; i++){
 
     cout << "iteration " << i << endl;
