@@ -48,7 +48,7 @@ int main(int argc, char * argv[]){
 
   //load the support to use in the reconstruction
   Double_2D support;
-  read_image("image_files/FCDI_simulation_support.tiff", support);
+  read_image("image_files/FCDI_support.tiff", support);
   
   //we will use the same white field as the Fresnel examples. For
   //this reason you will need to reconstruct it first using
