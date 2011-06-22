@@ -60,9 +60,19 @@ This example builds on the Fresnel examples by demonstrating how
 complex and other constraints on the transmission function can be
 included in a reconstruction.
 
+PhaseDiverse_example.c
+----------------------
+This example shows how phase-diverse / ptychographic
+reconstruction can be performed. The example uses data from 
+Corey Putkunz which can be found on osiris at
+/data/cputkunz/phase_diverse_cdi/example_data.tar.gz
+It consists of 7 Fresnel diffraction images of the same object.
+For each image, the sample position is altered with respect to the focal
+point positions and/or transverse to the beam direction.
+
 
 IDL examples
 ------------
 These can be found in the directory cxs_software/interfaces/idl
 
-Nadia Davidson - nadiamd@unimelb.edu.au - 1/3/2011
+Nadia Davidson - nadiamd@unimelb.edu.au - 22/6/2011
