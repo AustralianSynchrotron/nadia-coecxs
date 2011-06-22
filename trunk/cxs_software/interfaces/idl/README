@@ -17,5 +17,9 @@ is familiar with the language.
 - fresnel_example.pro shows which commands and in which order they
   should be run for Fresnel CDI reconstruction to be performed.
 
+- phase_diverse_example.pro shows how phase-diverse/ptychographic
+  reconstruction can be perform. The example is based on Fresnel 
+  reconstruction, so it might be worth looking at fresnel_example.pro
+  before running this example.
 
-Last modified: 25th Jan. 2011,    Nadia Davidson
+Last modified: 21st June 2011,    Nadia Davidson

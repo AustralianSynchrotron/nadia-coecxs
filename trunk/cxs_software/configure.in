@@ -2,7 +2,7 @@
 # Process this file with autoconf to produce a configure script.
 
 #AC_PREREQ([2.65])
-AC_INIT([CXS_Software], [0.0], [Nadia Davidson <nadiamd@unimelb.edu.au>])
+AC_INIT([CXS_Software], [0.0], [<cxs-software@physics.unimelb.edu.au>])
 #AC_CONFIG_SRCDIR([examples/real_example.c])
 #AC_CONFIG_HEADERS([config.h])
 
