@@ -11,13 +11,13 @@
 	* all: Some bug fixes to the last version. Most of them small.	
 	* io_tiff.c (read_tiff): a major bug causing seg. faults in
 	the file io_tiff.c was fixed.
-	* inteface/idl: interface for idl has been created, but remains 
+	* interfaces/idl: interface for idl has been created, but remains 
 	to be documented and cleaned up.
 
 ----------------------------------------------------------------
 24/2/2011 Nadia Davidson
 	* rel_0.2
-	* clean up of examples and code in inteface/idl
+	* clean up of examples and code in interfaces/idl
 	* optimisation of the PlanarCDI code. Fourier transforms
 	are now performed in the Complex_2D class.
 	* FresnelCDI_simulation_example.exe added and corresponding 
@@ -37,7 +37,7 @@
 	material and maximum thickness are known.
 	* Initialisation in Fresnel and Fresnel_WF CDI is done slightly
 	differently now. This fixed a problem with speckle in the
-	white-field reconstuction, and also allows FresnelCDI to be
+	white-field reconstruction, and also allows FresnelCDI to be
 	initialised (at least partially) randomly.
 	* Soft support edges are now allowed.
 ------------------------------------------------------------------
