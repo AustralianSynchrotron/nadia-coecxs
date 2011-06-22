@@ -40,7 +40,7 @@ int main(int argc, char * argv[]){
   const int max_iterations = 15;
 
   //make the support
-  Double_2D * beam = new Double_2D(nx,ny);
+  Double_2D beam(nx,ny);
   double beam_fraction = 0.5;
   double i0 = (nx-1)/2.0;
   double j0 = (ny-1)/2.0;
@@ -48,9 +48,9 @@ int main(int argc, char * argv[]){
     for(int j=0; j<ny; j++){
       if(sqrt((i-i0)*(i-i0)+(j-j0)*(j-j0)) 
 	 < beam_fraction*sqrt(j0*j0+i0*i0))
-	beam->set(i,j,100);
+	beam.set(i,j,100);
       else{
-	beam->set(i,j,0);
+	beam.set(i,j,0);
       }
     }
   }
@@ -139,7 +139,7 @@ int main(int argc, char * argv[]){
 
     //set the support and intensity and initialise
     proj[n]->set_intensity(*diffraction);
-    proj[n]->set_support(*beam,true); //*this_support, true);  
+    proj[n]->set_support(beam);
     proj[n]->initialise_estimate();
 
     //add a complex constraint
@@ -147,7 +147,6 @@ int main(int argc, char * argv[]){
 
     delete wf;
     delete diffraction;
-    delete this_support;    
 
     //New part.. Add the FresnelCDI to the PhaseDiverseCDI.
     pd.add_new_position(proj[n], x_pos[n], y_pos[n]);
