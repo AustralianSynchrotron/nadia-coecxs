@@ -7,11 +7,45 @@
 \usepackage{amsmath}
 \usepackage{subfigure}
 \usepackage{fancyhdr}
+\usepackage{fancyvrb}
 \usepackage{booktabs}
 \usepackage{comment}
 \usepackage{import}
+\usepackage{listings}
+\usepackage{tikz}
+\usepackage{html}
+%\begin{htmlonly}
+%  \usepackage{verbatim}
+%  \providecommand{\lstlisting}[2][]{\verbatim{#2}}
+%  \renewcommand*{\lstlisting}{\verbatim}
+%\end{htmlonly}
+\lstnewenvironment{myverbatim}{}{}
+
+\RequirePackage[dvips]{color}
+
+\definecolor{mycolour}{rgb}{0.05,0.2,0.5}
+\definecolor{gray}{rgb}{0.9,0.9,0.9}
+\definecolor{darkgray}{rgb}{0.3,0.3,0.3}
+
 %\usepackage{doxygen}
 \pagestyle{fancy}
+
+\lstset{
+language=C++,
+basicstyle=\ttfamily\color{mycolour},                  % Code font, Examples: \footnotesize, \ttfamily
+commentstyle=\color{darkgray},            % Comments font
+backgroundcolor=\color{gray},
+basewidth=0.5em,
+breaklines=true,
+}   
+
+\usetikzlibrary{shapes.arrows,chains,positioning}
+
+%\usepackage{color,fancyvrb}
+%\renewcommand\FancyVerbFormatLine[1]
+%{\colorbox{gray}{\makebox[\linewidth][l]{#1}}}
+
+%\DefineShortVerb{\!}
 
 %\makeatletter
 %\renewcommand*\l@section{\bf{\color{mycolour}\sffamily{#1}}}
@@ -141,7 +175,6 @@ feedback on any aspect of the software package: functionality,
 installation, documentation etc. Please email ..... for questions or
 comments.
 
-
 \section{Installation Instructions}
 \label{installation}
 
@@ -175,17 +208,17 @@ package manager. Look for libfftw3-dev, libtiff4-dev and libhdf4-dev.
 
 Download our source code from the website and put
 it into an appropriate directory. Unzip and untar the source code: 
-\begin{verbatim}
+\begin{myverbatim}
   gunzip CXS.rel_0.4.tar.gz 
   tar -xvvf CXS.rel_0.4.tar
-\end{verbatim}
+\end{myverbatim}
 
 Now change to the directory cxs\_software and compile the source code: 
-\begin{verbatim}
+\begin{myverbatim}
   cd cxs_software 
   ./configure 
   make
-\end{verbatim}
+\end{myverbatim}
 
 If ./configure doesn't finish by making a set of "Makefiles", the
 dependent libraries probably haven't been installed correctly or
@@ -213,15 +246,14 @@ compiled and the \name libraries linked.
 \item Get and build the fftw, libtiff and hdf packages using fink
 \item Download the \name source code from the website
 \item Follow the install instruction for linux, except, replace ./configure with 
-\begin{verbatim}
-  ./configure --with-fftw_inc=/sw/include --with-fftw_lib=/sw/lib CXX="g++ -arch i386" 
-  --with-mfhdf_inc=/sw/include --enable-checking
-\end{verbatim}
+\begin{myverbatim}
+  ./configure --with-fftw_inc=/sw/include --with-fftw_lib=/sw/lib CXX="g++ -arch i386" --with-mfhdf_inc=/sw/include --enable-checking
+\end{myverbatim}
 The ``--with'' flags will tell the compiler where to look for the
 external packages.  The CXX="g++ -arch i386" relates to your
 computer's architecture. This is for a late 2010 macbook pro running
 10.6, try this, if it doesn't work, try looking up the relevant
-information for your computer. --enable-checking is just in case!
+information for your computer. --enable-checking is just in case.
 \item Type make, as in the linux instructions.
 \end{enumerate}
 
@@ -234,7 +266,7 @@ linux/unix and (in my opinion) makes modifying and recompiling the
 code a bit easier than it would be in Windows otherwise. First you
 will need to install cygwin. You can do this by going to
 http://www.cygwin.com/, scrolling to the bottom of the page and
-clicking on "Install or update now! (using setup.exe)". Open setup.exe
+clicking on "Install or update now\ (using setup.exe)". Open setup.exe
 and follow the installation instructions. Apart from the "Package
 Selection" screen, used the default options. When you get to the
 "Package Selection" screen leave "All" on "Default" and add the
@@ -271,29 +303,29 @@ and also extract it into your home directory on cygwin.
 Next, download the cxs software here and put it into your home
 directory on cygwin (C:\textbackslash{}cygwin\textbackslash{}home\textbackslash{}your\_user\_name). Open cygwin and
 unzip and untar the package:
-\begin{verbatim}
+\begin{myverbatim}
 $ gunzip CXS.rel_0.4.tar.gz 
 $ tar -xvvf CXS.rel_0.4.tar 
-\end{verbatim}
+\end{myverbatim}
 
 When you type ls you should see the directory "cxs\_software" plus a
 few others. Change into the cxs\_software directory:
-\begin{verbatim}
+\begin{myverbatim}
 $ cd cxs_software 
-\end{verbatim}
+\end{myverbatim}
 Tell the package where your hdf and szip libraries files are located
 (replace the "user\_name" with your cygwin user name):
-\begin{verbatim}
+\begin{myverbatim}
 $ ./configure --with-mfhdf_lib=/home/"user_name"/hdf4.2.5-cygwin-szip/lib --with-mfhdf_inc=/home/"user_name"/hdf4.2.5-cygwin-szip/include --with-sz_lib=/home/"user_name"/szip_cygwin_encoder/lib 
-\end{verbatim}
+\end{myverbatim}
 
 If you get an errror, check that the paths given to configure are
 correct; the lib directories should have files starting with "lib" and
 the include directory should have files ending in ".h". If configure
 worked correctly, then compile the libraries and examples:
-\begin{verbatim}
+\begin{myverbatim}
 $ make
-\end{verbatim}
+\end{myverbatim}
 
 Hopefully you won't get any errors and when you look in the lib/ and
 include/ directories you will see some files. The libraries can be
@@ -303,13 +335,13 @@ examples). The examples show how the libraries can be used.
 \begin{comment}
 --------------------------------------
 Change into the example directory:
-\begin{verbatim}
+\begin{myverbatim}
 $ cd examples 
-\end{verbatim}
+\end{myverbatim}
 and run one of the examples. e.g.: 
-\begin{verbatim}
+\begin{myverbatim}
 $ ./PlanarCDI_example.exe
-\end{verbatim}
+\end{myverbatim}
 
 If everything is working correcting, you should see some text output
 (counting the iterations). If you look at this directory in the
@@ -317,15 +349,15 @@ Windows browser you should see that some .ppm image files are created
 which give you the reconstruction image for various number of iterations.
 
 Have a look at the code in more detail to see what's going on: 
-\begin{verbatim}
+\begin{myverbatim}
 $ xemacs PlanarCDI_example.c 
-\end{verbatim}
+\end{myverbatim}
 and edit some variables to see what happens (eg. change the reconstruction algorithm). 
 Then recompile and rerun the example: 
-\begin{verbatim}
+\begin{myverbatim}
 $ make 
 $ ./PlanarCDI_example.exe
-\end{verbatim}
+\end{myverbatim}
 -------------------------
 \end{comment}
 
@@ -363,9 +395,9 @@ setting up and running the software.
 \subsubsection{Logging into Osiris from a Linux/Unix/Mac Machine}
 
 Open a terminal and type: 
-\begin{verbatim}
+\begin{myverbatim}
   ssh -X11 -2 osiris.ph.unimelb.edu.au 
-\end{verbatim}
+\end{myverbatim}
 The "-X11 -2" enables you to view graphics on osiris.
 
 \subsubsection{Logging into Osiris from Windows}
@@ -416,54 +448,69 @@ Finally go into putty again, and load your "osiris" session.
 Once you have successfully logged in, append your PATH variable to the
 directory where the cxs programs are located. This can be done by
 typing:
-\begin{verbatim}
+\begin{myverbatim}
   export PATH=$PATH:/data/nadia/cxs_software_rel_0.4/cxs_software/bin 
-\end{verbatim}
+\end{myverbatim}
 
 You now have available all of the command line tools listed here. Note
 that this will only work for your current session on osiris. To make
 it permanent, open the file ".bash\_profile" in your home area:
-\begin{verbatim}
+\begin{myverbatim}
   emacs .bash_profile 
-\end{verbatim}
+\end{myverbatim}
 Add the line above to the end of the file, save and then close it (use
 the menu or type "xs" followed by "xc" while holding down the Ctrl
 key).
 
 If you plan to work with IDL you will also need to update your
 LD\_LIBRARY\_PATH with the wrapper library path:
-\begin{verbatim}
+\begin{myverbatim}
   export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/data/nadia/cxs_software_dev/cxs_software/interfaces/idl/ 
-\end{verbatim}
+\end{myverbatim}
 and update the IDL\_PATH with the IDL module location:
-\begin{verbatim}
+\begin{myverbatim}
   export IDL_PATH="${IDL_PATH}:\:/data/nadia/cxs_software_dev/cxs_software/interfaces/idl/"
-\end{verbatim}
+\end{myverbatim}
 
 \subsubsection{Running the Commandline Tool}
+
 The simplest way to run reconstruction is to use the
 CDI\_reconstruction.exe command line tool. It takes three arguements as
 input:
+\begin{itemize}
+\item a configuration file, 
+\item the reconstruction type: planar, fresnel\_wf or fresnel and
+\item a seed for the initial random estimate. 
+\end{itemize}
+If you don't give the seed value, "0" is used as the default, and if
+you don't give the reconstuction type, "planar" is assumed.
 
-a configuration file the reconstruction type: "planar", "fresnel\_wf"
-or "fresnel" a seed for the initial random estimate If you don't give
-the seed value, "0" is used as the default, and if you don't give the
-reconstuction type, "planar" is assumed.  Test out the program by
-running it with one of the example configuration files:
-CDI\_reconstruction.exe planar\_example.config You should see output
-telling you the iteration number and the error. The error is a measure
-of the difference between the diffraction data and the reconstructed
-diffraction (the usual chi squared given in the literature). You can
-kill the process at any time by typing Ctrl-C or you can wait for it
-to finish if you like.
+Test out the program by running it with one of the example
+configuration files: 
+\begin{myverbatim}
+   ./CDI_reconstruction.exe planar_example.config
+\end{myverbatim}
+You should see output telling you the iteration number and the
+error. The error is a measure of the difference between the
+diffraction data and the reconstructed diffraction (the usual chi
+squared given in the literature). You can kill the process at any time
+by typing Ctrl-C or you can wait for it to finish if you like.
 
 Now look into the configuration file by typing: 
-emacs planar\_example.config 
+\begin{myverbatim}
+   emacs planar_example.config 
+\end{myverbatim}
 You can see that the data and support file names are given. Type: 
-gthumb image\_files/planar\_support.tiff 
-to view the support. The data file can't be viewed with gthumb because it's in binary format, however you can convert it to a .ppm file using one of the other command line tools and then view it: 
-dbin2ppm.exe image\_files/planar\_data.dbin planar\_data.ppm 1024 1024 
-gthumb planar\_data.ppm
+\begin{myverbatim}
+   gthumb image_files/planar_support.tiff 
+\end{myverbatim}
+to view the support. The data file can't be viewed with gthumb because
+it's in binary format, however you can convert it to a !.ppm! file using
+one of the other command line tools and then view it: 
+\begin{myverbatim}
+   dbin2ppm.exe image_files/planar_data.dbin planar_data.ppm 1024 1024 
+   gthumb planar_data.ppm
+\end{myverbatim}
 
 The CDI\_reconstruction.exe program outputs a .ppm file of the current
 magnitude of the estimated exit surface wave every 40 iterations. Type
@@ -479,16 +526,22 @@ can also use this file as the starting point for another
 reconstruction (see planar\_example.config for instructions).
 
 Now, try editing the configuration file: 
-emacs planar\_example.config 
+\begin{myverbatim}
+   emacs planar_example.config 
+\end{myverbatim}
 e.g. with a different combination of reconstuction algorithms, a
 different output rate, support file or shrink-wrap parameters etc. and
 see what happends.
 
 A similar example exists for the Fresnel case. This can be run by
 first reconstructing the white field using 3-plane propogation:
-CDI\_reconstruction.exe fresnel\_example.config fresnel\_wf Then
-reconstruct the sample: CDI\_reconstruction.exe fresnel\_example.config
-fresnel
+\begin{myverbatim}
+   ./CDI_reconstruction.exe fresnel_example.config fresnel_wf 
+\end{myverbatim}
+Then reconstruct the sample: 
+\begin{myverbatim}
+   ./CDI_reconstruction.exe fresnel_example.config fresnel
+\end{myverbatim}
 
 \subsubsection{Using the C/C++ Library}
 
@@ -499,9 +552,9 @@ reconstruction as planar.config performs can be done using
 PlanarCDI\_example.c. Compile this code using the Makefile: make Now
 when you type ls you should see a filenamed PlanarCDI\_example.exe. Run
 this.
-\begin{verbatim}
+\begin{myverbatim}
 ./PlanarCDI_example.exe 
-\end{verbatim}
+\end{myverbatim}
 You should find it gives almost exactly the same output as the
 CDI\_reconstuction program did. Have a look at the source code: emacs
 PlanarCDI\_example.c edit it and recompile using make to see what
@@ -523,13 +576,13 @@ flexibility than the command line program but doesn't allow to you use
 all the features of the C++ library.
 
 Begin by copying the IDL examples to your working directory, 
-\begin{verbatim}
+\begin{myverbatim}
 cp /data/nadia/cxs_software_dev/cxs_software/interfaces/idl/*_example.pro ./ 
-\end{verbatim}
+\end{myverbatim}
 and run them: 
-\begin{verbatim}
+\begin{myverbatim}
 idl planar_example.pro
-\end{verbatim}
+\end{myverbatim}
 
 Look at the .pro files to see what they do. 
 
@@ -549,14 +602,161 @@ with the path where you installed the software.
 
 
 \section{How Tos}
-\ref{how to}
+\label{how to}
 
 In this section, we describe how a number of common tasks can be
 achieved using the software. More detail of the functionality
 available can be found in the doxygen documentation () and IDL routine
-documentation ().
+documentation (). In the rest of this section, each of these steps are
+described in more detail.
 
-\subsection{Read and Write to Image Files}
+
+%\UndefineShortVerb{\!}
+\begin{figure}
+  \centering
+  \begin{tikzpicture}[auto,mybox/.style={rectangle,draw=black!50,fill=yellow!20,thick},
+      mybox2/.style={rectangle,draw=black!50,fill=blue!20,thick},
+      mybox3/.style={rectangle,fill=black!10,minimum height=2cm,minimum width=5cm},
+      mybox4/.style={rectangle,fill=white!10,minimum height=7.5cm,minimum width=7.5cm},
+      mybox5/.style={rectangle}]
+  
+    \node[mybox] (load) {1. Load input data};
+    \node[mybox] (initialise)   [below=of load,text width=4cm,text centered] {2. Initialise the reconstruction library};
+    \node[mybox] (iterate)      [below=of initialise]    {3. Iterate};
+    \node[mybox] (result)  [below=of iterate]    {4. Save the result};
+              
+    \draw [->] (load.south) -- (initialise.north);
+    \draw [->] (initialise.south) -- (iterate.north);
+    \draw [->] (iterate.west) to [->,loop left,looseness=16,min distance=15mm](iterate.west);
+    \draw [->] (iterate.south) -- (result.north);              
+
+  \end{tikzpicture}  
+  \caption{\label{fig:reco}The basic steps involved in a CDI reconstruction}
+\end{figure}
+
+\begin{enumerate}
+
+\item {\it Load input data} - Functions are provided for reading and writing
+  to various image formats. More information is given in Section
+  \ref{subsubsec:read_images}.
+  
+\item {\it Initialise the reconstruction library} - Whether you are
+  performing plane-wave, Fresnel or Phase-diverse/Ptycographic
+  reconstruction, you must initialise the library with a number of
+  input: the diffraction and support data, initial estimate, and
+  parameters which describe the experimental set-up. Please refer to
+  Sections \ref{subsubsec:rec_planar,subsubsec:rec_fresnel,subsubsec:rec_phase_div}
+  for specific instructions.
+      
+\item {\it Iterate} - At this stage the iterative algorithms developed by
+  \cite[] are run. In the software library, an iteration can be
+  performed simply by calling one function:
+      
+      {\bf In C++}
+      \begin{myverbatim}[language=C++]
+        planar.iterate();
+      \end{myverbatim}
+      
+      {\bf In IDL}
+      \begin{myverbatim}[language=IDL]
+        ; Perform one iteration. The exit-
+        ; surface-wave is return to 'result'  
+        result = CXS_ITERATE()
+        
+        ; Perform 50 iterations
+        result = CXS_ITERATE(50)
+      \end{myverbatim}
+
+      Various aspects of the reconstruction can be controlled, for
+      example, the algorithm, the relaxation parameter and the
+      shrinkwrap algorithm. How this can be achieve with the software
+      is described in this section. 
+
+
+    \item {\it Save the result} - Refer to Section \ref{subsubsec:write_images}.
+
+\end{enumerate}
+
+
+
+\begin{comment}    
+  \begin{scope}[xshift=5.5cm,yshift=-2.5cm]
+    
+    \node [mybox4] (highlight){};
+         
+    %      \only<1>{
+    \node [mybox2] (intensity) at (-1.5,-0.5) {scale intensity};
+    \node [mybox2] (support) [right=of intensity] {apply support};
+    
+    \draw [->] (intensity.south) to [in=270,out=270] node [auto,swap] {propagate to sample plane}(support.south) ; 
+    \draw [<-] (intensity.north) to [in=90,out=90] node [auto] {propagate to detector plane} (support.north) ;
+    %      }
+    
+
+                  \uncover<2-5>{
+
+                    \node [mybox4] {
+                      
+                      \begin{minipage}{6cm}
+                        
+                        \only<2>{
+                          Functions are provided for reading hdf, tiff and ppm image
+                          files. \\
+                          
+                          {\bf In C++} 
+                          \begin{myverbatim}[language=C++]
+                            //read in the data
+                            Double_2D data;
+                            read_image(``data_file_name.tiff'', data);
+                            
+                            //read in the support shape
+                            Double_2D support;
+                            read_image(``support_file_name.tiff'', support);
+                          \end{myverbatim}
+                          
+                          {\bf In IDL}
+                          \begin{myverbatim}[language=IDL]
+                            data = CXS_READ_PPM(1024, 1024, 'data_file.ppm')
+                          \end{myverbatim}
+                          etc. or use one of IDLs built in libraries to get
+                          the input in matrix form.
+                        }
+                        
+                        \only<3>{
+                          The reconstruction code must be initialised for either
+                          plane-wave, Fresnel white-field, Fresnel or phase diverse
+                          reconstruction. \\
+                          
+                          {\bf In C++} 
+                          \begin{myverbatim}[language=C++]
+                            //Create a complex 2D field which will
+                            //hold the result of the reconstruction.
+                            Complex_2D object_estimate(nx,ny);
+                            
+                            //Create the planar CDI object which will
+                            //be used to perform the reconstruction.
+                            PlanarCDI planar(object_estimate);
+                            
+                            //set the support and intensity
+                            planar.set_support(support,false);
+                            planar.set_intensity(data);
+                          \end{myverbatim}
+                              {\bf In IDL}
+                              \begin{myverbatim}[language=IDL]
+                                CXS_INIT_PLANAR, data, support
+                              \end{myverbatim}
+                        }
+                          
+\end{comment}
+
+\DefineShortVerb{\!}
+
+
+\subsection{Data Input/Output and Preparation}
+
+\subsubsection{Read Image Files}
+
+\label{subsec:read_images}
 
 The software is capable of accepting data in hdf, tiff or ppm image
 format. It can output as a grey scale tiff or ppm image with X bytes
@@ -566,6 +766,50 @@ required. Similarly, two dimensional arrays of complex numbers, such
 as those produced in the reconstruction, may be stored as a binary
 file of fftw~\cite{} complex number types.
 
+{\bf In C++} 
+\begin{myverbatim}[language=C++]
+  //read in the data
+  Double_2D data;
+  read_image(``data_file_name.tiff'', data);
+  
+  //read in the support shape
+  Double_2D support;
+  read_image(``support_file_name.tiff'', support);
+  \end{myverbatim}
+
+{\bf In IDL}
+\begin{myverbatim}[language=IDL]
+   data = CXS_READ_PPM(1024, 1024, 'data_file.ppm')
+\end{myverbatim}
+etc. or use one of IDLs built in libraries to get
+the input in matrix form.
+
+
+\subsubsection{Write Image Files}
+\label{subsub:write_images}
+Save the result to file.\\
+                          
+{\bf In C++} 
+\begin{myverbatim}[language=C++]
+  //write out the result:
+  // - as a complex binary file
+  write_cplx(temp_str.str(),object_estimate);
+  // - just the magnitude as an image
+  Double_2D object_mag;
+  object_estimate.get_2d(MAG,object_mag);
+  write_image("mag.tiff",object_mag);
+\end{myverbatim}
+                          
+{\bf In IDL}
+\begin{myverbatim}[language=IDL]
+  ; Record the complex field to a binary file
+  CXS_WRITE_CPLX, result, 'result_file.cplx'
+\end{myverbatim}
+The magnitude and phase of the complex matrix
+can be viewed and saved using the standard IDL
+routines.
+
+
 %\subsubsection{Plot the average intensity versus frame number, full-frame and ROI}
 %\subsubsection{Check for saturation/dead pixels}
 %\subsubsection{Run correlations on data and white-fields}
@@ -574,30 +818,34 @@ file of fftw~\cite{} complex number types.
 
 
 
-
 \subsubsection{Output Data on a Log Scale}
 
-
-
-
-
-
-\subsection{Raw data processing}
 \subsubsection{Subtract the darkfield}
-\subsubsection{Check the beam stability in data over time}
-\subsubsection{Check correlations after dark-field subtraction}
+%\subsubsection{Check the beam stability in data over time}
+%\subsubsection{Check correlations after dark-field subtraction}
+
 \subsubsection{Merge (add or average) data files together}
+
 \subsubsection{Determine the normalisation of the white-field to data}
+
 \subsubsection{Get the autocorrelation function}
 
 
-\newpage
-
-\subsection{Reconstruction}
+\subsection{Initialise a Reconstruction or Simulation}
 
 \subsubsection{Perform plane-wave reconstruction}
+\label{subsubsec:rec_planar}
 
 \subsubsection{Perform Fresnel reconstruction}
+\label{subsubsec:rec_fresnel}
+
+\subsubsection{Perform Phase Diverse Reconstruction}
+\label{subsubsec:rec_phase_div}
+
+
+
+\subsection{Run and Steer a Reconstruction}
+
 
 \subsubsection{Select the algorithm}
 
@@ -605,9 +853,9 @@ By default plane-wave CDI uses the ... algorithm and Fresnel CDI uses
 the ... algorithm. This can be easily changed at any point in the
 reconstruction using the method
 
-\begin{verbatim}
+\begin{myverbatim}
 void PlanarCDI::set_algorithm(int alg) 	
-\end{verbatim}
+\end{myverbatim}
 Where the algorithm options are:
 \begin{description} 
 \item ER - error reduction 
@@ -623,9 +871,9 @@ Where the algorithm options are:
 
 For example, if you have an object of type FresnelCDI called ``fcdi'', and
 you wish to change the algorithm to HIO:
-\begin{verbatim}
+\begin{myverbatim}
 fcdi.set_algorithm(HIO) 	
-\end{verbatim}
+\end{myverbatim}
 
 In addition to this extensive list, custom algorithms can be
 used. Iterative reconstruction algorithms can be expressed as a
@@ -639,7 +887,7 @@ Please see page 22 of the H.M. Quiney review: TUTORIAL REVIEW,
 Coherent diffractive imaging using short wavelength light sources,
 Journal of Modern Optics, 2010, DOI: 10.1080/09500340.2010.495459
 
-\begin{verbatim}
+\begin{myverbatim}
 void Planar::set_custom_algorithm (double m1,
 double 	m2,
 double 	m3,
@@ -651,7 +899,7 @@ double 	m8,
 double 	m9,
 double 	m10	 
 )
-\end{verbatim}
+\end{myverbatim}
 			
 Parameters:
 m1 	Coefficient to the  term
@@ -677,10 +925,10 @@ In IDL, the routine ... can be called to select the algorithm.
 
 \subsubsection{How to modify the reconstruction algorithm by adding a new constraint}
 
-\subsubsection{Perform Phase Diverse Reconstruction}
-
 \subsubsection{Refine the experimental parameters during reconstuction}
 
+
+\subsection{Perform a Simulation}
 
 
 \section{Performance}
@@ -709,9 +957,10 @@ FresnelCDI with Complex Constraints & 1.8 & \\
 Phase-Diverse/Ptychography & & \\
 \bottomrule
 \end{tabular}
-\caption{\label{table:speed} CPU time for a 1024$\item$1024 pixel
-  reconstruction. Laptop - , Cluster - . The start-up time is a few
-  seconds in each case. }
+
+\caption{\label{table:speed} CPU time for a 1024$\times$1024 pixel reconstruction. Laptop - , Cluster - . The start-up time is a few seconds in each case. 
+}
+
 \end{table}
 
 
@@ -723,23 +972,23 @@ single precision. We found no noticible lose in performance or
 correctness by using single precision, however users may choose to use
 double precision fast fourier transforms by adding the flag
 ``--enable-double-precision'' to ``./configure'' during installation.
-The class Double\_2D, despite it's name, will also use the same
+The class Double\_2D, despite its name, will also use the same
 precision as the fourier transform library and is single precision by
 default.
 
 \begin{table}[hbt!]
 \begin{tabular}[hbt!]{lcc}
 \toprule
- &  Number of N$\times$N & With p=4, N=1024 \\
- &  pixel arrays used & (MB) \\
+&  Number of N$\times$N & With p=4, N=1024 \\
+&  pixel arrays used & (MB) \\
 \midrule
 PlanarCDI (ER) & $4$ & 17 \\
 PlanarCDI (HIO) & $10$ & 42  \\
 FresnelCDI - white field & $4.5$ & 19 \\
 FresnelCDI & $8.5$ & 36 \\
-FresnelCDI with complex constraints & $11.5+c$ & 57 (c=2)\\
+FresnelCDI with complex constraints & $11.5+c$ & 57 (c=2) \\
 Phase-Diverse/Ptychography & $I(1+X) + 2M/N$ & 30,000 (I=400,M = 1100$^2$, \\
-&                 & X = FresnelCDI)  \\
+ &                 & X = FresnelCDI)  \\
 \bottomrule
 \end{tabular}
 
@@ -764,17 +1013,20 @@ X - number of arrays needed for a single reconstruction )
 
 \begin{figure}[htbp]
 \centering
-\includegraphics*[scale=0.2,viewport = 0 0 1500 1200]{cxs_class_diagram.eps}
-%\includegraphics*[scale=0.25]{cxs_class_diagram.eps}
+\includegraphics*[scale=0.3,viewport = 0 0 1500 1200]{cxs_class_diagram.eps}
 \caption[]{The relationship between classes of the \name package.
 \label{fig:class_diagram}}
 \end{figure}
 
 
 
-
-
 \section{IDL Routines}
+
+
+\section{License}
+
+
+\section{More Information}
 
 
 \end{document}

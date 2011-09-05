@@ -26,6 +26,7 @@
 
 \RequirePackage[dvips]{color}
 \definecolor{mycolour}{rgb}{0.05,0.2,0.5}
+\definecolor{gray}{rgb}{0.5,0.5,0.5}
 
 \renewcommand{\section}{\@startsection
 {section}%                    % the name
