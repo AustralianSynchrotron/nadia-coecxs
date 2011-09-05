@@ -4,10 +4,12 @@ FILENAME=cxs-software
 
 #my_paper
 
-all:	$(FILENAME).dvi
+all:	simple
+	acroread $(FILENAME).pdf
+
+simple: $(FILENAME).dvi
 	dvips $(FILENAME).dvi
 	dvipdf $(FILENAME).dvi
-	acroread $(FILENAME).pdf
 
 $(FILENAME).pdf: $(FILENAME).dvi
 	dvipdf $(FILENAME).dvi
