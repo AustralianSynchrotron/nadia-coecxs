@@ -1,3 +1,10 @@
+; Copyright 2011 Nadia Davidson 
+; for The ARC Centre of Excellence in Coherent X-ray Science. 
+;
+; This program is distributed under the GNU General Public License. 
+; We also ask that you cite this software in publications where you made 
+; use of it for any part of the data analysis.
+
 ; This file demonstrates the steps in performing planar CDI
 ; reconstruction using the library in IDL. 
 

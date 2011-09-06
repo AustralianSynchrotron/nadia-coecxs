@@ -1,3 +1,9 @@
+// Copyright 2011 Nadia Davidson for The ARC Centre of Excellence in 
+// Coherent X-ray Science. This program is distributed under the GNU  
+// General Public License. We also ask that you cite this software in 
+// publications where you made use of it for any part of the data     
+// analysis.  
+
 #include <iostream>
 #include <string>
 #include <cstdlib> 
@@ -99,7 +105,7 @@ void BaseCDI::set_support(const Double_2D & object_support, bool soften){
       support.set(i,j,object_support.get(i,j)/max);
     }
   }
-  //if required, convolve the support with a gaussian to soften the
+  //if required, convolve the support with a Gaussian to soften the
   //edges
   if(soften) 
     convolve(support,3,5);
@@ -340,7 +346,7 @@ int BaseCDI::iterate(){
   }
 
 
-  //combine the result of the seperate operators
+  //combine the result of the separate operators
   double value_real, value_imag;
   for(int i=0; i < nx; ++i){
     for(int j=0; j < ny; ++j){
@@ -429,12 +435,12 @@ void BaseCDI::apply_shrinkwrap(double gauss_width, double threshold){
 void BaseCDI::convolve(Double_2D & array, double gauss_width, 
 			 int pixel_cut_off){
     //to speed up computation we only convolve 
-  //up to 4 pixels away from the gaussian peak
+  //up to 4 pixels away from the Gaussian peak
 
   //make a temporary array to hold the smeared image
   Double_2D temp_array(nx,ny);
   
-  //make a temporary array to hold the gaussian distribution.
+  //make a temporary array to hold the Gaussian distribution.
   Double_2D gauss_dist(pixel_cut_off+1, pixel_cut_off+1);
   for(int i=0; i <= pixel_cut_off; i++){
     for(int j=0; j <= pixel_cut_off; j++){
@@ -450,7 +456,7 @@ void BaseCDI::convolve(Double_2D & array, double gauss_width,
   for(int i=0; i < nx; i++){
     for(int j=0; j < ny; j++){
       
-      //now loop over the colvoluted array (the one we want to make).
+      //now loop over the convoluted array (the one we want to make).
       //Calculate the contribution to each element in it.
       
       new_value = 0;

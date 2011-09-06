@@ -1,7 +1,11 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-; Author: Nadia Davidson (nadiamd@unimelb.edu.au)
-; Date: 24th January 2011
-; 
+; Copyright 2011 Nadia Davidson 
+; for The ARC Centre of Excellence in Coherent X-ray Science. 
+;
+; This program is distributed under the GNU General Public License. 
+; We also ask that you cite this software in publications where you made 
+; use of it for any part of the data analysis.
+;
 ; This code provides wrappers to the functions in the COECXS C++
 ; library. It calls the methods which are defined in the
 ; IDL_interface.c file (and compiled into libIDLCOECXS.so), thus
