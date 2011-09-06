@@ -8,8 +8,9 @@ all:	simple
 	acroread $(FILENAME).pdf
 
 simple: $(FILENAME).dvi
-	dvips $(FILENAME).dvi
 	dvipdf $(FILENAME).dvi
+#	dvips $(FILENAME).dvi
+
 
 $(FILENAME).pdf: $(FILENAME).dvi
 	dvipdf $(FILENAME).dvi
