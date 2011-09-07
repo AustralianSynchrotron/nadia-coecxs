@@ -17,6 +17,9 @@
 \usepackage{listings}
 \usepackage{tikz}
 \usepackage{html}
+\usepackage{dirtree}
+\renewcommand*\DTstylecomment{\textsf}
+
 %\begin{htmlonly}
 %  \usepackage{verbatim}
 %  \providecommand{\lstlisting}[2][]{\verbatim{#2}}
@@ -378,6 +381,26 @@ To uninstall, go to "Control Panel", go to "Add/Remove program", find
 CXSSoftware and remove it.
 
 
+\newpage
+{
+\section{Directory Structure}
+
+\dirtree{% 
+.1 cxs\_software/\DTcomment{base directory, where ./configure and make should be executed from}.
+.2 bin/ \DTcomment{contains the tool executable files are compilation}.
+.2 doc/ \DTcomment{contains configuration files for doxygen}.
+.3 manual/\DTcomment{contains the latex source for the software manual (this file)}.
+.2 examples/\DTcomment{this directory stores all the examples}.
+.3 image\_files/\DTcomment{stores images and data files used in the examples}.
+.2 include/\DTcomment{contains the source header files after compilation}.
+.2 interfaces/\DTcomment{a directory for wrapper code to languages other than C/C++}.
+.3 idl/\DTcomment{contains all IDL related code (source and examples)}.
+.2 lib/\DTcomment{contains the static and dynamic C++ library after compilation}.
+.2 src/\DTcomment{a directory for the library source code}.
+.2 tools/\DTcomment{contains the source code for the command-line tools}.
+}
+}
+
 \section{Getting Started}
 \label{getting started}
 
@@ -615,7 +638,7 @@ described in more detail.
 
 
 %\UndefineShortVerb{\!}
-\begin{figure}
+\begin{figure}[h!]
   \centering
   \begin{tikzpicture}[auto,mybox/.style={rectangle,draw=black!50,fill=yellow!20,thick},
       mybox2/.style={rectangle,draw=black!50,fill=blue!20,thick},
@@ -946,27 +969,34 @@ current state of the software in version \ver.
 
 \subsection{Speed}
 
-\begin{table}
-\begin{tabular}{lcc}
+\begin{table}[h!]
+\begin{tabular}[h!]{lcc}
 \toprule
-   & Laptop & Cluster/Server \\
-   & Iteration per Second & Iterations per Second \\
+   & Iteration per Second
+   & Laptop & Desktop \\
+   & Intel U2500 @ 1.20GHz, 1.5 GB memory & i7-2600 CPU @ 3.40GHz, 8 GB memory\\
 \midrule
-PlanarCDI (ER) & 3.3  &  \\
-PlanarCDI (HIO) & 2.7 & \\
-FresnelCDI - white field 2.0 &   & \\
-FresnelCDI & 2.7 & \\
-FresnelCDI with Complex Constraints & 1.8 & \\
-Phase-Diverse/Ptychography & & \\
+PlanarCDI (ER) & 3.3  &  16 \\
+PlanarCDI (HIO) & 2.7 & 13 \\
+FresnelCDI - white field 2.0 & 7 & \\
+FresnelCDI & 2.7 & 10 \\
+FresnelCDI with Complex Constraints & 1.8 & 7 \\
+Phase-Diverse/Ptychography & (X-0.6)/N  & (X-2)/N  \\
 \bottomrule
 \end{tabular}
 
-\caption{\label{table:speed} CPU time for a 1024$\times$1024 pixel reconstruction. Laptop - , Cluster - . The start-up time is a few seconds in each case. 
-}
-
+\caption{\label{table:speed} CPU time for a 1024$\times$1024 pixel
+  reconstruction. For phase-diverse/ptychography reconstruction, X is
+  the number of iterations which could be perform for a single frame,
+  non-phase-diverse/ptychography reconstruction of that type
+  (i.e. from the first five rows of the table). The start-up time is a
+  few seconds in each case. }
 \end{table}
 
 
+
+These values are independante of whether C/C++, IDL or the
+command-line tools are used.
 
 \subsection{Memory}
 
@@ -979,8 +1009,8 @@ The class Double\_2D, despite its name, will also use the same
 precision as the fourier transform library and is single precision by
 default.
 
-\begin{table}[hbt!]
-\begin{tabular}[hbt!]{lcc}
+\begin{table}[h!]
+\begin{tabular}[h!]{lcc}
 \toprule
 &  Number of N$\times$N & With p=4, N=1024 \\
 &  pixel arrays used & (MB) \\
@@ -990,26 +1020,25 @@ PlanarCDI (HIO) & $10$ & 42  \\
 FresnelCDI - white field & $4.5$ & 19 \\
 FresnelCDI & $8.5$ & 36 \\
 FresnelCDI with complex constraints & $11.5+c$ & 57 (c=2) \\
-Phase-Diverse/Ptychography & $I(1+X) + 2M/N$ & 30,000 (I=400,M = 1100$^2$, \\
+Phase-Diverse/Ptychography & $I(1+X) + 2R$ & 30,000 (I=400,M = 1100$^2$, \\
  &                 & X = FresnelCDI)  \\
 \bottomrule
 \end{tabular}
 
-\caption{\label{table:memory}The memory used.......
+\caption{\label{table:memory}The memory used. 
 In total the memory used will be the factor given in the second
 coloumn of Figure \ref{table:memory} multiplied by $pN^2$.
 (N - image side length in pixels, p - precision in bytes, 
 c - number of complex constraint regions, I - number of images, 
-M - area, in pixels, of the phase-diverse image,
+R - ratio of the total phase-diverse image size to a single N$\timesN$ image,
 X - number of arrays needed for a single reconstruction ) 
 }
 \end{table}
 
 
 
-
-
 \appendix
+
 
 
 \section{Class Description} 
