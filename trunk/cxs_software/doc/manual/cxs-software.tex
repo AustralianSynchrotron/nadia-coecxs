@@ -184,6 +184,9 @@ feedback on any aspect of the software package: functionality,
 installation, documentation etc. Please email ..... for questions or
 comments.
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\newpage
 \section{Installation Instructions}
 \label{installation}
 
@@ -406,6 +409,9 @@ CXSSoftware and remove it.
 %}
 %{
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newpage
+
 \section{Directory Structure}
 
 \begin{itemize}
@@ -431,7 +437,10 @@ CXSSoftware and remove it.
    \end{itemize}
 \end{itemize}
 
-\section{Getting Started}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newpage
+
+\section{Tutorial for Getting Started}
 \label{getting started}
 
 \subsection{For Users on Osiris}
@@ -653,9 +662,212 @@ with the path where you installed the software.
 
 \subsection{After Installing from the Window's Binary}
 
+The software doesn't have a flash graphical user interface, but rather
+is a library and set of files which can be used to performing image
+reconstruction through various means: IDL, C++ and command lines
+tools. Brief instructions for how to get started for each of these
+options is described below.
+
+\subsubsection{IDL}
+If you have IDL installed, you can import the library routines by
+simply executing:
+\begin{myverbatim}
+ .Compile CXS_interface.pro
+\end{myverbatim}
+in IDL. Documentation for each of the routines can be found on the
+website and examples are provided in the {\tt examples} subdirectory
+of this distribution.
+
+To run the IDL examples:
+\begin{itemize}
+\item Open IDL (open in 32-bit mode if you are on a 64-bit machine).
+\item Open the file planar\_example.pro or fresnel\_example.pro
+\item Change the file names in the file to the directory where the
+  example image files are stored on your system. It should be
+  something like,
+  \begin{myverbatim}
+    'C:\<path you installed the package>\cxs_software\examples\image_files\<file_name>'
+  \end{myverbatim}
+     Note how the "/"s should be changed to "\"s.
+   \item Run the examples by copying and pasting each line of the
+     example file into your IDL command prompt. Read the code comments
+     to work out what it's doing. Later you can write a single file to
+     execute. I got errors when I tried to execute the whole file at
+     once using the IDL workbench, although it's possible under
+     linux. If you work out how to, please let me know.
+\end{itemize}
+
+
+\subsubsection{Command Line Tools}
+
+Some command line tools are provided for image reconstruction and for
+converting between different image file formats. The image
+reconstruction tool (CDI\_reconstruction.exe) is not very flexible
+(for example it doesn't allow simulation to be carried out). So in
+general the previous two options are recommended.  However, it does
+not require any extra software to be installed, for example IDL or
+mingw, so maybe useful, to quickly demonstrate the concepts of the
+algorithms to new users.
+
+
+To use:
+\begin{itemize}
+\item copy the examples directory from the package to somehwere in
+  your home area. This will be the copy you work on.
+\item open a command line terminal: Click on "Start", click on "run",
+  type "cmd" in the open field and click on okay
+\item change into the directory where the examples are, using the "cd"
+  command, for example: "cd <directory name>\\examples" where
+  <directory name> is the directory where you copies the examples
+\item open the "planar\_example.config" file to see what options have
+  been set.
+\item run the planar example: 
+  \begin{myverbatim}
+    CDI_reconstruction.exe planar.config
+  \end{myverbatim}
+\item When it has finished look at the directory in windows explorer
+  or similar to see which files were created. You might need a program
+  like "IrfanView" to view the .ppm image files.
+\item the output of the reconstruction is a .cplx file (a 2D array of
+  complex numbers) which represents the exit-surface-wave of the
+  object. You can use this to get the magnitude, phase etc. of the
+  result using the cplx2ppm.exe program, or you can use it as the
+  input starting point for another reconstruction.
+\end{itemize}
+
+A description of each of the command line tools can be found at
+http://www.ph.unimelb.edu.au/~ndavidson/cxs/doxygen/index.html
 
 
 
+\subsubsection{C/C++}
+
+If you wish to run the software using C++ you should either be
+familiar with C/C++ or be willing to invest a bit of time to
+understand how to compile and write this type of code. For this reason
+it's not advised that a beginner attempts to follow the rest of these
+instruction. However, they are provided in case more advanced users
+wish to use C/C++.
+
+The benefit of using C/C++ is that it is more powerful and you will
+have greater flexibility with the software library.  If your
+reconstruction requires a lot of computing power (for example you plan
+on run on osiris or similar, rather than a desktop), this is the best
+option in my opinion.
+
+The first thing you will need is a C/C++ compiler. I recommend mingw
+because it is free; the code provided here was compiled with it, so I
+know it works; and because compilation is similar to linux/unix
+meaning you will be better trained for compiling on osiris or similar
+if the need arises.
+
+Five examples showing how to write c code using the CXS software for
+CDI reconstruction and simulation are given in the examples directory.
+Assuming you have mingw and mssys intalled you can compile and run the
+examples in the following way:
+
+\begin{itemize}
+\item copy the examples directory from the package to somehwere in
+  your home area. This will be the copy you work on.
+\item open a command line terminal: click on "Start", click on "run",
+  type "cmd" in the open field and click on okay
+\item change into the directory where the examples are, using the "cd"
+  command, for example: "cd <directory name>\\cxs\_software\\examples"
+  where <directory name> is the directory where you copied the package
+\item open "Makefile" in a text editor. Note that you might need a
+  text editor for linux/unix style files, otherwise the new lines
+  symbols will be missing. Change the directory path to you place the
+  package is installed.
+\item on the command line, type "make". You should see the five
+  examples being compiled.
+\item run the examples. e.g. by typing "PlanarCDI\_example.exe"
+\item when it has finished look at the directory in windows explorer
+  or similar to see which files were created. You might need a program
+  like "IrfanView" to view the .ppm image files.
+\end{itemize}
+
+In case you are interested, the header files for the CXS software
+project can be found in the "include" directory and the libraries in
+the "bin" (libraries which the CXS software depends on are also
+provided in this directory.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\newpage
+
+\section{Examples and Demos}
+
+The package consits of a set of examples which demonstrate how to use
+the library and tools of the software package for various
+reconstructions and simulations. All are located in the {\tt examples}
+subdirectory of the package.
+
+The examples should be compiled automatically after installation
+(Section \ref{installation}). To recompile (e.g.  after making
+modifications to the examples), you may type "make" in the {\tt
+  examples} directory.  To force a recompilation type "make clobber"
+followed by "make".
+
+\begin{description}
+
+\item[{\tt PlanarCDI\_example.c}] - \\ Reconstruction of plane-wave diffraction
+  data (data from L. Whitehead \cite{}). The shrinkwrap algorithm is
+  used to improve the reconstruction. A combination of the hybrid
+  input-out (HIO) and the ER (error-reduction) algorithms are used.
+
+\item[{\tt PlanarCDI\_example.sh}] - \\ The same reconstruction as above will
+  be performed using the CDI\_reconstruction.exe command line
+  program. A simple bash script and configuration file
+  (planar\_example.config and fresnel\_example.config) shows how this tool
+  can be used. Other parts of the bash script can be uncommented to
+  run Fresnel reconstruction or to run multiple times with a different
+  starting seed.
+
+\item[{\tt PlanarCDI\_simulation\_example.c}] - \\ An image of a sample (from
+  L. Whitehead \cite{}) is used to simulate a diffraction pattern for
+  planar CDI. The diffraction pattern is thresholded to make it more
+  realistic and then CDI reconstruction is performed.
+
+\item[{\tt FresnelCDI\_WF\_example.c }] - \\ This example demonstrates
+  how the phase of a white field can be recovered and saved for use in
+  Fresnel CDI reconstruction. The data set comes from Corey.
+
+\item[{\tt FresnelCDI\_example.c }]- \\ The result of the previous
+  example is used in Fresnel CDI reconstruction. The error-reduction
+  algorithm is used. The phase and magnitude of the transmission
+  function are output to file.
+
+\item[{\tt FresnelCDI\_simulation\_example.c }]- \\ This examples
+  demonstrates how a Fresnel experiment can be simulated. It makes use
+  of the object from the planar example and the white-field from the
+  fresnel example. Because it uses the fresnel white-field
+  reconstructed from data, you will need to run
+  FresnelCDI\_WF\_example.exe first.
+
+\item[{\tt ComplexConstraint\_example.c }]- \\ This example builds on
+  the Fresnel examples by demonstrating how complex and other
+  constraints on the transmission function can be included in a
+  reconstruction.
+
+\item[{\tt PhaseDiverse\_example.c }]- \\ This example shows how
+  phase-diverse/ptychographic reconstruction can be performed. The
+  example uses data from C. Putkunz which can be found on osiris at
+  /data/cputkunz/phase\_diverse\_cdi/example\_data.tar.gz It consists
+  of 7 Fresnel diffraction images of the same object.  For each image,
+  the sample position is altered with respect to the focal point
+  positions and/or transverse to the beam direction.
+
+\item[{\tt IDL examples}] - \\ Examples for performing planar, Fresnel
+  and Phase-Diverse/ptychographic reconstruction in IDL can be found
+  in the directory cxs\_software/interfaces/idl in the files
+  planar\_example.pro, fresnel\_example.pro and
+  phase\_diverse\_example.pro.
+
+\end{description}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newpage
 
 \section{How Tos}
 \label{how to}
@@ -985,6 +1197,9 @@ In IDL, the routine ... can be called to select the algorithm.
 \subsection{Perform a Simulation}
 
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newpage
+
 \section{Performance}
 
 Performance results for the software are given below for the speed at
@@ -1067,29 +1282,283 @@ X - number of arrays needed for a single reconstruction )
 \end{table}
 
 
+\section{More Information}
+
+- webpage
+- email address
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newpage
 
 \appendix
 
+\section{C++ Class Description} 
+
+For the sake of advanced users we provide a description of the
+software library structure in this section. Figure
+\ref{fig:class_diagram} shows the relationship between the non-I/O
+class of the software, and lists the public member functions.
+
+The reconstruction classes PlanarCDI, FresnelCDI and FresnelCDI\_WF
+(shows in the shaded region of Figure \ref{fig:class_diagram}, all
+inherit from the abstract base class, BaseCDI. Common functionality,
+for example the definition of the reconstruction algorithms is
+provided in BaseCDI. The reconstruction type PhaseDiverseCDI, which is
+capable of performing phase-diverse and ptycographic reconstruction
+accepts multiple objects of type BaseCDI.
 
 
-\section{Class Description} 
 
 \begin{figure}[htbp]
-\centering
-\includegraphics*[scale=0.3,viewport = 0 0 1500 1200]{cxs_class_diagram.eps}
+\centering \includegraphics*[scale=0.32,viewport = 0 0 1500
+  1200]{cxs_class_diagram.eps}
 \caption[]{The relationship between classes of the \name package.
 \label{fig:class_diagram}}
 \end{figure}
 
+\subsection{BaseCDI}
+The fundamental class used for performing CDI reconstruction; an
+object of type "BaseCDI" allows planar CDI to be performed, and it is
+also used by the Fresnel reconstruction code (through inheritance).
+The reconstruction can be performed in the following way:
+
+\begin{itemize}
+
+\item The user should create an object to store the result (the exit
+  surface wave of type Complex\_2D). For example using: Complex\_2D
+  esw\_estimate(nx,ny) This can be initialise to a best guess, or can
+  be left for the BaseCDI object to initialise.
+
+\item The BaseCDI object should be created and the Complex\_2D
+  previously created should be passed as input. For example: BaseCDI
+  my\_planar\_recon(esw\_estimate)
+
+\item The support and intensity data should be set, and the exit
+  surface wave initialised to a first guess (if not already done):
+  \begin{myverbatim}
+my_planar_recon.set_support(support) 
+my_planar_recon.set_intensity(data) 
+my_planar_recon.initialise_estimate()
+\end{myverbatim}
+
+\item The reconstruction can be configured before, or at anytime
+  during the reconstruction using setter methods. For example the
+  algorithm choice and relaxation parameters:
+\begin{myverbatim}
+my_planar_recon.set_algorithm(HIO) 
+my_planar_recon.set_relaxation_parameter(0.95) 
+\end{myverbatim}
+The algorithm is fully customisable through the
+BaseCDI::set\_custom\_algorithm method. See page 22 of the H.M. Quiney
+review: TUTORIAL REVIEW, Coherent diffractive imaging using short
+wavelength light sources, Journal of Modern Optics, 2010, DOI:
+10.1080/09500340.2010.495459 for the formalism.
+
+\item The reconstruction is then performed with multiple calls to the
+  BaseCDI::iterate() method:
+\begin{myverbatim}
+my_planar_recon.iterate() 
+\end{myverbatim}
+This will automatically update the values in the Complex\_2D estimate
+and the current error. The error can be retrieved using
+BaseCDI::get\_current\_error().
+\end{itemize}
+
+For cases where the beam-stop region must be excluded during
+reconstruction, you should call the set\_beam\_stop() method, to define
+the beam-stop region before running iterate().
 
 
-\section{IDL Routines}
+\subsection{PlanarCDI}
+
+\subsection{FresnelCDI}
+The class used for performing Fresnel CDI reconstruction (for
+white-field reconstruction see FresnelCDI\_WF). It inherits most
+methods from BaseCDI, so please look at the documentation of this
+class also. Although there are some differences in the underlying code
+between this class and the planar case, the interface is generally
+unchanged. Therefore users should refer to the instructions for
+BaseCDI to understand how to use a FresnelCDI object in their own
+code. Only the differences relevant to users will be documented here.
+
+\subsection{FresnelCDI\_WF}
+This is the class used for reconstructing white-field data prior to
+running Fresnel reconstruction with FresnelCDI. It inherits most
+methods from BaseCDI, so please look at the documentation of this
+class also. Although there are some differences in the underlying code
+between this class and the planar case, the interface is generally
+unchanged. Therefore users should refer to the instructions for
+BaseCDI to understand how to use a FresnelCDI\_WF object in their own
+code. Only the differences relevant to users will be documented here.
+
+\subsection{PhaseDiverseCDI}
+
+This class can be used to perform phase diverse or ptychographic
+reconstruction of either Fresnel or plane-wave CDI data. Any number of
+frames (also called local/single frames or probes in this
+documentation) may be added to the reconstruction. In order to perform
+a reconstruction, you will need to create either a new FresnelCDI or
+PlanarCDI object for each of these 'local' datasets. The FresnelCDI or
+PlanarCDI objects must then be passed to a PhaseDiverseCDI
+object. Because the each sub-iteration (ie. each iteration of a local
+frame) is performed using the code in FresnelCDI/PlanarCDI, all the
+functionality available in these classes is also available here. For
+example complex constraint can be set, shrink-wrap can be used, the
+estimate can be initialised using the results from a previous
+reconstruction etc. An example can be found in the /examples
+directory, demonstrating how to use PhaseDiverseCDI.
+
+The displacement in position between 'local' frames may be either
+transverse to the beam direction, or longitudinal, along the beam
+direction. The longitudinal position (for FresnelCDI) is set when the
+FresnelCDI objects are initially constructed. Transverse positions are
+set when the FresnelCDI/PlanarCDI objects are added to the
+PhaseDiverseCDI object. This class allows the transverse positions to
+be automatically adjusted during reconstruction using the
+"adjust\_positions" function.
+
+The code allows for several options in the type of reconstruction
+which is done:
+
+\begin{itemize}
+
+\item The reconstruction can be performed in series or parallel.
+  \begin{itemize}
+
+    \item In the case of series (see for example the paper....), a
+      'local' frame will undergo one or more iterations, the result
+      will be updated to a 'global' estimate of the sample, and this
+      estimate will form the starting point for the next frame. For
+      each call to the method "iterate()" this process is repeated
+      until each local frame is used once. The algorithm can be
+      described by:
+      \[ T_{k+1} = (1-\beta w^n)T_k + \beta w^n T^n_k \] 
+      where $T_{k+1}$ is the updated global function, $T^n$ is the
+      updated local function for the nth local frame. $\beta$ is the
+      relaxation parameter and the weight is $ w^n(\rho) = \alpha^n
+      (\frac{|T^n(\rho)|}{max|T^n(\rho)|} )^\gamma $ for Fresnel CDI
+      or $w^n = \alpha^n$ for Plane-wave CDI. The weight is zero
+      outside of the support.
+
+   \item For a parallel reconstruction (see .....), each frame with
+     independently undergo one of more iteration, the result from all
+     frames will be merged to form a new estimate of the sample, this
+     estimate then becomes the starting point for the next iteration
+     of all frames. The algorithm can be described by:
+     \[T_{k+1} = (1-\beta)T_k + \beta \sum_n(w^n T^n_k)\]
+     where $T_{k+1}$, $T^n$, and $\beta$ were defined
+    earlier. The weight, w, is similar to that used for series
+    reconstruction, but the weight it normalised such that 
+    $ \sum_n w^n = 1 $.  i.e. $ w^n_{parallel}= w^n_{series} / \sum_n w^n_{series} $
+
+\end{itemize}
+
+\item The number of local iterations to perform before updating the
+  result to the 'global' function can be set.
+
+\item The feedback parameter, beta, may be set. This quantity is used
+  to set how much of the previous 'global' sample function will be
+  left after the next 'global' iteration.
+
+\item The amplification factor, gamma, and the probe scaling, alpha,
+  may also be see. These parameters control the weighting of one frame
+  (and pixels within a frame) with respect to each other.
+
+\end{itemize}
+
+\subsection{TransmissionConstraint}
+This class allows constraints on the transmission function
+(FresnelCDI) or exit-surface-wave (PlanarCDI), such as complex
+constraints to be used. To achieve this the user needs to: create an
+instance of this class configure it (for example by setting some
+ComplexConstraint objects and finally by passing this object to the
+reconstruction (through the PlanarCDI or FresnelCDI function
+"set\_complex\_constraint").
+
+\subsection{ComplexConstraint}
+
+This class is based on the paper "Use of a complex constraint in
+coherent diffractive imaging", J. N. Clark et. al., 2010. The notation
+used there is also used here. Users should have knowledge of this or
+similar papers before using this class.
+
+A section of the reconstructed transmission function will be updated
+according to a restriction on the value of c (c = beta/delta). If the
+material is of a known element, then c can be fixed to the know value,
+and the phase and magnitude of the transmission function updated
+accordingly. Alternatively, c can be left to float, and calculated for
+each iteration from a mean over the defined region. The parameters
+alpha1 and alpha2 are used to control the strength of the constraint.
+
+Instances of this class should be pass to a TransmissionConstraint
+object. If a sample consists of different regions which are locally
+homogeneous in element, multiple instances of this class should be
+created, each one defining a different region of the sample, and then
+each should be added to the TransmissionConstraint object.
+
+\subsection{Double\_2D}
+This class represents a 2D field of doubles. Setter and getter methods
+are provided along with some other useful functions. This is a
+convenient form to store and pass image data in the reconstruction
+software. A better implementation of this class would use templates,
+but restricting the type to double is sufficient our needs.
+
+\subsection{Complex\_2D}
+This class represents a 2D complex field. Setter and getter methods
+are provided along with some other useful functions (add, multiplying
+and fast fourier transforming). Complex\_2D objects are used in the CDI
+reconstruction to represent the ESW in a single plane.
+
+\subsection{Config}
+This class allows simple text files to be read and is used by the
+command line tool programs. The parser takes a file name and
+constructs key-value pairs for each line with the syntax:\\ 
+key = value or \\
+key = value\_1 value\_2 value\_3 ... \\
+White spaces are ignored and everything to the right of a "\#" symbol
+is also ignored (this allows comments to be included in the config
+file. See example.config to see how it looks. If a key (as given by
+any of the methods below) is not found in the file, the status is set
+to FAILURE and the method returns either 0, an empty string or list.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\section{IDL Routine Descriptions}
+
+The complete list of IDL routines provided with release 0.4 of the
+DIXE software is described below. This documentation can also be found
+on the project website and will be updated with new releases of the
+software.
+
+
+\include{IDL_interface}
+
+\section{Command-Line Tools}
+
+
 
 
 \section{License}
 
+Copyright (C) 2011 The ARC Centre of Excellence in Coherent X-ray
+Science.
 
-\section{More Information}
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published
+by the Free Software Foundation, either version 3 of the License,
+or (at your option) any later version.
 
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program (see COPYING).  If not, see
+<http://www.gnu.org/licenses/>.
+
+We also ask that you cite this software in publications where you made
+use of it for any part of the data analysis.
 
 \end{document}
