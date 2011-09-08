@@ -17,8 +17,10 @@
 \usepackage{listings}
 \usepackage{tikz}
 \usepackage{html}
-\usepackage{dirtree}
-\renewcommand*\DTstylecomment{\textsf}
+
+
+%\usepackage{dirtree}
+%\renewcommand*\DTstylecomment{\textsf}
 
 %\begin{htmlonly}
 %  \usepackage{verbatim}
@@ -46,6 +48,7 @@ breaklines=true,
 }   
 
 \usetikzlibrary{shapes.arrows,chains,positioning}
+\def\pgfsysdriver{pgfsys-tex4ht.def}
 
 %\usepackage{color,fancyvrb}
 %\renewcommand\FancyVerbFormatLine[1]
@@ -382,24 +385,51 @@ CXSSoftware and remove it.
 
 
 \newpage
-{
+
+%{
+%\section{Directory Structure}
+
+%\dirtree{% 
+%.1 cxs\_software/\DTcomment{base directory, where ./configure and make should be executed from}.
+%.2 bin/ \DTcomment{contains the tool executable files are compilation}.
+%.2 doc/ \DTcomment{contains configuration files for doxygen}.
+%.3 manual/\DTcomment{contains the latex source for the software manual (this file)}.
+%.2 examples/\DTcomment{this directory stores all the examples}.
+%.3 image\_files/\DTcomment{stores images and data files used in the examples}.
+%.2 include/\DTcomment{contains the source header files after compilation}.
+%.2 interfaces/\DTcomment{a directory for wrapper code to languages other than C/C++}.
+%.3 idl/\DTcomment{contains all IDL related code (source and examples)}.
+%.2 lib/\DTcomment{contains the static and dynamic C++ library after compilation}.
+%.2 src/\DTcomment{a directory for the library source code}.
+%.2 tools/\DTcomment{contains the source code for the command-line tools}.
+%}
+%}
+%{
+
 \section{Directory Structure}
 
-\dirtree{% 
-.1 cxs\_software/\DTcomment{base directory, where ./configure and make should be executed from}.
-.2 bin/ \DTcomment{contains the tool executable files are compilation}.
-.2 doc/ \DTcomment{contains configuration files for doxygen}.
-.3 manual/\DTcomment{contains the latex source for the software manual (this file)}.
-.2 examples/\DTcomment{this directory stores all the examples}.
-.3 image\_files/\DTcomment{stores images and data files used in the examples}.
-.2 include/\DTcomment{contains the source header files after compilation}.
-.2 interfaces/\DTcomment{a directory for wrapper code to languages other than C/C++}.
-.3 idl/\DTcomment{contains all IDL related code (source and examples)}.
-.2 lib/\DTcomment{contains the static and dynamic C++ library after compilation}.
-.2 src/\DTcomment{a directory for the library source code}.
-.2 tools/\DTcomment{contains the source code for the command-line tools}.
-}
-}
+\begin{itemize}
+   \item[] {\tt cxs\_software/} ...... base directory, where ./configure and make should be executed from.
+   \begin{itemize}
+      \item[] {\tt bin/} ...... contains the tool executable files are compilation.
+      \item[] {\tt doc/} ...... contains configuration files for doxygen.
+      \begin{itemize}
+         \item[] {\tt manual/} ...... contains the latex source for the software manual (this file).
+      \end{itemize}
+      \item[] {\tt examples/} ...... this directory stores all the examples.
+      \begin{itemize}
+         \item[] {\tt image\_files/} ...... stores images and data files used in the examples.
+      \end{itemize}
+      \item[] {\tt include/ }...... contains the source header files after compilation.
+      \item[] {\tt interfaces/} ...... a directory for wrapper code to languages other than C/C++.
+      \begin{itemize}
+         \item[] {\tt idl/} ...... contains all IDL related code (source and examples).
+      \end{itemize}
+      \item[] {\tt lib/} ...... contains the static and dynamic C++ library after compilation.
+      \item[] {\tt src/} ...... a directory for the library source code.
+      \item[] {\tt tools/} ...... contains the source code for the command-line tools.
+   \end{itemize}
+\end{itemize}
 
 \section{Getting Started}
 \label{getting started}
@@ -475,7 +505,7 @@ Once you have successfully logged in, append your PATH variable to the
 directory where the cxs programs are located. This can be done by
 typing:
 \begin{myverbatim}
-  export PATH=$PATH:/data/nadia/cxs_software_rel_0.4/cxs_software/bin 
+  export PATH=$PATH:/data/DIXE/dixe/tags/rel_0.4/cxs_software/bin 
 \end{myverbatim}
 
 You now have available all of the command line tools listed here. Note
@@ -491,11 +521,11 @@ key).
 If you plan to work with IDL you will also need to update your
 LD\_LIBRARY\_PATH with the wrapper library path:
 \begin{myverbatim}
-  export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/data/nadia/cxs_software_dev/cxs_software/interfaces/idl/ 
+  export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/data/DIXE/dixe/tags/rel_0.4/cxs_software/interfaces/idl/ 
 \end{myverbatim}
 and update the IDL\_PATH with the IDL module location:
 \begin{myverbatim}
-  export IDL_PATH="${IDL_PATH}:\:/data/nadia/cxs_software_dev/cxs_software/interfaces/idl/"
+  export IDL_PATH="${IDL_PATH}:\:/data/DIXE/dixe/tags/rel_0.4/cxs_software/interfaces/idl/"
 \end{myverbatim}
 
 \subsubsection{Running the Commandline Tool}
@@ -603,7 +633,7 @@ all the features of the C++ library.
 
 Begin by copying the IDL examples to your working directory, 
 \begin{myverbatim}
-cp /data/nadia/cxs_software_dev/cxs_software/interfaces/idl/*_example.pro ./ 
+cp /data/DIXE/dixe/tags/rel_0.4/cxs_software/interfaces/idl/*_example.pro ./ 
 \end{myverbatim}
 and run them: 
 \begin{myverbatim}
@@ -618,7 +648,7 @@ Look at the .pro files to see what they do.
 Open a terminal and follow the instruction given for ``Users on
 Osiris'', from Section \ref{osiris-setup} onwards. Replace the path to
 the software on osiris,
-``/data/nadia/cxs\_software\_dev/cxs\_software/'' in the instructions,
+``/data/DIXE/dixe/tags/rel\_0.4/cxs\_software/'' in the instructions,
 with the path where you installed the software.
 
 \subsection{After Installing from the Window's Binary}
@@ -637,9 +667,9 @@ documentation (). In the rest of this section, each of these steps are
 described in more detail.
 
 
-%\UndefineShortVerb{\!}
 \begin{figure}[h!]
   \centering
+  \begin{minipage}[h]{0.5\linewidth}
   \begin{tikzpicture}[auto,mybox/.style={rectangle,draw=black!50,fill=yellow!20,thick},
       mybox2/.style={rectangle,draw=black!50,fill=blue!20,thick},
       mybox3/.style={rectangle,fill=black!10,minimum height=2cm,minimum width=5cm},
@@ -657,6 +687,7 @@ described in more detail.
     \draw [->] (iterate.south) -- (result.north);              
 
   \end{tikzpicture}  
+  \end{minipage}
   \caption{\label{fig:reco}The basic steps involved in a CDI reconstruction}
 \end{figure}
 
@@ -774,9 +805,6 @@ described in more detail.
                         }
                           
 \end{comment}
-
-\DefineShortVerb{\!}
-
 
 \subsection{Data Input/Output and Preparation}
 
@@ -972,22 +1000,25 @@ current state of the software in version \ver.
 \begin{table}[h!]
 \begin{tabular}[h!]{lcc}
 \toprule
-   & Iteration per Second & \\
+   & \multicolumn{2}{c}{Iteration per Second} \\
    & Laptop & Desktop \\
-   & Intel U2500 @ 1.20GHz, 1.5 GB memory & i7-2600 CPU @ 3.40GHz, 8 GB memory\\
+   & Intel U2500 @ 1.20GHz & i7-2600 CPU @ 3.40GHz \\
+   & 1.5 GB memory & 8 GB memory\\
+
 \midrule
 PlanarCDI (ER) & 3.3  &  16 \\
 PlanarCDI (HIO) & 2.7 & 13 \\
-FresnelCDI - white field 2.0 & 7 & \\
+FresnelCDI - white field & 2.0 & 7 \\
 FresnelCDI & 2.7 & 10 \\
 FresnelCDI with Complex Constraints & 1.8 & 7 \\
 Phase-Diverse/Ptychography & (X-0.6)/N  & (X-2)/N  \\
 \bottomrule
 \end{tabular}
 
-\caption{\label{table:speed} CPU time for a 1024$\times$1024 pixel
-  reconstruction. For phase-diverse/ptychography reconstruction, X is
-  the number of iterations which could be perform for a single frame,
+\caption{\label{table:speed} Iterations performed per second for a
+  1024$\times$1024 pixel reconstruction. For
+  phase-diverse/ptychography reconstruction, X is the number of
+  iterations which could be perform for a single frame,
   non-phase-diverse/ptychography reconstruction of that type
   (i.e. from the first five rows of the table). The start-up time is a
   few seconds in each case. }
@@ -1015,19 +1046,19 @@ default.
 &  Number of N$\times$N & With p=4, N=1024 \\
 &  pixel arrays used & (MB) \\
 \midrule
-PlanarCDI (ER) & $4$ & 17 \\
-PlanarCDI (HIO) & $10$ & 42  \\
-FresnelCDI - white field & $4.5$ & 19 \\
-FresnelCDI & $8.5$ & 36 \\
-FresnelCDI with complex constraints & $11.5+c$ & 57 (c=2) \\
-Phase-Diverse/Ptychography & $I(1+X) + 2R$ & 30,000 (I=400,M = 1100$^2$, \\
+PlanarCDI (ER) & 4 & 17 \\
+PlanarCDI (HIO) & 10 & 42  \\
+FresnelCDI - white field & 4.5 & 19 \\
+FresnelCDI & 8.5 & 36 \\
+FresnelCDI with complex constraints & 11.5+c & 57 (c=2) \\
+Phase-Diverse/Ptychography & I(1+X) + 2R & 30,000 (I=400,M = 1100$^2$, \\
  &                 & X = FresnelCDI)  \\
 \bottomrule
 \end{tabular}
 
 \caption{\label{table:memory}The memory used. 
 In total the memory used will be the factor given in the second
-coloumn of Figure \ref{table:memory} multiplied by $pN^2$.
+coloumn of Figure \ref{table:memory} multiplied by pN$^2$.
 (N - image side length in pixels, p - precision in bytes, 
 c - number of complex constraint regions, I - number of images, 
 R - ratio of the total phase-diverse image size to a single N$\times$N image,
