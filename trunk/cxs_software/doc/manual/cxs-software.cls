@@ -107,12 +107,20 @@
 \title{\color{mycolour}{\textbf{DIXE: Diffractive Imaging for X-rays and Electrons}\\[0.5cm] Software Manual\\[0.5cm] Version \ver \\[0.5cm] \rule{4cm}{1pt}\\[0.7cm]}
 }
 
-\author{\Large N. Davidson, B. Abbey, H. Quiney, M. Jones, \\[0.5cm] C. Putkunz, A. Torrance and K. Nugent}\\[0.5cm]
+\author{\Large N. Davidson$^1$, B. Abbey$^1$, H. Quiney$^1$, M. Jones$^2$, \\[0.5cm] 
+C. Putkunz$^1$, A. Torrance$^1$, H. Wittler$^2$, \\[0.5cm] 
+A. Carroll$^2$, M. Luu$^2$  and K. Nugent$^1$}\\[1.0cm]
+
+{\em $^1$ University of Melbourne, Victoria, Australia.  }\\[0.5cm]
+{\em $^2$ La Trobe University, Victoria, Australia.  }\\
 
 
+\vskip 15 mm
+
+\textbf\sf{cxs-software@physics.unimelb.edu.au} 
 
 \end{center}
-\vskip 4 mm
+\vskip 10 mm
 
 \centerline{\normalsize \today}
 
