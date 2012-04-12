@@ -288,12 +288,16 @@ class BaseCDI{
   const Complex_2D & get_exit_surface_wave(){
     return complex;
   }
-  
+
+  const Double_2D & get_intensity(){
+    return intensity_sqrt;
+  }
+
   void set_exit_surface_wave(Complex_2D & esw){
     complex.copy(esw);
   }
 
-  
+
   /**
    * Set the algorithm. By default HIO is used.
    *
@@ -310,7 +314,7 @@ class BaseCDI{
    */ 
   void set_algorithm(int alg);
 
-   /**
+  /**
    * Iterative reconstruction algorithms can be expressed as a
    * combination of the following 5 operators:<br>\f$ \hat{P}_S
    * \hat{P}_F\f$, \f$\hat{P}_F \hat{P}_S\f$ , \f$ \hat{P}_S \f$ , \f$
@@ -345,11 +349,11 @@ class BaseCDI{
    * @param m10 Coefficient to the \f$ [ \hat{P}_S - \hat{I} ]x_k \f$ term
    */  
   void set_custom_algorithm(double m1, double m2, double m3, 
-			    double m4, double m5, double m6, 
-			    double m7, double m8,
-			    double m9, double m10);
-  
-  
+      double m4, double m5, double m6, 
+      double m7, double m8,
+      double m9, double m10);
+
+
   /**
    * Print the current algorithm to standard output. The algorithm is
    * in the form: <br> \f$ x_{k+1} = x_k + (a \hat{P}_S \hat{P}_F + b
@@ -389,7 +393,7 @@ class BaseCDI{
       return -1;
     return (alg->second);
   }
-  
+
   /**
    * Apply the shrinkwrap algorithm. The magnitude of the current ESW
    * estimate will be convolved with a Gaussian, thresholded and set
@@ -401,7 +405,7 @@ class BaseCDI{
    * as a fraction of the maximum pixel value. The default is 0.1 (10%).
    */  
   virtual void apply_shrinkwrap(double gauss_width=1.5, double threshold=0.1);  
-  
+
   /**
    * Get the current support. This might be useful if shrinkwrap has
    * been applied, as it allows you to get the updated support.
@@ -431,7 +435,7 @@ class BaseCDI{
   virtual void project_intensity(Complex_2D & c);
 
 
-   /**
+  /**
    * The intensity is scaled to match the measured data. The error is
    * updated in this method.
    * 
@@ -475,12 +479,18 @@ class BaseCDI{
     transmission_constraint = &trans_constraint;
   }
 
-  
+
   void reset_best(){
     for(int i=0; i<n_best; i++)
       best_error_array[i]=1;
   }
-  
+
+  /**
+   *Overwrite the current complex with a new complex
+  */
+  void initialise_guess(Complex_2D &);
+
+
  protected:
 
   /**
@@ -501,7 +511,7 @@ class BaseCDI{
    * as a fraction of the maximum pixel value. The default is 0.1 (10%).
    */    
   void apply_threshold(Double_2D & array, double threshold);
-  
+
 
   /**
    * Convolved "array" with a 2-D Gaussian function.  To speed up
@@ -515,15 +525,13 @@ class BaseCDI{
    * Gaussian peak.
    */  
   void convolve(Double_2D & array, double gauss_width, int pixel_cut_off=4);
-  
 
-  
   void support_constraint(Complex_2D & c);
 
   void reallocate_temp_complex_memory();
 
   void update_n_best();
-    
+
 };
 
 #endif

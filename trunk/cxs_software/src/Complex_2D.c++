@@ -32,6 +32,34 @@ Complex_2D::Complex_2D(int x_size, int y_size){
   fftw_type = FFTW_MEASURE;
 }
 
+Complex_2D::Complex_2D(const Complex_2D& object){
+
+  //set the array size
+  nx = object.get_size_x();
+  ny = object.get_size_y();
+
+
+#ifndef DOUBLE_PRECISION
+  array = (fftwf_complex*) fftwf_malloc(sizeof(fftwf_complex)*nx*ny);//object.get_size_x()*object.get_size_y());
+#else
+  array = (fftw_complex*) fftw_malloc(sizeof(fftwf_complex)*object.get_size_x()*object.get_size_y());
+#endif
+
+  //initalise the fftw plans to null (not created yet. We will
+  //create them when needed to avoid unnecessary time overhead).
+  f_forward = 0;
+  f_backward = 0;
+  fftw_type = FFTW_MEASURE;
+
+  for(int i=0; i < object.get_size_x(); i++){
+    for(int j=0; j < object.get_size_y(); j++){
+
+      set_real(i, j, object.get_real(i, j));
+      set_imag(i, j, object.get_imag(i, j));
+    }
+  }
+}
+
 Complex_2D::~Complex_2D(){
 
 #ifndef DOUBLE_PRECISION
@@ -61,12 +89,12 @@ Complex_2D::~Complex_2D(){
 
 //set the value at positions x,y. See Complex_2D.h for more info.
 void Complex_2D::set_value(int x, int y, int component, double value){
-  
+
   if(check_bounds(x,y)==FAILURE){
     cout << "can not set value out of array bounds" << endl;
     exit(1);
   }
-  
+
   switch(component){
 
   case REAL :
@@ -83,7 +111,7 @@ void Complex_2D::set_value(int x, int y, int component, double value){
     break;
   default:
     cout << "Value type in Complex_2D::set_value is unknown: " 
-	 << component << ". Must be REAL, IMAG, MAG or PHASE" << endl;
+      << component << ". Must be REAL, IMAG, MAG or PHASE" << endl;
     exit(1);
   }
 }
@@ -115,7 +143,7 @@ double Complex_2D::get_value(int x, int y, int type) const {
 
 //like get() but we do it for the entire array not just a single value.
 void Complex_2D::get_2d(int type, Double_2D & result) const {
-  
+
   for(int i=0; i < nx; i++)
     for(int j=0; j < ny; j++){
       result.set(i,j,get_value(i,j,type));
@@ -125,7 +153,7 @@ void Complex_2D::get_2d(int type, Double_2D & result) const {
 
 //scale all the values in the array by the given factor.
 void Complex_2D::scale(double scale_factor){
-  
+
   for(int i=0; i < nx; ++i){
     for(int j=0; j < ny; ++j){ 
       array[i*ny + j][REAL]*=scale_factor;
@@ -163,7 +191,7 @@ void Complex_2D::multiply(Complex_2D & c2, double scale){
       "this Complex_2D object" << endl;
     exit(1);
   }
-  
+
   for(int i=0; i < nx; ++i){
     for(int j=0; j < ny; ++j){
       // values are multiplied in the usual way
@@ -174,7 +202,7 @@ void Complex_2D::multiply(Complex_2D & c2, double scale){
 	- c2.get_imag(i,j)*this->get_imag(i,j);
       double new_imag = c2.get_real(i,j)*this->get_imag(i,j)
 	+ c2.get_imag(i,j)*this->get_real(i,j);
-      
+
       //and set the values
       set_real(i,j,scale*new_real);
       set_imag(i,j,scale*new_imag);
@@ -195,7 +223,7 @@ double Complex_2D::get_norm() const {
 }
 
 void Complex_2D::conjugate() {
-  
+
   for(int i=0; i < nx; ++i){
     for(int j=0; j < ny; ++j){
       set_imag(i,j,-1*get_imag(i,j));
@@ -214,7 +242,7 @@ Complex_2D * Complex_2D::clone() const {
       new_complex->set_imag(i,j, get_imag(i,j));
     }
   } 
- 
+
   return new_complex;
 }
 
@@ -224,12 +252,12 @@ void Complex_2D::copy(const Complex_2D & c){
 
   //check the bounds
   if(c.get_size_x()!=get_size_x()||
-     c.get_size_y()!=get_size_y()){
+      c.get_size_y()!=get_size_y()){
     cout << "Trying to copy an array with different dimensions... "
-	   << "exiting"<<endl;
+      << "exiting"<<endl;
     exit(1);
   }
-  
+
   //copy
 
 #ifndef DOUBLE_PRECISION
@@ -249,30 +277,30 @@ void Complex_2D::invert(bool scale){
   double scale_factor = 1;
   if(scale)
     scale_factor = 1.0/(sqrt(nx*ny));
-  
+
   if(nx%2==1 || ny%2==1)
     cout << "WARNING: The array dimensions are odd "
-	 << "but we have assumed they are even when inverting an "
-	 << "array after FFT. This will probably cause you issues..."
-	 << endl;
-  
+      << "but we have assumed they are even when inverting an "
+      << "array after FFT. This will probably cause you issues..."
+      << endl;
+
   for(int i=0; i < nx; ++i){
     for(int j=0; j < middle_y; ++j){
-      
-	int j_new = j+middle_y; 
-	int i_new = i+middle_x; 
 
-	if(i >=  middle_x)
-	  i_new = i_new - 2*middle_x;
+      int j_new = j+middle_y; 
+      int i_new = i+middle_x; 
 
-	double temp_rl = get_real(i_new,j_new);
-	double temp_im = get_imag(i_new,j_new);
+      if(i >=  middle_x)
+	i_new = i_new - 2*middle_x;
 
-	set_real(i_new,j_new,get_real(i,j)*scale_factor);
-	set_imag(i_new,j_new,get_imag(i,j)*scale_factor);
+      double temp_rl = get_real(i_new,j_new);
+      double temp_im = get_imag(i_new,j_new);
 
-	set_real(i,j,temp_rl*scale_factor);
-	set_imag(i,j,temp_im*scale_factor);
+      set_real(i_new,j_new,get_real(i,j)*scale_factor);
+      set_imag(i_new,j_new,get_imag(i,j)*scale_factor);
+
+      set_real(i,j,temp_rl*scale_factor);
+      set_imag(i,j,temp_im*scale_factor);
     }
   }
 
@@ -280,13 +308,13 @@ void Complex_2D::invert(bool scale){
 
 
 int Complex_2D::check_bounds(int x, int y) const{
- 
+
   if(x < 0 || x >= nx || y < 0 || y >=ny )
-      return FAILURE;
- 
-   return SUCCESS;
+    return FAILURE;
+
+  return SUCCESS;
 }
-     
+
 
 void Complex_2D::initialise_fft(){
   //creating the plan will erase the content of the array
@@ -296,13 +324,13 @@ void Complex_2D::initialise_fft(){
   //make a new array 
   fftwf_complex * tmp_array;
   tmp_array = (fftwf_complex*) fftwf_malloc(sizeof(fftwf_complex)*nx*ny);
-  
+
   //make the plans
   f_backward = fftwf_plan_dft_2d(nx, ny, tmp_array, tmp_array, 
-				FFTW_BACKWARD, fftw_type);
+      FFTW_BACKWARD, fftw_type);
   f_forward = fftwf_plan_dft_2d(nx, ny,tmp_array,tmp_array, 
-			       FFTW_FORWARD, fftw_type);
-  
+      FFTW_FORWARD, fftw_type);
+
   //now copy the array contents into the tmp_array,
   //free the old memory and update the pointer.
   std::memcpy(tmp_array,array,sizeof(fftwf_complex)*nx*ny);
@@ -311,13 +339,13 @@ void Complex_2D::initialise_fft(){
 #else
   fftw_complex * tmp_array;
   tmp_array = (fftw_complex*) fftw_malloc(sizeof(fftw_complex)*nx*ny);
-  
+
   //make the plans
   f_backward = fftw_plan_dft_2d(nx, ny, tmp_array, tmp_array, 
-				FFTW_BACKWARD, fftw_type);
+      FFTW_BACKWARD, fftw_type);
   f_forward = fftw_plan_dft_2d(nx, ny,tmp_array,tmp_array, 
-			       FFTW_FORWARD, fftw_type);
-  
+      FFTW_FORWARD, fftw_type);
+
   //now copy the array contents into the tmp_array,
   //free the old memory and update the pointer.
   std::memcpy(tmp_array,array,sizeof(fftw_complex)*nx*ny);

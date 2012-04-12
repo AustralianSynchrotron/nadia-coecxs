@@ -25,6 +25,7 @@ using namespace std;
 
 FresnelCDI::FresnelCDI(Complex_2D & initial_guess,
 		       Complex_2D & white_field,
+//		       Complex_2D & illumination_ast,
 		       double beam_wavelength,
 		       double focal_detector_length,
 		       double focal_sample_length,
@@ -33,12 +34,15 @@ FresnelCDI::FresnelCDI(Complex_2D & initial_guess,
 		       int n_best)
   :BaseCDI(initial_guess,n_best),
    illumination(nx,ny),
+  // illumination_as(nx,ny),
    norm(normalisation),
    coefficient(nx/2,ny/2)
 {
 
   illumination.copy(white_field);
   illumination.scale(norm);
+
+  //illumination_as=illumination_ast;
   
   illumination_at_sample=0;
   transmission = 0;
@@ -97,6 +101,7 @@ void FresnelCDI::set_experimental_parameters(double beam_wavelength,
   
   illumination_at_sample->copy(illumination);
   propagate_from_detector(*illumination_at_sample);
+  //apply_support(*illumination_at_sample);
 
 }
 
@@ -178,7 +183,7 @@ void FresnelCDI::initialise_estimate(int seed){
   }
   
   set_transmission_function(random_trans,&complex);
-  apply_support(complex);
+  //  apply_support(complex);
 
   /**  for(int i=0; i<nx; i++){
     for(int j=0; j<ny; j++){
@@ -229,7 +234,7 @@ void FresnelCDI::scale_intensity(Complex_2D & c){
   //c.get_2d(PHASE,result);
   //write_image("before_p.tiff",result);
   
-  c.add(illumination); //add the white field
+  c.add(illumination, 1.0); //add the white field
 
   //c.get_2d(REAL,result);
   //write_image("after_r.tiff",result);
@@ -237,21 +242,26 @@ void FresnelCDI::scale_intensity(Complex_2D & c){
   //write_image("after_mag.tiff",result);
   BaseCDI::scale_intensity(c);
 
-  c.add(illumination,-1.0);//subtract the white field
+  c.add(illumination, -1.0);//subtract the white field
 
 }
 
 void FresnelCDI::propagate_from_detector(Complex_2D & c){
   //  c.multiply(B_d);
+  
   multiply_factors(c,BACKWARD);
-  c.perform_backward_fft();
   c.invert(true);
+  //multiply_factors(c,BACKWARD);
+  c.perform_backward_fft();
+  //c.invert(true);
 }
 
 void FresnelCDI::propagate_to_detector(Complex_2D & c){
-  c.invert(true); 
+  //c.invert(true); 
   c.perform_forward_fft();
   //c.multiply(B_s);
+  //multiply_factors(c,FORWARD);
+  c.invert(true); 
   multiply_factors(c,FORWARD);
 }
 
@@ -293,6 +303,7 @@ void FresnelCDI::check_illumination_at_sample(){
     illumination_at_sample = new Complex_2D(nx,ny);
     illumination_at_sample->copy(illumination);
     propagate_from_detector(*illumination_at_sample);
+    //apply_support(*illumination_at_sample);
   }
 }
 
@@ -313,6 +324,11 @@ void FresnelCDI::get_transmission_function(Complex_2D & result,
   if(!esw)
     esw=&complex;
   check_illumination_at_sample();
+
+  Complex_2D tmp(nx, ny);
+  tmp=*esw;
+
+  //tmp.add(*illumination_at_sample, +1.0);
 
   double ill_r;
   double esw_r;
@@ -338,11 +354,13 @@ void FresnelCDI::get_transmission_function(Complex_2D & result,
 	esw_r = esw->get_real(i,j);
 	esw_i = esw->get_imag(i,j);
 
-	real_numerator = ill_r*(esw_r+ill_r) + ill_i*(esw_i+ill_i);
-	imag_numerator = ill_r*(esw_i+ill_i) - ill_i*(esw_r+ill_r);
+	real_numerator = ill_r*(esw_r) + ill_i*(esw_i);
+	imag_numerator = ill_r*(esw_i) - ill_i*(esw_r);
 
 	result.set_real(i,j,real_numerator/denom);
 	result.set_imag(i,j,imag_numerator/denom);
+
+	//std::cout<<"The numbers are real: "<<real_numerator/denom<<" and imag: "<<imag_numerator/denom<<"\n";
 	
 	
 	//	if(inforce_unity_mag && result.get_mag(i,j) > 1)
@@ -351,10 +369,13 @@ void FresnelCDI::get_transmission_function(Complex_2D & result,
       else{
 	result.set_real(i,j,1.0);
 	result.set_imag(i,j,0.0);
+	std::cout<<"Bad\n";
 
       }
     }
   }
+
+  esw->add(*illumination_at_sample, -1.0);
 
   if(transmission_constraint){
     transmission_constraint->apply_constraint(result);
@@ -363,194 +384,194 @@ void FresnelCDI::get_transmission_function(Complex_2D & result,
 
 
 /**double FresnelCDI::refine_sample_to_focal_length(double min, double max,
-				     int points_per_scan,
-				     double precision,
-				     int iterations_before_comparison,
-				     int crop_min_x, int crop_min_y,
-				     int crop_max_x, int crop_max_y ){
+  int points_per_scan,
+  double precision,
+  int iterations_before_comparison,
+  int crop_min_x, int crop_min_y,
+  int crop_max_x, int crop_max_y ){
 
-  //set some defaults
-  if(min==0&&max==0){
-    min = 0.8*focal_sample_length;
-    max = 1.2*focal_sample_length;
+//set some defaults
+if(min==0&&max==0){
+min = 0.8*focal_sample_length;
+max = 1.2*focal_sample_length;
+}
+if(precision==0)
+precision = 0.01*focal_sample_length;
+if(crop_max_x==0)
+crop_max_x=nx;
+if(crop_max_y==0)
+crop_max_y=ny;
+
+
+//make copies of the object esw estimate ("complex")
+//and support. The esw and support will be overriden
+//during this function call, and we will use the copied
+//to reset them back to their original state at the end.
+Complex_2D * complex_copy = new Complex_2D(nx,ny);
+complex_copy->copy(complex);
+Double_2D * support_copy = new Double_2D(nx,ny);
+support_copy->copy(get_support());
+//double fd = focal_detector_length;
+double fs = focal_sample_length;
+
+//store the focal metric values in this vector object.
+vector<double> focal_metrics;
+
+//test the images at several points between the min and max.
+//focal lengths.
+for(double f = min; f <= max; f+=(max-min)/points_per_scan){
+
+//work out the new length and set it.
+cout << endl << f << endl;
+
+//maintain the detector sample distance
+//    double fd_new = fd + fs - f;  //focal to detector
+double fs_new = f;//    ; //focal to sample
+
+//reset the initial estimate so that all lengths
+//are compared from the same starting point
+
+set_experimental_parameters(wavelength,
+focal_detector_length,
+fs,
+pixel_length);
+complex.copy(*complex_copy);
+propagate_to_detector(complex);
+set_experimental_parameters(wavelength,
+focal_detector_length,
+fs_new,
+pixel_length);
+propagate_from_detector(complex);
+
+//scale the support for size
+double pixel_ratio = (focal_detector_length-fs)/(focal_detector_length-fs_new);
+cout << "pixel_ratio="<<pixel_ratio<<endl; 
+double length_ratio = fs_new/fs;
+cout << "length_ratio="<<length_ratio<<endl;
+double scale = length_ratio/pixel_ratio;
+cout << "scale="<<scale<<endl;
+Double_2D temp_support(nx,ny);
+temp_support.copy(*support_copy);
+rescale(temp_support,1.0/scale);
+set_support(temp_support);
+
+//initialise_estimate();
+
+for(int i=0; i<iterations_before_comparison; i++) 
+iterate();
+
+
+Double_2D result(nx,ny);
+complex.get_2d(MAG_SQ,result);
+
+rescale(result,scale);
+result.scale(scale*scale);
+
+Double_2D crop_result(crop_max_x-crop_min_x,crop_max_x-crop_min_y);
+crop(result,crop_result,crop_min_x,crop_min_y);
+
+//temp remove later
+char buff[80];
+//     static int counter=0;
+sprintf(buff,"temp_%f.tiff",f);
+write_image(buff,result);
+//   counter++;
+
+//calculate the focal metric
+double metric_value = edges(crop_result);
+focal_metrics.push_back(metric_value);
+
+}
+
+double largest = focal_metrics.at(0);
+double smallest = focal_metrics.at(0);
+double sum = 0;
+int best_index = 0;
+
+//fine the largest value of the focal metric.
+
+for(int l=0; l<focal_metrics.size(); l++){
+  if(largest<focal_metrics.at(l)){
+    largest=focal_metrics.at(l);
+    best_index = l;
   }
-  if(precision==0)
-    precision = 0.01*focal_sample_length;
-  if(crop_max_x==0)
-    crop_max_x=nx;
-  if(crop_max_y==0)
-    crop_max_y=ny;
+  if(smallest>focal_metrics.at(l))
+    smallest=focal_metrics.at(l);
+  sum+=focal_metrics.at(l);
 
-  
-  //make copies of the object esw estimate ("complex")
-  //and support. The esw and support will be overriden
-  //during this function call, and we will use the copied
-  //to reset them back to their original state at the end.
-  Complex_2D * complex_copy = new Complex_2D(nx,ny);
-  complex_copy->copy(complex);
-  Double_2D * support_copy = new Double_2D(nx,ny);
-  support_copy->copy(get_support());
-  //double fd = focal_detector_length;
-  double fs = focal_sample_length;
+  cout //<< "("<< (min + (max-min)*l/points_per_scan) 
+    << "," << focal_metrics.at(l); // << ") ";
 
-  //store the focal metric values in this vector object.
-  vector<double> focal_metrics;
-  
-  //test the images at several points between the min and max.
-  //focal lengths.
-  for(double f = min; f <= max; f+=(max-min)/points_per_scan){
-    
-    //work out the new length and set it.
-    cout << endl << f << endl;
-      
-    //maintain the detector sample distance
-    //    double fd_new = fd + fs - f;  //focal to detector
-    double fs_new = f;//    ; //focal to sample
+}
 
-    //reset the initial estimate so that all lengths
-    //are compared from the same starting point
-    
-    set_experimental_parameters(wavelength,
-				focal_detector_length,
-				fs,
-				pixel_length);
-    complex.copy(*complex_copy);
-    propagate_to_detector(complex);
-    set_experimental_parameters(wavelength,
-				focal_detector_length,
-				fs_new,
-				pixel_length);
-    propagate_from_detector(complex);
-    
-    //scale the support for size
-    double pixel_ratio = (focal_detector_length-fs)/(focal_detector_length-fs_new);
-    cout << "pixel_ratio="<<pixel_ratio<<endl; 
-    double length_ratio = fs_new/fs;
-    cout << "length_ratio="<<length_ratio<<endl;
-    double scale = length_ratio/pixel_ratio;
-    cout << "scale="<<scale<<endl;
-    Double_2D temp_support(nx,ny);
-    temp_support.copy(*support_copy);
-    rescale(temp_support,1.0/scale);
-    set_support(temp_support);
-     
-    //initialise_estimate();
-    
-    for(int i=0; i<iterations_before_comparison; i++) 
-      iterate();
+//return everything to normal
+set_support(*support_copy);
+complex.copy(*complex_copy);
+focal_sample_length = fs;
+delete support_copy;
+delete complex_copy;
 
-   
-    Double_2D result(nx,ny);
-    complex.get_2d(MAG_SQ,result);
 
-    rescale(result,scale);
-    result.scale(scale*scale);
-    
-    Double_2D crop_result(crop_max_x-crop_min_x,crop_max_x-crop_min_y);
-    crop(result,crop_result,crop_min_x,crop_min_y);
+//if we have already acheive the required 
+//precision return as we're finished.
+if(max-min < precision){
+  double new_focal_sample_length = min + (max-min)*best_index/points_per_scan;
+  set_experimental_parameters(wavelength,
+      focal_detector_length,
+      new_focal_sample_length,
+      pixel_length);
 
-    //temp remove later
-    char buff[80];
-    //     static int counter=0;
-    sprintf(buff,"temp_%f.tiff",f);
-    write_image(buff,result);
-    //   counter++;
-        
-     //calculate the focal metric
-     double metric_value = edges(crop_result);
-     focal_metrics.push_back(metric_value);
+  return new_focal_sample_length;
+}
 
+double new_min = min;
+double new_max = max;
+//  double cut_off = 0.5*(largest-smallest)+smallest;
+double largest_below = min;
+double largest_above = max;
+
+//work out new min and max values
+for(int l=0; l<best_index; l++){
+  if( focal_metrics.at(l) > largest_below ){
+    largest_below = focal_metrics.at(l);
+    new_min = min + (max-min)*l/points_per_scan;
   }
+}
 
-  double largest = focal_metrics.at(0);
-  double smallest = focal_metrics.at(0);
-  double sum = 0;
-  int best_index = 0;
-
-  //fine the largest value of the focal metric.
-
-  for(int l=0; l<focal_metrics.size(); l++){
-    if(largest<focal_metrics.at(l)){
-      largest=focal_metrics.at(l);
-      best_index = l;
-    }
-    if(smallest>focal_metrics.at(l))
-      smallest=focal_metrics.at(l);
-    sum+=focal_metrics.at(l);
-    
-    cout //<< "("<< (min + (max-min)*l/points_per_scan) 
-      << "," << focal_metrics.at(l); // << ") ";
-    
+for(int l=focal_metrics.size()-1; l>best_index; l--){
+  if( focal_metrics.at(l) > largest_above ){
+    largest_above = focal_metrics.at(l);
+    new_max = min + (max-min)*l/points_per_scan;
   }
+}
 
-  //return everything to normal
-  set_support(*support_copy);
-  complex.copy(*complex_copy);
-  focal_sample_length = fs;
-  delete support_copy;
-  delete complex_copy;
+if(new_min==min&&new_max==max){
+  cout << "Could not refine the focal length. "
+    << "A maximum of the focal metric was not found "
+    << "because the function contained multiple local maxima. "
+    << "Restoring the original focal-sample length." 
+    << endl;
+  return fs;
+}
 
+//reset the focal-sample length to the best found so far
+//focal_sample_length = min + (max-min)*best_index/points_per_scan;
 
-  //if we have already acheive the required 
-  //precision return as we're finished.
-  if(max-min < precision){
-    double new_focal_sample_length = min + (max-min)*best_index/points_per_scan;
-    set_experimental_parameters(wavelength,
-				focal_detector_length,
-				new_focal_sample_length,
-				pixel_length);
+//recursively call this function until the error is small enough.
 
-    return new_focal_sample_length;
-  }
+//  int min_index = best_index - points_per_scan/4;
+//int max_index = best_index + points_per_scan/4;
 
-  double new_min = min;
-  double new_max = max;
-  //  double cut_off = 0.5*(largest-smallest)+smallest;
-  double largest_below = min;
-  double largest_above = max;
-
-  //work out new min and max values
-  for(int l=0; l<best_index; l++){
-    if( focal_metrics.at(l) > largest_below ){
-      largest_below = focal_metrics.at(l);
-      new_min = min + (max-min)*l/points_per_scan;
-    }
-  }
-
-  for(int l=focal_metrics.size()-1; l>best_index; l--){
-    if( focal_metrics.at(l) > largest_above ){
-      largest_above = focal_metrics.at(l);
-      new_max = min + (max-min)*l/points_per_scan;
-    }
-  }
-  
-  if(new_min==min&&new_max==max){
-    cout << "Could not refine the focal length. "
-	 << "A maximum of the focal metric was not found "
-	 << "because the function contained multiple local maxima. "
-	 << "Restoring the original focal-sample length." 
-	 << endl;
-    return fs;
-  }
-
-  //reset the focal-sample length to the best found so far
-  //focal_sample_length = min + (max-min)*best_index/points_per_scan;
-
-  //recursively call this function until the error is small enough.
-
-  //  int min_index = best_index - points_per_scan/4;
-  //int max_index = best_index + points_per_scan/4;
-
-  double best_length = refine_sample_to_focal_length(new_min, new_max,
-						     points_per_scan,
-						     precision,
-						     iterations_before_comparison,
-						     crop_min_x, crop_min_y,
-						     crop_max_x, crop_max_y);
-  
+double best_length = refine_sample_to_focal_length(new_min, new_max,
+    points_per_scan,
+    precision,
+    iterations_before_comparison,
+    crop_min_x, crop_min_y,
+    crop_max_x, crop_max_y);
 
 
-  //return the value of focal length found.
-  return best_length;
 
-  }**/
+//return the value of focal length found.
+return best_length;
+
+}**/

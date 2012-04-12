@@ -102,6 +102,70 @@ class Complex_2D{
    */
   ~Complex_2D();
 
+  /**
+   *Copy Constructor
+   */
+  Complex_2D(const Complex_2D& object);
+
+
+  /**
+   *Assignment Operator
+   */
+
+  Complex_2D& operator=(const Complex_2D& rhs){
+
+    nx = rhs.get_size_x();
+    ny = rhs.get_size_y();
+
+    //std::cout<<"Being called!!!\n\n\n";
+
+
+#ifndef DOUBLE_PRECISION
+    //free the memory of the array.
+    fftwf_free(array);
+
+    //free the memory of the fftw plans (but
+    //only if it was actually allocated).
+    if(f_forward)
+      fftwf_destroy_plan(f_forward);
+    if(f_backward)
+      fftwf_destroy_plan(f_backward);
+
+#else
+    //free the memory of the array.
+    fftw_free(array);
+
+    //free the memory of the fftw plans (but
+    //only if it was actually allocated).
+    if(f_forward)
+      fftw_destroy_plan(f_forward);
+    if(f_backward)
+      fftw_destroy_plan(f_backward);
+
+#endif
+
+#ifndef DOUBLE_PRECISION
+    array = (fftwf_complex*) fftwf_malloc(sizeof(fftwf_complex)*rhs.get_size_x()*rhs.get_size_y());
+#else
+    array = (fftw_complex*) fftw_malloc(sizeof(fftwf_complex)*rhs.get_size_x()*rhs.get_size_y());
+#endif
+
+    //initalise the fftw plans to null (not created yet. We will
+    //create them when needed to avoid unnecessary time overhead).
+    f_forward = 0;
+    f_backward = 0;
+    fftw_type = FFTW_MEASURE;
+
+    for(int i=0; i <rhs.get_size_x(); i++){
+      for(int j=0; j < rhs.get_size_y(); j++){
+	set_real(i, j, rhs.get_real(i, j));
+	set_imag(i, j, rhs.get_imag(i, j));
+      }
+    }
+
+  };
+
+
 
   /**
    * Set the value at point x,y. Note that this is
@@ -204,7 +268,7 @@ class Complex_2D{
   inline double get_imag(int x, int y) const{
     return array[x*ny+y][IMAG];
   };
-  
+
   /**
    * Get the magnitude at point x,y, @f$ \sqrt{\mathrm{real}^2 + \mathrm{imag}^2} @f$
    * Note that this is an unsafe method as no bounds checking is performed.
@@ -215,7 +279,7 @@ class Complex_2D{
    */
   inline double get_mag(int x, int y) const{
     return sqrt(array[x*ny+y][REAL]*array[x*ny+y][REAL]+
-		array[x*ny+y][IMAG]*array[x*ny+y][IMAG]);
+	array[x*ny+y][IMAG]*array[x*ny+y][IMAG]);
   };
 
   /**
@@ -231,14 +295,14 @@ class Complex_2D{
    */
   inline double get_phase(int x, int y) const{
     double phase = atan2(get_imag(x,y),get_real(x,y));
-    
+
     if( phase > M_PI )
       return phase - 2*M_PI;
-    
+
     return phase;
 
   };
-  
+
 
   /**
    * Get the value at point x,y. Note that this is
@@ -389,7 +453,7 @@ class Complex_2D{
    */
   void perform_backward_fft();
 
-  
+
 
   void perform_backward_fft_real(Double_2D & result);
 
@@ -408,7 +472,7 @@ class Complex_2D{
   };
 
  private:
-    
+
   /**
    * Check that an (x,y) position is within the bounds of the array
    * 
@@ -417,12 +481,12 @@ class Complex_2D{
    */
   int check_bounds(int x, int y) const;
 
-  
+
   /**
    * Create the fftw plans for forward and backward fast fourier transforms
    */
   void initialise_fft();
-   
+
 
 };
 

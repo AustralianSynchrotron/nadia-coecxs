@@ -25,6 +25,9 @@
 
 #include "string.h"
 
+
+#include <iostream>
+
 template <class T>
 class Real_2D{
 
@@ -209,13 +212,34 @@ class Real_2D{
     for(int i=0; i< nx; i++)
       for(int j=0; j< ny; j++)
 	array[i*ny+j]+=norm*other_array.get(i,j);
-  }
+  };
   
   void scale(double scale_by){
     for(int i=0; i< nx; i++)
       for(int j=0; j< ny; j++)
 	array[i*ny+j]*=scale_by;
-  }
+  };
+
+  Real_2D(const Real_2D& object){
+    //std::cout<<"No, I'm called!!!! \n\n\n";
+    allocate_memory(object.get_size_x(),object.get_size_y());
+    for(int i =0; i<object.get_size_x(); i++){
+      for(int j=0; j<object.get_size_y(); j++){
+	set(i, j, object.get(i, j));
+      }
+    }
+    //return *this;
+  };
+
+  Real_2D& operator=(const Real_2D& rhs){
+    //std::cout<<"Being called!!!\n\n\n";
+    allocate_memory(rhs.get_size_x(),rhs.get_size_y());
+    for(int i =0; i<rhs.get_size_x(); i++){
+      for(int j=0; j<rhs.get_size_y(); j++){
+	set(i, j, rhs.get(i, j));
+      }
+    }
+  };
 
 
 };

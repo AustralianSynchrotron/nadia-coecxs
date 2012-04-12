@@ -55,7 +55,7 @@ void PlanarCDI::initialise_estimate(int seed){
       else{
 	double r = support.get(i,j)*(max_value*rand()/(double) RAND_MAX);
 	double im = support.get(i,j)*(max_value*rand()/(double) RAND_MAX);
-	
+
 	complex.set_value(i,j,REAL,r); 
 	complex.set_value(i,j,IMAG,im);
       }
@@ -66,8 +66,8 @@ void PlanarCDI::initialise_estimate(int seed){
 
 
 void PlanarCDI::propagate_to_detector(Complex_2D & c){
-  c.perform_forward_fft();
-  c.invert(true);
+    c.perform_forward_fft();
+    c.invert(true);
 }
 
 void PlanarCDI::propagate_from_detector(Complex_2D & c){

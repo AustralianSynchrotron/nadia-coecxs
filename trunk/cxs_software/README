@@ -11,6 +11,7 @@ be installed prior to installing this package:
 fftw - for fast fourier transforms.  
 libtiff - for reading (and not yet writing to) tiff files.
 HDF libraries - for reading (and not yet writing to) hdf4 files.
+LAPACK - for linear algebra and matrix manipulation/
 
 In the base cxs_software directory type "./configure" followed by "make" 
 

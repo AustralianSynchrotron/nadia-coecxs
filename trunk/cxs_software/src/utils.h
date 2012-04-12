@@ -7,6 +7,7 @@
 #ifndef UTILS_H
 #define UTILS_H
 
+#include <vector>
 #include "Double_2D.h"
 //class Double_2D;
 class Complex_2D;
@@ -45,6 +46,12 @@ void interpolate( const Complex_2D & original, Complex_2D & big);
 void interpolate( const Double_2D & original, Double_2D & big);
 void shrink( const Complex_2D & original, Complex_2D & small);
 void shrink( const Double_2D & original, Double_2D & small);
+
+//Legendre related functions
+Double_2D  legroots(double n);
+Double_2D fill_legmatrix(std::vector<double>, int norder);
+
+void solve_gep(Complex_2D & A, Complex_2D & B, std::vector<double> & eigen);
 
 
 #endif

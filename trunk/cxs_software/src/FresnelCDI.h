@@ -39,6 +39,7 @@ class FresnelCDI: public BaseCDI{
 
   /** the white field in the sample plane */ 
   Complex_2D * illumination_at_sample;
+//  Complex_2D  illumination_as;
 
   /** the transmission function */ 
   Complex_2D * transmission;
@@ -91,6 +92,7 @@ class FresnelCDI: public BaseCDI{
    */
   FresnelCDI(Complex_2D & initial_guess,
 	     Complex_2D & white_field,
+//	     Complex_2D & illumination_ast,
 	     double beam_wavelength,
 	     double focal_detector_length,
 	     double focal_sample_length,

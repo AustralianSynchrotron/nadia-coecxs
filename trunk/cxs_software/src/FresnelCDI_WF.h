@@ -50,9 +50,13 @@ class FresnelCDI_WF: public BaseCDI{
   /** the pixel size */
   double pixel_length;
 
-   /** an array which holds a constants we use when propagating between
+  /** an array which holds a constants we use when propagating between
        difference planes */
   Complex_2D coefficient;
+
+  /** an array to hold the phase and magnitude at the detector plane */
+
+  Complex_2D complex_detector;
   
   /** an array which holds a constants we use when propagating between
       difference planes */
@@ -185,6 +189,12 @@ class FresnelCDI_WF: public BaseCDI{
 
   
   void multiply_factors(Complex_2D & c, int direction);
+
+  /** Returns the estimate at the detector */
+
+  Complex_2D get_detector(){
+    return complex_detector;
+  };
 
 };
 

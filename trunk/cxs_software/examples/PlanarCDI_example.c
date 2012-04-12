@@ -44,10 +44,10 @@ int main(void){
   string support_file_name = "image_files/planar_support.tiff";
 
   //number of hybrid input-out iterations to perform.
-  const int hio_iterations = 250;
+  const int hio_iterations = 500;
   
   //number of error reduction iterations to perform after the HIO.
-  const int er_iterations = 150;
+  const int er_iterations = 300;
 
   //output the current image ever "output_iterations"
   int output_iterations = 50;
