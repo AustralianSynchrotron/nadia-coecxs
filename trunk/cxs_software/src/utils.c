@@ -16,6 +16,8 @@
 #include <cmath>
 //#include <math.h>
 #include <string>
+#include <iomanip>
+
 
 using namespace std;
 
@@ -1733,15 +1735,20 @@ Double_2D  legroots(double n){
     roots.set(n-iz-1,0,-z);
     roots.set(n-iz-1,1,w);
 
-    //std::cout<<"z, w "<<roots.get(iz,0)<<", "<<roots.get(iz,1)<<"\n";
-
   }
+
+  std::cout<<"Output begins\n";
+  for(int i=0; i<n; i++){
+    std::cout<<"n, z, w "<<n<<", "<<roots.get(i,0)<<", "<<roots.get(i,1)<<"\n";
+  }
+  std::cout<<"Output ends\n";
+
 
   return(roots);
 
 }
 
-//takes a Double_2D and finds the norerth
+//takes a Double_2D and finds the norderth
 //legendre polynomial of each of the 
 //x values.
 Double_2D fill_legmatrix(std::vector<double> x, int norder){
@@ -1772,6 +1779,21 @@ Double_2D fill_legmatrix(std::vector<double> x, int norder){
       }
     }
   }
+
+/*  std::cout<<"x_matrix:\n";
+  for(int i=0; i<x.size(); i++){
+    std::cout<<x.at(i)<<" ";
+  }
+  std::cout<<"\n";
+
+  std::cout<<"legmatrix\n\n";
+   for(int i=0; i<x.size(); i++){
+     for(int j=0; j<norder; j++){
+     std::cout<<legmatrix.get(i, j)<<" ";
+     }
+     std::cout<<"\n";
+     }
+  */
   return(legmatrix);
 }
 
@@ -1787,7 +1809,7 @@ void solve_gep(Complex_2D & A, Complex_2D & B, vector<double> & eigen){
     return;
   }
 
-  double Afort[2*A.get_size_x()*A.get_size_x()], Bfort[2*B.get_size_x()*B.get_size_x()], eigenfort[eigen.size()];
+  double Afort[2*A.get_size_x()*A.get_size_x()+A.get_size_x()], Bfort[2*B.get_size_x()*B.get_size_x()], eigenfort[B.get_size_x()];
 
   for(int i=0; i<A.get_size_x(); i++){
     for(int j=0; j<A.get_size_y(); j++){
@@ -1799,27 +1821,53 @@ void solve_gep(Complex_2D & A, Complex_2D & B, vector<double> & eigen){
     }
   }
 
+/*  for(int i = 0; i<A.get_size_x(); i++){
+    for(int j=0; j<A.get_size_y(); j++){
+      if((fabs(A.get_real(i, j)))<0.00000001){
+	A.set_real(i,j,0);
+      }
+      std::cout<<setprecision(3)<<A.get_real(i, j)<<" ";//<<A.get_imag(i, j)<<"   ";
+    }
+    std::cout<<"\n";
+  }
+*/
+
+  /*  for(int i = 0; i<A.get_size_x(); i++){
+      for(int j=0; j<A.get_size_y(); j++){
+      std::cout<<A.get_imag(i, j)<<" ";
+      }
+      std::cout<<"\n";
+      }*/
+
+  //for(int i=0; i<2*A.get_size_x()*A.get_size_x(); i=i+2){
+  //std::cout<<Afort[i]<<"\n";
+  //}
+
   int ITYPE=1;
-  char UPLO='U';
+  char UPLO='L';
   int N=A.get_size_x();
   char JOB='V';
   int LDA=A.get_size_x();
   int LDB=B.get_size_x();
-  int LWORK=3*A.get_size_x();
-  double WORK[LWORK];
-  double RWORK[LWORK];
+  int LWORK=2*A.get_size_x();
+  double WORK[2*LWORK];
+  double RWORK[2*LWORK];
   int INFO;
 
 
   zhegv_(&ITYPE, &JOB, &UPLO, &N, Afort, &LDA, Bfort,&LDB, eigenfort, WORK, &LWORK, RWORK, &INFO);
 
-//  std::cout<<"Info is "<<INFO<<"!\n\n";
+  std::cout<<"Info is "<<INFO<<"!\n\n";
 
   eigen.clear();
 
+  /*for(int i=0; i<2*A.get_size_x()*A.get_size_x(); i++){
+  std::cout<<Afort[i]<<"\n";
+   }*/
+
   for(int i=0; i<A.get_size_x(); i++){
     eigen.push_back(eigenfort[i]);
-//    std::cout<< eigenfort[i]<<" "<<eigen.at(i)<<" is eigen \n";
+    std::cout<< eigenfort[i]<<" "<<eigen.at(i)<<" is eigen \n";
     for(int j=0; j<A.get_size_y(); j++){
 
       A.set_real(j,i, Afort[2*(j+A.get_size_x()*i)]);
@@ -1829,12 +1877,16 @@ void solve_gep(Complex_2D & A, Complex_2D & B, vector<double> & eigen){
     }
   }
 
-  /*  for(int i = 0; i<A.get_size_x(); i++){
-      for(int j=0; j<A.get_size_y(); j++){
-      std::cout<<A.get_imag(i, j)<<" ";
+  std::cout<<"Jmatrix is:\n";
+  for(int i = 0; i<A.get_size_x(); i++){
+    for(int j=0; j<A.get_size_y(); j++){
+      if((fabs(A.get_real(i, j)))<0.0000000001){
+	A.set_real(i,j,0);
       }
-      std::cout<<"\n";
-      }*/
+      std::cout<<setw(7)<<setprecision(3)<<A.get_real(i, j)<<" ";//<<A.get_imag(i, j)<<"   ";
+    }
+    std::cout<<"\n";
+  }
 }
 
 ////////////////////////////////

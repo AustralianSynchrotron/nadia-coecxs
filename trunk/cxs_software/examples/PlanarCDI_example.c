@@ -37,20 +37,22 @@ int main(void){
   //Define some constants which will be used in the code.
 
   //the data file name
-  string data_file_name = "image_files/planar_data.tif";
+  string data_file_name = "part_sim_intensity.tiff";//"image_files/planar_data.tif";
+    //"part_sim_intensity.tiff";
+  //"image_files/planar_data.tif";
 
   //the file which provides the support (pixels with the value 0
   //are considered as outside the object)
   string support_file_name = "image_files/planar_support.tiff";
 
   //number of hybrid input-out iterations to perform.
-  const int hio_iterations = 500;
+  const int hio_iterations = 51;
   
   //number of error reduction iterations to perform after the HIO.
-  const int er_iterations = 300;
+  const int er_iterations = 100;
 
   //output the current image ever "output_iterations"
-  int output_iterations = 50;
+  int output_iterations = 10;
 
   //the number of pixels in x and y
   int nx = 1024;

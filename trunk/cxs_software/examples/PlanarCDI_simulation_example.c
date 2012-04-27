@@ -93,7 +93,7 @@ int main(void){
   Double_2D intensity(n_x,n_y);
   input.get_2d(MAG_SQ,intensity);
 
-  //apply a threashold to make the simulation a bit more realistic
+  //apply a threshold to make the simulation a bit more realistic
   for(int i=0; i<n_x; i++){
     for(int j=0; j<n_y; j++){
       intensity.set(i,j,intensity.get(i,j)-noise_level);
