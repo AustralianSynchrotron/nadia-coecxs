@@ -1832,12 +1832,13 @@ void solve_gep(Complex_2D & A, Complex_2D & B, vector<double> & eigen){
   }
 */
 
-  /*  for(int i = 0; i<A.get_size_x(); i++){
+    for(int i = 0; i<A.get_size_x(); i++){
       for(int j=0; j<A.get_size_y(); j++){
-      std::cout<<A.get_imag(i, j)<<" ";
+//      std::cout<<A.get_real(i, j)<<" ";
+	std::cout<<setw(15)<<setprecision(7)<<A.get_real(i, j);
       }
       std::cout<<"\n";
-      }*/
+      }
 
   //for(int i=0; i<2*A.get_size_x()*A.get_size_x(); i=i+2){
   //std::cout<<Afort[i]<<"\n";
