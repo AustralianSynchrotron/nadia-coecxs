@@ -37,7 +37,7 @@ int main(void){
   //Define some constants which will be used in the code.
 
   //the data file name
-  string data_file_name = "part_sim_intensity.tiff";//"image_files/planar_data.tif";//08280.hdf";
+  string data_file_name = "part_sim_intensity.tiff";//*/"image_files/planar_data.tif";//08280.hdf";
   //string data_file_name = "08280.hdf";
 
     //"part_sim_intensity.tiff";
@@ -61,15 +61,13 @@ int main(void){
   int output_iterations = 10;
 
   //the number of pixels in x and y
-  int nx =1024;//2048;
-    //1024;
-
+  int nx =1024;
   int ny = 1024;
 
   //the number of legendre polynomials and the square root of the modes
-  int nleg = 2;
+  int nleg = 8;
 
-  int nmodes = 2;
+  int nmodes = 4;
 
   /**** get the diffraction data from file and read into an array *****/
 
@@ -106,7 +104,7 @@ int main(void){
 
   //create the planar CDI object which will be used to
   //perform the reconstuction.
-  PartialCDI partial(object_estimate, 0.9, 1.0e-9, 1.0e-9, 3.9e-3, 4, 0);
+  PartialCDI partial(object_estimate, 0.9, 4.0e+0, 4.0e+0, 3.9e-3, 4, 0);
   // 10000.0, 10000.0, 1, 4, 0);
 
   //set the support and intensity
@@ -132,7 +130,7 @@ int main(void){
   ostringstream temp_str0 ( ostringstream::out ) ;
   object_estimate.get_2d(MAG,result);
   temp_str0 << "modes.ppm";
-  write_image(temp_str0.str(), result, false);
+  write_image(temp_str0.str(), result, true);
 
 
   //Initialise the current object ESW with a random numbers
@@ -165,7 +163,7 @@ int main(void){
     cout << "iteration " << i << endl;
 
     //apply the set of partial CDI projections 
-    partial.iterate_modes(); 
+    partial.iterate(); 
     cout << "Current error is "<<partial.get_error()<<endl;
 
 
@@ -206,7 +204,7 @@ int main(void){
 
     cout << "iteration " << i << endl;
 
-    partial.iterate_modes(); 
+    partial.iterate(); 
 
     cout << "Current error is "<<partial.get_error()<<endl;
 

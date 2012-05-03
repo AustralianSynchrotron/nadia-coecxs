@@ -55,8 +55,8 @@ int main(void){
   //output the current image ever "output_iterations"
   const int output_iterations = 50;
 
-  int nleg=3;
-  int nmodes=3;
+  int nleg=8;
+  int nmodes=5;
 
 
   /****** get the object from an image file ****************/
@@ -87,7 +87,7 @@ int main(void){
   /**** create the projection/reconstruction object *****/
 
   Complex_2D first_guess(n_x,n_y);
-  PartialCDI my_partial(first_guess, 0.9, 1.0e-9 , 1.0e-9, 1.5e-3, 4, 0);
+  PartialCDI my_partial(first_guess, 0.9, 4.0e+0 , 4.0e+0, 3.9e-3, 4, 0);
   my_partial.initialise_matrices(nleg, nmodes);
 
   //propagate to the detector plane

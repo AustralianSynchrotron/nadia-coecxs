@@ -190,7 +190,7 @@ class PartialCDI:public BaseCDI {
    */
   void sum_intensity();
 
-  int iterate_modes();
+  int iterate();
 
 
   /**
