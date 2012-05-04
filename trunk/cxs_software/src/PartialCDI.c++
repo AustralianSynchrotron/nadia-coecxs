@@ -26,7 +26,8 @@ PartialCDI::PartialCDI(Complex_2D & initial_guess,
     double beta, 
     double lcx,
     double lcy,
-    double pixel_size,
+    double lx,
+    double ly,
     int n_best,
     bool parallel
     )
@@ -34,12 +35,9 @@ PartialCDI::PartialCDI(Complex_2D & initial_guess,
   beta(beta), 
   lcx(lcx),
   lcy(lcy),
-  psize(pixel_size),
   parallel(parallel),
-  x_min(0),
-  y_min(0),
-  weights_set(false),
   transmission(nx,ny),
+  threshold(0),
   iterations_per_cycle(1){
 
     x_position.clear();
@@ -47,19 +45,22 @@ PartialCDI::PartialCDI(Complex_2D & initial_guess,
 
     //Create arrays for the x and y positions of pixels within the detector.
 
-    double x_0=(nx/2*(-psize))+(psize/2);
-    double y_0=(ny/2*(-psize))+(psize/2);
+    pxsize=lx/nx;
+    pysize=ly/ny;
+    
+    double x_0=(nx/2*(-pxsize))+(pxsize/2);
+    double y_0=(ny/2*(-pysize))+(pysize/2);
 
     x_position.push_back(x_0);
     y_position.push_back(y_0);
 
     for(int i=1; i<nx; i++){
-      x_position.push_back(x_position.at(i-1)+psize);
+      x_position.push_back(x_position.at(i-1)+pxsize);
+    }
+    for(int i=1; i<ny; i++){
+      y_position.push_back(y_position.at(i-1)+pysize);
     }
 
-    for(int i=1; i<ny; i++){
-      y_position.push_back(y_position.at(i-1)+psize);
-    }
   }
 
 
@@ -113,16 +114,15 @@ void PartialCDI::initialise_estimate(int seed){
 	transmission.set_value(i,j,IMAG,0);
       }
       else{
-	double r = support.get(i,j)*(max_value*rand()/(double) RAND_MAX);
+	double re = support.get(i,j)*(max_value*rand()/(double) RAND_MAX);
 	double im = support.get(i,j)*(max_value*rand()/(double) RAND_MAX);
 
-	transmission.set_value(i,j,REAL,r);
+	transmission.set_value(i,j,REAL,re);
 	transmission.set_value(i,j,IMAG,im);
       }
     }
   }
   complex=transmission;
-
 }
 
 //this iterate function overrides that of BaseCDI, 
@@ -132,15 +132,16 @@ int PartialCDI::iterate(){
   //below is the code for the special case of ER
   //this is faster than using the generic algorithm code
   //further down in this function.
+  
   vector<Complex_2D> temp_complex_PFS;
   vector<Complex_2D> temp_complex_PF;
   vector<Complex_2D> temp_complex_PS;
   vector<Complex_2D> temp_complex_PSF;
 
   singleCDI.clear();
-  for(unsigned int i=0; i<singlemode.size(); i++){
-    singleCDI.push_back(singlemode.at(i));
-    apply_transmission(singleCDI.at(i));
+  for(unsigned int mode=0; mode<singlemode.size(); mode++){
+    singleCDI.push_back(singlemode.at(mode));
+    apply_transmission(singleCDI.at(mode));
   }
 
   if(algorithm==ER){
@@ -164,7 +165,7 @@ int PartialCDI::iterate(){
       apply_support(temp_complex_PFS.at(mode));
       propagate_to_detector(temp_complex_PFS.at(mode));
     } 
-    scale_intensity(temp_complex_PFS.back());
+    scale_intensity(temp_complex_PFS);
     propagate_from_detector(temp_complex_PFS.back());
   }
 
@@ -201,7 +202,6 @@ int PartialCDI::iterate(){
       apply_support(temp_complex_PSF.back());
     }
   }
-
 
   //combine the result of the separate operators
   double value_real, value_imag;
@@ -243,6 +243,7 @@ int PartialCDI::iterate(){
     }
   }
 
+  //Update the transmission using the dominant mode
   update_transmission();
 
   return SUCCESS;
@@ -254,39 +255,9 @@ void PartialCDI::apply_transmission(Complex_2D & c){
     c.multiply(transmission, 1);
 }
 
-
 //scale the highest occupancy mode 
 //this overwrites the function of the same
 //name in BaseCDI
-void PartialCDI::scale_intensity(Complex_2D & c){
-
-  double measured_int =0;
-  double calc_int =0;
-  double norm2_mag=0;
-  double norm2_diff=0;
-
-  for(int i=0; i< nx; i++){
-    for(int j=0; j< ny; j++){
-      //reset the magnitude
-      if(beam_stop==0 || beam_stop->get(i,j)>0){
-
-	measured_int=intensity_sqrt.get(i,j);
-
-	calc_int=sqrt(c.get_mag(i,j));
-
-	c.set_mag(i,j,measured_int);
-
-	//calculate the error
-	norm2_mag += measured_int*measured_int;
-
-	norm2_diff += (measured_int-calc_int)*(measured_int-calc_int);
-      }
-    }
-  }
-}
-
-
-
 void PartialCDI::scale_intensity(vector<Complex_2D> & c){
   double norm2_mag=0;
   double norm2_diff=0;
@@ -294,10 +265,10 @@ void PartialCDI::scale_intensity(vector<Complex_2D> & c){
   double calc_int=0;
   double scaled_mag=0;
 
-  Double_2D magnitude(nx, ny);
+  Double_2D magnitude=sum_intensity(c);
 
   //set the intensities to 0
-  for(int i=0; i< nx; i++){
+/*  for(int i=0; i< nx; i++){
     for(int j=0; j< ny; j++){
       magnitude.set(i,j,0.0);
     }
@@ -313,7 +284,7 @@ void PartialCDI::scale_intensity(vector<Complex_2D> & c){
       }
     }
   }
-
+*/
   for(int i=0; i< nx; i++){
     for(int j=0; j< ny; j++){
       //reset the magnitude
@@ -339,28 +310,32 @@ void PartialCDI::scale_intensity(vector<Complex_2D> & c){
 
 
 //add the intensities across all modes scaled by the eigenvalues
-void PartialCDI::sum_intensity(){
+Double_2D PartialCDI::sum_intensity(vector<Complex_2D> & c){
 
-  magnitude = new Double_2D(nx, ny);
+  Double_2D magnitude(nx, ny);
 
   //set the intensities to 0
+/*  for(int i=0; i< nx; i++){
+    for(int j=0; j< ny; j++){
+      magnitude.set(i,j,0.0);
+    }
+  }*/
+
+
   for(int i=0; i< nx; i++){
     for(int j=0; j< ny; j++){
-      magnitude->set(i,j,0.0);
-    }
-  }
 
-  for(unsigned int mode=0; mode<singleCDI.size(); mode++){
+      double mag_total=0;
+      for(int mode=0; mode<c.size(); mode++){
 
-    for(int i=0; i< nx; i++){
-      for(int j=0; j< ny; j++){
-
-	double mag_total = magnitude->get(i,j)+eigen.at(mode)*singleCDI.at(mode).get_mag(i,j)*singleCDI.at(mode).get_mag(i,j);
-	magnitude->set(i,j,mag_total);
+	mag_total += eigen.at(mode)*c.at(mode).get_mag(i,j)*c.at(mode).get_mag(i,j);
 
       }
+      magnitude.set(i,j,mag_total);
     }
   }
+
+  return(magnitude);
 };
 
 
@@ -419,12 +394,9 @@ void PartialCDI::initialise_matrices(int leg, int modes){
   Double_2D legmatrix = fill_legmatrix(rootval, nmode); 
 
   fill_jmatrix(legmatrix, roots);
-
   fill_smatrix();
-
   solve_gep(*jmatrix, *smatrix, eigen);
   fill_modes(*jmatrix);
-
 
   Complex_2D mags(nx, ny);
 
@@ -436,20 +408,19 @@ void PartialCDI::initialise_matrices(int leg, int modes){
     }
   }
 
-  for(unsigned int mode=0; mode<singlemode.size(); mode++){
 
-    for(int i=0; i< nx; i++){
-      for(int j=0; j< ny; j++){
+  for(int i=0; i< nx; i++){
+    for(int j=0; j< ny; j++){
 
-	double mag_total = mags.get_real(i,j)+eigen.at(mode)*singlemode.at(mode).get_mag(i,j)*singlemode.at(mode).get_mag(i,j);
-	mags.set_real(i,j,mag_total);
+      double mag_total=0;
+      for(unsigned int mode=0; mode<singlemode.size(); mode++){
+	mag_total += eigen.at(mode)*singlemode.at(mode).get_mag(i,j)*singlemode.at(mode).get_mag(i,j);
       }
+      mags.set_real(i,j,mag_total);
     }
   }
 
-
   complex=mags;
-
   return;
 }
 
@@ -523,6 +494,7 @@ void PartialCDI::fill_jmatrix(Double_2D legmatrix, Double_2D roots){
 
 	  xj_real+= scalex*roots.get(k,1)*roots.get(l,1)*legmatrix.get(k,i)*legmatrix.get(l,j);
 	  yj_real+= scaley*roots.get(k,1)*roots.get(l,1)*legmatrix.get(k,i)*legmatrix.get(l,j);
+
 	  xj_imag+=0;
 	  yj_imag+=0;
 
@@ -569,29 +541,37 @@ void PartialCDI::fill_modes(Complex_2D & c){
 
   singlemode.clear();
 
+  int e_mode=0;
+
   for(int mode=0; mode<nmode*nmode; mode++){
 
-    Complex_2D tmp(nx, ny);
+    if(eigen.at(e_mode)/eigen.back() > threshold){
 
-    for(int i=0; i<nx; i++){
-      for(int j=0; j<ny; j++){
+      Complex_2D tmp(nx, ny);
 
-	val_imag=0;
-	val_real=0;
-	for(int k=0; k<nmode; k++){
-	  for(int l=0; l<nmode; l++){
+      for(int i=0; i<nx; i++){
+	for(int j=0; j<ny; j++){
 
-	    val_real +=c.get_real(l+nmode*k, mode)*x_legmatrix.get(i, k)*y_legmatrix.get(j, l);
-	    val_imag +=c.get_imag(mode, l+nmode*k)*x_legmatrix.get(i, k)*y_legmatrix.get(j, l);
+	  val_imag=0;
+	  val_real=0;
+	  for(int k=0; k<nmode; k++){
+	    for(int l=0; l<nmode; l++){
 
+	      val_real +=c.get_real(l+nmode*k, mode)*x_legmatrix.get(i, k)*y_legmatrix.get(j, l);
+	      val_imag +=c.get_imag(l+nmode*k, mode)*x_legmatrix.get(i, k)*y_legmatrix.get(j, l);
+
+	    }
 	  }
+	  tmp.set_real(i, j, val_real);
+	  tmp.set_imag(i, j, val_imag);
 	}
-
-	tmp.set_real(i, j, val_real);
-	tmp.set_imag(i, j, val_imag);
       }
+      singlemode.push_back(tmp);
+
+      e_mode++;
+    }else{
+      eigen.erase(eigen.begin()+e_mode);
     }
-    singlemode.push_back(tmp);
   }
 }
 
@@ -669,13 +649,12 @@ Double_2D PartialCDI::propagate_modes_to_detector(){
       }
     }
   }
-
   return(magnitude);
 }
 
 //a function that returns a single mode.
 Complex_2D PartialCDI::get_mode(int mode){
-  if(mode>singlemode.size()){
+  if(mode>=singlemode.size()){
     std::cout<<"Maximum mode is "<<singlemode.size()<<". Returning this mode instead\n";
     return(singlemode.back());
   }

@@ -49,10 +49,13 @@ int main(void){
   const int hio_iterations = 51;
   
   //number of error reduction iterations to perform after the HIO.
-  const int er_iterations = 100;
+  const int er_iterations = 50;
 
-  //output the current image ever "output_iterations"
+  //output the current image every "output_iterations"
   int output_iterations = 10;
+
+  //apply the shrinkwrap algorithm every "shrinkwrap iterations"
+  int shrinkwrap_iterations = 50;
 
   //the number of pixels in x and y
   int nx = 1024;
@@ -151,7 +154,7 @@ int main(void){
       //0.1 is the threshold (10% of the maximum pixel).
       
     }
-    if(i%output_iterations==(output_iterations-1))
+    if(i%shrinkwrap_iterations==(shrinkwrap_iterations-1))
       planar.apply_shrinkwrap(1.5,0.1);
 
   }
@@ -178,7 +181,7 @@ int main(void){
       //apply the shrinkwrap algorithm
       //planar.apply_shrinkwrap(1.5,0.1);
     }
-    if(i%output_iterations==(output_iterations-1))
+    if(i%shrinkwrap_iterations==(shrinkwrap_iterations-1))
       planar.apply_shrinkwrap(1.5,0.1);
    
   }

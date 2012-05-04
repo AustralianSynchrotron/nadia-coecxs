@@ -27,7 +27,7 @@
 class Complex_2D;
 class PartialCDI:public BaseCDI {
 
-  protected:
+protected:
 
 
   /* A vector holding a pointer to each of the FresnelCDI/PlanarCDI objects */
@@ -38,21 +38,18 @@ class PartialCDI:public BaseCDI {
 
   /** A vector holding the weighting function for each frame */  
   std::vector<Double_2D * > weights; 
-  
+
   /* A vector of the transverse positions in x */
   std::vector<double> x_position;
 
   /* A vector of the transverse positions in y */
   std::vector<double> y_position;
-  
+
   //parameters controlling the feedback
   double beta;
-  std::vector<double> alpha;
 
   /** The current estimate of the transmission function */
   Complex_2D transmission;
-
-  Double_2D *  magnitude;
 
   /** An array of the eigenvectors for the system of JC=nSC */
   std::vector<double> eigen;
@@ -60,57 +57,48 @@ class PartialCDI:public BaseCDI {
   /** The number of iterations to perform for each 'local' frame */
   int iterations_per_cycle;
 
-  /** A factor which controls sub-pixel alignment. 
-      1=regular, 2 = 2 'global' pixels for every 1 'local' pixel.
-      i.e. 2 allows alignment to within half a pixel. */
-  //int scale;
-
-  /** The size in x and y of the 'global' sample function. */
-  //int nx,ny;
-
   /** The number of orthogonal components for the light source.*/
   int nleg;
 
-  /** The number of component modes for the light source.*/
+  /** The number of component modes for the light source. nleg must 
+    be bigger than nmode*/
   int nmode;
 
   /** Coherence lengths */
   double lcy;
   double lcx;
 
+  /** Length of area being imaged **/
+  double lx;
+  double ly;
+
   /** The size of a pixel */
-  double psize;
+  double pxsize;
+  double pysize;
+
+  /** The minimum value of the contribution of a mode 
+    * as a proportion of the dominant mode
+    */
+  double threshold;
 
   /** The matrices describing the source properties.*/
   Complex_2D * jmatrix;
-
   Complex_2D * hmatrix;
   Complex_2D * smatrix;
-
-  void set_experimental_parameters(double beam_wavelength,
-      double focal_detector_length,
-      double focal_sample_length,
-      double pixel_size);
-
-
-  /** Minimum coordinates of the 'global' function based on the
-    positions entered by the user. */
-  int x_min;
-  int y_min;
+  
+  Double_2D * magnitude;
 
   /** a flag for running in either series or parallel mode */
   bool parallel; 
 
-  /** a flag indicating whether the weights need to be recalculated */
-  bool weights_set;
-
- public:
+public:
 
   PartialCDI(Complex_2D & initial_guess,
       double beta=1.0,
       double lcx=0,
       double lcy=0,
-      double pixel_size=0,
+      double lx=0,
+      double ly=0,
       int n_best=1.0,
       bool parallel=0
       );
@@ -181,14 +169,19 @@ class PartialCDI:public BaseCDI {
   void scale_intensity(std::vector<Complex_2D> & c);
 
   /**
-    * for scaling the transmission
-    */
-  void scale_intensity(Complex_2D & c);
+   * for scaling the transmission
+   */
+//  void scale_intensity(Complex_2D & c);
 
   /**
-   *add the intensities across all modes 
+   * add the intensities across all modes 
    */
-  void sum_intensity();
+  Double_2D sum_intensity(std::vector<Complex_2D> & c);
+
+  /**
+    * The iterate the algorithm. This overwrites the
+    * the class of the same name in BaseCDI.
+    */ 
 
   int iterate();
 
@@ -245,17 +238,6 @@ class PartialCDI:public BaseCDI {
   }
 
   /**
-   * Set the feed-back parameter.
-   *
-   * @param beta The feedback parameter
-   */
-  void set_feedback_parameter(double beta){
-    this->beta = beta;    
-    weights_set = false;
-
-  };
-
-  /**
    * This function allows you to access the 'global' sample function.
    *
    * @return The current estimate of either the transmission (for
@@ -283,15 +265,23 @@ class PartialCDI:public BaseCDI {
    * Propagates the modes to the detector. Specifically for use with 
    * the simulations
    */
-   Double_2D propagate_modes_to_detector();
+  Double_2D propagate_modes_to_detector();
 
   /**
-   *Returns a given mode. If the mode requested is too big, it returns
-   *the final mode
+   * Returns a given mode. If the mode requested is too big, it returns
+   * the final mode
    */
-   Complex_2D get_mode(int mode);
+  Complex_2D get_mode(int mode);
 
- private:
+  /**
+    * Set the minimum contribution of a mode as a proportion of the 
+    * dominant mode for it to be included in the reconstruction 
+    */
+  void set_threshold(double d){
+    threshold=d;
+  }
+
+private:
 
   /**
    * This function is used to reallocate memory for the 'global'

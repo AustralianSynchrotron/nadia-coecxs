@@ -8,7 +8,8 @@
  * @file Double_2D.h
  * @class Double_2D
  * @author  Nadia Davidson 
- * @date Last modified on 6/1/2011
+ * @date Last modified on 4/5/2012 by T'Mir D. Julius
+ * 
  *
  * @brief A 2-dimensional array of doubles
  *
@@ -220,19 +221,30 @@ class Real_2D{
 	array[i*ny+j]*=scale_by;
   };
 
+  /**
+   * Set the copy constructor
+   */
+
   Real_2D(const Real_2D& object){
-    //std::cout<<"No, I'm called!!!! \n\n\n";
     allocate_memory(object.get_size_x(),object.get_size_y());
     for(int i =0; i<object.get_size_x(); i++){
       for(int j=0; j<object.get_size_y(); j++){
 	set(i, j, object.get(i, j));
       }
     }
-    //return *this;
   };
 
+  /**
+   * Set the assignment operator
+   */
   Real_2D& operator=(const Real_2D& rhs){
-    //std::cout<<"Being called!!!\n\n\n";
+
+    //Clean up
+    if(nx > 0 ){
+      delete [] array;
+    }
+
+    //Construct again
     allocate_memory(rhs.get_size_x(),rhs.get_size_y());
     for(int i =0; i<rhs.get_size_x(); i++){
       for(int j=0; j<rhs.get_size_y(); j++){

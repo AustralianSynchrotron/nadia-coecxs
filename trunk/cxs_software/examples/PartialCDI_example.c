@@ -55,30 +55,33 @@ int main(void){
   const int hio_iterations = 51;
   
   //number of error reduction iterations to perform after the HIO.
-  const int er_iterations = 100;
+  const int er_iterations = 50;
 
   //output the current image ever "output_iterations"
   int output_iterations = 10;
+
+  //apply the shrinkwrap algorithm every "shrinkwrap iterations"
+  int shrinkwrap_iterations = 50;
 
   //the number of pixels in x and y
   int nx =1024;
   int ny = 1024;
 
   //the number of legendre polynomials and the square root of the modes
-  int nleg = 8;
+  int nleg = 5;
 
-  int nmodes = 4;
+  int nmodes = 5;
 
   /**** get the diffraction data from file and read into an array *****/
 
   Double_2D data;
   read_image(data_file_name, data, nx, ny);  
 
-/*  ostringstream atemp_str ( ostringstream::out ) ;
-  atemp_str << "08280_log.ppm";
-  write_image(atemp_str.str(), data, true);
+  /*  ostringstream atemp_str ( ostringstream::out ) ;
+      atemp_str << "08280_log.ppm";
+      write_image(atemp_str.str(), data, true);
 
-*/
+   */
   /****** get the support from a file and read it into an array *****/
 
   //Every pixel with a zero value is intepreted as being outside
@@ -104,13 +107,15 @@ int main(void){
 
   //create the planar CDI object which will be used to
   //perform the reconstuction.
-  PartialCDI partial(object_estimate, 0.9, 4.0e+0, 4.0e+0, 3.9e-3, 4, 0);
+  PartialCDI partial(object_estimate, 0.9, 1.5e+0, 1.5e+0, 4.0, 4.0, 4, 0);
   // 10000.0, 10000.0, 1, 4, 0);
 
   //set the support and intensity
   partial.set_support(support,false);
 
   partial.set_intensity(data);
+
+  partial.set_threshold(1.0e-5);
 
   //set the algorithm to hybrid input-output
   partial.set_algorithm(HIO);
@@ -130,7 +135,7 @@ int main(void){
   ostringstream temp_str0 ( ostringstream::out ) ;
   object_estimate.get_2d(MAG,result);
   temp_str0 << "modes.ppm";
-  write_image(temp_str0.str(), result, true);
+  write_image(temp_str0.str(), result, false);
 
 
   //Initialise the current object ESW with a random numbers
@@ -192,7 +197,7 @@ int main(void){
       //0.1 is the threshold (10% of the maximum pixel).
 
     }
-    if(i%output_iterations==(output_iterations-1))
+    if(i%shrinkwrap_iterations==(shrinkwrap_iterations-1))
       partial.apply_shrinkwrap(1.5,0.1);
 
   }
@@ -219,7 +224,7 @@ int main(void){
       //apply the shrinkwrap algorithm
       //partial.apply_shrinkwrap(1.5,0.1);
     }
-    if(i%output_iterations==(output_iterations-1))
+    if(i%shrinkwrap_iterations==(shrinkwrap_iterations-1))
       partial.apply_shrinkwrap(1.5,0.1);
 
   }

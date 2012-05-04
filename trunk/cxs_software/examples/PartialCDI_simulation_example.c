@@ -55,7 +55,7 @@ int main(void){
   //output the current image ever "output_iterations"
   const int output_iterations = 50;
 
-  int nleg=8;
+  int nleg=5;
   int nmodes=5;
 
 
@@ -86,9 +86,30 @@ int main(void){
 
   /**** create the projection/reconstruction object *****/
 
-  Complex_2D first_guess(n_x,n_y);
-  PartialCDI my_partial(first_guess, 0.9, 4.0e+0 , 4.0e+0, 3.9e-3, 4, 0);
+  Complex_2D pattern(n_x,n_y);
+  PartialCDI my_partial(pattern, 0.9, 1.5e+0 , 1.5e+0, 4.0, 4.0, 4, 0);
+
   my_partial.initialise_matrices(nleg, nmodes);
+
+  Double_2D result(n_x, n_y);
+
+  ostringstream temp_str0 ( ostringstream::out ) ;
+  pattern.get_2d(MAG,result);
+  temp_str0 << "field.ppm";
+  write_image(temp_str0.str(), result, false);
+
+  ostringstream temp_str1 ( ostringstream::out ) ;
+  temp_str1 << "fieldl.ppm";
+  write_image(temp_str1.str(), result, true);
+
+
+  for(int i=0; i< nmodes*nmodes; i++){
+    ostringstream temp_str0 ( ostringstream::out ) ;
+    my_partial.get_mode(i).get_2d(REAL,result);
+    temp_str0 << "mode"<<i<<".ppm";
+    write_image(temp_str0.str(), result);
+  }
+
 
   //propagate to the detector plane
   my_partial.set_transmission(input);
@@ -135,7 +156,7 @@ int main(void){
   //my_partial.initialise_estimate(0);
 
   //make a temporary arrary
-  Double_2D result(n_x,n_y);
+  //Double_2D result(n_x,n_y);
 
   //apply the projection operators
   for(int i=0; i<hio_iterations; i++){
@@ -147,7 +168,7 @@ int main(void){
     if(i%output_iterations==0){
 
       ostringstream temp_str ( ostringstream::out ) ;
-      first_guess.get_2d(MAG,result);
+      pattern.get_2d(MAG,result);
       temp_str << "part_sim_result_" << i << ".ppm";
       write_ppm(temp_str.str(), result);
 
@@ -167,7 +188,7 @@ int main(void){
     if(i%output_iterations==0){
 
       ostringstream temp_str ( ostringstream::out ) ;
-      first_guess.get_2d(MAG,result);
+      pattern.get_2d(MAG,result);
       temp_str << "part_sim_result_" << i << ".ppm";
       write_ppm(temp_str.str(), result);
 

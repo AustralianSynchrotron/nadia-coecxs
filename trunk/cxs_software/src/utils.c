@@ -1737,12 +1737,12 @@ Double_2D  legroots(double n){
 
   }
 
-  std::cout<<"Output begins\n";
+/*  std::cout<<"Output begins\n";
   for(int i=0; i<n; i++){
     std::cout<<"n, z, w "<<n<<", "<<roots.get(i,0)<<", "<<roots.get(i,1)<<"\n";
   }
   std::cout<<"Output ends\n";
-
+*/
 
   return(roots);
 
@@ -1832,14 +1832,14 @@ void solve_gep(Complex_2D & A, Complex_2D & B, vector<double> & eigen){
   }
 */
 
-    for(int i = 0; i<A.get_size_x(); i++){
+ /*   for(int i = 0; i<A.get_size_x(); i++){
       for(int j=0; j<A.get_size_y(); j++){
 //      std::cout<<A.get_real(i, j)<<" ";
 	std::cout<<setw(15)<<setprecision(7)<<A.get_real(i, j);
       }
       std::cout<<"\n";
       }
-
+*/
   //for(int i=0; i<2*A.get_size_x()*A.get_size_x(); i=i+2){
   //std::cout<<Afort[i]<<"\n";
   //}
@@ -1858,17 +1858,13 @@ void solve_gep(Complex_2D & A, Complex_2D & B, vector<double> & eigen){
 
   zhegv_(&ITYPE, &JOB, &UPLO, &N, Afort, &LDA, Bfort,&LDB, eigenfort, WORK, &LWORK, RWORK, &INFO);
 
-  std::cout<<"Info is "<<INFO<<"!\n\n";
+  //std::cout<<"Info is "<<INFO<<"!\n\n";
 
   eigen.clear();
 
-  /*for(int i=0; i<2*A.get_size_x()*A.get_size_x(); i++){
-  std::cout<<Afort[i]<<"\n";
-   }*/
-
   for(int i=0; i<A.get_size_x(); i++){
     eigen.push_back(eigenfort[i]);
-    std::cout<< eigenfort[i]<<" "<<eigen.at(i)<<" is eigen \n";
+//    std::cout<< eigenfort[i]<<" "<<eigen.at(i)<<" is eigen \n";
     for(int j=0; j<A.get_size_y(); j++){
 
       A.set_real(j,i, Afort[2*(j+A.get_size_x()*i)]);
@@ -1878,16 +1874,17 @@ void solve_gep(Complex_2D & A, Complex_2D & B, vector<double> & eigen){
     }
   }
 
-  std::cout<<"Jmatrix is:\n";
-  for(int i = 0; i<A.get_size_x(); i++){
+  /*std::cout<<"Jmatrix is:\n";
+    for(int i = 0; i<A.get_size_x(); i++){
     for(int j=0; j<A.get_size_y(); j++){
-      if((fabs(A.get_real(i, j)))<0.0000000001){
-	A.set_real(i,j,0);
-      }
-      std::cout<<setw(7)<<setprecision(3)<<A.get_real(i, j)<<" ";//<<A.get_imag(i, j)<<"   ";
+    if((fabs(A.get_real(i, j)))<0.0000000001){
+    A.set_real(i,j,0);
+    }
+    std::cout<<setw(7)<<setprecision(3)<<A.get_real(i, j)<<" ";//<<A.get_imag(i, j)<<"   ";
     }
     std::cout<<"\n";
-  }
+    }*/
+  return;
 }
 
 ////////////////////////////////
