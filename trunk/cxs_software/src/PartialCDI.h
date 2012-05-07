@@ -215,7 +215,7 @@ public:
    * Polynomials. We then turn it in to a 2D matrix
    * for the x and y dimensions
    */
-  void fill_smatrix();
+  void fill_smatrix(Double_2D legmatrix, Double_2D roots);
 
   /**
    * fill a vector of Complex_2D for single modes. These 

@@ -68,9 +68,9 @@ int main(void){
   int ny = 1024;
 
   //the number of legendre polynomials and the square root of the modes
-  int nleg = 5;
+  int nleg = 12;
 
-  int nmodes = 5;
+  int nmodes = 7;
 
   /**** get the diffraction data from file and read into an array *****/
 
@@ -115,7 +115,7 @@ int main(void){
 
   partial.set_intensity(data);
 
-  partial.set_threshold(1.0e-5);
+//  partial.set_threshold(1.0e-5);
 
   //set the algorithm to hybrid input-output
   partial.set_algorithm(HIO);
