@@ -37,19 +37,26 @@ int main(void){
   //Define some constants which will be used in the code.
 
   //the data file name
-  string data_file_name = "part_sim_intensity.tiff";//"image_files/planar_data.tif";
-    //"part_sim_intensity.tiff";
+  string data_file_name = //"lowcoherence.dbin";
+  //"/home/tdjempire/Desktop/polychromatic_03667.ppm";//"real_sim_intensity.tiff";//"image_files/planar_data.tif";
+  "part_sim_intensity.tiff";
   //"image_files/planar_data.tif";
 
   //the file which provides the support (pixels with the value 0
   //are considered as outside the object)
-  string support_file_name = "image_files/planar_support.tiff";
+  string support_file_name = //"image_files/planar_support2.tiff";
+  //"/home/tdjempire/Desktop/support.tiff";
+  "image_files/planar_support.tiff";
+
+  const int cycles=5;
+  //number of error reduction iterations to perform before the HIO.
+  const int er_iterations1 = 0;
 
   //number of hybrid input-out iterations to perform.
-  const int hio_iterations = 51;
-  
+  const int hio_iterations = 280;
+
   //number of error reduction iterations to perform after the HIO.
-  const int er_iterations = 50;
+  const int er_iterations2 = 50;
 
   //output the current image every "output_iterations"
   int output_iterations = 10;
@@ -68,7 +75,7 @@ int main(void){
   read_image(data_file_name, data, nx, ny);  
 
   /****** get the support from a file and read it into an array *****/
-  
+
   //Every pixel with a zero value is intepreted as being outside
   //the support
 
@@ -91,20 +98,20 @@ int main(void){
   //create the planar CDI object which will be used to
   //perform the reconstuction.
   PlanarCDI planar(object_estimate,4);
- 
+
   //set the support and intensity
   planar.set_support(support,false);
   planar.set_intensity(data);
 
   //set the algorithm to hybrid input-output
-  planar.set_algorithm(HIO);
+  planar.set_algorithm(ER);
 
   //Initialise the current object ESW with a random numbers
   //"0" is the seed to the random number generator
-  planar.initialise_estimate(0);
+  planar.initialise_estimate(7);
 
   //  planar.set_fftw_type(FFTW_ESTIMATE);
-  
+
   //make a 2D object. This will be used to output the 
   //image of the current estimate.
   Double_2D result(nx,ny);
@@ -121,93 +128,122 @@ int main(void){
 
 
   /*** run the reconstruction ************/
+  for(int a=0; a<cycles; a++){
 
-  for(int i=0; i<hio_iterations; i++){
+    for(int i=0; i<er_iterations1; i++){
 
-    cout << "iteration " << i << endl;
+      cout << "iteration " << i << endl;
 
-    //apply the set of planar CDI projections 
-    planar.iterate(); 
-    cout << "Current error is "<<planar.get_error()<<endl;
-    
-    //every "output_iterations" 
-    //output the current estimate of the object
-    if(i%output_iterations==0){
+      //apply the set of planar CDI projections 
+      planar.iterate(); 
+      cout << "Current error is "<<planar.get_error()<<endl;
 
-      ostringstream temp_str ( ostringstream::out ) ;
-      object_estimate.get_2d(MAG,result);
-      temp_str << "real_example_iteration_" << i << ".ppm";
-      write_image(temp_str.str(), result);
-
-      temp_str.clear();
-
-      //uncomment to output the estimated diffraction pattern
-      //planar.propagate_to_detector(object_estimate);
-      //object_estimate.get_2d(MAG_SQ,result);
-      //temp_str << "diffraction.ppm";
-      //write_ppm(temp_str.str(), result, true);
-      //planar.propagate_from_detector(object_estimate);
-      //object_estimate.get_2d(MAG,result);
-      
-      //apply the shrinkwrap algorithm
-      //1.5 is the gaussian width in pixels
-      //0.1 is the threshold (10% of the maximum pixel).
-      
-    }
-    if(i%shrinkwrap_iterations==(shrinkwrap_iterations-1))
-      planar.apply_shrinkwrap(1.5,0.1);
-
-  }
-  
-  //now change to the error reduction algorithm 
-  planar.set_algorithm(ER);
-
-  for(int i=hio_iterations; i<(hio_iterations+er_iterations+1); i++){
-
-    cout << "iteration " << i << endl;
-    
-    planar.iterate(); 
-    
-    cout << "Current error is "<<planar.get_error()<<endl;
-
-    if(i%output_iterations==0){
+      //every "output_iterations" 
       //output the current estimate of the object
-      ostringstream temp_str ( ostringstream::out ) ;
-      object_estimate.get_2d(MAG,result);
-      temp_str << "real_example_iteration_" << i << ".ppm";
-      write_image(temp_str.str(), result);
-      temp_str.clear();
+      if(i%output_iterations==0){
 
-      //apply the shrinkwrap algorithm
-      //planar.apply_shrinkwrap(1.5,0.1);
+	ostringstream temp_str ( ostringstream::out ) ;
+	object_estimate.get_2d(MAG,result);
+	temp_str << "silly_real_example_iteration_" << i +a*(hio_iterations+er_iterations1+er_iterations2+1)<< ".ppm";
+	write_image(temp_str.str(), result);
+
+	temp_str.clear();
+
+	//uncomment to output the estimated diffraction pattern
+	//planar.propagate_to_detector(object_estimate);
+	//object_estimate.get_2d(MAG_SQ,result);
+	//temp_str << "diffraction.ppm";
+	//write_ppm(temp_str.str(), result, true);
+	//planar.propagate_from_detector(object_estimate);
+	//object_estimate.get_2d(MAG,result);
+
+	//apply the shrinkwrap algorithm
+	//1.5 is the gaussian width in pixels
+	//0.1 is the threshold (10% of the maximum pixel).
+
+      }
+      if(i%shrinkwrap_iterations==(shrinkwrap_iterations-1))
+	planar.apply_shrinkwrap(1.5,0.1);
+
     }
-    if(i%shrinkwrap_iterations==(shrinkwrap_iterations-1))
-      planar.apply_shrinkwrap(1.5,0.1);
-   
+
+    //now change to the error reduction algorithm 
+    planar.set_algorithm(HIO);
+
+    for(int i=er_iterations1; i<(hio_iterations+er_iterations1+1); i++){
+
+      cout << "iteration " << i << endl;
+
+      planar.iterate(); 
+
+      cout << "Current error is "<<planar.get_error()<<endl;
+
+      if(i%output_iterations==0){
+	//output the current estimate of the object
+	ostringstream temp_str ( ostringstream::out ) ;
+	object_estimate.get_2d(MAG,result);
+	temp_str << "silly_real_example_iteration_" << i+a*(hio_iterations+er_iterations1+er_iterations2+1) << ".ppm";
+	write_image(temp_str.str(), result);
+	temp_str.clear();
+
+	//apply the shrinkwrap algorithm
+	//planar.apply_shrinkwrap(1.5,0.1);
+      }
+      if(i%shrinkwrap_iterations==(shrinkwrap_iterations-1))
+	planar.apply_shrinkwrap(1.5,0.1);
+
+    }
+
+    planar.set_algorithm(ER);
+
+    for(int i=er_iterations1+hio_iterations; i<(hio_iterations+er_iterations1+er_iterations2+1); i++){
+
+      cout << "iteration " << i << endl;
+
+      planar.iterate();
+
+      cout << "Current error is "<<planar.get_error()<<endl;
+
+      if(i%output_iterations==0){
+	//output the current estimate of the object
+	ostringstream temp_str ( ostringstream::out ) ;
+	object_estimate.get_2d(MAG,result);
+	temp_str << "silly_real_example_iteration_" << i+a*(hio_iterations+er_iterations1+er_iterations2+1) << ".ppm";
+	write_image(temp_str.str(), result);
+	temp_str.clear();
+
+	//apply the shrinkwrap algorithm
+	//planar.apply_shrinkwrap(1.5,0.1);
+      }
+      if(i%shrinkwrap_iterations==(shrinkwrap_iterations-1))
+	planar.apply_shrinkwrap(1.5,0.1);
+
+    }
   }
+
 
   //And we are done. "object_estimate" contained the final estimate of
   //the ESW.
 
   /** ignore the stuff below  
-  Double_2D result2(nx,ny);
+    Double_2D result2(nx,ny);
 
-  double error=0;
-  planar.get_best_result(0,error)->get_2d(MAG,result2);
-  write_ppm("best_error.ppm", result2);
-  cout << "Best error 0 is "<< error <<endl;
+    double error=0;
+    planar.get_best_result(0,error)->get_2d(MAG,result2);
+    write_ppm("best_error.ppm", result2);
+    cout << "Best error 0 is "<< error <<endl;
 
-  planar.get_best_result(1,error)->get_2d(MAG,result2);
-  write_ppm("best_error_1.ppm", result2);
-  cout << "Best error 1 is "<< error <<endl;
+    planar.get_best_result(1,error)->get_2d(MAG,result2);
+    write_ppm("best_error_1.ppm", result2);
+    cout << "Best error 1 is "<< error <<endl;
 
-  planar.get_best_result(2,error)->get_2d(MAG,result2);
-  write_ppm("best_error_2.ppm", result2);
-  cout << "Best error 2 is "<< error <<endl;
+    planar.get_best_result(2,error)->get_2d(MAG,result2);
+    write_ppm("best_error_2.ppm", result2);
+    cout << "Best error 2 is "<< error <<endl;
 
-  planar.get_best_result(3,error)->get_2d(MAG,result2);
-  write_ppm("best_error_3.ppm", result2);
-  cout << "Best error 3 is "<< error <<endl; **/
+    planar.get_best_result(3,error)->get_2d(MAG,result2);
+    write_ppm("best_error_3.ppm", result2);
+    cout << "Best error 3 is "<< error <<endl; **/
 
   //  ProfilerStop();
 

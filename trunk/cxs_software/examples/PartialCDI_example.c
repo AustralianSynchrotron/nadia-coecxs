@@ -37,25 +37,33 @@ int main(void){
   //Define some constants which will be used in the code.
 
   //the data file name
-  string data_file_name = "part_sim_intensity.tiff";//*/"image_files/planar_data.tif";//08280.hdf";
-  //string data_file_name = "08280.hdf";
+  string data_file_name = 
+    //"lowcoherence.dbin";
+    //"/home/tdjempire/Desktop/polychromatic_03667.ppm";//"real_sim_intensity.tiff";//"image_files/planar_data.tif";//08280.hdf";
+    //string data_file_name = "08280.hdf";
 
-    //"part_sim_intensity.tiff";
-    //"image_files/planar_data.tif";
+  "part_sim_intensity.tiff";
+  //"image_files/planar_data.tif";
   //part_sim_intensity.tiff";//08280.hdf";
 
   //the file which provides the support (pixels with the value 0
   //are considered as outside the object)
-  string support_file_name = /*"support_02141.tiff";//*/"image_files/planar_support.tiff";
+  string support_file_name = //"image_files/planar_support2.tiff";
+  //"/home/tdjempire/Desktop/support.tiff";//*"support_02141.tiff";/
+  "image_files/planar_support.tiff";
 
   //the file with the initial guess
   //string initial_guess_name = "08280_800.tiff";
+  const int cycles = 5;
+
+  const int er_iterations1 = 0;
+
 
   //number of hybrid input-out iterations to perform.
-  const int hio_iterations = 51;
-  
+  const int hio_iterations = 280;
+
   //number of error reduction iterations to perform after the HIO.
-  const int er_iterations = 50;
+  const int er_iterations2 = 50;
 
   //output the current image ever "output_iterations"
   int output_iterations = 10;
@@ -64,11 +72,11 @@ int main(void){
   int shrinkwrap_iterations = 50;
 
   //the number of pixels in x and y
-  int nx =1024;
-  int ny = 1024;
+  int nx =1024;//2048;
+  int ny = 1024;//2048;
 
   //the number of legendre polynomials and the square root of the modes
-  int nleg = 12;
+  int nleg = 7;
 
   int nmodes = 7;
 
@@ -80,8 +88,8 @@ int main(void){
   /*  ostringstream atemp_str ( ostringstream::out ) ;
       atemp_str << "08280_log.ppm";
       write_image(atemp_str.str(), data, true);
-
    */
+
   /****** get the support from a file and read it into an array *****/
 
   //Every pixel with a zero value is intepreted as being outside
@@ -107,7 +115,7 @@ int main(void){
 
   //create the planar CDI object which will be used to
   //perform the reconstuction.
-  PartialCDI partial(object_estimate, 0.9, 1.5e+0, 1.5e+0, 4.0, 4.0, 4, 0);
+  PartialCDI partial(object_estimate, 0.9, 2.0, 2.0, 8.0, 8.0, 4, 0);
   // 10000.0, 10000.0, 1, 4, 0);
 
   //set the support and intensity
@@ -115,10 +123,10 @@ int main(void){
 
   partial.set_intensity(data);
 
-//  partial.set_threshold(1.0e-5);
+  partial.set_threshold(+1.0e-1);
 
   //set the algorithm to hybrid input-output
-  partial.set_algorithm(HIO);
+  partial.set_algorithm(ER);
 
   //Initialise the wave function
   partial.initialise_matrices(nleg, nmodes);
@@ -127,7 +135,7 @@ int main(void){
 
   for(int i=0; i< nmodes*nmodes; i++){
     ostringstream temp_str0 ( ostringstream::out ) ;
-    partial.get_mode(i).get_2d(REAL,result);
+    partial.get_mode(i).get_2d(MAG,result);
     temp_str0 << "mode"<<i<<".ppm";
     write_image(temp_str0.str(), result);
   }
@@ -135,12 +143,12 @@ int main(void){
   ostringstream temp_str0 ( ostringstream::out ) ;
   object_estimate.get_2d(MAG,result);
   temp_str0 << "modes.ppm";
-  write_image(temp_str0.str(), result, false);
+  write_image(temp_str0.str(), result);
 
 
   //Initialise the current object ESW with a random numbers
   //"0" is the se:ed to the random number generator
-  partial.initialise_estimate(0);
+  partial.initialise_estimate(7);
 
   //  partial.set_fftw_type(FFTW_ESTIMATE);
 
@@ -152,9 +160,9 @@ int main(void){
 
   /******* for fun, let's get the autocorrelation *****/
 
-  //Double_2D autoc(nx,ny);
-  //partial.get_intensity_autocorrelation(autoc);
-  //write_image("test_autocorrelation.ppm", autoc, true); //"true" means log scale
+//  Double_2D autoc(nx,ny);
+//  partial.get_intensity_autocorrelation(autoc);
+//  write_image("test_autocorrelation.ppm", autoc, true); //"true" means log scale
 
 
   //  ProfilerStart("profile");
@@ -162,99 +170,127 @@ int main(void){
   //partial.set_algorithm(HIO);
 
   /*** run the reconstruction ************/
-
-  for(int i=0; i<hio_iterations; i++){
-
-    cout << "iteration " << i << endl;
-
-    //apply the set of partial CDI projections 
-    partial.iterate(); 
-    cout << "Current error is "<<partial.get_error()<<endl;
+  for(int a=0; a<cycles; a++){
 
 
-    //every "output_iterations" 
-    //output the current estimate of the object
-    if(i%output_iterations==0){
+    for(int i=0; i<er_iterations1; i++){
+
+      cout << "iteration " << i << endl;
+
+      //apply the set of partial CDI projections 
+      partial.iterate(); 
+      cout << "Current error is "<<partial.get_error()<<endl;
 
 
-      ostringstream temp_str ( ostringstream::out ) ;
-      object_estimate.get_2d(MAG,result);
-      temp_str << "part_example_iteration_" << i << ".ppm";
-      write_image(temp_str.str(), result);
-
-      temp_str.clear();
-
-      //uncomment to output the estimated diffraction pattern
-      //partial.propagate_to_detector(object_estimate);
-      //object_estimate.get_2d(MAG_SQ,result);
-      //temp_str << "diffraction.ppm";
-      //write_ppm(temp_str.str(), result, true);
-      //partial.propagate_from_detector(object_estimate);
-      //object_estimate.get_2d(MAG,result);
-
-      //apply the shrinkwrap algorithm
-      //1.5 is the gaussian width in pixels
-      //0.1 is the threshold (10% of the maximum pixel).
-
-    }
-    if(i%shrinkwrap_iterations==(shrinkwrap_iterations-1))
-      partial.apply_shrinkwrap(1.5,0.1);
-
-  }
-
-  //now change to the error reduction algorithm 
-  partial.set_algorithm(ER);
-
-  for(int i=hio_iterations; i<(hio_iterations+er_iterations+1); i++){
-
-    cout << "iteration " << i << endl;
-
-    partial.iterate(); 
-
-    cout << "Current error is "<<partial.get_error()<<endl;
-
-    if(i%output_iterations==0){
+      //every "output_iterations" 
       //output the current estimate of the object
-      ostringstream temp_str ( ostringstream::out ) ;
-      object_estimate.get_2d(MAG,result);
-      temp_str << "part_example_iteration_" << i << ".ppm";
-      write_image(temp_str.str(), result);
-      temp_str.clear();
+      if(i%output_iterations==0){
 
-      //apply the shrinkwrap algorithm
-      //partial.apply_shrinkwrap(1.5,0.1);
+
+	ostringstream temp_str ( ostringstream::out ) ;
+	object_estimate.get_2d(MAG,result);
+	temp_str << "silly_part_example_iteration_" << i+a*(hio_iterations+er_iterations1+er_iterations2+1) << ".ppm";
+	write_image(temp_str.str(), result);
+
+	temp_str.clear();
+
+	//uncomment to output the estimated diffraction pattern
+	//partial.propagate_to_detector(object_estimate);
+	//object_estimate.get_2d(MAG_SQ,result);
+	//temp_str << "diffraction.ppm";
+	//write_ppm(temp_str.str(), result, true);
+	//partial.propagate_from_detector(object_estimate);
+	//object_estimate.get_2d(MAG,result);
+
+	//apply the shrinkwrap algorithm
+	//1.5 is the gaussian width in pixels
+	//0.1 is the threshold (10% of the maximum pixel).
+
+      }
+      if(i%shrinkwrap_iterations==(shrinkwrap_iterations-1))
+	partial.apply_shrinkwrap(1.5,0.1);
+
     }
-    if(i%shrinkwrap_iterations==(shrinkwrap_iterations-1))
-      partial.apply_shrinkwrap(1.5,0.1);
 
+    //now change to the error reduction algorithm 
+    partial.set_algorithm(HIO);
+
+    for(int i=er_iterations1; i<(hio_iterations+er_iterations1+1); i++){
+
+      cout << "iteration " << i << endl;
+
+      partial.iterate(); 
+
+      cout << "Current error is "<<partial.get_error()<<endl;
+
+      if(i%output_iterations==0){
+	//output the current estimate of the object
+	ostringstream temp_str ( ostringstream::out ) ;
+	object_estimate.get_2d(MAG,result);
+	temp_str << "silly_part_example_iteration_" << i+a*(hio_iterations+er_iterations1+er_iterations2+1) << ".ppm";
+	write_image(temp_str.str(), result, true);
+	temp_str.clear();
+
+	//apply the shrinkwrap algorithm
+	//partial.apply_shrinkwrap(1.5,0.1);
+      }
+      if(i%shrinkwrap_iterations==(shrinkwrap_iterations-1))
+	partial.apply_shrinkwrap(1.5,0.1);
+
+    }
+
+    partial.set_algorithm(ER);
+    for(int i=er_iterations1+hio_iterations; i<(hio_iterations+er_iterations1+er_iterations2+1); i++){
+
+      cout << "iteration " << i << endl;
+
+      partial.iterate();
+
+      cout << "Current error is "<<partial.get_error()<<endl;
+
+      if(i%output_iterations==0){
+	//output the current estimate of the object
+	ostringstream temp_str ( ostringstream::out ) ;
+	object_estimate.get_2d(MAG,result);
+	temp_str << "silly_part_example_iteration_" << i+a*(hio_iterations+er_iterations1+er_iterations2+1) << ".ppm";
+	write_image(temp_str.str(), result);
+	temp_str.clear();
+
+	//apply the shrinkwrap algorithm
+	//partial.apply_shrinkwrap(1.5,0.1);
+      }
+      if(i%shrinkwrap_iterations==(shrinkwrap_iterations-1))
+	partial.apply_shrinkwrap(1.5,0.1);
+
+    }
   }
 
-  //And we are done. "object_estimate" contained the final estimate of
-  //the ESW.
+    //And we are done. "object_estimate" contained the final estimate of
+    //the ESW.
 
-  /** ignore the stuff below  
-    Double_2D result2(nx,ny);
+    /** ignore the stuff below  
+      Double_2D result2(nx,ny);
 
-    double error=0;
-    partial.get_best_result(0,error)->get_2d(MAG,result2);
-    write_ppm("best_error.ppm", result2);
-    cout << "Best error 0 is "<< error <<endl;
+      double error=0;
+      partial.get_best_result(0,error)->get_2d(MAG,result2);
+      write_ppm("best_error.ppm", result2);
+      cout << "Best error 0 is "<< error <<endl;
 
-    partial.get_best_result(1,error)->get_2d(MAG,result2);
-    write_ppm("best_error_1.ppm", result2);
-    cout << "Best error 1 is "<< error <<endl;
+      partial.get_best_result(1,error)->get_2d(MAG,result2);
+      write_ppm("best_error_1.ppm", result2);
+      cout << "Best error 1 is "<< error <<endl;
 
-    partial.get_best_result(2,error)->get_2d(MAG,result2);
-    write_ppm("best_error_2.ppm", result2);
-    cout << "Best error 2 is "<< error <<endl;
+      partial.get_best_result(2,error)->get_2d(MAG,result2);
+      write_ppm("best_error_2.ppm", result2);
+      cout << "Best error 2 is "<< error <<endl;
 
-    partial.get_best_result(3,error)->get_2d(MAG,result2);
-    write_ppm("best_error_3.ppm", result2);
-    cout << "Best error 3 is "<< error <<endl; **/
+      partial.get_best_result(3,error)->get_2d(MAG,result2);
+      write_ppm("best_error_3.ppm", result2);
+      cout << "Best error 3 is "<< error <<endl; **/
 
-  //  ProfilerStop();
-  write_cplx("PCDI_trans.cplx", object_estimate);
+    //  ProfilerStop();
+    write_cplx("PCDI_trans.cplx", object_estimate);
 
-  return 0;
-}
+    return 0;
+  }
 

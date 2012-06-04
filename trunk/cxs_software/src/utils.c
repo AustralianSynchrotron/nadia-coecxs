@@ -1757,7 +1757,7 @@ Double_2D fill_legmatrix(std::vector<double> x, int norder){
 
   if(norder > 0){
     for(int i = 0; i < x.size(); i++){
-      legmatrix.set(i,0,1.0);
+      legmatrix.set(i,0, 1.0);
     }
   }
   if(norder > 1){
@@ -1780,7 +1780,7 @@ Double_2D fill_legmatrix(std::vector<double> x, int norder){
     }
   }
 
-/*  std::cout<<"x_matrix:\n";
+  /*std::cout<<"x_matrix:\n";
   for(int i=0; i<x.size(); i++){
     std::cout<<x.at(i)<<" ";
   }
@@ -1821,7 +1821,7 @@ void solve_gep(Complex_2D & A, Complex_2D & B, vector<double> & eigen){
     }
   }
 
-/*8  for(int i = 0; i<A.get_size_x(); i++){
+/*  for(int i = 0; i<A.get_size_x(); i++){
     for(int j=0; j<A.get_size_y(); j++){
       if((fabs(A.get_real(i, j)))<0.00000001){
 	A.set_real(i,j,0);
@@ -1832,18 +1832,18 @@ void solve_gep(Complex_2D & A, Complex_2D & B, vector<double> & eigen){
   }
 
 */
- /*   for(int i = 0; i<A.get_size_x(); i++){
+/*    for(int i = 0; i<A.get_size_x(); i++){
       for(int j=0; j<A.get_size_y(); j++){
 //      std::cout<<A.get_real(i, j)<<" ";
-	std::cout<<setw(15)<<setprecision(7)<<A.get_real(i, j);
+	std::cout<<setw(15)<<setprecision(4)<<A.get_real(i, j);
       }
       std::cout<<"\n";
       }
-*/
+
   //for(int i=0; i<2*A.get_size_x()*A.get_size_x(); i=i+2){
   //std::cout<<Afort[i]<<"\n";
   //}
-
+*/
   int ITYPE=1;
   char UPLO='L';
   int N=A.get_size_x();
@@ -1866,8 +1866,11 @@ void solve_gep(Complex_2D & A, Complex_2D & B, vector<double> & eigen){
     eigen.push_back(eigenfort[i]);
     std::cout<< eigenfort[i]<<" "<<eigen.at(i)<<" is eigen \n";
     for(int j=0; j<A.get_size_y(); j++){
-
-      A.set_real(j,i, Afort[2*(j+A.get_size_x()*i)]);
+      //if(fabs(Afort[2*(j+A.get_size_x()*i)])>0.00000001){
+	A.set_real(j,i, Afort[2*(j+A.get_size_x()*i)]);
+     // }else{
+//	A.set_real(j,i,0);
+  //    }
       A.set_imag(j,i, Afort[2*(j+A.get_size_x()*i)+1]);
       B.set_real(j,i, Bfort[2*(j+B.get_size_x()*i)]);
       B.set_imag(j,i, Bfort[2*(j+B.get_size_x()*i)+1]);
@@ -1875,15 +1878,15 @@ void solve_gep(Complex_2D & A, Complex_2D & B, vector<double> & eigen){
   }
 
 /*  std::cout<<"Jmatrix is:\n";
-    for(int i = 0; i<A.get_size_x(); i++){
+  for(int i = 0; i<A.get_size_x(); i++){
     for(int j=0; j<A.get_size_y(); j++){
-    if((fabs(A.get_real(i, j)))<0.0000000001){
-    A.set_real(i,j,0);
-    }
-    std::cout<<setw(7)<<setprecision(3)<<A.get_real(i, j)<<" ";//<<A.get_imag(i, j)<<"   ";
+      if((fabs(A.get_real(i, j)))<0.0000000001){
+	A.set_real(i,j,0);
+      }
+      std::cout<<setw(7)<<setprecision(3)<<A.get_real(i, j)<<" ";//<<A.get_imag(i, j)<<"   ";
     }
     std::cout<<"\n";
-    }*/
+  }*/
   return;
 }
 

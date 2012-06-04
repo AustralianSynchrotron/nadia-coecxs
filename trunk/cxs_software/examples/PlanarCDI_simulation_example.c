@@ -103,7 +103,7 @@ int main(void){
   }
 
   //write the output to file (use log scale)
-  write_ppm("sim_intensity.ppm",intensity,true);
+  write_tiff("real_sim_intensity.tiff",intensity,false);
 
   /******** get the support from file ****************************/
 

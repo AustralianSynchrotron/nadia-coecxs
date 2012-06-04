@@ -141,10 +141,12 @@ int PartialCDI::iterate(){
   singleCDI.clear();
   for(unsigned int mode=0; mode<singlemode.size(); mode++){
     singleCDI.push_back(singlemode.at(mode));
+   //apply_support(transmission);
     apply_transmission(singleCDI.at(mode));
   }
 
   if(algorithm==ER){
+    std::cout<<singleCDI.size()<<"is size \n\n";
     for(int mode=0; mode<singleCDI.size(); mode++){
       propagate_to_detector(singleCDI.at(mode));
     }
@@ -152,13 +154,15 @@ int PartialCDI::iterate(){
     propagate_from_detector(singleCDI.back());
     apply_support(singleCDI.back());
     update_transmission();
+    //apply_support(transmission);
+    update_n_best();
 
     return SUCCESS;
   }
 
   //start of the generic algorithm code
 
-  //PFS
+  //FS
   if(algorithm_structure[PFS]!=0){
     for(int mode=0; mode<singleCDI.size(); mode++){
       temp_complex_PFS.push_back(singleCDI.at(mode));
@@ -189,10 +193,10 @@ int PartialCDI::iterate(){
 
   //SF
   if(algorithm_structure[PSF]!=0){
-    if(algorithm_structure[PF]!=0){
+    /*if(algorithm_structure[PF]!=0){
       temp_complex_PSF.push_back(temp_complex_PF.back());
       apply_support(temp_complex_PSF.back());
-    }else{
+    }else{*/
       for(int mode=0; mode<singleCDI.size(); mode++){
 	temp_complex_PSF.push_back(singleCDI.at(mode));
 	propagate_to_detector(temp_complex_PSF.at(mode));
@@ -200,7 +204,7 @@ int PartialCDI::iterate(){
       scale_intensity(temp_complex_PSF);
       propagate_from_detector(temp_complex_PSF.back());
       apply_support(temp_complex_PSF.back());
-    }
+    //}
   }
 
   //combine the result of the separate operators
@@ -245,14 +249,14 @@ int PartialCDI::iterate(){
 
   //Update the transmission using the dominant mode
   update_transmission();
-
+  update_n_best();
   return SUCCESS;
 }
 
 //uses the complex_2d multiply function to apply 
 //the transmission function
 void PartialCDI::apply_transmission(Complex_2D & c){
-    c.multiply(transmission, 1);
+  c.multiply(transmission, 1);
 }
 
 //scale the highest occupancy mode 
@@ -268,23 +272,23 @@ void PartialCDI::scale_intensity(vector<Complex_2D> & c){
   Double_2D magnitude=sum_intensity(c);
 
   //set the intensities to 0
-/*  for(int i=0; i< nx; i++){
-    for(int j=0; j< ny; j++){
+  /*  for(int i=0; i< nx; i++){
+      for(int j=0; j< ny; j++){
       magnitude.set(i,j,0.0);
-    }
-  }
+      }
+      }
 
-  for(unsigned int mode=0; mode<c.size(); mode++){
+      for(unsigned int mode=0; mode<c.size(); mode++){
 
-    for(int i=0; i< nx; i++){
+      for(int i=0; i< nx; i++){
       for(int j=0; j< ny; j++){
 
-	double mag_total = magnitude.get(i,j)+eigen.at(mode)*c.at(mode).get_mag(i,j)*c.at(mode).get_mag(i,j);
-	magnitude.set(i,j,mag_total);
+      double mag_total = magnitude.get(i,j)+eigen.at(mode)*c.at(mode).get_mag(i,j)*c.at(mode).get_mag(i,j);
+      magnitude.set(i,j,mag_total);
       }
-    }
-  }
-*/
+      }
+      }
+   */
   for(int i=0; i< nx; i++){
     for(int j=0; j< ny; j++){
       //reset the magnitude
@@ -315,11 +319,11 @@ Double_2D PartialCDI::sum_intensity(vector<Complex_2D> & c){
   Double_2D magnitude(nx, ny);
 
   //set the intensities to 0
-/*  for(int i=0; i< nx; i++){
-    for(int j=0; j< ny; j++){
+  /*  for(int i=0; i< nx; i++){
+      for(int j=0; j< ny; j++){
       magnitude.set(i,j,0.0);
-    }
-  }*/
+      }
+      }*/
 
 
   for(int i=0; i< nx; i++){
@@ -354,7 +358,7 @@ void PartialCDI::update_transmission(){
       rs = singleCDI.back().get_real(i,j);
       is = singleCDI.back().get_imag(i,j);
 
-      if(abs(rd*rd+id*id) > 0.0000000001){ 
+      //if(abs(rd*rd+id*id) > 0.0000000001){ 
 
 	transreal = (rd*rs+id*is)/(rd*rd+id*id);
 	transimag = (rd*is-rs*id)/(rd*rd+id*id);
@@ -362,13 +366,14 @@ void PartialCDI::update_transmission(){
 	transmission.set_real(i, j, transreal);
 	transmission.set_imag(i, j, transimag);
 
-      }else{
-	transmission.set_real(i, j, 1);
-	transmission.set_imag(i, j, 1);
-      }
+      /*}else{
+	transmission.set_real(i, j, 0);
+	transmission.set_imag(i, j, 0);
+      }*/
     }
   }
 
+  //apply_support(transmission);
   complex=transmission;
 }
 
@@ -465,12 +470,12 @@ void PartialCDI::fill_smatrix(Double_2D legmatrix, Double_2D roots){
       }
     }
 
-/*    for(int i=0; i<nmode*nmode; i++){
-      for(int j=0; j<nmode*nmode; j++){
-	std::cout<<smatrix->get_real(i, j)<<" ";
-      }
-      std::cout<<"\n";
-    }*/
+    /*    for(int i=0; i<nmode*nmode; i++){
+	  for(int j=0; j<nmode*nmode; j++){
+	  std::cout<<smatrix->get_real(i, j)<<" ";
+	  }
+	  std::cout<<"\n";
+	  }*/
     return;
   }
 
@@ -513,14 +518,28 @@ void PartialCDI::fill_smatrix(Double_2D legmatrix, Double_2D roots){
 
 	  }
 	}
-
-	xjmatrix.set_real(i,j, xj_real);
+	if((i+j)%2==1){
+	  xjmatrix.set_real(i,j, 0);
+	  yjmatrix.set_real(i,j, 0);
+	}else{
+	  xjmatrix.set_real(i,j, xj_real);
+	  yjmatrix.set_real(i,j, yj_real);
+	}
 	xjmatrix.set_imag(i,j, xj_imag);
-	yjmatrix.set_real(i,j, yj_real);
 	yjmatrix.set_imag(i,j, yj_imag);
+
 
       }
     }
+
+    for(int i=0; i< nmode; i++){
+      for(int j=0; j< nmode; j++){
+	std::cout<<xjmatrix.get_real(i, j)<<" ";
+      }
+      std::cout<<"\n";
+    }
+    std::cout<<"\n";
+
 
     jmatrix = new Complex_2D(nmode*nmode, nmode*nmode);
 
@@ -570,8 +589,8 @@ void PartialCDI::fill_smatrix(Double_2D legmatrix, Double_2D roots){
 	    for(int k=0; k<nmode; k++){
 	      for(int l=0; l<nmode; l++){
 
-		val_real +=c.get_real(l+nmode*k, mode)*x_legmatrix.get(i, k)*y_legmatrix.get(j, l);
-		val_imag +=c.get_imag(l+nmode*k, mode)*x_legmatrix.get(i, k)*y_legmatrix.get(j, l);
+		val_real +=c.get_real(l+nmode*k, mode)*x_legmatrix.get(i, k)*y_legmatrix.get(j, l)/sqrt(2.0/(2*k+1))/sqrt(2.0/(2*l+1));
+		val_imag +=c.get_imag(l+nmode*k, mode)*x_legmatrix.get(i, k)*y_legmatrix.get(j, l)/sqrt(2.0/(2*k+1))/sqrt(2.0/(2*l+1));
 
 	      }
 	    }
@@ -668,7 +687,7 @@ void PartialCDI::fill_smatrix(Double_2D legmatrix, Double_2D roots){
   //a function that returns a single mode.
   Complex_2D PartialCDI::get_mode(int mode){
     if(mode>=singlemode.size()){
-      std::cout<<"Maximum mode is "<<singlemode.size()<<". Returning this mode instead\n";
+      std::cout<<"Maximum mode is "<<singlemode.size()-1<<". Returning this mode instead\n";
       return(singlemode.back());
     }
     return(singlemode.at(mode));

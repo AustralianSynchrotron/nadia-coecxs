@@ -40,7 +40,7 @@ int main(void){
   const static char * data_file_name = "image_files/object.tiff";
 
   //the approx. level of background noise in the image
-  const double noise_level = 0;
+  const double noise_level = 15;
 
   //the file which provides the support (pixels with the value 0
   //are considered as outside the object)
@@ -55,8 +55,8 @@ int main(void){
   //output the current image ever "output_iterations"
   const int output_iterations = 50;
 
-  int nleg=5;
-  int nmodes=5;
+  int nleg=7;
+  int nmodes=7;
 
 
   /****** get the object from an image file ****************/
@@ -87,7 +87,10 @@ int main(void){
   /**** create the projection/reconstruction object *****/
 
   Complex_2D pattern(n_x,n_y);
-  PartialCDI my_partial(pattern, 0.9, 1.5e+0 , 1.5e+0, 4.0, 4.0, 4, 0);
+  PartialCDI my_partial(pattern, 0.9, 1.0, 100000.0, 8.0, 8.0, 4, 0);
+
+  my_partial.set_threshold(+1.0e-11);
+
 
   my_partial.initialise_matrices(nleg, nmodes);
 
