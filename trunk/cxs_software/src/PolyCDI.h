@@ -5,8 +5,8 @@
 // analysis. 
 
 /**
- * @file PartialCDI.h
- * @class PartialCDI
+ * @file PolyCDI.h
+ * @class PolyCDI
  * @author T'Mir Julius <cxs-softwarse@physics.unimelb.edu.au> 
  *
  * @brief  The class which performs partially coherent 
@@ -25,7 +25,7 @@
 
 //forward declarations
 class Complex_2D;
-class PartialCDI:public BaseCDI {
+class PolyCDI:public BaseCDI {
 
 protected:
 
@@ -68,15 +68,13 @@ protected:
   double lcy;
   double lcx;
 
+  /** Length of area being imaged **/
+  double lx;
+  double ly;
+
   /** The size of a pixel */
   double pxsize;
   double pysize;
-
-  /** The distance between the sample and detector */
-  double zsd;
-
-  /** The energy of the beam */
-  double energy;
 
   /** The minimum value of the contribution of a mode 
     * as a proportion of the dominant mode
@@ -95,15 +93,13 @@ protected:
 
 public:
 
-  PartialCDI(Complex_2D & initial_guess,
+  PolyCDI(Complex_2D & initial_guess,
       double beta=1.0,
-      double lcx=1.0,
-      double lcy=1.0,
-      double pxsize=1.0,
-      double pysize=1.0,
-      double energy=1.0,
-      double zsd=1.0,
-      int n_best=1,
+      double lcx=0,
+      double lcy=0,
+      double lx=0,
+      double ly=0,
+      int n_best=1.0,
       bool parallel=0
       );
 
@@ -126,7 +122,7 @@ public:
    *   NOTE: This is not currently working properly!
    */
 
-  /*  PartialCDI(double beta=1.0, 
+  /*  PolyCDI(double beta=1.0, 
       double gamma=1.0,
       bool parallel=false,
       int granularity=1
@@ -135,7 +131,7 @@ public:
   /** 
    * Destructor for PhaseDiverseCDI
    */
-  ~PartialCDI();
+  ~PolyCDI();
 
 
   /**
@@ -175,7 +171,7 @@ public:
   /**
    * for scaling the transmission
    */
-  //  void scale_intensity(Complex_2D & c);
+//  void scale_intensity(Complex_2D & c);
 
   /**
    * add the intensities across all modes 
@@ -183,9 +179,9 @@ public:
   Double_2D sum_intensity(std::vector<Complex_2D> & c);
 
   /**
-   * The iterate the algorithm. This overwrites the
-   * the class of the same name in BaseCDI.
-   */ 
+    * The iterate the algorithm. This overwrites the
+    * the class of the same name in BaseCDI.
+    */ 
 
   int iterate();
 
@@ -278,9 +274,9 @@ public:
   Complex_2D get_mode(int mode);
 
   /**
-   * Set the minimum contribution of a mode as a proportion of the 
-   * dominant mode for it to be included in the reconstruction 
-   */
+    * Set the minimum contribution of a mode as a proportion of the 
+    * dominant mode for it to be included in the reconstruction 
+    */
   void set_threshold(double d){
     threshold=d;
   }

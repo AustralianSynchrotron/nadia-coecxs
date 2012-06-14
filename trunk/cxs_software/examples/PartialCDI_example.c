@@ -57,13 +57,11 @@ int main(void){
   const int cycles = 5;
 
   const int er_iterations1 = 0;
-
-
   //number of hybrid input-out iterations to perform.
-  const int hio_iterations = 280;
+  const int hio_iterations = 50;
 
   //number of error reduction iterations to perform after the HIO.
-  const int er_iterations2 = 50;
+  const int er_iterations2 = 100;
 
   //output the current image ever "output_iterations"
   int output_iterations = 10;
@@ -72,11 +70,11 @@ int main(void){
   int shrinkwrap_iterations = 50;
 
   //the number of pixels in x and y
-  int nx =1024;//2048;
+  int nx = 1024;//2048;
   int ny = 1024;//2048;
 
   //the number of legendre polynomials and the square root of the modes
-  int nleg = 7;
+  int nleg = 32;
 
   int nmodes = 7;
 
@@ -115,7 +113,7 @@ int main(void){
 
   //create the planar CDI object which will be used to
   //perform the reconstuction.
-  PartialCDI partial(object_estimate, 0.9, 2.0, 2.0, 8.0, 8.0, 4, 0);
+  PartialCDI partial(object_estimate, 0.9, 5.0e-6, 40.0e-2, 13.5e-6, 13.5e-6, 1400, 1.4, 4, 0);
   // 10000.0, 10000.0, 1, 4, 0);
 
   //set the support and intensity
@@ -123,7 +121,7 @@ int main(void){
 
   partial.set_intensity(data);
 
-  partial.set_threshold(+1.0e-1);
+  partial.set_threshold(+0.4e-5);
 
   //set the algorithm to hybrid input-output
   partial.set_algorithm(ER);
@@ -228,7 +226,7 @@ int main(void){
 	ostringstream temp_str ( ostringstream::out ) ;
 	object_estimate.get_2d(MAG,result);
 	temp_str << "silly_part_example_iteration_" << i+a*(hio_iterations+er_iterations1+er_iterations2+1) << ".ppm";
-	write_image(temp_str.str(), result, true);
+	write_image(temp_str.str(), result);
 	temp_str.clear();
 
 	//apply the shrinkwrap algorithm

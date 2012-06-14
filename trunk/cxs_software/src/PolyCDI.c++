@@ -12,7 +12,7 @@
 #include <cstdlib> 
 #include "Complex_2D.h"
 #include "Double_2D.h"
-#include "PartialCDI.h"
+#include "PolyCDI.h"
 #include "io.h" 
 #include <sstream>
 #include <typeinfo>
@@ -22,28 +22,22 @@ using namespace std;
 
 //constructor for the class which handles partially coherent diffractive imaging.
 
-PartialCDI::PartialCDI(Complex_2D & initial_guess,
+PolyCDI::PolyCDI(Complex_2D & initial_guess,
     double beta, 
-    double ilcx,
-    double ilcy,
-    double ipxsize,
-    double ipysize,
-    double energy,
-    double zsd,
+    double lcx,
+    double lcy,
+    double lx,
+    double ly,
     int n_best,
     bool parallel
     )
 :BaseCDI(initial_guess,n_best),
   beta(beta), 
-  //lcx(lcx),
-  //lcy(lcy),
-  pxsize(ipxsize),
-  pysize(ipysize),
-  energy(energy),
-  zsd(zsd),
+  lcx(lcx),
+  lcy(lcy),
   parallel(parallel),
   transmission(nx,ny),
-  threshold(1.0e-5),
+  threshold(-1.0),
   iterations_per_cycle(1){
 
     x_position.clear();
@@ -51,70 +45,45 @@ PartialCDI::PartialCDI(Complex_2D & initial_guess,
 
     //Create arrays for the x and y positions of pixels within the detector.
 
-    double plank_h = 4.13566733e-15;
-    double speed_c = 2.99792458e8;
-
-    double lambda = plank_h*speed_c/energy;
-
-    //std::cout<<lambda<<"is lambda\n\n";
-
-    double psx = (lambda*zsd)/(ipxsize*nx);
-    double psy = (lambda*zsd)/(ipysize*ny);
-
-  //  pxsize = psx;
-  //  pysize = psy;
-
-    std::cout<<psx*nx<<"\n";
-    std::cout<<psy<<"\n";
-
-    lcx = 2*ilcx/(nx*psx);
-    lcy = 2*ilcy/(ny*psy);
-
-    std::cout<<1/(2*lcx*lcx)<<"\n";
-    std::cout<<lcy<<"\n";
-
-    psx=2.0/nx;
-    psy=2.0/ny;
-
-    //std::cout << psx<<" "<<psy<<"is psx, psy\n";
-
-    double x_0=(nx/2*(-psx))+(psx/2);
-    double y_0=(ny/2*(-psy))+(psy/2);
+    pxsize=lx/nx;
+    pysize=ly/ny;
+    
+    double x_0=(nx/2*(-pxsize))+(pxsize/2);
+    double y_0=(ny/2*(-pysize))+(pysize/2);
 
     x_position.push_back(x_0);
     y_position.push_back(y_0);
 
     for(int i=1; i<nx; i++){
-      x_position.push_back(x_position.at(i-1)+psx);
-      //std::cout<<x_position.at(i)<<"\n\n";
+      x_position.push_back(x_position.at(i-1)+pxsize);
     }
     for(int i=1; i<ny; i++){
-      y_position.push_back(y_position.at(i-1)+psy);
+      y_position.push_back(y_position.at(i-1)+pysize);
     }
 
   }
 
 
 //destructor for cleaning up
-PartialCDI::~PartialCDI(){
+PolyCDI::~PolyCDI(){
 
 }
 
 //return the transmision function.
-Complex_2D  PartialCDI::get_transmission(){
+Complex_2D  PolyCDI::get_transmission(){
   return transmission;
 }
 
 //set the transmission function 
 //this function can be used to set the initial estimate.
-void PartialCDI::set_transmission(Complex_2D & new_transmission){
+void PolyCDI::set_transmission(Complex_2D & new_transmission){
 
   int new_nx = new_transmission.get_size_x();
   int new_ny = new_transmission.get_size_y();
 
   if(new_nx!=nx||new_ny!=ny){
     cout << "Can not set the transmission function in "
-      << "PartialCDI because the complex array "
+      << "PolyCDI because the complex array "
       << "given does not have the same dimensions as "
       << "the current transmission function"<<endl;
     return;
@@ -129,7 +98,7 @@ void PartialCDI::set_transmission(Complex_2D & new_transmission){
 //value between 0 and 1 within the support, and
 //0 everywhere else. Complex is then set to be 
 //the value of the transmission function
-void PartialCDI::initialise_estimate(int seed){
+void PolyCDI::initialise_estimate(int seed){
 
   //initialise the random number generator
   srand(seed);
@@ -158,12 +127,12 @@ void PartialCDI::initialise_estimate(int seed){
 
 //this iterate function overrides that of BaseCDI, 
 //and handles the multiple modes.
-int PartialCDI::iterate(){
+int PolyCDI::iterate(){
 
   //below is the code for the special case of ER
   //this is faster than using the generic algorithm code
   //further down in this function.
-
+  
   vector<Complex_2D> temp_complex_PFS;
   vector<Complex_2D> temp_complex_PF;
   vector<Complex_2D> temp_complex_PS;
@@ -172,12 +141,10 @@ int PartialCDI::iterate(){
   singleCDI.clear();
   for(unsigned int mode=0; mode<singlemode.size(); mode++){
     singleCDI.push_back(singlemode.at(mode));
-    //apply_support(transmission);
     apply_transmission(singleCDI.at(mode));
   }
 
   if(algorithm==ER){
-    //std::cout<<singleCDI.size()<<"is size \n\n";
     for(int mode=0; mode<singleCDI.size(); mode++){
       propagate_to_detector(singleCDI.at(mode));
     }
@@ -185,7 +152,6 @@ int PartialCDI::iterate(){
     propagate_from_detector(singleCDI.back());
     apply_support(singleCDI.back());
     update_transmission();
-    //apply_support(transmission);
     update_n_best();
 
     return SUCCESS;
@@ -193,7 +159,7 @@ int PartialCDI::iterate(){
 
   //start of the generic algorithm code
 
-  //FS
+  //PFS
   if(algorithm_structure[PFS]!=0){
     for(int mode=0; mode<singleCDI.size(); mode++){
       temp_complex_PFS.push_back(singleCDI.at(mode));
@@ -215,6 +181,7 @@ int PartialCDI::iterate(){
     scale_intensity(temp_complex_PF);
     propagate_from_detector(temp_complex_PF.back());
   }
+
   //S
   if(algorithm_structure[PS]!=0){
     temp_complex_PS.push_back(singleCDI.back());
@@ -285,14 +252,14 @@ int PartialCDI::iterate(){
 
 //uses the complex_2d multiply function to apply 
 //the transmission function
-void PartialCDI::apply_transmission(Complex_2D & c){
+void PolyCDI::apply_transmission(Complex_2D & c){
   c.multiply(transmission, 1);
 }
 
 //scale the highest occupancy mode 
 //this overwrites the function of the same
 //name in BaseCDI
-void PartialCDI::scale_intensity(vector<Complex_2D> & c){
+void PolyCDI::scale_intensity(vector<Complex_2D> & c){
   double norm2_mag=0;
   double norm2_diff=0;
   double measured_int=0;
@@ -344,7 +311,7 @@ void PartialCDI::scale_intensity(vector<Complex_2D> & c){
 
 
 //add the intensities across all modes scaled by the eigenvalues
-Double_2D PartialCDI::sum_intensity(vector<Complex_2D> & c){
+Double_2D PolyCDI::sum_intensity(vector<Complex_2D> & c){
 
   Double_2D magnitude(nx, ny);
 
@@ -376,7 +343,7 @@ Double_2D PartialCDI::sum_intensity(vector<Complex_2D> & c){
 //calculate the transmission function by dividing 
 //the highest occupacy mode at the source by the 
 //highest occupancy mode at the detector
-void PartialCDI::update_transmission(){
+void PolyCDI::update_transmission(){
 
   double transreal, transimag, rd, id, rs, is;
 
@@ -388,32 +355,30 @@ void PartialCDI::update_transmission(){
       rs = singleCDI.back().get_real(i,j);
       is = singleCDI.back().get_imag(i,j);
 
-      //      if(abs(rd*rd+id*id) > 0.00001){ 
+      if(abs(rd*rd+id*id) > 0.0000000001){ 
 
-      transreal = (rd*rs+id*is)/(rd*rd+id*id);
-      transimag = (rd*is-rs*id)/(rd*rd+id*id);
+	transreal = (rd*rs+id*is)/(rd*rd+id*id);
+	transimag = (rd*is-rs*id)/(rd*rd+id*id);
 
-      transmission.set_real(i, j, transreal);
-      transmission.set_imag(i, j, transimag);
+	transmission.set_real(i, j, transreal);
+	transmission.set_imag(i, j, transimag);
 
-      /*    }else{
-
-	    transmission.set_real(i, j, singlemode.back().get_real(i,j));
-	    transmission.set_imag(i, j, singlemode.back().get_imag(i,j));
-	    }
-       */ }
+      }else{
+	transmission.set_real(i, j, 1);
+	transmission.set_imag(i, j, 1);
+      }
+    }
   }
 
-  //apply_support(transmission);
   complex=transmission;
 }
 
-//generate the S and J matrices for the decomposition 
+/*//generate the S and J matrices for the decomposition 
 //of the partially coherent wave where JC=nSC where
 //H = integral(P*l(r1)J(r1, r2)Pm(r2)) dr1 dr2 and 
 //S=integral(P*l(r)pm(r))dr where Pl is an orhtonormal
 //basis set, in this case, the Legendre polynomials
-void PartialCDI::initialise_matrices(int leg, int modes){
+void PolyCDI::initialise_matrices(int leg, int modes){
 
   nleg = leg;
   nmode = modes;
@@ -464,7 +429,7 @@ void PartialCDI::initialise_matrices(int leg, int modes){
 //from the orthogonality requirments of Legendre 
 //Polynomials. We then turn it in to a 2D matrix
 //for the x and y dimensions
-void PartialCDI::fill_smatrix(Double_2D legmatrix, Double_2D roots){
+void PolyCDI::fill_smatrix(Double_2D legmatrix, Double_2D roots){
 
   Complex_2D s1d(nleg,nleg);
 
@@ -472,166 +437,147 @@ void PartialCDI::fill_smatrix(Double_2D legmatrix, Double_2D roots){
 
   for(int i = 0; i < nmode; i++){
     for(int j = 0; j < nmode; j++){
-      //      if(i==j)
+      //      if(i==j){
       //	s1d.set_real(i, j, 1.0);//2.0/(2.0*i+1.0));
       double s1_real = 0;
       for(int k=0; k<nleg; k++){
 	s1_real+= roots.get(k,1)*legmatrix.get(k,i)*legmatrix.get(k,j)/sqrt(2.0/(2*j+1))/sqrt(2.0/(2*i+1));
       }
-      if(fabs(s1_real)>1.0e-50){
-      s1d.set_real(i, j, s1_real);
+      if(fabs(s1_real)>1.0e-5){
+	s1d.set_real(i, j, s1_real);
       }else{
 	s1d.set_real(i, j, 0);
-	}
+      }
       s1d.set_imag(i, j, 0);
     }
-  }
+    }
 
-  for(int i=0; i<nmode; i++){
-    for(int j=0; j<nmode; j++){
-      for(int k=0; k<nmode; k++){
-	for(int l=0; l<nmode; l++){
+    for(int i=0; i<nmode; i++){
+      for(int j=0; j<nmode; j++){
+	for(int k=0; k<nmode; k++){
+	  for(int l=0; l<nmode; l++){
 
-	  double val=s1d.get_real(i,k)*s1d.get_real(j,l);
-	  smatrix->set_real(i*nmode+j,k*nmode+l, val);
-	  smatrix->set_imag(i*nmode+j,k*nmode+l, 0.0);
+	    double val=s1d.get_real(i,k)*s1d.get_real(j,l);
+	    smatrix->set_real(i*nmode+j,k*nmode+l, val);
+	    smatrix->set_imag(i*nmode+j,k*nmode+l, 0.0);
 
+	  }
 	}
       }
     }
+
+    /*    for(int i=0; i<nmode*nmode; i++){
+	  for(int j=0; j<nmode*nmode; j++){
+	  std::cout<<smatrix->get_real(i, j)<<" ";
+	  }
+	  std::cout<<"\n";
+	  }*/
+  /*  return;
   }
 
-  /*    for(int i=0; i<nmode*nmode; i++){
-	for(int j=0; j<nmode*nmode; j++){
-	std::cout<<smatrix->get_real(i, j)<<" ";
+  //the J matrix where J = integral(P*l(r1)J(r1, r2)Pm(r2))dr1dr2 
+  //the x and y are computed seperately, then multiplied together
+  //to take the 1D matrix to the 2D matrix.
+  void PolyCDI::fill_jmatrix(Double_2D legmatrix, Double_2D roots){
+
+    Complex_2D xjmatrix(nmode, nmode);
+    Complex_2D yjmatrix(nmode, nmode);
+
+    double xj_real;
+    double yj_real;
+    double xj_imag;
+    double yj_imag;
+
+    double scalex;
+    double scaley;
+
+
+    for(int i=0; i<nmode; i++){
+      for(int j=0; j<nmode; j++){
+
+	xj_real=0.0;
+	yj_real=0.0;
+	xj_imag=0.0;
+	yj_imag=0.0;
+
+	for(int k=0; k<nleg; k++){
+	  for(int l=0; l<nleg; l++){
+
+	    scalex=exp(-(1/(2*lcx*lcx))*(roots.get(k,0)-roots.get(l,0))*(roots.get(k,0)-roots.get(l,0)));
+	    scaley=exp(-(1/(2*lcy*lcy))*(roots.get(k,0)-roots.get(l,0))*(roots.get(k,0)-roots.get(l,0)));
+
+	    xj_real+= scalex*roots.get(k,1)*roots.get(l,1)*legmatrix.get(k,i)*legmatrix.get(l,j)/sqrt(2.0/(2*j+1))/sqrt(2.0/(2*i+1));
+	    yj_real+= scaley*roots.get(k,1)*roots.get(l,1)*legmatrix.get(k,i)*legmatrix.get(l,j)/sqrt(2.0/(2*j+1))/sqrt(2.0/(2*i+1));
+
+	    xj_imag+=0;
+	    yj_imag+=0;
+
+	  }
 	}
-	std::cout<<"\n";
-	}*/
-  return;
-}
-
-//the J matrix where J = integral(P*l(r1)J(r1, r2)Pm(r2))dr1dr2 
-//the x and y are computed seperately, then multiplied together
-//to take the 1D matrix to the 2D matrix.
-void PartialCDI::fill_jmatrix(Double_2D legmatrix, Double_2D roots){
-
-  Complex_2D xjmatrix(nmode, nmode);
-  Complex_2D yjmatrix(nmode, nmode);
-
-  float xj_real;
-  float yj_real;
-  float xj_imag;
-  float yj_imag;
-
-  float scalex;
-  float scaley;
-
-
-  for(int i=0; i<nmode; i++){
-    for(int j=0; j<nmode; j++){
-
-      xj_real=0.0;
-      yj_real=0.0;
-      xj_imag=0.0;
-      yj_imag=0.0;
-
-      for(int k=0; k<nleg; k++){
-	for(int l=0; l<nleg; l++){
-
-	  scalex=exp(-(1/(2*lcx*lcx))*(roots.get(k,0)-roots.get(l,0))*(roots.get(k,0)-roots.get(l,0)));
-	  // std::cout<<scalex<<"is scalex and "<<lcx<<"is lcx \n\n";
-	  scaley=exp(-(1/(2*lcy*lcy))*(roots.get(k,0)-roots.get(l,0))*(roots.get(k,0)-roots.get(l,0)));
-
-	  xj_real+= scalex*roots.get(k,1)*roots.get(l,1)*legmatrix.get(k,i)*legmatrix.get(l,j)/sqrt(2.0/(2*j+1))/sqrt(2.0/(2*i+1));
-	  yj_real+= scaley*roots.get(k,1)*roots.get(l,1)*legmatrix.get(k,i)*legmatrix.get(l,j)/sqrt(2.0/(2*j+1))/sqrt(2.0/(2*i+1));
-
-	  xj_imag+=0;
-	  yj_imag+=0;
-
+	if((i+j)%2==1){
+	  xjmatrix.set_real(i,j, 0);
+	  yjmatrix.set_real(i,j, 0);
+	}else{
+	  xjmatrix.set_real(i,j, xj_real);
+	  yjmatrix.set_real(i,j, yj_real);
 	}
-      }
-      if((i+j)%2==1){
-	xjmatrix.set_real(i,j, 0);
-	yjmatrix.set_real(i,j, 0);
-      }else{
-	xjmatrix.set_real(i,j, xj_real);
-	yjmatrix.set_real(i,j, yj_real);
-      }
 	xjmatrix.set_imag(i,j, xj_imag);
 	yjmatrix.set_imag(i,j, yj_imag);
 
 
+      }
     }
-  }
 
-  for(int i=0; i< nmode; i++){
-    for(int j=0; j< nmode; j++){
-      std::cout<<yjmatrix.get_real(i, j)<<" ";
+    for(int i=0; i< nmode; i++){
+      for(int j=0; j< nmode; j++){
+	std::cout<<xjmatrix.get_real(i, j)<<" ";
+      }
+      std::cout<<"\n";
     }
     std::cout<<"\n";
-  }
-  std::cout<<"\n";
 
 
-  jmatrix = new Complex_2D(nmode*nmode, nmode*nmode);
+    jmatrix = new Complex_2D(nmode*nmode, nmode*nmode);
 
-  for(int i=0; i<nmode; i++){
-    for(int j=0; j<nmode; j++){
-      for(int k=0; k<nmode; k++){
-	for(int l=0; l<nmode; l++){
+    for(int i=0; i<nmode; i++){
+      for(int j=0; j<nmode; j++){
+	for(int k=0; k<nmode; k++){
+	  for(int l=0; l<nmode; l++){
 
-	  double val_real=xjmatrix.get_real(i,k)*yjmatrix.get_real(j,l);
-	  double val_imag=xjmatrix.get_imag(i,k)*yjmatrix.get_imag(j,l);
+	    double val_real=xjmatrix.get_real(i,k)*yjmatrix.get_real(j,l);
+	    double val_imag=xjmatrix.get_imag(i,k)*yjmatrix.get_imag(j,l);
 
-	  jmatrix->set_real(i*nmode+j,k*nmode+l, val_real);
-	  jmatrix->set_imag(i*nmode+j,k*nmode+l, val_imag);
+	    jmatrix->set_real(i*nmode+j,k*nmode+l, val_real);
+	    jmatrix->set_imag(i*nmode+j,k*nmode+l, val_imag);
 
+	  }
 	}
       }
     }
+    return;
   }
-  return;
-}
-
+*/
 //fill a vector of Complex_2D for single modes. These 
 //modes do not evolve over time, and so are not BaseCDI's
-void PartialCDI::fill_modes(Complex_2D & c){
+void PolyCDI::fill_modes(Complex_2D & c){
 
-  Double_2D x_legmatrix = fill_legmatrix(x_position, nmode);
-  Double_2D y_legmatrix = fill_legmatrix(y_position, nmode);
 
-  double val_imag; 
-  double val_real;
+  singlefreq.clear();
 
-  singlemode.clear();
+  int f_mode=0;
 
-  int e_mode=0;
+  for(int mode=0; mode<nfreq; mode++){
 
-  for(int mode=0; mode<nmode*nmode; mode++){
-
-    if(eigen.at(e_mode)/eigen.back() > threshold){
-   // std::cout<<"mode is "<<mode<<"\n";
+    if(fspec.at(f_mode, 0)/fspec.at(fmax, 0) > threshold){
 
       Complex_2D tmp(nx, ny);
 
       for(int i=0; i<nx; i++){
 	for(int j=0; j<ny; j++){
 
-	  val_imag=0;
-	  val_real=0;
-	  for(int k=0; k<nmode; k++){
-	    for(int l=0; l<nmode; l++){
+	  tmp.set_real(i, j, cos(2*M_PI*fspec.at(f_mode, 2)/fspec(f_mode, 1)));
+	  tmp.set_imag(i, j, sin(2*M_PI*fspec.at(f_mode, 2)/fspec(f_mode, 1)));
 
-	      val_real +=c.get_real(l+nmode*k, mode)*x_legmatrix.get(i, k)*y_legmatrix.get(j, l)/sqrt(2.0/(2*k+1))/sqrt(2.0/(2*l+1));
-	      val_imag +=c.get_imag(l+nmode*k, mode)*x_legmatrix.get(i, k)*y_legmatrix.get(j, l)/sqrt(2.0/(2*k+1))/sqrt(2.0/(2*l+1));
-
-	    }
-	  }
-	  /*if(mode==24){
-	  std::cout<<"val_real is "<<val_real<<"\n";
-	  }*/
-	  tmp.set_real(i, j, val_real);
-	  tmp.set_imag(i, j, val_imag);
 	}
       }
       singlemode.push_back(tmp);
@@ -644,7 +590,7 @@ void PartialCDI::fill_modes(Complex_2D & c){
 }
 
 //Propagate from the object plane to the detector
-void PartialCDI::propagate_to_detector(Complex_2D & c){
+void PolyCDI::propagate_to_detector(Complex_2D & c){
 
   c.perform_forward_fft();
   c.invert(true);
@@ -652,7 +598,7 @@ void PartialCDI::propagate_to_detector(Complex_2D & c){
 }
 
 //Propagate form the detector plane to the object
-void PartialCDI::propagate_from_detector(Complex_2D & c){
+void PolyCDI::propagate_from_detector(Complex_2D & c){
 
   c.invert(true);
   c.perform_backward_fft();
@@ -660,7 +606,7 @@ void PartialCDI::propagate_from_detector(Complex_2D & c){
 }
 
 //find and return the current intensity
-Double_2D PartialCDI::get_intensity(){
+Double_2D PolyCDI::get_intensity(){
 
   Double_2D magnitude(nx, ny);
 
@@ -694,7 +640,7 @@ Double_2D PartialCDI::get_intensity(){
 
 //propagate each mode to the detector. This is specifically
 //for use in simulations.
-Double_2D PartialCDI::propagate_modes_to_detector(){
+Double_2D PolyCDI::propagate_modes_to_detector(){
 
   singleCDI.clear();
   for(unsigned int i=0; i<singlemode.size(); i++){
@@ -721,18 +667,12 @@ Double_2D PartialCDI::propagate_modes_to_detector(){
 }
 
 //a function that returns a single mode.
-Complex_2D PartialCDI::get_mode(int mode){
-
-  Complex_2D returnmode(nx, ny);
+Complex_2D PolyCDI::get_mode(int mode){
   if(mode>=singlemode.size()){
-    std::cout<<"Maximum mode is "<<singlemode.size()-1<<". Returning this mode instead\n";
-    returnmode = singlemode.back();
-    returnmode.multiply(singlemode.back(), eigen.back());
-  }else{
-    returnmode = singlemode.at(mode);
-    returnmode.multiply(singlemode.back(), eigen.at(mode));
+    std::cout<<"Maximum mode is "<<singlemode.size()<<". Returning this mode instead\n";
+    return(singlemode.back());
   }
-  return(returnmode);
+  return(singlemode.at(mode));
 }
 
 

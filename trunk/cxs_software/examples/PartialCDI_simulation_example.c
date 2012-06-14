@@ -55,7 +55,7 @@ int main(void){
   //output the current image ever "output_iterations"
   const int output_iterations = 50;
 
-  int nleg=7;
+  int nleg=32;
   int nmodes=7;
 
 
@@ -87,9 +87,9 @@ int main(void){
   /**** create the projection/reconstruction object *****/
 
   Complex_2D pattern(n_x,n_y);
-  PartialCDI my_partial(pattern, 0.9, 1.0, 100000.0, 8.0, 8.0, 4, 0);
+  PartialCDI my_partial(pattern, 0.9, 5.0e-6, 40.0e-3, 13.5e-6, 13.5e-6, 1400, 1.4, 4, 0);
 
-  my_partial.set_threshold(+1.0e-11);
+  my_partial.set_threshold(+1.0e-6);
 
 
   my_partial.initialise_matrices(nleg, nmodes);

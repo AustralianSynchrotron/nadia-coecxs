@@ -53,10 +53,10 @@ int main(void){
   const int er_iterations1 = 0;
 
   //number of hybrid input-out iterations to perform.
-  const int hio_iterations = 280;
+  const int hio_iterations = 50;
 
   //number of error reduction iterations to perform after the HIO.
-  const int er_iterations2 = 50;
+  const int er_iterations2 = 100;
 
   //output the current image every "output_iterations"
   int output_iterations = 10;

@@ -23,6 +23,7 @@
 
 #ifndef DOUBLE_2D_H
 #define DOUBLE_2D_H
+//#define DOUBLE_PRECISION 
 
 #include "string.h"
 
