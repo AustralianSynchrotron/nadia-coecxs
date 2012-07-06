@@ -3387,7 +3387,7 @@ if test "x$ac_cv_lib_m_main" = x""yes; then :
 #define HAVE_LIBM 1
 _ACEOF
 
-  LIBS="-lm $LIBS"
+  LIBS="-llapack -lm $LIBS"
 
 fi
 

@@ -1,4 +1,4 @@
-export LD_RUN_PATH=@LD_RUN_PATH@:@BASE@/lib
+export LD_RUN_PATH=:/home/tdjempire/CXS/DIXE/lib
 
 EXAMPLE_SRC=PlanarCDI_example.c PlanarCDI_simulation_example.c  \
 	    FresnelCDI_example.c FresnelCDI_WF_example.c \
@@ -15,9 +15,9 @@ EXAMPLE_EXEC=$(EXAMPLE_SRC:.c=.exe)
 all: $(EXAMPLE_EXEC)
 
 %.exe: %.c
-	@CXX@ @CXXFLAGS@ -I@BASE@/include $< -o $@ \
-	  -L@BASE@/lib -lCOECXS \
-	  @LDFLAGS@ @LIBS@
+	g++ -fPIC -O3 -ffast-math  -DHAVE_HDF_MFHDF_H -I/home/tdjempire/CXS/DIXE/include $< -o $@ \
+	  -L/home/tdjempire/CXS/DIXE/lib -lCOECXS \
+	   -ltiff -lmfhdf -ldf -lz -ljpeg -llapack -lm -lfftw3f -lstdc++ 
 
 
 clean:                                                     
