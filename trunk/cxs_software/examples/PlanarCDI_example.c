@@ -38,8 +38,10 @@ int main(void){
 
   //the data file name
   string data_file_name = //"lowcoherence.dbin";
-  //"/home/tdjempire/Desktop/polychromatic_03667.ppm";//"real_sim_intensity.tiff";//"image_files/planar_data.tif";
-  "part_sim_intensity.tiff";
+  //"/home/tdjempire/Desktop/polychromatic_03667.ppm";//"real_sim_intensity.tiff";
+  "poly_sim_intensity.tiff";
+  //"image_files/planar_data.tif";
+  //"part_sim_intensity.tiff";
   //"image_files/planar_data.tif";
 
   //the file which provides the support (pixels with the value 0
@@ -53,10 +55,10 @@ int main(void){
   const int er_iterations1 = 0;
 
   //number of hybrid input-out iterations to perform.
-  const int hio_iterations = 50;
+  const int hio_iterations = 250;
 
   //number of error reduction iterations to perform after the HIO.
-  const int er_iterations2 = 100;
+  const int er_iterations2 = 150;
 
   //output the current image every "output_iterations"
   int output_iterations = 10;
@@ -144,7 +146,7 @@ int main(void){
 
 	ostringstream temp_str ( ostringstream::out ) ;
 	object_estimate.get_2d(MAG,result);
-	temp_str << "silly_real_example_iteration_" << i +a*(hio_iterations+er_iterations1+er_iterations2+1)<< ".ppm";
+	temp_str << "real_example_iteration_" << i +a*(hio_iterations+er_iterations1+er_iterations2+1)<< ".ppm";
 	write_image(temp_str.str(), result);
 
 	temp_str.clear();
@@ -182,7 +184,7 @@ int main(void){
 	//output the current estimate of the object
 	ostringstream temp_str ( ostringstream::out ) ;
 	object_estimate.get_2d(MAG,result);
-	temp_str << "silly_real_example_iteration_" << i+a*(hio_iterations+er_iterations1+er_iterations2+1) << ".ppm";
+	temp_str << "real_example_iteration_" << i+a*(hio_iterations+er_iterations1+er_iterations2+1) << ".ppm";
 	write_image(temp_str.str(), result);
 	temp_str.clear();
 
@@ -208,7 +210,7 @@ int main(void){
 	//output the current estimate of the object
 	ostringstream temp_str ( ostringstream::out ) ;
 	object_estimate.get_2d(MAG,result);
-	temp_str << "silly_real_example_iteration_" << i+a*(hio_iterations+er_iterations1+er_iterations2+1) << ".ppm";
+	temp_str << "real_example_iteration_" << i+a*(hio_iterations+er_iterations1+er_iterations2+1) << ".ppm";
 	write_image(temp_str.str(), result);
 	temp_str.clear();
 

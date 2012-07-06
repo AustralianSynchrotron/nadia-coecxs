@@ -23,6 +23,9 @@
 #include "BaseCDI.h"
 #include <vector>
 
+#define wl 0
+#define weight 1
+
 //forward declarations
 class Complex_2D;
 class PolyCDI:public BaseCDI {
@@ -48,9 +51,6 @@ protected:
   //parameters controlling the feedback
   double beta;
 
-  /** The current estimate of the transmission function */
-  Complex_2D transmission;
-
   /** An array of the eigenvectors for the system of JC=nSC */
   std::vector<double> eigen;
 
@@ -64,28 +64,18 @@ protected:
     be bigger than nmode*/
   int nmode;
 
-  /** Coherence lengths */
-  double lcy;
-  double lcx;
+  /** Number of wavelengths in the spectrum */
+  double nlambda;
 
-  /** Length of area being imaged **/
-  double lx;
-  double ly;
+  /** Some features of the spectrum */
+  Double_2D & spectrum;
 
-  /** The size of a pixel */
-  double pxsize;
-  double pysize;
+  /** The calculated intensity at the detector */
+  Double_2D intensity_sqrt_calc;
 
-  /** The minimum value of the contribution of a mode 
-    * as a proportion of the dominant mode
-    */
-  double threshold;
+  double lambdac;
 
   /** The matrices describing the source properties.*/
-  Complex_2D * jmatrix;
-  Complex_2D * hmatrix;
-  Complex_2D * smatrix;
-  
   Double_2D * magnitude;
 
   /** a flag for running in either series or parallel mode */
@@ -94,12 +84,9 @@ protected:
 public:
 
   PolyCDI(Complex_2D & initial_guess,
+      Double_2D & spectrumi,
       double beta=1.0,
-      double lcx=0,
-      double lcy=0,
-      double lx=0,
-      double ly=0,
-      int n_best=1.0,
+      int n_best=1,
       bool parallel=0
       );
 
@@ -166,12 +153,17 @@ public:
    * this overwrites the function of the same
    * name in BaseCDI
    */
-  void scale_intensity(std::vector<Complex_2D> & c);
+  void scale_intensity(Complex_2D & c);
+
+  /* expand wavelengths from central wavelength 
+     */
+  void expand_wl(Complex_2D & c);
+
 
   /**
    * for scaling the transmission
    */
-//  void scale_intensity(Complex_2D & c);
+  //  void scale_intensity(Complex_2D & c);
 
   /**
    * add the intensities across all modes 
@@ -179,9 +171,9 @@ public:
   Double_2D sum_intensity(std::vector<Complex_2D> & c);
 
   /**
-    * The iterate the algorithm. This overwrites the
-    * the class of the same name in BaseCDI.
-    */ 
+   * The iterate the algorithm. This overwrites the
+   * the class of the same name in BaseCDI.
+   */ 
 
   int iterate();
 
@@ -259,7 +251,9 @@ public:
    * calculate and return the current intensity of the modes multiplied
    * by the transmissoion fnction
    */
-  Double_2D get_intensity();
+  Double_2D get_intensity(){
+    return(intensity_sqrt_calc);
+  };
 
   /**
    * Propagates the modes to the detector. Specifically for use with 
@@ -274,13 +268,15 @@ public:
   Complex_2D get_mode(int mode);
 
   /**
-    * Set the minimum contribution of a mode as a proportion of the 
-    * dominant mode for it to be included in the reconstruction 
-    */
-  void set_threshold(double d){
-    threshold=d;
-  }
+   *Propagate the CDI's 
+   */
+  void propagate_from_detector(Complex_2D & c);
+  void propagate_to_detector(Complex_2D & c);
 
+  /**
+   * Set the minimum contribution of a mode as a proportion of the 
+   * dominant mode for it to be included in the reconstruction 
+   */
 private:
 
   /**
@@ -304,11 +300,6 @@ private:
    */
   void scale_object(double factor);
 
-  /**
-   *Propagate the CDI's 
-   */
-  void propagate_from_detector(Complex_2D & c);
-  void propagate_to_detector(Complex_2D & c);
 };
 
 

@@ -58,7 +58,7 @@ int main(void){
 
   const int er_iterations1 = 0;
   //number of hybrid input-out iterations to perform.
-  const int hio_iterations = 50;
+  const int hio_iterations = 150;
 
   //number of error reduction iterations to perform after the HIO.
   const int er_iterations2 = 100;
@@ -73,9 +73,10 @@ int main(void){
   int nx = 1024;//2048;
   int ny = 1024;//2048;
 
-  //the number of legendre polynomials and the square root of the modes
+  //The number of legendre polynomials and the square root of the modes
+  //The number of legendre polynomials must be greater than or equal to the 
+  //number of modes
   int nleg = 32;
-
   int nmodes = 7;
 
   /**** get the diffraction data from file and read into an array *****/
@@ -113,7 +114,23 @@ int main(void){
 
   //create the planar CDI object which will be used to
   //perform the reconstuction.
-  PartialCDI partial(object_estimate, 0.9, 5.0e-6, 40.0e-2, 13.5e-6, 13.5e-6, 1400, 1.4, 4, 0);
+  double beta = 0.9;
+
+  //Coherence lengths x and y in m
+  double lcx = 5.0e-6;
+  double lcy = 40.0e-3;
+
+  //Pixel size detector in m
+  double psize_x=13.0e-6;
+  double psize_y=13.0e-6;
+
+  //Energy of the beam in eV
+  double e_beam=1400.0;
+
+  //Distance between detector and sampl in metres
+  double z_sd=1.4;
+
+  PartialCDI partial(object_estimate, beta, lcx, lcy, psize_x, psize_y, e_beam, z_sd, 4, 0);
   // 10000.0, 10000.0, 1, 4, 0);
 
   //set the support and intensity
@@ -187,7 +204,7 @@ int main(void){
 
 	ostringstream temp_str ( ostringstream::out ) ;
 	object_estimate.get_2d(MAG,result);
-	temp_str << "silly_part_example_iteration_" << i+a*(hio_iterations+er_iterations1+er_iterations2+1) << ".ppm";
+	temp_str << "part_example_iteration_" << i+a*(hio_iterations+er_iterations1+er_iterations2+1) << ".ppm";
 	write_image(temp_str.str(), result);
 
 	temp_str.clear();
@@ -225,7 +242,7 @@ int main(void){
 	//output the current estimate of the object
 	ostringstream temp_str ( ostringstream::out ) ;
 	object_estimate.get_2d(MAG,result);
-	temp_str << "silly_part_example_iteration_" << i+a*(hio_iterations+er_iterations1+er_iterations2+1) << ".ppm";
+	temp_str << "part_example_iteration_" << i+a*(hio_iterations+er_iterations1+er_iterations2+1) << ".ppm";
 	write_image(temp_str.str(), result);
 	temp_str.clear();
 
@@ -250,7 +267,7 @@ int main(void){
 	//output the current estimate of the object
 	ostringstream temp_str ( ostringstream::out ) ;
 	object_estimate.get_2d(MAG,result);
-	temp_str << "silly_part_example_iteration_" << i+a*(hio_iterations+er_iterations1+er_iterations2+1) << ".ppm";
+	temp_str << "part_example_iteration_" << i+a*(hio_iterations+er_iterations1+er_iterations2+1) << ".ppm";
 	write_image(temp_str.str(), result);
 	temp_str.clear();
 
