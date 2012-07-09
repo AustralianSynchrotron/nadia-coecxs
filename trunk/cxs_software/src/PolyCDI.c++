@@ -36,12 +36,23 @@ PolyCDI::PolyCDI(Complex_2D & initial_guess,
 
     nlambda=spectrum.get_size_x();
 
-    int maxweight=0;
+    double maxweight=0;
+    double totweight=0;
 
     for(int i=0; i<nlambda; i++){
-      if(spectrum.get(i, weight) > maxweight){
-	lambdac = spectrum.get(i, wl);
+      if(spectrum.get(i, WEIGHT) > maxweight){
+	lambdac = spectrum.get(i, WL);
+	maxweight=spectrum.get(i, WEIGHT);
       }
+      totweight+=spectrum.get(i, WEIGHT);
+
+      std::cout<<"tot weight is "<<spectrum.get(i, WEIGHT)<<"\n";
+    }
+
+    std::cout<<"lambdac is "<<lambdac<<"\n";
+
+    for(int i=0; i<nlambda; i++){
+      spectrum.set(i, WEIGHT, spectrum.get(i, WEIGHT)/totweight);
     }
     //Create arrays for the x and y positions of pixels within the detector.
   }
@@ -104,7 +115,7 @@ int PolyCDI::iterate(){
     propagate_to_detector(complex);
 
     scale_intensity(complex);
-      
+
     propagate_from_detector(complex);
     apply_support(complex);
     update_n_best();
@@ -207,7 +218,7 @@ void PolyCDI::scale_intensity(Complex_2D & c){
   double calc_int=0;
   double scaled_mag=0;
 
-//  double lambdmax = spectrum.get(nlambda, wl);
+  //  double lambdmax = spectrum.get(nlambda, wl);
   //  double nxmin = (1.0-lambdac/lambdmax)*((nx-1)/2);
   //  double nymin = (1.0-lambdac/lambdmax)*((ny-1)/2);
 
@@ -260,10 +271,10 @@ void PolyCDI::expand_wl(Complex_2D & c){
 
   for(int sn=0; sn<nlambda; sn++){
 
-    double lambda=spectrum.get(sn, wl);
-    double weightl=spectrum.get(sn, weight);
+    double lambda=spectrum.get(sn, WL);
+    double weightl=spectrum.get(sn, WEIGHT);
 
-    double lf=lambda/lambdac;
+    double lf=/*(2*lambdac-lambda)*/lambda/lambdac;
 
     for(int i=0; i<nx; i++){
       for(int j=0; j<ny; j++){

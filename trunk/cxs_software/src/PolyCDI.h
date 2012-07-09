@@ -23,8 +23,8 @@
 #include "BaseCDI.h"
 #include <vector>
 
-#define wl 0
-#define weight 1
+#define WL 0
+#define WEIGHT 1
 
 //forward declarations
 class Complex_2D;
