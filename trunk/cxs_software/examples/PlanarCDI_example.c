@@ -39,7 +39,7 @@ int main(void){
   //the data file name
   string data_file_name = //"lowcoherence.dbin";
   //"/home/tdjempire/Desktop/polychromatic_03667.ppm";//"real_sim_intensity.tiff";
-  "poly_sim_intensity.tiff";
+  "part_sim_intensity.tiff";
   //"image_files/planar_data.tif";
   //"part_sim_intensity.tiff";
   //"image_files/planar_data.tif";
@@ -52,19 +52,19 @@ int main(void){
 
   const int cycles=5;
   //number of error reduction iterations to perform before the HIO.
-  const int er_iterations1 = 0;
+  const int er_iterations1 = 50;
 
   //number of hybrid input-out iterations to perform.
-  const int hio_iterations = 250;
+  const int hio_iterations = 100;
 
   //number of error reduction iterations to perform after the HIO.
-  const int er_iterations2 = 150;
+  const int er_iterations2 = 50;
 
   //output the current image every "output_iterations"
   int output_iterations = 10;
 
   //apply the shrinkwrap algorithm every "shrinkwrap iterations"
-  int shrinkwrap_iterations = 50;
+  int shrinkwrap_iterations = 200;
 
   //the number of pixels in x and y
   int nx = 1024;
@@ -146,7 +146,7 @@ int main(void){
 
 	ostringstream temp_str ( ostringstream::out ) ;
 	object_estimate.get_2d(MAG,result);
-	temp_str << "real_example_iteration_" << i +a*(hio_iterations+er_iterations1+er_iterations2+1)<< ".ppm";
+	temp_str << "real_part_example_iteration_" << i +a*(hio_iterations+er_iterations1+er_iterations2+1)<< ".ppm";
 	write_image(temp_str.str(), result);
 
 	temp_str.clear();
@@ -184,7 +184,7 @@ int main(void){
 	//output the current estimate of the object
 	ostringstream temp_str ( ostringstream::out ) ;
 	object_estimate.get_2d(MAG,result);
-	temp_str << "real_example_iteration_" << i+a*(hio_iterations+er_iterations1+er_iterations2+1) << ".ppm";
+	temp_str << "real_part_example_iteration_" << i+a*(hio_iterations+er_iterations1+er_iterations2+1) << ".ppm";
 	write_image(temp_str.str(), result);
 	temp_str.clear();
 
@@ -210,7 +210,7 @@ int main(void){
 	//output the current estimate of the object
 	ostringstream temp_str ( ostringstream::out ) ;
 	object_estimate.get_2d(MAG,result);
-	temp_str << "real_example_iteration_" << i+a*(hio_iterations+er_iterations1+er_iterations2+1) << ".ppm";
+	temp_str << "real_part_example_iteration_" << i+a*(hio_iterations+er_iterations1+er_iterations2+1) << ".ppm";
 	write_image(temp_str.str(), result);
 	temp_str.clear();
 

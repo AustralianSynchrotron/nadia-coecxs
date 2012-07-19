@@ -56,9 +56,9 @@ int main(void){
   //string initial_guess_name = "08280_800.tiff";
   const int cycles = 5;
 
-  const int er_iterations1 = 0;
+  const int er_iterations1 = 50;
   //number of hybrid input-out iterations to perform.
-  const int hio_iterations = 150;
+  const int hio_iterations = 50;
 
   //number of error reduction iterations to perform after the HIO.
   const int er_iterations2 = 100;
@@ -67,7 +67,7 @@ int main(void){
   int output_iterations = 10;
 
   //apply the shrinkwrap algorithm every "shrinkwrap iterations"
-  int shrinkwrap_iterations = 50;
+  int shrinkwrap_iterations = 200;
 
   //the number of pixels in x and y
   int nx = 1024;//2048;
@@ -117,12 +117,12 @@ int main(void){
   double beta = 0.9;
 
   //Coherence lengths x and y in m
-  double lcx = 5.0e-6;
+  double lcx = 3.0e-6;
   double lcy = 40.0e-3;
 
   //Pixel size detector in m
-  double psize_x=13.0e-6;
-  double psize_y=13.0e-6;
+  double psize_x=13.5e-6;
+  double psize_y=13.5e-6;
 
   //Energy of the beam in eV
   double e_beam=1400.0;
@@ -131,6 +131,7 @@ int main(void){
   double z_sd=1.4;
 
   PartialCDI partial(object_estimate, beta, lcx, lcy, psize_x, psize_y, e_beam, z_sd, 4, 0);
+
   // 10000.0, 10000.0, 1, 4, 0);
 
   //set the support and intensity
@@ -148,6 +149,10 @@ int main(void){
 
   Double_2D result(nx, ny);
 
+  ostringstream temp_strsupp ( ostringstream::out ) ;
+  temp_strsupp << "support_tmp.ppm";
+  write_image(temp_strsupp.str(), support);
+/*
   for(int i=0; i< nmodes*nmodes; i++){
     ostringstream temp_str0 ( ostringstream::out ) ;
     partial.get_mode(i).get_2d(MAG,result);
@@ -159,7 +164,7 @@ int main(void){
   object_estimate.get_2d(MAG,result);
   temp_str0 << "modes.ppm";
   write_image(temp_str0.str(), result);
-
+*/
 
   //Initialise the current object ESW with a random numbers
   //"0" is the se:ed to the random number generator
@@ -175,9 +180,9 @@ int main(void){
 
   /******* for fun, let's get the autocorrelation *****/
 
-//  Double_2D autoc(nx,ny);
-//  partial.get_intensity_autocorrelation(autoc);
-//  write_image("test_autocorrelation.ppm", autoc, true); //"true" means log scale
+  //  Double_2D autoc(nx,ny);
+  //  partial.get_intensity_autocorrelation(autoc);
+  //  write_image("test_autocorrelation.ppm", autoc, true); //"true" means log scale
 
 
   //  ProfilerStart("profile");
@@ -280,32 +285,32 @@ int main(void){
     }
   }
 
-    //And we are done. "object_estimate" contained the final estimate of
-    //the ESW.
+  //And we are done. "object_estimate" contained the final estimate of
+  //the ESW.
 
-    /** ignore the stuff below  
-      Double_2D result2(nx,ny);
+  /** ignore the stuff below  
+    Double_2D result2(nx,ny);
 
-      double error=0;
-      partial.get_best_result(0,error)->get_2d(MAG,result2);
-      write_ppm("best_error.ppm", result2);
-      cout << "Best error 0 is "<< error <<endl;
+    double error=0;
+    partial.get_best_result(0,error)->get_2d(MAG,result2);
+    write_ppm("best_error.ppm", result2);
+    cout << "Best error 0 is "<< error <<endl;
 
-      partial.get_best_result(1,error)->get_2d(MAG,result2);
-      write_ppm("best_error_1.ppm", result2);
-      cout << "Best error 1 is "<< error <<endl;
+    partial.get_best_result(1,error)->get_2d(MAG,result2);
+    write_ppm("best_error_1.ppm", result2);
+    cout << "Best error 1 is "<< error <<endl;
 
-      partial.get_best_result(2,error)->get_2d(MAG,result2);
-      write_ppm("best_error_2.ppm", result2);
-      cout << "Best error 2 is "<< error <<endl;
+    partial.get_best_result(2,error)->get_2d(MAG,result2);
+    write_ppm("best_error_2.ppm", result2);
+    cout << "Best error 2 is "<< error <<endl;
 
-      partial.get_best_result(3,error)->get_2d(MAG,result2);
-      write_ppm("best_error_3.ppm", result2);
-      cout << "Best error 3 is "<< error <<endl; **/
+    partial.get_best_result(3,error)->get_2d(MAG,result2);
+    write_ppm("best_error_3.ppm", result2);
+    cout << "Best error 3 is "<< error <<endl; **/
 
-    //  ProfilerStop();
-    write_cplx("PCDI_trans.cplx", object_estimate);
+  //  ProfilerStop();
+  write_cplx("PCDI_trans.cplx", object_estimate);
 
-    return 0;
-  }
+  return 0;
+}
 

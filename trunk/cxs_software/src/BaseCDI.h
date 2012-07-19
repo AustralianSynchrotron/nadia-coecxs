@@ -424,6 +424,8 @@ class BaseCDI{
    * @param c The complex field to apply the support constraint on
    */ 
   virtual void apply_support(Complex_2D & c);
+  virtual void apply_support(Double_2D & c);
+
 
   /**
    * Apply the intensity constraint. The ESW is projected to the
@@ -527,6 +529,8 @@ class BaseCDI{
   void convolve(Double_2D & array, double gauss_width, int pixel_cut_off=4);
 
   void support_constraint(Complex_2D & c);
+  void support_constraint(Double_2D & c);
+
 
   void reallocate_temp_complex_memory();
 

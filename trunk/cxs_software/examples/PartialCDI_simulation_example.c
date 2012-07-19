@@ -87,7 +87,7 @@ int main(void){
   /**** create the projection/reconstruction object *****/
 
   Complex_2D pattern(n_x,n_y);
-  PartialCDI my_partial(pattern, 0.9, 5.0e-6, 40.0e-3, 13.5e-6, 13.5e-6, 1400, 1.4, 4, 0);
+  PartialCDI my_partial(pattern, 0.9, 2.0e-6, 40.0e-3, 13.5e-6, 13.5e-6, 1400, 1.4, 4, 0);
 
   my_partial.set_threshold(+1.0e-6);
 
@@ -106,12 +106,12 @@ int main(void){
   write_image(temp_str1.str(), result, true);
 
 
-  for(int i=0; i< nmodes*nmodes; i++){
+/*  for(int i=0; i< nmodes*nmodes; i++){
     ostringstream temp_str0 ( ostringstream::out ) ;
     my_partial.get_mode(i).get_2d(REAL,result);
     temp_str0 << "mode"<<i<<".ppm";
     write_image(temp_str0.str(), result);
-  }
+  }*/
 
 
   //propagate to the detector plane

@@ -134,8 +134,14 @@ double BaseCDI::get_error(){
 
 void BaseCDI::apply_support(Complex_2D & c){
   support_constraint(c);
+  if(transmission_constraint)
+    transmission_constraint->apply_constraint(c);
+}
+
+void BaseCDI::apply_support(Double_2D & c){
+  support_constraint(c);
   //if(transmission_constraint)
-    //transmission_constraint->apply_constraint(c);
+  //transmission_constraint->apply_constraint(c);
 }
 
 void BaseCDI::support_constraint(Complex_2D & c){
@@ -145,18 +151,28 @@ void BaseCDI::support_constraint(Complex_2D & c){
     for(int j=0; j< ny; j++){
 
       support_value = support.get(i,j);
-      if(support_value == 0){
-	c.set_real(i,j,0);
-	c.set_imag(i,j,0);
-      }
-      else if(support_value < 1){
-	c.set_real(i,j,c.get_real(i,j) * support_value);
-	c.set_imag(i,j,c.get_imag(i,j) * support_value);
-      }
+
+      c.set_real(i,j,c.get_real(i,j) * support_value);
+      c.set_imag(i,j,c.get_imag(i,j) * support_value);
     }
   }
-
 }
+
+void BaseCDI::support_constraint(Double_2D & c){
+  double support_value;
+  double max=support.get_max();
+
+  for(int i=0; i< nx; i++){
+    for(int j=0; j< ny; j++){
+
+      support_value = support.get(i,j);
+
+      c.set(i,j,c.get(i,j) * support_value);
+    }
+  }
+}
+
+
 
 void BaseCDI::project_intensity(Complex_2D & c){
   propagate_to_detector(c);
@@ -431,6 +447,8 @@ void BaseCDI::apply_shrinkwrap(double gauss_width, double threshold){
 
   //threshold
   apply_threshold(recon,threshold);
+
+  apply_support(recon);
 
   set_support(recon);
 
