@@ -90,7 +90,7 @@ int write_ppm(string file_name, const Double_2D & data, bool log_scale,
 //if empty then ignore the line
 //if it starts with a comment then ignore
 //otherwise fill the data array with doubles.
-void line_tokeniser(string line, vector<string> * data){
+/*void line_tokeniser(string line, vector<string> * data){
   
   string temp;
   std::istringstream iss(line);
@@ -101,7 +101,7 @@ void line_tokeniser(string line, vector<string> * data){
   return;
   
 }
-
+*/
 /***************************************************************/
 
 /***************************************************************/

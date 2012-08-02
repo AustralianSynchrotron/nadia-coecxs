@@ -6,9 +6,9 @@
 // use of it for any part of the data analysis.
 
 /**
- * @file PlanarCDI_example.c
+ * @file PolyCDI_example.c
  *
- * \a PlanarCDI_example.c This example reconstructs some planar
+ * \a PolyCDI_example.c This example reconstructs some poly
  * diffraction data (Lachie's data). The shrinkwrap algorithm is used
  * to improve the reconstruction. A combination of HIO and the
  * error-reduction algorithm are used.
@@ -25,7 +25,7 @@
 #include <cstdlib> 
 #include "io.h"
 #include "Complex_2D.h"
-#include "PartialCDI.h"
+#include "PolyCDI.h"
 #include "Double_2D.h"
 
 //#include "google/profiler.h"
@@ -37,46 +37,46 @@ int main(void){
   //Define some constants which will be used in the code.
 
   //the data file name
-  string data_file_name = "image_files/part_data.dbin";
+  string data_file_name = 
+    "poly_sim_intensity.tiff";
+    //"lowcoherence.dbin";
+  //"/home/tdjempire/Desktop/polychromatic_03667.ppm";//"real_sim_intensity.tiff";//"image_files/planar_data.tif";
+  //"part_sim_intensity.tiff";
+//  "image_files/planar_data.tif";
 
+  //the file which provides the support (pixels with the value 0
+  //are considered as outside the object)
+  string support_file_name = //"image_files/planar_support2.tiff";
+  //"/home/tdjempire/Desktop/support.tiff";
+  "image_files/planar_support.tiff";
 
-  string support_file_name = "image_files/part_support.tiff";
+  string data_spectrum_name = "tdj.txt";
 
-  //the file with the initial guess
-  //string initial_guess_name = "08280_800.tiff";
-  const int cycles = 5;
-
+  const int cycles=5;
+  //number of error reduction iterations to perform before the HIO.
   const int er_iterations1 = 50;
+
   //number of hybrid input-out iterations to perform.
   const int hio_iterations = 100;
+
   //number of error reduction iterations to perform after the HIO.
   const int er_iterations2 = 50;
 
-  //output the current image ever "output_iterations"
+  //output the current image every "output_iterations"
   int output_iterations = 10;
 
   //apply the shrinkwrap algorithm every "shrinkwrap iterations"
   int shrinkwrap_iterations = 200;
 
   //the number of pixels in x and y
-  int nx = 2048;
-  int ny = 2048;
+  int nx = 1024;
 
-  //The number of legendre polynomials and the square root of the modes
-  //The number of legendre polynomials must be greater than or equal to the 
-  //number of modes
-  int nleg = 32;
-  int nmodes = 7;
+  int ny = 1024;
 
   /**** get the diffraction data from file and read into an array *****/
 
   Double_2D data;
   read_image(data_file_name, data, nx, ny);  
-
-  /*  ostringstream atemp_str ( ostringstream::out ) ;
-      atemp_str << "08280_log.ppm";
-      write_image(atemp_str.str(), data, true);
-   */
 
   /****** get the support from a file and read it into an array *****/
 
@@ -84,7 +84,7 @@ int main(void){
   //the support
 
   Double_2D support;
-  read_image(support_file_name, support, nx, ny);
+  read_image(support_file_name, support, 50, 2);
 
   //check that the support image has the same dimensions
   //as the data.
@@ -97,118 +97,113 @@ int main(void){
 
   //Create a complex 2D field which will hold the result of
   //the reconstruction.
-
   Complex_2D object_estimate(nx,ny);
-  //read_image(initial_guess_name, object_estimate, nx, ny);
 
-  //create the planar CDI object which will be used to
-  //perform the reconstuction.
-  double beta = 0.9;
+  Double_2D spectrum;
+  read_txt(data_spectrum_name, spectrum);
 
-  //Coherence lengths x and y in m
-  double lcx = 13.3e-6;
-  double lcy = 40.0e-3;
 
-  //Pixel size detector in m
-  double psize_x=13.5e-6;
-  double psize_y=13.5e-6;
+  /*double n=4000.0;
 
-  //Energy of the beam in eV
-  double e_beam=1400.0;
+    Double_2D spectrum(n, 2);
 
-  //Distance between detector and sampl in metres
-  double z_sd=1.4;
+    double sigma, mean, scale, del;
 
-  PartialCDI partial(object_estimate, beta, lcx, lcy, psize_x, psize_y, e_beam, z_sd, 4, 0);
+    sigma=0.035;
+    mean=1.4;
+    scale=1.0/(sqrt(2.0*3.14159));
+    del=(1.6-1.2)/n;
 
-  // 10000.0, 10000.0, 1, 4, 0);
+  /*  for(double i=0; i<n; i++){
 
-  //set the support and intensity
-  partial.set_support(support,false);
 
-  partial.set_intensity(data);
+  spectrum.set(int(i), 0, 1.0/(mean-del*(n/2.0+i)));
+  spectrum.set(int(i), 1, scale*exp(-del*((-n/2.0)+i)*del*(-n/2.0+i)/2.0/sigma/sigma));
 
-  partial.set_threshold(+0.4e-5);
+  std::cout<<spectrum.get(i, 0)<<" "<<spectrum.get(i, 1)<<"\n";
 
-  //set the algorithm to hybrid input-output
-  partial.set_algorithm(ER);
-
-  //Initialise the wave function
-  partial.initialise_matrices(nleg, nmodes);
-
-  Double_2D result(nx, ny);
-
-  ostringstream temp_strsupp ( ostringstream::out ) ;
-  temp_strsupp << "support_tmp.ppm";
-  write_image(temp_strsupp.str(), support);
-/*
-  for(int i=0; i< nmodes*nmodes; i++){
-    ostringstream temp_str0 ( ostringstream::out ) ;
-    partial.get_mode(i).get_2d(MAG,result);
-    temp_str0 << "mode"<<i<<".ppm";
-    write_image(temp_str0.str(), result);
   }
 
-  ostringstream temp_str0 ( ostringstream::out ) ;
-  object_estimate.get_2d(MAG,result);
-  temp_str0 << "modes.ppm";
-  write_image(temp_str0.str(), result);
-*/
+  //Create the spectrum
+
+  /*Double_2D spectrum(1, 1);
+
+  spectrum.set(0, 0, 1.0/1.4);
+  spectrum.set(0, 1, 1.0);
+   */
+  /*  Double_2D spectrum(7, 7);
+
+      spectrum.set(0, 0, 1.0/1.3);
+      spectrum.set(0, 1, 0.3);
+      spectrum.set(1, 0, 1.0/1.35);
+      spectrum.set(1, 1, 0.0);
+      spectrum.set(2, 0, 1.0/1.40);
+      spectrum.set(2, 1, 0.4);
+      spectrum.set(3, 0, 1.0/1.45);
+      spectrum.set(3, 1, 0.0);
+      spectrum.set(4, 0, 1.0/1.5);
+      spectrum.set(4, 1, 0.3);
+   */
+  //create the poly CDI object which will be used to
+  //perform the reconstuction.
+  PolyCDI poly(object_estimate, spectrum, 0.9, 4, 0);
+
+  //set the support and intensity
+  poly.set_support(support,false);
+  poly.set_intensity(data);
+
+  //set the algorithm to hybrid input-output
+  poly.set_algorithm(ER);
 
   //Initialise the current object ESW with a random numbers
-  //"0" is the se:ed to the random number generator
-  partial.initialise_estimate(7);
+  //"0" is the seed to the random number generator
+  poly.initialise_estimate(7);
 
-  //  partial.set_fftw_type(FFTW_ESTIMATE);
+  //  poly.set_fftw_type(FFTW_ESTIMATE);
 
   //make a 2D object. This will be used to output the 
   //image of the current estimate.
-
-  //  Double_2D result(nx,ny);
+  Double_2D result(nx,ny);
   object_estimate.get_2d(MAG,result);
 
   /******* for fun, let's get the autocorrelation *****/
 
-  //  Double_2D autoc(nx,ny);
-  //  partial.get_intensity_autocorrelation(autoc);
-  //  write_image("test_autocorrelation.ppm", autoc, true); //"true" means log scale
+  Double_2D autoc(nx,ny);
+  //poly.get_intensity_autocorrelation(autoc);
+  //write_image("test_autocorrelation.ppm", autoc, true); //"true" means log scale
 
 
   //  ProfilerStart("profile");
 
-  //partial.set_algorithm(HIO);
 
   /*** run the reconstruction ************/
   for(int a=0; a<cycles; a++){
-
 
     for(int i=0; i<er_iterations1; i++){
 
       cout << "iteration " << i << endl;
 
-      //apply the set of partial CDI projections 
-      partial.iterate(); 
-      cout << "Current error is "<<partial.get_error()<<endl;
-
+      //apply the set of poly CDI projections 
+      poly.iterate(); 
+      cout << "Current error is "<<poly.get_error()<<endl;
 
       //every "output_iterations" 
       //output the current estimate of the object
       if(i%output_iterations==0){
 
-
 	ostringstream temp_str ( ostringstream::out ) ;
 	object_estimate.get_2d(MAG,result);
-	temp_str << "part_example_iteration_" << i+a*(hio_iterations+er_iterations1+er_iterations2) << ".ppm";
+	temp_str << "poly_example_iteration_" << i +a*(hio_iterations+er_iterations1+er_iterations2+1)<< ".ppm";
 	write_image(temp_str.str(), result);
 
 	temp_str.clear();
 
 	//uncomment to output the estimated diffraction pattern
-	//partial.propagate_to_detector(object_estimate);
+	//poly.propagate_to_detector(object_estimate);
 	//object_estimate.get_2d(MAG_SQ,result);
 	//temp_str << "diffraction.ppm";
 	//write_ppm(temp_str.str(), result, true);
-	//partial.propagate_from_detector(object_estimate);
+	//poly.propagate_from_detector(object_estimate);
 	//object_estimate.get_2d(MAG,result);
 
 	//apply the shrinkwrap algorithm
@@ -217,62 +212,64 @@ int main(void){
 
       }
       if(i%shrinkwrap_iterations==(shrinkwrap_iterations-1))
-	partial.apply_shrinkwrap(1.5,0.1);
+	poly.apply_shrinkwrap(1.5,0.1);
 
     }
 
     //now change to the error reduction algorithm 
-    partial.set_algorithm(HIO);
+    poly.set_algorithm(HIO);
 
     for(int i=er_iterations1; i<(hio_iterations+er_iterations1+1); i++){
 
       cout << "iteration " << i << endl;
 
-      partial.iterate(); 
+      poly.iterate(); 
 
-      cout << "Current error is "<<partial.get_error()<<endl;
+      cout << "Current error is "<<poly.get_error()<<endl;
 
       if(i%output_iterations==0){
 	//output the current estimate of the object
 	ostringstream temp_str ( ostringstream::out ) ;
 	object_estimate.get_2d(MAG,result);
-	temp_str << "part_example_iteration_" << i+a*(hio_iterations+er_iterations1+er_iterations2) << ".ppm";
+	temp_str << "poly_example_iteration_" << i+a*(hio_iterations+er_iterations1+er_iterations2+1) << ".ppm";
 	write_image(temp_str.str(), result);
 	temp_str.clear();
 
 	//apply the shrinkwrap algorithm
-	//partial.apply_shrinkwrap(1.5,0.1);
+	//poly.apply_shrinkwrap(1.5,0.1);
       }
       if(i%shrinkwrap_iterations==(shrinkwrap_iterations-1))
-	partial.apply_shrinkwrap(1.5,0.1);
+	poly.apply_shrinkwrap(1.5,0.1);
 
     }
 
-    partial.set_algorithm(ER);
+    poly.set_algorithm(ER);
+
     for(int i=er_iterations1+hio_iterations; i<(hio_iterations+er_iterations1+er_iterations2+1); i++){
 
       cout << "iteration " << i << endl;
 
-      partial.iterate();
+      poly.iterate();
 
-      cout << "Current error is "<<partial.get_error()<<endl;
+      cout << "Current error is "<<poly.get_error()<<endl;
 
       if(i%output_iterations==0){
 	//output the current estimate of the object
 	ostringstream temp_str ( ostringstream::out ) ;
 	object_estimate.get_2d(MAG,result);
-	temp_str << "part_example_iteration_" << i+a*(hio_iterations+er_iterations1+er_iterations2+1) << ".ppm";
+	temp_str << "poly_example_iteration_" << i+a*(hio_iterations+er_iterations1+er_iterations2+1) << ".ppm";
 	write_image(temp_str.str(), result);
 	temp_str.clear();
 
 	//apply the shrinkwrap algorithm
-	//partial.apply_shrinkwrap(1.5,0.1);
+	//poly.apply_shrinkwrap(1.5,0.1);
       }
       if(i%shrinkwrap_iterations==(shrinkwrap_iterations-1))
-	partial.apply_shrinkwrap(1.5,0.1);
+	poly.apply_shrinkwrap(1.5,0.1);
 
     }
   }
+
 
   //And we are done. "object_estimate" contained the final estimate of
   //the ESW.
@@ -281,24 +278,23 @@ int main(void){
     Double_2D result2(nx,ny);
 
     double error=0;
-    partial.get_best_result(0,error)->get_2d(MAG,result2);
+    poly.get_best_result(0,error)->get_2d(MAG,result2);
     write_ppm("best_error.ppm", result2);
     cout << "Best error 0 is "<< error <<endl;
 
-    partial.get_best_result(1,error)->get_2d(MAG,result2);
+    poly.get_best_result(1,error)->get_2d(MAG,result2);
     write_ppm("best_error_1.ppm", result2);
     cout << "Best error 1 is "<< error <<endl;
 
-    partial.get_best_result(2,error)->get_2d(MAG,result2);
+    poly.get_best_result(2,error)->get_2d(MAG,result2);
     write_ppm("best_error_2.ppm", result2);
     cout << "Best error 2 is "<< error <<endl;
 
-    partial.get_best_result(3,error)->get_2d(MAG,result2);
+    poly.get_best_result(3,error)->get_2d(MAG,result2);
     write_ppm("best_error_3.ppm", result2);
     cout << "Best error 3 is "<< error <<endl; **/
 
   //  ProfilerStop();
-  write_cplx("PCDI_trans.cplx", object_estimate);
 
   return 0;
 }

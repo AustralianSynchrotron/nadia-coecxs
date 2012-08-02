@@ -10,6 +10,9 @@
 #include <cstring>
 #include <cmath>
 #include "Double_2D.h"
+#include <sstream>
+#include <vector>
+
 
 class Complex_2D;
 //class Double_2D;
@@ -25,6 +28,14 @@ using namespace std;
  * @param data The array to be filled with data
  */
 int read_ppm(string file_name, Double_2D & data);
+
+/**
+ * Read a SPECTRA output file. Returns a 2D of the data. 
+ *
+ * @param file_name The name of the file to read from
+ * @param data The array to be filled with data
+ */
+int read_spec(string file_name, Double_2D & data);
 
 /**
  * Read a tiff file. Returns a 2D of the data.
@@ -43,7 +54,7 @@ int read_tiff(string file_name, Double_2D & data);
  * By default it looks for the "data" block.
  */
 int read_hdf4(string file_name, Double_2D & data, 
-	      char * data_name="data");
+    char * data_name="data");
 
 
 
@@ -66,8 +77,27 @@ int read_cplx(string file_name, Complex_2D & complex);
  * @param log_scale Output on log scale? true/false. Default is false.
  */ 
 int write_ppm(string file_name, const Double_2D & data, 
-	      bool log_scale=false,
-	      double min=0, double max=0);
+    bool log_scale=false,
+    double min=0, double max=0);
+
+/** 
+ * Write a 2D array to a SPECTRA output file. 
+ * The data will be saved as a text file.
+ *
+ * @param file_name The name of the file to write to
+ * @param data The array to be written to file
+ */
+int write_spec(string file_name, const Double_2D & data);
+
+
+/**
+ *Write a 2D array to a spec file. The data will be saved as a text
+ * file. This is intended for SPECTRA output for polychromatic CDI
+ *
+ * @param file_name The name of the file to write to
+ * @param data The array to be written to file
+ */
+int write_ppm(string file_name, const Double_2D & data, int nx, int ny);
 
 /** 
  * Write a 2D array into a binary file. The data will be saved in 64
@@ -108,15 +138,22 @@ int write_cplx(string file_name, const Complex_2D & complex);
  * @param log_scale Output on log scale? true/false. Default is false.
  */ 
 int write_tiff(string file_name, const Double_2D & data, 
-	       bool log_scale=false,
-	       double min=0, double max=0);
+    bool log_scale=false,
+    double min=0, double max=0);
 
+/**
+  * if a line is empty then ignore the line
+  * if it starts with a comment then ignore
+  * otherwise fill the data array with each
+  * element seperated by spaces
+  */
+void line_tokeniser(string line, vector<string> * data);
 
 //used to transform an array of doubles in the range -x_min .... x_max
 //to fall between 0... pixel_max (which is usually 2^16).
 inline unsigned int io_scale_value(double min, double max, 
-			  int pixel_max, 
-			  double value, bool log_scale){
+    int pixel_max, 
+    double value, bool log_scale){
 
   if(min==max)
     return max;
@@ -128,13 +165,13 @@ inline unsigned int io_scale_value(double min, double max,
     //first scale to be between 1 and some large number (no. of pixels?):
     grad = (double)(pixel_max-1)/(double)(max-min);
     value = grad*(value-min)+1;
-    
+
     //adjust to log scale
     min = 0;
     max = log10(pixel_max);
     value = log10(value);
   }
-  
+
   grad = (double)pixel_max/(double)(max-min);
 
   value = grad*(value-min);
@@ -145,7 +182,7 @@ inline unsigned int io_scale_value(double min, double max,
     value = pixel_max;
 
   return value;
-  
+
 }
 
 //generic read and write methods
@@ -163,33 +200,36 @@ inline unsigned int io_scale_value(double min, double max,
  * file is to be read.
  */
 inline void read_image(string file_name, Double_2D & data,
-		int nx=0, int ny=0, char * data_name="data"){
+    int nx=0, int ny=0, char * data_name="data"){
 
   int status = FAILURE;
 
   const char * file = file_name.c_str();
-  
+
   if(strstr(file,".tiff\0")!=0 || strstr(file,".tif\0")!=0)
     status = read_tiff(file_name,data);
   
+
   if(strstr(file,".ppm\0")!=0)
     status = read_ppm(file_name,data);    
-  
+
+  if(strstr(file,".txt\0")!=0)
+    status = read_spec(file_name,data);
+
   if(strstr(file,".dbin\0")!=0){
     if(nx==0 || ny==0)
       cout << "Please pass the dimensions of the dbin file you"
-	   << " wish to read to the read_image method." << endl; 
+	<< " wish to read to the read_image method." << endl; 
     else
       status = read_dbin(file_name,nx,ny,data);
   } 
-  
+
   if(strstr(file,".hdf\0")!=0)
     status = read_hdf4(file_name,data,data_name); 
-  
 
   if(status==FAILURE){
     cout << "Failed to read the file: " << file_name
-	 << ". Exiting now.."<<endl;
+      << ". Exiting now.."<<endl;
     exit(0);
   }
 
@@ -207,27 +247,46 @@ inline void read_image(string file_name, Double_2D & data,
  *        images are not written out on a log scale.
  */
 inline void write_image(string file_name, Double_2D & data, bool log_scale=false, double min=0, double max=0){
-  
+
   int status = FAILURE;
 
   const char * file = file_name.c_str();
-  
+
   if(strstr(file,".tiff\0")!=0 || strstr(file,".tif\0")!=0)
     status = write_tiff(file_name,data, log_scale, min, max);
 
   if(strstr(file,".ppm\0")!=0)
     status = write_ppm(file_name,data, log_scale, min, max);    
 
+  if(strstr(file,".txt\0")!=0)
+    status = write_spec(file_name,data);
+
   if(strstr(file,".dbin\0")!=0)
     status = write_dbin(file_name,data);   
 
   if(status==FAILURE){
     cout << "Failed to write to the file: " << file_name
-	 << ". Exiting now.."<<endl;
+      << ". Exiting now.."<<endl;
     exit(0);
   }
 
 };
+
+//if empty then ignore the line
+//if it starts with a comment then ignore
+//otherwise fill the data array with doubles.
+inline void line_tokeniser(string line, vector<string> * data){
+
+  string temp;
+  std::istringstream iss(line);
+  while ( getline(iss, temp,'\t') ){
+    data->push_back(temp);
+  }
+
+  return;
+
+};
+
 
 
 #endif

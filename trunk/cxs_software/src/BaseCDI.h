@@ -90,10 +90,10 @@ class TransmissionConstraint;
 
 class BaseCDI{
 
- protected:
+protected:
 
   /**a reference to the Complex_2D object which is altered during each
-     iteration */
+    iteration */
   Complex_2D & complex;
 
   /** The samplings in x */
@@ -103,11 +103,11 @@ class BaseCDI{
   int ny;
 
   /**a Fourier transform objected used to perform 
-     the forward and backward transformations */
+    the forward and backward transformations */
   //  FourierT fft; 
 
-   /** temporary Complex_2Ds which are used in the computation of the
-      PFS and PF terms for each iteration. */
+  /** temporary Complex_2Ds which are used in the computation of the
+    PFS and PF terms for each iteration. */
   Complex_2D * temp_complex_PFS;
   Complex_2D * temp_complex_PF;
   Complex_2D * temp_complex_PS;
@@ -119,6 +119,9 @@ class BaseCDI{
   /** a copy of the support */
   Double_2D support;
 
+  /** a copy of the original support. This one is not changed by shrinkwrapping **/
+  Double_2D support_init;
+
   /**a copy of the square root of the intensity at the detector plane. */
   Double_2D intensity_sqrt;
 
@@ -129,11 +132,11 @@ class BaseCDI{
   int algorithm;
 
   /**an array which holds the structure of the algorithm. i.e. the 
-     coefficients for each term in the iteration equation.*/
+    coefficients for each term in the iteration equation.*/
   double algorithm_structure[NTERMS];
 
   /** the difference between the intensity in the detector plane 
-      the current estimated intensity. */
+    the current estimated intensity. */
   double current_error;
 
   /** how many best estimates to store */
@@ -143,7 +146,7 @@ class BaseCDI{
   Complex_2D ** best_array;
 
   /** array of the error corresponding to each of the
-      best estimates */
+    best estimates */
   double * best_error_array;
 
   /** a function pointer to a cumstomized complex constraint */
@@ -151,11 +154,11 @@ class BaseCDI{
   TransmissionConstraint * transmission_constraint;
 
   /** a mapping between the algorithm name (string) and identification
-      number */
+    number */
   static std::map<std::string,int> * algNameMap;
 
- public:
-  
+public:
+
   /**
    * Constructor. The default algorithms is set to HIO with a relaxation
    * parameter of 0.9.
@@ -178,15 +181,15 @@ class BaseCDI{
    */
   virtual ~BaseCDI();
 
- /**
-  * The main method for running the reconstruction!  This method
-  * transforms the Complex_2D given to it according to:
-  * <br>\f$ x_{k+1} = g ( x_{k} ) \f$
-  * <br> Where \f$g()\f$ depends on the algorithm used.
-  * The current error is also updated when this method is called.
-  */
+  /**
+   * The main method for running the reconstruction!  This method
+   * transforms the Complex_2D given to it according to:
+   * <br>\f$ x_{k+1} = g ( x_{k} ) \f$
+   * <br> Where \f$g()\f$ depends on the algorithm used.
+   * The current error is also updated when this method is called.
+   */
   virtual int iterate();
-  
+
   /**
    * Set the values in the Complex_2D to an initial estimate.  For
    * BaseCDI, this is set to random numbers inside the support for
@@ -197,7 +200,7 @@ class BaseCDI{
    * this is 0.
    */
   virtual void initialise_estimate(int seed=0) = 0;
-  
+
 
   /**
    * While the reconstruction is running this object will store the
@@ -214,28 +217,30 @@ class BaseCDI{
    */
   Complex_2D * get_best_result(double & error, int index=0);
 
-   /**
-    * Set the sample support. A "0" value in the Double_2D is
-    * interpreted as being outside the support. Pixels with the
-    * maximum value of the Double_2D are considered inside the
-    * support. Values between 0 and the maximum indict the soft edge
-    * of the support. In this case, when the support is applied, the
-    * esw magnitude is scaled relative to the support edge value.  
-    * 
-    * By default, the edge of a given support will be softened by
-    * convolution with a 3 pixel wide gaussian. This feature can be
-    * turned off by setting the boolean flag to false.
-    *
-    * The support can be updated at anytime during reconstruction by
-    * calling this method.
-    *
-    * @param object_support The sample support 
-    * @param soften If true, the edges of the support will be
-    * softened by covolving it with a 3 pixel wide gaussian. By default
-    * this option is off.
-    */ 
+  /**
+   * Set the sample support. A "0" value in the Double_2D is
+   * interpreted as being outside the support. Pixels with the
+   * maximum value of the Double_2D are considered inside the
+   * support. Values between 0 and the maximum indict the soft edge
+   * of the support. In this case, when the support is applied, the
+   * esw magnitude is scaled relative to the support edge value.  
+   * 
+   * By default, the edge of a given support will be softened by
+   * convolution with a 3 pixel wide gaussian. This feature can be
+   * turned off by setting the boolean flag to false.
+   *
+   * The support can be updated at anytime during reconstruction by
+   * calling this method.
+   *
+   * @param object_support The sample support 
+   * @param soften If true, the edges of the support will be
+   * softened by covolving it with a 3 pixel wide gaussian. By default
+   * this option is off.
+   */ 
   void set_support(const Double_2D & object_support, bool soften=false);
-  
+
+  void set_support_new(const Double_2D & object_support, bool soften=false);
+
   /**
    * Set the detector diffraction image (i.e. the square of the
    * amplitude of the wavefield at the detector).
@@ -268,7 +273,7 @@ class BaseCDI{
     beta = relaxation_parameter;
     set_algorithm(algorithm); //force algorithm constants to update
   };
-  
+
 
   /**
    * @return the number of pixel along the x-axis.
@@ -424,7 +429,7 @@ class BaseCDI{
    * @param c The complex field to apply the support constraint on
    */ 
   virtual void apply_support(Complex_2D & c);
-  virtual void apply_support(Double_2D & c);
+  virtual void apply_support_init(Double_2D & c);
 
 
   /**
@@ -489,11 +494,11 @@ class BaseCDI{
 
   /**
    *Overwrite the current complex with a new complex
-  */
+   */
   void initialise_guess(Complex_2D &);
 
 
- protected:
+protected:
 
   /**
    * Sets up the mapping between algorithm name and number. This is
@@ -529,7 +534,7 @@ class BaseCDI{
   void convolve(Double_2D & array, double gauss_width, int pixel_cut_off=4);
 
   void support_constraint(Complex_2D & c);
-  void support_constraint(Double_2D & c);
+  void support_constraint_init(Double_2D & c);
 
 
   void reallocate_temp_complex_memory();

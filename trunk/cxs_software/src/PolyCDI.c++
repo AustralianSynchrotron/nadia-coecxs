@@ -39,6 +39,8 @@ PolyCDI::PolyCDI(Complex_2D & initial_guess,
     double maxweight=0;
     double totweight=0;
 
+    std::cout<< nlambda<<"\n";
+
     for(int i=0; i<nlambda; i++){
       if(spectrum.get(i, WEIGHT) > maxweight){
 	lambdac = spectrum.get(i, WL);
@@ -46,7 +48,7 @@ PolyCDI::PolyCDI(Complex_2D & initial_guess,
       }
       totweight+=spectrum.get(i, WEIGHT);
 
-      std::cout<<"tot weight is "<<spectrum.get(i, WEIGHT)<<"\n";
+      std::cout<<"lambda is "<<spectrum.get(i, WL)<<"weight is "<<spectrum.get(i, WEIGHT)<<"\n";
     }
 
     std::cout<<"lambdac is "<<lambdac<<"\n";
