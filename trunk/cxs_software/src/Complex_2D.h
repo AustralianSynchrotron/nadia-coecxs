@@ -117,9 +117,6 @@ class Complex_2D{
     nx = rhs.get_size_x();
     ny = rhs.get_size_y();
 
-    //std::cout<<"Being called!!!\n\n\n";
-
-
 #ifndef DOUBLE_PRECISION
     //free the memory of the array.
     fftwf_free(array);

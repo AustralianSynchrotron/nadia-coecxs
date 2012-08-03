@@ -3,13 +3,10 @@ SOURCE_FILES_CXX=Complex_2D.c++ BaseCDI.c++ PlanarCDI.c++ \
 		 Config.c++ FresnelCDI_WF.c++ FresnelCDI.c++ \
 		 TransmissionConstraint.c++ PhaseDiverseCDI.c++ \
 		 PartialCDI.c++ PolyCDI.c++
-#Complex_2D.c++ BaseCDI.c++ PlanarCDI.c++ \
-  Config.c++ FresnelCDI_WF.c++ FresnelCDI.c++ \
-  TransmissionConstraint.c++ PhaseDiverseCDI.c++ \
-  PartialCDI.c++ PartialFresnel.c++ PolyCDI.c++
 
 SOURCE_FILES_C=io_hdf.c io_ppm.c io_tiff.c io_dbin.c \
-	       io_cplx.c utils.c io_txt.c
+	       io_cplx.c utils.c io_spec.c
+
 OBJECT_FILES=$(SOURCE_FILES_CXX:.c++=.o) $(SOURCE_FILES_C:.c=.o)
 HEADER_FILES=$(SOURCE_FILES_CXX:.c++=.h) io.h utils.h Double_2D.h
 

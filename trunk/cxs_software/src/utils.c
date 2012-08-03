@@ -346,7 +346,6 @@ double calculate_image_entropy(Double_2D & image){
   int ny = image.get_size_y();
 
   double total = nx*ny;
-  //cout << "here" <<endl;
 
   //loop over the array once to sort into bins
   for(int i=0; i<nx; i++){
@@ -1737,13 +1736,6 @@ Double_2D  legroots(double n){
 
   }
 
-/*  std::cout<<"Output begins\n";
-  for(int i=0; i<n; i++){
-    std::cout<<"n, z, w "<<n<<", "<<roots.get(i,0)<<", "<<roots.get(i,1)<<"\n";
-  }
-  std::cout<<"Output ends\n";
-*/
-
   return(roots);
 
 }
@@ -1780,20 +1772,6 @@ Double_2D fill_legmatrix(std::vector<double> x, int norder){
     }
   }
 
-/*  std::cout<<"x_matrix:\n";
-  for(int i=0; i<x.size(); i++){
-    std::cout<<x.at(i)<<" ";
-  }
-  std::cout<<"\n";
-
-  std::cout<<"legmatrix\n\n";
-   for(int i=0; i<x.size(); i++){
-     for(int j=0; j<norder; j++){
-     std::cout<<legmatrix.get(i, j)<<" ";
-     }
-     std::cout<<"\n";
-     }
-*/
   return(legmatrix);
 }
 
@@ -1821,29 +1799,6 @@ void solve_gep(Complex_2D & A, Complex_2D & B, vector<double> & eigen){
     }
   }
 
-/*  for(int i = 0; i<A.get_size_x(); i++){
-    for(int j=0; j<A.get_size_y(); j++){
-      if((fabs(A.get_real(i, j)))<0.00000001){
-	A.set_real(i,j,0);
-      }
-      std::cout<<setprecision(3)<<A.get_real(i, j)<<" ";//<<A.get_imag(i, j)<<"   ";
-    }
-    std::cout<<"\n";
-  }
-
-*/
-/*    for(int i = 0; i<A.get_size_x(); i++){
-      for(int j=0; j<A.get_size_y(); j++){
-//      std::cout<<A.get_real(i, j)<<" ";
-	std::cout<<setw(15)<<setprecision(4)<<A.get_real(i, j);
-      }
-      std::cout<<"\n";
-      }
-
-  //for(int i=0; i<2*A.get_size_x()*A.get_size_x(); i=i+2){
-  //std::cout<<Afort[i]<<"\n";
-  //}
-*/
   int ITYPE=1;
   char UPLO='L';
   int N=A.get_size_x();
@@ -1858,36 +1813,24 @@ void solve_gep(Complex_2D & A, Complex_2D & B, vector<double> & eigen){
 
   zhegv_(&ITYPE, &JOB, &UPLO, &N, Afort, &LDA, Bfort,&LDB, eigenfort, WORK, &LWORK, RWORK, &INFO);
 
-  //std::cout<<"Info is "<<INFO<<"!\n\n";
-
   eigen.clear();
 
   for(int i=0; i<A.get_size_x(); i++){
+
     eigen.push_back(eigenfort[i]);
-    std::cout<< eigenfort[i]/4<<" "<<eigen.at(i)<<" is eigen \n";
+    //std::cout<< eigenfort[i]/4<<" "<<eigen.at(i)<<" is eigen"<<endl;
+
     for(int j=0; j<A.get_size_y(); j++){
-      //if(fabs(Afort[2*(j+A.get_size_x()*i)])>0.00000001){
-	A.set_real(j,i, Afort[2*(j+A.get_size_x()*i)]);
-     // }else{
-//	A.set_real(j,i,0);
-  //    }
+
+      A.set_real(j,i, Afort[2*(j+A.get_size_x()*i)]);
       A.set_imag(j,i, Afort[2*(j+A.get_size_x()*i)+1]);
       B.set_real(j,i, Bfort[2*(j+B.get_size_x()*i)]);
       B.set_imag(j,i, Bfort[2*(j+B.get_size_x()*i)+1]);
+
     }
   }
 
-/*  std::cout<<"Jmatrix is:\n";
-  for(int i = 0; i<A.get_size_x(); i++){
-    for(int j=0; j<A.get_size_y(); j++){
-      //if((fabs(A.get_real(i, j)))<1e-20){
-	//A.set_real(i,j,0);
-      //}
-      std::cout<<setw(7)<<setprecision(3)<<A.get_real(i, j)<<" ";//<<A.get_imag(i, j)<<"   ";
-    }
-    std::cout<<"\n";
-  }*/
-  return;
+return;
 }
 
 ////////////////////////////////

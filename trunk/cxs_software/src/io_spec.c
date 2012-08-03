@@ -35,24 +35,24 @@ int write_spec(string file_name, const Double_2D & data){
    //error check.
    if(!new_file.is_open()){
      cout << "Could not open the file " 
-	  << file_name << "for writing" << endl;
+       << file_name << "for writing" << endl;
      return FAILURE;
    }
-   
+
    new_file << "Energy"<<'\t'<<"F.Density"<<endl; 
 
    for(int j=0; j < ny; ++j){
      for(int i=0; i < nx; ++i){
-       
+
        new_file << data.get(i,j) <<'\t'; 
-       
+
      }
      new_file << endl;
    }
    new_file.close();
-   
+
    return SUCCESS; //success
-   
+
 }
 
 /***************************************************************/
@@ -105,6 +105,7 @@ int read_spec(string file_name, Double_2D & data){
     cout << "You are using " << nx << " number of points"
       <<"which is quite a lot. I usually find ~50 to be a "
       <<"good number."<< endl;
+  }
 
   //do a sanity check
 
@@ -117,11 +118,11 @@ int read_spec(string file_name, Double_2D & data){
   for(int i=0,k=0; i< nx; ++i){
     for(int j=0; j < ny; ++j, ++k){
       std::istringstream(string_data.at(k)) >> value;
-      if(energy){
-	if(j==0){
-	  value = 1.0/value;
-	}
+      //if(energy){
+      if(j==0){
+	value = 1.0/value;
       }
+      // }
       data.set(i,j,value);
     }
   }

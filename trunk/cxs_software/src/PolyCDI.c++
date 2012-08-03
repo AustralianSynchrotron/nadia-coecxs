@@ -39,19 +39,15 @@ PolyCDI::PolyCDI(Complex_2D & initial_guess,
     double maxweight=0;
     double totweight=0;
 
-    std::cout<< nlambda<<"\n";
-
     for(int i=0; i<nlambda; i++){
       if(spectrum.get(i, WEIGHT) > maxweight){
 	lambdac = spectrum.get(i, WL);
 	maxweight=spectrum.get(i, WEIGHT);
       }
       totweight+=spectrum.get(i, WEIGHT);
-
-      std::cout<<"lambda is "<<spectrum.get(i, WL)<<"weight is "<<spectrum.get(i, WEIGHT)<<"\n";
     }
 
-    std::cout<<"lambdac is "<<lambdac<<"\n";
+    //std::cout<<"lambdac is "<<lambdac<<endl;
 
     for(int i=0; i<nlambda; i++){
       spectrum.set(i, WEIGHT, spectrum.get(i, WEIGHT)/totweight);
@@ -234,7 +230,6 @@ void PolyCDI::scale_intensity(Complex_2D & c){
 	calc_int=intensity_sqrt_calc.get(i,j);
 	measured_int=intensity_sqrt.get(i,j); 
 
-	//	std::cout<<"scale is "<<calc_int<<"\n";
 	if(calc_int==0.0){
 	  scaled_mag=0.0;
 	}else{
@@ -242,11 +237,6 @@ void PolyCDI::scale_intensity(Complex_2D & c){
 	}
 	c.set_mag(i,j,scaled_mag);
 
-	/*if(intensity_sqrt.get(i, j) !=0){
-	  std::cout<<"intensity is "<<intensity.get(i,j)<<"\n\n";
-	  std::cout<<"int_sqrt is "<<intensity_sqrt.get(i,j)<<"\n\n";
-	  }
-	 */
 	//calculate the error
 	norm2_mag += measured_int*measured_int;
 
@@ -285,10 +275,9 @@ void PolyCDI::expand_wl(Complex_2D & c){
 	double yval = lf*(j-ny/2.0)+ny/2.0;
 
 	if(((xval>=0) && (xval<(nx)))&&((yval>=0)&&(yval<(ny)))){
-	  //      std::cout<< i<<" "<<j<<"\n";
-	  //      std::cout<<flush;
 
 	  intensity.set(i, j, intensity.get(i, j) + weightl*pow(c.get_mag(xval, yval), 2));
+
 	}
       }
     }
@@ -350,42 +339,3 @@ void PolyCDI::propagate_from_detector(Complex_2D & c){
   c.perform_backward_fft();
 
 }
-
-//propagate each mode to the detector. This is specifically
-//for use in simulations.
-Double_2D PolyCDI::propagate_modes_to_detector(){
-
-  singleCDI.clear();
-  for(unsigned int i=0; i<singlemode.size(); i++){
-    singleCDI.push_back(singlemode.at(i));
-  }
-
-  for(int mode=0; mode<singleCDI.size(); mode++){
-    propagate_to_detector(singleCDI.at(mode));
-  }
-
-  Double_2D magnitude(nx, ny);
-  for(unsigned int mode=0; mode<singleCDI.size(); mode++){
-
-    for(int i=0; i< nx; i++){
-      for(int j=0; j< ny; j++){
-
-	double mag_total = magnitude.get(i,j)+eigen.at(mode)*singleCDI.at(mode).get_mag(i,j)*singleCDI.at(mode).get_mag(i,j);
-	magnitude.set(i,j,mag_total);
-      }
-    }
-  }
-  return(magnitude);
-}
-
-//a function that returns a single mode.
-Complex_2D PolyCDI::get_mode(int mode){
-  if(mode>=singlemode.size()){
-    std::cout<<"Maximum mode is "<<singlemode.size()<<". Returning this mode instead\n";
-    return(singlemode.back());
-  }
-  return(singlemode.at(mode));
-}
-
-
-

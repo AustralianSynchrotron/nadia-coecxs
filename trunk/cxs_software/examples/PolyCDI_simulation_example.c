@@ -28,8 +28,6 @@
 #include "PolyCDI.h"
 #include <sstream>
 
-//#define M_PI 3.14159
-
 using namespace std;
 
 
@@ -48,7 +46,7 @@ int main(void){
   //are considered as outside the object)
   const static char * support_file_name = "image_files/planar_support.tiff";
 
-  const static char * data_spectrum_name = "../../../Desktop/tdj.txt";
+  const static char * data_spectrum_name = "image_files/spectrum.txt";
   //image_files/planar_support.tiff";
 
   //number of hybrid input-out iterations to perform.
@@ -89,43 +87,7 @@ int main(void){
   /**** create the projection/reconstruction object *****/
 
   Double_2D spectrum;
-  std::cout<<"Hello!!!\n";
-  read_txt(data_spectrum_name, spectrum);
-  std::cout<<"Hello!!!\n";
-
-
-/*
-  double n=4000.0;
-
-  Double_2D spectrum(n, 2);
-
-  double sigma, mean, scale, del;
-
-  sigma=0.035;
-  mean=1.4;
-  scale=1.0/(sqrt(2.0*3.14159));
-  del=(1.6-1.2)/n;
-
-  for(double i=0; i<n; i++){
-
-
-    spectrum.set(int(i), 0, 1/(mean-del*(n/2.0+i)));
-    spectrum.set(int(i), 1, scale*exp(-del*((-n/2.0)+i)*del*(-n/2.0+i)/2.0/sigma/sigma));
-
-    std::cout<<spectrum.get(i, 0)<<" "<<spectrum.get(i, 1)<<"\n";
-
-  }
-
-  /*spectrum.set(1, 0, 1.0/1.35);
-    spectrum.set(1, 1, 0.0);
-    spectrum.set(2, 0, 1.0/1.40);
-    spectrum.set(2, 1, 0.4);
-    spectrum.set(3, 0, 1.0/1.45);
-    spectrum.set(3, 1, 0.0);
-    spectrum.set(4, 0, 1.0/1.5);
-    spectrum.set(4, 1, 0.3);
-   */
-
+  read_spec(data_spectrum_name, spectrum);
 
   Complex_2D first_guess(n_x,n_y);
   PolyCDI my_poly(first_guess, spectrum, 0.9, 4, 0);

@@ -360,17 +360,10 @@ void FresnelCDI::get_transmission_function(Complex_2D & result,
 	result.set_real(i,j,real_numerator/denom);
 	result.set_imag(i,j,imag_numerator/denom);
 
-	//std::cout<<"The numbers are real: "<<real_numerator/denom<<" and imag: "<<imag_numerator/denom<<"\n";
-	
-	
-	//	if(inforce_unity_mag && result.get_mag(i,j) > 1)
-	//	  result.set_mag(i,j,1);      
       }
       else{
 	result.set_real(i,j,1.0);
 	result.set_imag(i,j,0.0);
-	std::cout<<"Bad\n";
-
       }
     }
   }

@@ -39,16 +39,15 @@ int main(void){
   //the data file name
   string data_file_name = //"lowcoherence.dbin";
   //"/home/tdjempire/Desktop/polychromatic_03667.ppm";//"real_sim_intensity.tiff";
-  "poly_sim_intensity.tiff";
+//  "poly_sim_intensity.tiff";
+  "image_files/1_percent.tif";
   //"image_files/planar_data.tif";
   //"part_sim_intensity.tiff";
   //"image_files/planar_data.tif";
 
   //the file which provides the support (pixels with the value 0
   //are considered as outside the object)
-  string support_file_name = "image_files/planar_support.tiff";
-  //"/home/tdjempire/Desktop/support.tiff";
-  //"image_files/planar_support.tiff";
+  string support_file_name = "image_files/poly_support.tiff";
 
   const int cycles=5;
   //number of error reduction iterations to perform before the HIO.
@@ -146,7 +145,7 @@ int main(void){
 
 	ostringstream temp_str ( ostringstream::out ) ;
 	object_estimate.get_2d(MAG,result);
-	temp_str << "real_poly_example_iteration_" << i +a*(hio_iterations+er_iterations1+er_iterations2+1)<< ".ppm";
+	temp_str << "real_poly_example_iteration_" << i +a*(hio_iterations+er_iterations1+er_iterations2)<< ".ppm";
 	write_image(temp_str.str(), result);
 
 	temp_str.clear();
@@ -172,7 +171,7 @@ int main(void){
     //now change to the error reduction algorithm 
     planar.set_algorithm(HIO);
 
-    for(int i=er_iterations1; i<(hio_iterations+er_iterations1+1); i++){
+    for(int i=er_iterations1; i<(hio_iterations+er_iterations1); i++){
 
       cout << "iteration " << i << endl;
 
@@ -184,7 +183,7 @@ int main(void){
 	//output the current estimate of the object
 	ostringstream temp_str ( ostringstream::out ) ;
 	object_estimate.get_2d(MAG,result);
-	temp_str << "real_poly_example_iteration_" << i+a*(hio_iterations+er_iterations1+er_iterations2+1) << ".ppm";
+	temp_str << "real_poly_example_iteration_" << i+a*(hio_iterations+er_iterations1+er_iterations2) << ".ppm";
 	write_image(temp_str.str(), result);
 	temp_str.clear();
 
@@ -198,7 +197,7 @@ int main(void){
 
     planar.set_algorithm(ER);
 
-    for(int i=er_iterations1+hio_iterations; i<(hio_iterations+er_iterations1+er_iterations2+1); i++){
+    for(int i=er_iterations1+hio_iterations; i<(hio_iterations+er_iterations1+er_iterations2); i++){
 
       cout << "iteration " << i << endl;
 
@@ -210,7 +209,7 @@ int main(void){
 	//output the current estimate of the object
 	ostringstream temp_str ( ostringstream::out ) ;
 	object_estimate.get_2d(MAG,result);
-	temp_str << "real_poly_example_iteration_" << i+a*(hio_iterations+er_iterations1+er_iterations2+1) << ".ppm";
+	temp_str << "real_poly_example_iteration_" << i+a*(hio_iterations+er_iterations1+er_iterations2) << ".ppm";
 	write_image(temp_str.str(), result);
 	temp_str.clear();
 
