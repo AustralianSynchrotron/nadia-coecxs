@@ -47,6 +47,33 @@ PolyCDI::PolyCDI(Complex_2D & initial_guess,
       totweight+=spectrum.get(i, WEIGHT);
     }
 
+    int paddingx = (spectrum.get(0, WL)/lambdac -1.0)*nx/2;
+    int paddingy = (spectrum.get(0, WL)/lambdac -1.0)*ny/2;
+
+    Double_2D padded_support(nx+paddingx, ny+paddingy);
+
+    for(int i=0; i<paddingx; i++){
+      for(int j=0; j<paddingy; j++){
+	padded_support.set(i, j, 0);
+      }
+    }
+
+    for(int i=0; i<nx; i++){
+      for(int j=0; j<ny; j++){
+	padded_support.set(i+paddingx, j+paddingy, support.get(i, j));
+      }
+    }
+
+    for(int i=0; i<paddingx; i++){
+      for(int j=0; j<paddingy; j++){
+	padded_support.set(nx+i, ny+j, 0);
+      }
+    }
+
+    support_init = padded_support;
+    support = padded_support;
+
+
     //std::cout<<"lambdac is "<<lambdac<<endl;
 
     for(int i=0; i<nlambda; i++){
@@ -100,22 +127,31 @@ int PolyCDI::iterate(){
   //this is faster than using the generic algorithm code
   //further down in this function.
 
-  Complex_2D temp_complex_PFS(nx, ny);
-  Complex_2D temp_complex_PF(nx, ny);
-  Complex_2D temp_complex_PS(nx, ny);
-  Complex_2D temp_complex_PSF(nx, ny);
+  int paddingx = (spectrum.get(0, WL)/lambdac -1.0)*nx/2;
+  int paddingy = (spectrum.get(0, WL)/lambdac -1.0)*ny/2;
 
-  singleCDI.clear();
+  Complex_2D padded = complex;//.get_padded(paddingx, paddingy);
+
+  std::cout<<"padd ing is "<<paddingx<<endl;
+
+  paddingx = 0;
+  paddingy = 0;
+
+  Complex_2D temp_complex_PFS(nx+2*paddingx, ny+2*paddingy);
+  Complex_2D temp_complex_PF(nx+2*paddingx, ny+2*paddingy);
+  Complex_2D temp_complex_PS(nx+2*paddingx, ny+2*paddingy);
+  Complex_2D temp_complex_PSF(nx+2*paddingx, ny+2*paddingy);
+
 
 
   if(algorithm==ER){
 
-    propagate_to_detector(complex);
+    propagate_to_detector(padded);
 
-    scale_intensity(complex);
+    scale_intensity(padded);
 
-    propagate_from_detector(complex);
-    apply_support(complex);
+    propagate_from_detector(padded);
+    apply_support(padded);
     update_n_best();
 
     return SUCCESS;
@@ -126,7 +162,7 @@ int PolyCDI::iterate(){
 
   //PFS
   if(algorithm_structure[PFS]!=0){
-    temp_complex_PFS=complex;
+    temp_complex_PFS=padded;
     apply_support(temp_complex_PFS);
     propagate_to_detector(temp_complex_PFS);
     scale_intensity(temp_complex_PFS);
@@ -135,7 +171,7 @@ int PolyCDI::iterate(){
 
   //F
   if(algorithm_structure[PF]!=0){
-    temp_complex_PF=complex;
+    temp_complex_PF=padded;
     propagate_to_detector(temp_complex_PF);
     scale_intensity(temp_complex_PF);
     propagate_from_detector(temp_complex_PF);
@@ -143,7 +179,7 @@ int PolyCDI::iterate(){
 
   //S
   if(algorithm_structure[PS]!=0){
-    temp_complex_PS=complex;
+    temp_complex_PS=padded;
     apply_support(temp_complex_PS);
   }
 
@@ -153,7 +189,7 @@ int PolyCDI::iterate(){
       temp_complex_PSF=temp_complex_PF;
       apply_support(temp_complex_PSF);
     }else{
-      temp_complex_PSF=complex;
+      temp_complex_PSF=padded;
       propagate_to_detector(temp_complex_PSF);
       scale_intensity(temp_complex_PSF);
       propagate_from_detector(temp_complex_PSF);
@@ -167,8 +203,8 @@ int PolyCDI::iterate(){
     for(int j=0; j < ny; ++j){
 
       //Add the identity
-      value_real = (1+algorithm_structure[PI])*complex.get_real(i,j);
-      value_imag = (1+algorithm_structure[PI])*complex.get_imag(i,j);
+      value_real = (1+algorithm_structure[PI])*padded.get_real(i,j);
+      value_imag = (1+algorithm_structure[PI])*padded.get_imag(i,j);
 
       //Add the component from the PfPs operator
       if(algorithm_structure[PFS]!=0){
@@ -195,11 +231,13 @@ int PolyCDI::iterate(){
 	value_imag+=algorithm_structure[PSF]*temp_complex_PSF.get_imag(i,j);
       }
 
-      complex.set_real(i,j,value_real);
-      complex.set_imag(i,j,value_imag);
+      padded.set_real(i,j,value_real);
+      padded.set_imag(i,j,value_imag);
 
     }
   }
+
+  complex=padded;//.get_unpadded(paddingx, paddingy);
 
   //Update the transmission using the dominant mode
   update_n_best();

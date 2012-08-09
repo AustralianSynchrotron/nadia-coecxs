@@ -468,23 +468,36 @@ class Complex_2D{
     fftw_type = type;
   };
 
- private:
+  /**
+   * Create the same complex with some padding. The padding is filled with 0s
+   **/
+
+  Complex_2D get_padded(int x_add, int y_add);
 
   /**
-   * Check that an (x,y) position is within the bounds of the array
-   * 
-   * @param x The horizontal position to check
-   * @param y The vertical position to check
+   * Create the same complex without the some padding. 
    */
-  int check_bounds(int x, int y) const;
+  Complex_2D get_unpadded(int x_add, int y_add);
 
 
-  /**
-   * Create the fftw plans for forward and backward fast fourier transforms
-   */
-  void initialise_fft();
+
+  private:
+
+    /**
+     * Check that an (x,y) position is within the bounds of the array
+     * 
+     * @param x The horizontal position to check
+     * @param y The vertical position to check
+     */
+    int check_bounds(int x, int y) const;
 
 
-};
+    /**
+     * Create the fftw plans for forward and backward fast fourier transforms
+     */
+    void initialise_fft();
+
+
+  };
 
 #endif
