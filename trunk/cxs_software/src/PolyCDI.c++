@@ -288,6 +288,8 @@ void PolyCDI::scale_intensity(Complex_2D & c){
 
 //take the central wavelength, and generate the
 //diffraction pattern 
+
+//temp edit
 void PolyCDI::expand_wl(Complex_2D & c){
 
   Double_2D intensity(nx, ny);
