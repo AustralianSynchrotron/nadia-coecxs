@@ -40,7 +40,7 @@ int main(void){
   string data_file_name = //"lowcoherence.dbin";
   //"/home/tdjempire/Desktop/polychromatic_03667.ppm";//"real_sim_intensity.tiff";
 //  "poly_sim_intensity.tiff";
-  "image_files/1_percent.tif";
+  "image_files/2p5percent.tif";
   //"image_files/planar_data.tif";
   //"part_sim_intensity.tiff";
   //"image_files/planar_data.tif";

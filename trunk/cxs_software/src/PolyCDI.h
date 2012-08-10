@@ -67,6 +67,10 @@ protected:
   /** Number of wavelengths in the spectrum */
   double nlambda;
 
+  /** Padding required to expand the wavelengths */
+  int paddingx;
+  int paddingy;
+
   /** Some features of the spectrum */
   Double_2D & spectrum;
 
@@ -299,6 +303,13 @@ private:
    *
    */
   void scale_object(double factor);
+
+  /** These functions pad and unpad the support in order to allow for
+    * larger supports when scaling the intensity of low energies.
+    */
+
+  void pad_support();
+  void unpad_support();
 
 };
 

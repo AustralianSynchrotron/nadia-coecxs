@@ -103,8 +103,8 @@ Complex_2D * BaseCDI::get_best_result(double & error, int index){
 
 void BaseCDI::set_support(const Double_2D & object_support, bool soften){
   double max = object_support.get_max();
-  for(int i=0; i< nx; i++){
-    for(int j=0; j< ny; j++){
+  for(int i=0; i< object_support.get_size_x(); i++){
+    for(int j=0; j< object_support.get_size_y(); j++){
       support.set(i,j,object_support.get(i,j)/max);
       support_init.set(i,j,object_support.get(i,j)/max);
     }
@@ -117,8 +117,8 @@ void BaseCDI::set_support(const Double_2D & object_support, bool soften){
 
 void BaseCDI::set_support_new(const Double_2D & object_support, bool soften){
   double max = object_support.get_max();
-  for(int i=0; i< nx; i++){
-    for(int j=0; j< ny; j++){
+  for(int i=0; i< object_support.get_size_x(); i++){
+    for(int j=0; j< object_support.get_size_y(); j++){
       support.set(i,j,object_support.get(i,j)/max);
     }
   }
@@ -162,8 +162,13 @@ void BaseCDI::apply_support_init(Double_2D & c){
 void BaseCDI::support_constraint(Complex_2D & c){
   double support_value;
 
-  for(int i=0; i< nx; i++){
-    for(int j=0; j< ny; j++){
+  if((c.get_size_x()!=support.get_size_x())||(c.get_size_y()!=support.get_size_y())){
+    std::cout<<"Support does not have the correct dimensions"<<endl;
+    return;
+  }
+
+  for(int i=0; i< c.get_size_x(); i++){
+    for(int j=0; j< c.get_size_y(); j++){
 
       support_value = support.get(i,j);
 
@@ -176,13 +181,13 @@ void BaseCDI::support_constraint(Complex_2D & c){
 void BaseCDI::support_constraint_init(Double_2D & c){
   double support_value;
 
-  for(int i=0; i< nx; i++){
-    for(int j=0; j< ny; j++){
+  for(int i=0; i< c.get_size_x(); i++){
+    for(int j=0; j< c.get_size_y(); j++){
 
       support_value = support_init.get(i,j);
 
       c.set(i,j,c.get(i,j) * support_value);
-//      c.set_imag(i,j,c.get_imag(i,j) * support_value);
+      //      c.set_imag(i,j,c.get_imag(i,j) * support_value);
     }
   }
 }
@@ -474,7 +479,7 @@ void BaseCDI::convolve(Double_2D & array, double gauss_width,
   //up to 4 pixels away from the Gaussian peak
 
   //make a temporary array to hold the smeared image
-  Double_2D temp_array(nx,ny);
+  Double_2D temp_array(array.get_size_x(),array.get_size_y());
 
   //make a temporary array to hold the Gaussian distribution.
   Double_2D gauss_dist(pixel_cut_off+1, pixel_cut_off+1);
@@ -489,8 +494,8 @@ void BaseCDI::convolve(Double_2D & array, double gauss_width,
   //this is messy. First loop over the elements of
   //the array which was given as input
   double new_value;
-  for(int i=0; i < nx; i++){
-    for(int j=0; j < ny; j++){
+  for(int i=0; i < array.get_size_x(); i++){
+    for(int j=0; j < array.get_size_y(); j++){
 
       //now loop over the convoluted array (the one we want to make).
       //Calculate the contribution to each element in it.
@@ -499,7 +504,7 @@ void BaseCDI::convolve(Double_2D & array, double gauss_width,
 
       for(int i2=i-pixel_cut_off; i2 <= i+pixel_cut_off; i2++){
 	for(int j2=j-pixel_cut_off; j2 <= j+pixel_cut_off; j2++){
-	  if(i2<nx && i2>=0 && j2>=0 && j2<ny){
+	  if(i2<array.get_size_x() && i2>=0 && j2>=0 && j2<array.get_size_y()){
 	    new_value += array.get(i2,j2)*gauss_dist.get(fabs(i-i2),fabs(j-j2));
 	  }
 	}
@@ -527,8 +532,8 @@ void BaseCDI::apply_threshold(Double_2D & array,
   double max = array.get_max();
 
   //apply the threshold
-  for(int i=0; i < nx; i++){
-    for(int j=0; j < nx; j++){
+  for(int i=0; i < array.get_size_x(); i++){
+    for(int j=0; j < array.get_size_y(); j++){ //these were both x, but I changed one to y. TDJ
       if( array.get(i,j) < (threshold*max) )
 	array.set(i,j,0.0);
       else

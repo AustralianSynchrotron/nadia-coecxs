@@ -320,7 +320,28 @@ Complex_2D Complex_2D::get_padded(int x_add, int y_add){
   Complex_2D padded(nx+2*x_add, ny+2*y_add);
 
   for(int i=0; i<x_add; i++){
+    for(int j=0; j<ny+2*y_add; j++){
+      padded.set_real(i, j, 0);
+      padded.set_imag(i, j, 0);
+    }
+  }
+
+  for(int i=nx+x_add; i<nx+2*x_add; i++){
+    for(int j=0; j<ny+2*y_add; j++){
+      padded.set_real(i, j, 0);
+      padded.set_imag(i, j, 0);
+    }
+  }
+
+  for(int i=x_add; i<nx; i++){
     for(int j=0; j<y_add; j++){
+      padded.set_real(i, j, 0);
+      padded.set_imag(i, j, 0);
+    }
+  }
+
+  for(int i=x_add; i<nx; i++){
+    for(int j=ny+y_add; j<ny+2*y_add; j++){
       padded.set_real(i, j, 0);
       padded.set_imag(i, j, 0);
     }
@@ -330,26 +351,23 @@ Complex_2D Complex_2D::get_padded(int x_add, int y_add){
     for(int j=0; j<ny; j++){
       padded.set_real(i+x_add, j+y_add, get_real(i, j));
       padded.set_imag(i+x_add, j+y_add, get_imag(i, j));
+      //std::cout<<i<<", "<<j<<", "<<x_add<<"\n";
     } 
   } 
 
-  for(int i=0; i<x_add; i++){
-    for(int j=0; j<y_add; j++){
-      padded.set_real(nx+i, ny+j, 0);
-      padded.set_imag(nx+i, ny+j, 0);
-    }
-  }
   return padded;
 }
 
 Complex_2D Complex_2D::get_unpadded(int x_add, int y_add){
 
-  Complex_2D unpadded(nx-x_add, ny-y_add);
+  Complex_2D unpadded(nx-2*x_add, ny-2*y_add);
 
   for(int i=0; i<nx-2*x_add; i++){
     for(int j=0; j<ny-2*y_add; j++){
       unpadded.set_real(i, j, get_real(i+x_add, j+y_add));
       unpadded.set_imag(i, j, get_imag(i+x_add, j+y_add));
+      //      std::cout<<"Goodbye\n";
+
     }
   }
   return unpadded;

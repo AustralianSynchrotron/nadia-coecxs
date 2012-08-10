@@ -25,7 +25,7 @@
 #define DOUBLE_2D_H
 //#define DOUBLE_PRECISION 
 
-#include "string.h"
+#include <math.h>
 
 
 #include <iostream>
@@ -253,7 +253,6 @@ class Real_2D{
       }
     }
   };
-
 
 };
 
