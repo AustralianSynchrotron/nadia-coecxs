@@ -87,7 +87,7 @@ int main(void){
   /**** create the projection/reconstruction object *****/
 
   Complex_2D pattern(n_x,n_y);
-  PartialCDI my_partial(pattern, 0.9, 2.0e-6, 40.0e-3, 13.5e-6, 13.5e-6, 1400, 1.4, 4, 0);
+  PartialCDI my_partial(pattern, 0.9, 10.0e-6, 10.0e-6, 13.5e-6, 13.5e-6, 1400, 1.4057, 4, 0);
 
   my_partial.set_threshold(+1.0e-6);
 

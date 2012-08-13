@@ -86,8 +86,33 @@ int main(void){
 
   /**** create the projection/reconstruction object *****/
 
-  Double_2D spectrum;
-  read_spec(data_spectrum_name, spectrum);
+  //Double_2D spectrum;
+  //read_spec(data_spectrum_name, spectrum);
+
+  double n=500.0;
+
+  Double_2D spectrum(n, 2);
+
+  double bw, sigma, mean, scale, del;
+
+  mean=1.4;
+  bw=0.025*mean;
+  sigma=bw/2.35482; //FWHM in to sigma
+  scale=1.0/(sqrt(2.0*3.14159));
+  //    del=(1.6-1.2)/n;
+  del=5.0*sigma/n;
+
+  for(double i=0; i<n; i++){
+
+
+    spectrum.set(int(i), 0, 1.0/(mean-(n/2.0-i)*del));
+    spectrum.set(int(i), 1, scale*exp(-(del*(i-(n/2))*del*(i-(n/2))/2.0/sigma/sigma)));
+
+    std::cout<<1/spectrum.get(i, 0)<<" "<<spectrum.get(i, 1)<<"\n";
+
+  }
+
+
 
   Complex_2D first_guess(n_x,n_y);
   PolyCDI my_poly(first_guess, spectrum, 0.9, 4, 0);

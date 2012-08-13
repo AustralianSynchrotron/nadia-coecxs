@@ -39,17 +39,18 @@ int main(void){
   //the data file name
   string data_file_name = //"lowcoherence.dbin";
   //"/home/tdjempire/Desktop/polychromatic_03667.ppm";//"real_sim_intensity.tiff";
-//  "poly_sim_intensity.tiff";
-  "image_files/2p5percent.tif";
+  //"poly_sim_intensity.tiff";
+  //"image_files/2p5percent.tif";
   //"image_files/planar_data.tif";
-  //"part_sim_intensity.tiff";
+  "part_sim_intensity.tiff";
   //"image_files/planar_data.tif";
 
   //the file which provides the support (pixels with the value 0
   //are considered as outside the object)
-  string support_file_name = "image_files/poly_support.tiff";
+  string support_file_name = //"image_files/poly_support.tiff";
+  "image_files/planar_support.tiff";
 
-  const int cycles=5;
+  const int cycles=6;
   //number of error reduction iterations to perform before the HIO.
   const int er_iterations1 = 50;
 
@@ -133,7 +134,7 @@ int main(void){
 
     for(int i=0; i<er_iterations1; i++){
 
-      cout << "iteration " << i << endl;
+      cout << "iteration " << i+a*(hio_iterations+er_iterations1+er_iterations2) << endl;
 
       //apply the set of planar CDI projections 
       planar.iterate(); 
@@ -173,7 +174,7 @@ int main(void){
 
     for(int i=er_iterations1; i<(hio_iterations+er_iterations1); i++){
 
-      cout << "iteration " << i << endl;
+      cout << "iteration " << i+a*(hio_iterations+er_iterations1+er_iterations2) << endl;
 
       planar.iterate(); 
 
@@ -199,7 +200,7 @@ int main(void){
 
     for(int i=er_iterations1+hio_iterations; i<(hio_iterations+er_iterations1+er_iterations2); i++){
 
-      cout << "iteration " << i << endl;
+      cout << "iteration " << i+a*(hio_iterations+er_iterations1+er_iterations2) << endl;
 
       planar.iterate();
 
