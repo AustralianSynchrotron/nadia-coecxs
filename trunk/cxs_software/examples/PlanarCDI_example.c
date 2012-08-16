@@ -40,15 +40,15 @@ int main(void){
   string data_file_name = //"lowcoherence.dbin";
   //"/home/tdjempire/Desktop/polychromatic_03667.ppm";//"real_sim_intensity.tiff";
   //"poly_sim_intensity.tiff";
-  //"image_files/2p5percent.tif";
+  "image_files/2p5percent.tif";
   //"image_files/planar_data.tif";
-  "part_sim_intensity.tiff";
+  //"part_sim_intensity.tiff";
   //"image_files/planar_data.tif";
 
   //the file which provides the support (pixels with the value 0
   //are considered as outside the object)
-  string support_file_name = //"image_files/poly_support.tiff";
-  "image_files/planar_support.tiff";
+  string support_file_name = "image_files/poly_support.tiff";
+ // "image_files/planar_support.tiff";
 
   const int cycles=6;
   //number of error reduction iterations to perform before the HIO.
