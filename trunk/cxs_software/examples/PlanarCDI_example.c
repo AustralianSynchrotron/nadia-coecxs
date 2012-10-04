@@ -27,6 +27,7 @@
 #include "Complex_2D.h"
 #include "PlanarCDI.h"
 #include "Double_2D.h"
+#include <iomanip>
 
 //#include "google/profiler.h"
 
@@ -39,16 +40,16 @@ int main(void){
   //the data file name
   string data_file_name = //"lowcoherence.dbin";
   //"/home/tdjempire/Desktop/polychromatic_03667.ppm";//"real_sim_intensity.tiff";
-  //"poly_sim_intensity.tiff";
-  "image_files/2p5percent.tif";
+ // "poly_sim_intensity.tiff";
+  //"image_files/1_percent.tif";
   //"image_files/planar_data.tif";
-  //"part_sim_intensity.tiff";
-  //"image_files/planar_data.tif";
+//  "image_files/part_data.dbin";//sim_intensity.tiff";
+  "image_files/planar_data.tif";
 
   //the file which provides the support (pixels with the value 0
   //are considered as outside the object)
-  string support_file_name = "image_files/poly_support.tiff";
- // "image_files/planar_support.tiff";
+  string support_file_name = //"image_files/part_support.tiff";
+ "image_files/planar_support_b.tiff";
 
   const int cycles=6;
   //number of error reduction iterations to perform before the HIO.
@@ -64,7 +65,9 @@ int main(void){
   int output_iterations = 10;
 
   //apply the shrinkwrap algorithm every "shrinkwrap iterations"
-  int shrinkwrap_iterations = 200;
+  int shrinkwrap_iterations = 50;
+
+  int npic=0;
 
   //the number of pixels in x and y
   int nx = 1024;
@@ -110,7 +113,7 @@ int main(void){
 
   //Initialise the current object ESW with a random numbers
   //"0" is the seed to the random number generator
-  planar.initialise_estimate(7);
+  planar.initialise_estimate(0);
 
   //  planar.set_fftw_type(FFTW_ESTIMATE);
 
@@ -146,7 +149,8 @@ int main(void){
 
 	ostringstream temp_str ( ostringstream::out ) ;
 	object_estimate.get_2d(MAG,result);
-	temp_str << "real_poly_example_iteration_" << i +a*(hio_iterations+er_iterations1+er_iterations2)<< ".ppm";
+	temp_str << "good_planar_example_iteration_" << std::setw(3) << std::setfill('0') << npic/*i +a*(hio_iterations+er_iterations1+er_iterations2)*/<< ".tiff";
+	npic++;
 	write_image(temp_str.str(), result);
 
 	temp_str.clear();
@@ -184,7 +188,8 @@ int main(void){
 	//output the current estimate of the object
 	ostringstream temp_str ( ostringstream::out ) ;
 	object_estimate.get_2d(MAG,result);
-	temp_str << "real_poly_example_iteration_" << i+a*(hio_iterations+er_iterations1+er_iterations2) << ".ppm";
+	temp_str << "good_planar_example_iteration_" << std::setw(3) << std::setfill('0') << npic/*i+a*(hio_iterations+er_iterations1+er_iterations2)*/ << ".tiff";
+	npic++;
 	write_image(temp_str.str(), result);
 	temp_str.clear();
 
@@ -210,7 +215,8 @@ int main(void){
 	//output the current estimate of the object
 	ostringstream temp_str ( ostringstream::out ) ;
 	object_estimate.get_2d(MAG,result);
-	temp_str << "real_poly_example_iteration_" << i+a*(hio_iterations+er_iterations1+er_iterations2) << ".ppm";
+	temp_str << "good_planar_example_iteration_" << std::setw(3) << std::setfill('0')<< npic/*i+a*(hio_iterations+er_iterations1+er_iterations2)*/ << ".tiff";
+	npic++;
 	write_image(temp_str.str(), result);
 	temp_str.clear();
 

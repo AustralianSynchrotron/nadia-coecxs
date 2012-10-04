@@ -139,14 +139,6 @@ public:
 
 
   /**
-   *  
-   *
-   */
-  void add_new_position(BaseCDI * local, 
-      double x=0, double y=0, 
-      double alpha=1);
-
-  /**
    * Initialise the estimate of the 'global' object function. The
    * initialisation is performed using the current estimate for each
    * 'local' frame. For this reason you must first initialise each
@@ -154,48 +146,13 @@ public:
    * function.
    */
   void initialise_estimate();
-
   void initialise_estimate(int seed);
-
-  /** Initialise the wave matrices */
-  void initialise_matrices(int leg, int modes);
-
-  /**
-   *uses the complex_2d multiply function to apply 
-   *the transmission function
-   */
-  void apply_transmission(Complex_2D & c);
-
-  /* scale the highest occupancy mode 
-   * this overwrites the function of the same
-   * name in BaseCDI
-   */
-  void scale_intensity(std::vector<Complex_2D> & c);
-
-  /**
-   * for scaling the transmission
-   */
-  //  void scale_intensity(Complex_2D & c);
-
-  /**
-   * add the intensities across all modes 
-   */
-  Double_2D sum_intensity(std::vector<Complex_2D> & c);
 
   /**
    * The iterate the algorithm. This overwrites the
    * the class of the same name in BaseCDI.
    */ 
-
   int iterate();
-
-
-  /**
-   * calculate the transmission function by dividing 
-   * the highest occupacy mode at the source by the 
-   * highest occupancy mode at the detector
-   */
-  void update_transmission();
 
   /*
    * generate the S and J matrices for the decomposition 
@@ -204,42 +161,11 @@ public:
    * S=integral(P*l(r)pm(r))dr where Pl is an orhtonormal
    * basis set, in this case, the Legendre polynomials
    */
-  void initialse_matrices(int leg, int modes);
-
-  /**
-   * the J matrix where J = integral(P*l(r1)J(r1, r2)Pm(r2))dr1dr2 
-   * the x and y are computed seperately, then multiplied together.
-   * The result is a matrix of xn+y by in+j where 
-   */
-  void fill_jmatrix(Double_2D legmatrix, Double_2D roots);
-
-  /**
-   * the S matrix = integral(P*l(r)pm(r))dr = 2/(2n+1)
-   * from the orthogonality requirments of Legendre 
-   * Polynomials. We then turn it in to a 2D matrix
-   * for the x and y dimensions
-   */
-  void fill_smatrix(Double_2D legmatrix, Double_2D roots);
-
-  /**
-   * fill a vector of Complex_2D for single modes. These 
-   * modes do not evolve over time, and so are not BaseCDI's
-   */
-  void fill_modes(Complex_2D & c);
+  void initialise_matrices(int leg, int modes);
 
   /////////////////////////////////
   // Get and setter methods
   /////////////////////////////////
-
-  /**
-   * Set the number of 'local' frame iterations before updating the
-   * result to the 'global' object function.
-   *
-   * @param iterations The number of 'local' iterations.
-   */
-  void set_iterations_per_cycle(int iterations){
-    iterations_per_cycle = iterations;
-  }
 
   /**
    * This function allows you to access the 'global' sample function.
@@ -258,12 +184,6 @@ public:
    * exit-surface-wave to copy.
    */
   void set_transmission(Complex_2D & new_transmission);
-
-  /**
-   * calculate and return the current intensity of the modes multiplied
-   * by the transmissoion fnction
-   */
-  Double_2D get_intensity();
 
   /**
    * Propagates the modes to the detector. Specifically for use with 
@@ -313,6 +233,60 @@ private:
    */
   void propagate_from_detector(Complex_2D & c);
   void propagate_to_detector(Complex_2D & c);
+
+  /**
+   *uses the complex_2d multiply function to apply 
+   *the transmission function
+   */
+  void apply_transmission(Complex_2D & c);
+
+  /* scale the highest occupancy mode 
+   * this overwrites the function of the same
+   * name in BaseCDI
+   */
+  void scale_intensity(std::vector<Complex_2D> & c);
+
+  /**
+   * for scaling the transmission
+   */
+  //  void scale_intensity(Complex_2D & c);
+
+  /**
+   * add the intensities across all modes 
+   */
+  Double_2D sum_intensity(std::vector<Complex_2D> & c);
+
+  /**
+   * calculate the transmission function by dividing 
+   * the highest occupacy mode at the source by the 
+   * highest occupancy mode at the detector
+   */
+  void update_transmission();
+
+  /**
+   * the J matrix where J = integral(P*l(r1)J(r1, r2)Pm(r2))dr1dr2 
+   * the x and y are computed seperately, then multiplied together.
+   * The result is a matrix of xn+y by in+j where 
+   */
+  void fill_jmatrix(Double_2D legmatrix, Double_2D roots);
+
+  /**
+   * the S matrix = integral(P*l(r)pm(r))dr = 2/(2n+1)
+   * from the orthogonality requirments of Legendre 
+   * Polynomials. We then turn it in to a 2D matrix
+   * for the x and y dimensions
+   */
+  void fill_smatrix(Double_2D legmatrix, Double_2D roots);
+
+  /**
+   * fill a vector of Complex_2D for single modes. These 
+   * modes do not evolve over time, and so are not BaseCDI's
+   */
+  void fill_modes(Complex_2D & c);
+
+
+
+
 };
 
 

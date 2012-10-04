@@ -86,8 +86,28 @@ int main(void){
 
   /**** create the projection/reconstruction object *****/
 
+  //create the planar CDI object which will be used to
+  //perform the reconstuction.
+  double beta = 0.9;
+
+  //Coherence lengths x and y in m
+  double lcx = 13.3e-6;
+  double lcy = 40.0e-3;
+
+  //Pixel size detector in m
+  double psize_x=13.5e-6;
+  double psize_y=13.5e-6;
+
+  //Energy of the beam in eV
+  double e_beam=1400.0;
+
+  //Distance between detector and sampl in metres
+  double z_sd=1.4;
+
+  PartialCDI my_partial(input, beta, lcx, lcy, psize_x, psize_y, e_beam, z_sd, 4, 0);
+
+
   Complex_2D pattern(n_x,n_y);
-  PartialCDI my_partial(pattern, 0.9, 10.0e-6, 10.0e-6, 13.5e-6, 13.5e-6, 1400, 1.4057, 4, 0);
 
   my_partial.set_threshold(+1.0e-6);
 
@@ -106,12 +126,12 @@ int main(void){
   write_image(temp_str1.str(), result, true);
 
 
-/*  for(int i=0; i< nmodes*nmodes; i++){
-    ostringstream temp_str0 ( ostringstream::out ) ;
-    my_partial.get_mode(i).get_2d(REAL,result);
-    temp_str0 << "mode"<<i<<".ppm";
-    write_image(temp_str0.str(), result);
-  }*/
+    for(int i=0; i< nmodes*nmodes; i++){
+      ostringstream temp_str0 ( ostringstream::out ) ;
+      my_partial.get_mode(i).get_2d(REAL,result);
+      temp_str0 << "mode"<<i<<".ppm";
+      write_image(temp_str0.str(), result);
+      }
 
 
   //propagate to the detector plane

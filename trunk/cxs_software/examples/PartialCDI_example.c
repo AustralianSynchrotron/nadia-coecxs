@@ -27,24 +27,31 @@
 #include "Complex_2D.h"
 #include "PartialCDI.h"
 #include "Double_2D.h"
+//#include <gperftools/profiler.h>
+
 
 //#include "google/profiler.h"
 
-using namespace std;
+//using namespace std;
 
 int main(void){
+
+ // ProfilerStart("partoutput.pprof");
 
   //Define some constants which will be used in the code.
 
   //the data file name
   string data_file_name = "image_files/part_data.dbin";
+			  //"part_sim_intensity.tiff";
+
 
 
   string support_file_name = "image_files/part_support.tiff";
+			  //"image_files/planar_support.tiff";
 
   //the file with the initial guess
   //string initial_guess_name = "08280_800.tiff";
-  const int cycles = 5;
+  const int cycles = 6;
 
   const int er_iterations1 = 50;
   //number of hybrid input-out iterations to perform.
@@ -116,7 +123,7 @@ int main(void){
   //Energy of the beam in eV
   double e_beam=1400.0;
 
-  //Distance between detector and sampl in metres
+  //Distance between detector and sample in metres
   double z_sd=1.4;
 
   PartialCDI partial(object_estimate, beta, lcx, lcy, psize_x, psize_y, e_beam, z_sd, 4, 0);
@@ -174,7 +181,7 @@ int main(void){
   //  write_image("test_autocorrelation.ppm", autoc, true); //"true" means log scale
 
 
-  //  ProfilerStart("profile");
+  //ProfilerStart("profile.txt");
 
   //partial.set_algorithm(HIO);
 
@@ -224,7 +231,7 @@ int main(void){
     //now change to the error reduction algorithm 
     partial.set_algorithm(HIO);
 
-    for(int i=er_iterations1; i<(hio_iterations+er_iterations1+1); i++){
+    for(int i=er_iterations1; i<(hio_iterations+er_iterations1); i++){
 
       cout << "iteration " << i << endl;
 
@@ -249,7 +256,7 @@ int main(void){
     }
 
     partial.set_algorithm(ER);
-    for(int i=er_iterations1+hio_iterations; i<(hio_iterations+er_iterations1+er_iterations2+1); i++){
+    for(int i=er_iterations1+hio_iterations; i<(hio_iterations+er_iterations1+er_iterations2); i++){
 
       cout << "iteration " << i << endl;
 
@@ -261,7 +268,7 @@ int main(void){
 	//output the current estimate of the object
 	ostringstream temp_str ( ostringstream::out ) ;
 	object_estimate.get_2d(MAG,result);
-	temp_str << "part_example_iteration_" << i+a*(hio_iterations+er_iterations1+er_iterations2+1) << ".ppm";
+	temp_str << "part_example_iteration_" << i+a*(hio_iterations+er_iterations1+er_iterations2) << ".ppm";
 	write_image(temp_str.str(), result);
 	temp_str.clear();
 
@@ -297,7 +304,7 @@ int main(void){
     write_ppm("best_error_3.ppm", result2);
     cout << "Best error 3 is "<< error <<endl; **/
 
-  //  ProfilerStop();
+//  ProfilerStop();
   write_cplx("PCDI_trans.cplx", object_estimate);
 
   return 0;

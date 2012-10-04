@@ -883,6 +883,35 @@ end
 
 ;+
 ; NAME:
+;       CXS_GET_TRANSMISSION
+;
+; PURPOSE:
+;       Get the transmission function from the current estimate of the
+;       exit-surface-wave. The magnitude of the result will be
+;       displayed on the screen. Note that this functions
+;       is only available for Fresnel CDI reconstruction.
+;
+; CALLING SEQUENCE:
+;
+;       result = CXS_GET_TRANSMISSION()
+;
+; OUTPUTS:
+;
+;       result:
+;             The transmission function for the sample. A 2D array of
+;             COMPLEX variables is returned. 
+;
+; EXAMPLE:
+;       a = CXS_GET_TRANSMISSION()
+;-
+function cxs_get_transmission
+result = make_array(nx(),ny(),/COMPLEX)
+b = call_external(lib_name() ,'IDL_get_transmission',result) 
+show, abs(result)
+return, result
+end
+;+
+; NAME:
 ;       CXS_CLEAR_MEMORY
 ;
 ; PURPOSE:

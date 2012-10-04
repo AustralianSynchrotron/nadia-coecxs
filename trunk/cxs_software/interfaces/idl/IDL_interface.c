@@ -22,6 +22,7 @@
 #include "PlanarCDI.h"
 #include "FresnelCDI.h"
 #include "FresnelCDI_WF.h"
+#include "PartialCDI.h"
 #include "PhaseDiverseCDI.h"
 #include "TransmissionConstraint.h"
 #include "io.h"
@@ -106,19 +107,19 @@ void check_objects(){
 
 
 //Allows the dimensions of the image to be passed back to the IDL code
-extern "C" IDL_LONG IDL_get_array_x_size(int argc, void *argv[]){
-  if(!esw)
-    return 0;
-  else
-    return esw->get_size_x();
-}
+  extern "C" IDL_LONG IDL_get_array_x_size(int argc, void *argv[]){
+    if(!esw)
+      return 0;
+    else
+      return esw->get_size_x();
+  }
 
-extern "C" IDL_LONG IDL_get_array_y_size(int argc, void *argv[]){
-  if(!esw)
-    return 0;
-  else
-    return esw->get_size_y();
-}
+  extern "C" IDL_LONG IDL_get_array_y_size(int argc, void *argv[]){
+    if(!esw)
+      return 0;
+    else
+      return esw->get_size_y();
+  }
 
 
 
@@ -179,7 +180,7 @@ extern "C" void IDL_write_dbin(int argc, void * argv[])
 
   int ny = *(int*) argv[0];
   int nx = *(int*) argv[1];
-  
+
   IDL_STRING filename = *(IDL_STRING*)argv[3];
   Double_2D temp(nx,ny);
   copy_to_double_2d(temp, (double*) argv[2]);
@@ -191,7 +192,7 @@ extern "C" void IDL_write_cplx(int argc, void * argv[])
 {
   int ny = *(int*) argv[0];
   int nx = *(int*) argv[1];
-  
+
   IDL_STRING filename = *(IDL_STRING*)argv[3];
 
   Complex_2D temp(nx,ny);
@@ -226,22 +227,22 @@ extern "C" void IDL_deallocate_memory(int argc, void * argv[])
     delete constraint;
     constraint = 0;
   }
-  
+
   if(phaseDiv!=0){
     delete phaseDiv;
     phaseDiv = 0;
   }
-  
+
   while(!phaseDiv_complex.empty()){
     delete phaseDiv_complex.back();
     phaseDiv_complex.pop_back();
   }
-  
+
   while(!phaseDiv_cdi.empty()){
     delete phaseDiv_cdi.back();
     phaseDiv_cdi.pop_back();
   }
-  
+
   while(!phaseDiv_constraint.empty()){
     phaseDiv_constraint.back()->delete_complex_constraint_regions();
     delete phaseDiv_constraint.back();
@@ -252,7 +253,7 @@ extern "C" void IDL_deallocate_memory(int argc, void * argv[])
 
 
 void common_init(int argc, void * argv[], int max_args){
-  
+
   if(phaseDiv==0)
     IDL_deallocate_memory(0,0);
 
@@ -262,7 +263,7 @@ void common_init(int argc, void * argv[], int max_args){
   int nx = *(int*) argv[1];
 
   esw = new Complex_2D(nx,ny);  
-  
+
   if(argc == max_args)
     copy_to_complex_2d(*esw,(IDL_COMPLEX*) argv[max_args-1]);
 
@@ -277,13 +278,13 @@ extern "C" void IDL_planar_init(int argc, void * argv[])
 
 extern "C" void IDL_fresnel_wf_init(int argc, void * argv[])
 {
- 
+
   common_init(argc, argv, 7); 
   reco = new FresnelCDI_WF(*esw, 
-			   *(double*) argv[2],
-			   *(double*) argv[3], 
-			   *(double*) argv[4],
-			   *(double*) argv[5]);
+      *(double*) argv[2],
+      *(double*) argv[3], 
+      *(double*) argv[4],
+      *(double*) argv[5]);
 }
 
 
@@ -297,12 +298,28 @@ extern "C" void IDL_fresnel_init(int argc, void * argv[])
   copy_to_complex_2d(white_field,(IDL_COMPLEX*) argv[2]);
 
   reco = new FresnelCDI(*esw,
-			white_field,
-			*(double*) argv[3],
-			*(double*) argv[4], 
-			*(double*) argv[5],
-			*(double*) argv[6],
-			*(double*) argv[7]);
+      white_field,
+      *(double*) argv[3],
+      *(double*) argv[4], 
+      *(double*) argv[5],
+      *(double*) argv[6],
+      *(double*) argv[7]);
+
+}
+
+extern "C" void IDL_partial_init(int argc, void * argv[])
+{
+
+  common_init(argc, argv, 11);
+
+  reco = new PartialCDI(*esw,
+      *(double*) argv[2],
+      *(double*) argv[3],
+      *(double*) argv[4],
+      *(double*) argv[5],
+      *(double*) argv[6],
+      *(double*) argv[7],
+      *(double*) argv[8]);
 
 }
 
@@ -335,7 +352,7 @@ extern "C" void IDL_get_round_support(int argc, void * argv[]){
   for(int i=0; i<nx; i++){
     for(int j=0; j<ny; j++){
       if(sqrt((i-i0)*(i-i0)+(j-j0)*(j-j0)) 
-	 < radius*sqrt(j0*j0+i0*i0))
+	  < radius*sqrt(j0*j0+i0*i0))
 	temp_2D.set(i,j,100);
     }
   }
@@ -385,8 +402,8 @@ extern "C" void IDL_iterate(int argc, void * argv[]){
 
     ostringstream oss (ostringstream::out);
     oss << "Error for iteration " << total_iters - 1 
-	<< " is "<< reco->get_error() << endl
-	<< "Iteration: " << total_iters << endl;
+      << " is "<< reco->get_error() << endl
+      << "Iteration: " << total_iters << endl;
     IDL_Message(IDL_M_GENERIC, IDL_MSG_INFO, oss.str().c_str());    
 
   }
@@ -405,15 +422,15 @@ extern "C" void IDL_set_algorithm(int argc, void * argv[]){
 extern "C" void IDL_set_custom_algorithm(int argc, void * argv[]){
   check_objects();
   reco->set_custom_algorithm(*(double*)argv[0],
-			     *(double*)argv[1],
-			     *(double*)argv[2],
-			     *(double*)argv[3],
-			     *(double*)argv[4],
-			     *(double*)argv[5],
-			     *(double*)argv[6],
-			     *(double*)argv[7],
-			     *(double*)argv[8],
-			     *(double*)argv[9]);
+      *(double*)argv[1],
+      *(double*)argv[2],
+      *(double*)argv[3],
+      *(double*)argv[4],
+      *(double*)argv[5],
+      *(double*)argv[6],
+      *(double*)argv[7],
+      *(double*)argv[8],
+      *(double*)argv[9]);
   reco->print_algorithm();
 
 }
@@ -429,11 +446,11 @@ extern "C" void IDL_apply_shrinkwrap(int argc, void * argv[]){
   double gauss_width = *(double*) argv[0];
   double threshold = *(double*) argv[1];
 
-  
+
   ostringstream oss (ostringstream::out);
   oss << "Applying shrink wrap with a gaussian width of "
-      << gauss_width <<" pixels and a threshold of " <<  threshold
-      << "  the maximum pixel value" <<endl;
+    << gauss_width <<" pixels and a threshold of " <<  threshold
+    << "  the maximum pixel value" <<endl;
   IDL_Message(IDL_M_GENERIC, IDL_MSG_INFO, oss.str().c_str()); 
   reco->apply_shrinkwrap(gauss_width,threshold);
 }
@@ -455,19 +472,19 @@ extern "C" void IDL_get_intensity_autocorrelation(int argc, void * argv[]){
   check_objects();
 
   if(typeid(*reco)!=typeid(PlanarCDI)){
-    
+
     ostringstream oss (ostringstream::out);
     oss << "Sorry, can't get the autocorrelation function for "
-	<< "anything other than "<< typeid(PlanarCDI).name() <<" reconstuction. "
-	<< "You are doing "<<typeid(*reco).name() 
-	<< " reconstruction." << endl;
+      << "anything other than "<< typeid(PlanarCDI).name() <<" reconstuction. "
+      << "You are doing "<<typeid(*reco).name() 
+      << " reconstruction." << endl;
     IDL_Message(IDL_M_GENERIC, IDL_MSG_INFO, oss.str().c_str());    
     return;
   }
-  
+
   int nx = esw->get_size_x();
   int ny = esw->get_size_y();
-  
+
   Double_2D temp(nx,ny);
   ((PlanarCDI*)reco)->get_intensity_autocorrelation(temp);
   copy_from_double_2d(temp,(double*) argv[0]);
@@ -477,7 +494,7 @@ extern "C" void IDL_get_support(int argc, void * argv[]){
   check_objects();
   int nx = esw->get_size_x();
   int ny = esw->get_size_y();
-  
+
   //  Double_2D temp(nx,ny);
   //reco->get_support(temp);
   copy_from_double_2d(reco->get_support(),(double*) argv[0]); 
@@ -492,25 +509,96 @@ extern "C" void IDL_get_error(int argc, void * argv[]){
 
 extern "C" void IDL_get_transmission_function(int argc, void * argv[]){
   check_objects();
-  if(typeid(*reco)!=typeid(FresnelCDI)){
 
-    ostringstream oss (ostringstream::out);
-    oss << "Sorry, can't get the transmission function for "
-	<< "anything other than "<< typeid(FresnelCDI).name() <<" reconstuction. "
-	<< "You are doing "<<typeid(*reco).name() 
-	<< " reconstruction." << endl;
-    IDL_Message(IDL_M_GENERIC, IDL_MSG_INFO, oss.str().c_str());    
+  if(typeid(*reco)==typeid(FresnelCDI)){
+
+    int nx = esw->get_size_x();
+    int ny = esw->get_size_y();
+
+    Complex_2D temp(nx,ny);
+    ((FresnelCDI*) reco)->get_transmission_function(temp);
+    copy_from_complex_2d(temp,(IDL_COMPLEX*) argv[0]); 
     return;
   }
-  
-  int nx = esw->get_size_x();
-  int ny = esw->get_size_y();
 
-  Complex_2D temp(nx,ny);
-  ((FresnelCDI*) reco)->get_transmission_function(temp);
-  copy_from_complex_2d(temp,(IDL_COMPLEX*) argv[0]); 
+  ostringstream oss (ostringstream::out);
+  oss << "Sorry, can't get the transmission function for "
+    << "anything other than "<< typeid(FresnelCDI).name() <<" reconstuction. "
+    << "You are doing "<<typeid(*reco).name()
+    << " reconstruction." << endl;
+  IDL_Message(IDL_M_GENERIC, IDL_MSG_INFO, oss.str().c_str());
+  return;
 }
 
+extern "C" void IDL_get_transmission(int argc, void * argv[]){
+  check_objects();
+
+  if(typeid(*reco)==typeid(PartialCDI)){
+
+    int nx = esw->get_size_x();
+    int ny = esw->get_size_y();
+
+    Complex_2D temp(nx,ny);
+    temp=((PartialCDI*) reco)->get_transmission();
+    copy_from_complex_2d(temp,(IDL_COMPLEX*) argv[0]);
+    return;
+  }
+
+  ostringstream oss (ostringstream::out);
+  oss << "Sorry, can't get the transmission function for "
+    << "anything other than "<< typeid(PartialCDI).name() <<" reconstuction. "
+    << "You are doing "<<typeid(*reco).name()
+    << " reconstruction." << endl;
+  IDL_Message(IDL_M_GENERIC, IDL_MSG_INFO, oss.str().c_str());
+  return;
+}
+
+extern "C" void IDL_set_transmission(int argc, void * argv[]){
+  check_objects();
+
+  if(typeid(*reco)==typeid(PartialCDI)){
+
+    int ny = *(int*) argv[0];
+    int nx = *(int*) argv[1];
+
+    Double_2D temp_2D(nx,ny);
+    copy_to_double_2d(temp_2D,(double*) argv[2]); 
+
+    ((PartialCDI*) reco)->set_support(temp_2D);
+    return;
+  }
+
+  ostringstream oss (ostringstream::out);
+  oss << "Sorry, can't set the transmission function for "
+    << "anything other than "<< typeid(PartialCDI).name() <<" reconstuction. "
+    << "You are doing "<<typeid(*reco).name()
+    << " reconstruction." << endl;
+  IDL_Message(IDL_M_GENERIC, IDL_MSG_INFO, oss.str().c_str());
+  return;
+}
+
+extern "C" void IDL_initialise_matrices(int argc, void * argv[]){
+
+  check_objects();
+
+  if(typeid(*reco)==typeid(PartialCDI)){
+
+    int nleg = *(int*) argv[0];
+    int nmodes = *(int*) argv[1];
+
+    ((PartialCDI*) reco)->initialise_matrices(nleg, nmodes);
+
+    return;
+  }
+
+  ostringstream oss (ostringstream::out);
+  oss << "Sorry, can't iinitialise the matrices for "
+    << "anything other than "<< typeid(PartialCDI).name() <<" reconstuction. "
+    << "You are doing "<<typeid(*reco).name()
+    << " reconstruction." << endl;
+  IDL_Message(IDL_M_GENERIC, IDL_MSG_INFO, oss.str().c_str());
+  return;
+}
 
 extern "C" void IDL_print_algorithm(int argc, void * argv[]){
   check_objects();
@@ -592,7 +680,7 @@ extern "C" void IDL_set_charge_flipping(int argc, void * argv[]){
     constraint = new TransmissionConstraint();
     reco->set_complex_constraint(*constraint);
   }
-  
+
   constraint->set_charge_flipping( *(bool*) argv[0] );
 
 }
@@ -606,7 +694,7 @@ extern "C" void IDL_add_complex_constraint_region(int argc, void * argv[]){
     constraint = new TransmissionConstraint();
     reco->set_complex_constraint(*constraint);
   }
-  
+
   //copy the input into the right format.
   Double_2D temp_region(reco->get_size_x(),reco->get_size_y());
   copy_to_double_2d(temp_region,(double*) argv[0]); 
@@ -634,7 +722,7 @@ extern "C" void IDL_add_complex_constraint_region(int argc, void * argv[]){
 void check_pd(){
   if(phaseDiv==0){
     IDL_Message(IDL_M_GENERIC, IDL_MSG_INFO,
-		"ERROR: trying to use phase diverse functions before initialising.");
+	"ERROR: trying to use phase diverse functions before initialising.");
     exit(0);
   }
 }
@@ -645,7 +733,7 @@ void check_pd_trans(){
 
   if(phaseDiv && phaseDiv->get_transmission()==0){
     IDL_Message(IDL_M_GENERIC, IDL_MSG_INFO,
-		"ERROR: trying to use phase diverse functions before adding frames.");
+	"ERROR: trying to use phase diverse functions before adding frames.");
     exit(0);
   }
 }
@@ -661,8 +749,8 @@ extern "C" void IDL_phase_diverse_init(int argc, void * argv[]){
     phaseDiv = new PhaseDiverseCDI(beta, gamma, parallel);
   else
     IDL_Message(IDL_M_GENERIC, IDL_MSG_INFO,
-    "Warning: trying to intialise the phase diverse code more than once.");
-  
+	"Warning: trying to intialise the phase diverse code more than once.");
+
 }
 
 //double x=0, double y=0, double alpha=1
@@ -684,7 +772,7 @@ extern "C" void IDL_phase_diverse_add_position(int argc, void * argv[]){
 
   //add the new position
   phaseDiv->add_new_position(local, x, y, alpha);
-  
+
   cout.rdbuf(backup);  //restore cout to stdout
   //pass the string to IDL
   IDL_Message(IDL_M_GENERIC, IDL_MSG_INFO, ( (stringbuf*) str_buffer)->str().c_str());
@@ -696,7 +784,7 @@ extern "C" void IDL_phase_diverse_add_position(int argc, void * argv[]){
   phaseDiv_cdi.push_back(local);
   phaseDiv_complex.push_back(local_esw);
   phaseDiv_constraint.push_back(local_con);
-  
+
   reco = 0;
   esw = 0;
   constraint = 0;
@@ -763,7 +851,7 @@ extern "C" void IDL_phase_diverse_set_transmission(int argc, void * argv[]){
   check_pd();
   int nx = *(IDL_LONG*) argv[0];
   int ny = *(IDL_LONG*) argv[1];
-  
+
   Complex_2D new_transmission(nx,ny);
   copy_to_complex_2d(new_transmission ,(IDL_COMPLEX*) argv[2]); 
 
@@ -772,7 +860,7 @@ extern "C" void IDL_phase_diverse_set_transmission(int argc, void * argv[]){
 
 extern "C" void IDL_phase_diverse_adjust_positions(int argc, void * argv[]){
   check_pd_trans();
-  
+
   int type = *(IDL_LONG*) argv[0]; //0 - cross correlation, 1 - error minimisation.
   bool forward = *(bool*) argv[1];
   int x_min = *(IDL_LONG*) argv[2]; 
@@ -789,11 +877,11 @@ extern "C" void IDL_phase_diverse_adjust_positions(int argc, void * argv[]){
 
   //adjust the positions
   phaseDiv->adjust_positions(type,forward, 
-			     x_min, x_max, 
-			     y_min, y_max, 
-			     step_size);
+      x_min, x_max, 
+      y_min, y_max, 
+      step_size);
 
-  
+
   cout.rdbuf(backup);  //restore cout to stdout
   //pass the string to IDL
   IDL_Message(IDL_M_GENERIC, IDL_MSG_INFO, ( (stringbuf*) str_buffer)->str().c_str());

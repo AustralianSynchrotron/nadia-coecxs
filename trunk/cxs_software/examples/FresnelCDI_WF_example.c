@@ -151,7 +151,7 @@ int main(int argc, char * argv[]){
 
   //save the result as a complex binary for later use
 
-  status = write_cplx("fwf_recovered.cplx", wf_);
+  status = write_cplx("wf_recovered.cplx", wf_);
   write_cplx("fillumination_recovered.cplx", wf_i);
 
   if(status!=0)

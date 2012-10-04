@@ -96,7 +96,7 @@ int main(void){
   double bw, sigma, mean, scale, del;
 
   mean=1.4;
-  bw=0.025*mean;
+  bw=0.1*mean;
   sigma=bw/2.35482; //FWHM in to sigma
   scale=1.0/(sqrt(2.0*3.14159));
   //    del=(1.6-1.2)/n;

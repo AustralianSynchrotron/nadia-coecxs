@@ -1,40 +1,18 @@
-; Copyright 2011 Nadia Davidson 
-; for The ARC Centre of Excellence in Coherent X-ray Science. 
-;
-; This program is distributed under the GNU General Public License. 
-; We also ask that you cite this software in publications where you made 
-; use of it for any part of the data analysis.
 
-; This file demonstrates the steps in performing planar CDI
-; reconstruction using the library in IDL. 
-
-; Load up the module containing the wrapper code
 .Compile CXS_interface.pro
 
-; Load some image files of the data and the support. 
-; A 2D array of doubles is returned.
-; Please replace the file-name with your 
-; "cxs_software/example/image_files" directory if you are not
-; running this example on osiris.
 support = cxs_read_tiff(1024,1024,'../../examples/image_files/planar_support.tiff')
 data = cxs_read_tiff(1024,1024,'../../examples/image_files/planar_data.tif')
 
-; Set-up everything ready for planar reconstruction.
-; You need to pass the image data and support.
-; By default the HIO algorithm is used with a relaxation
-; parameter of beta=0.9
+
 cxs_init_planar, data, support
 
-;Set the algorithm to hybrid input-out
+
 cxs_set_algorithm, 'HIO'
 
-; Perform 50 iterations and then 
-; apply shrink wrap (default Gaussian width = 1.5 pixels,
-; threshold = 0.1 time the maximum pixel value). 
-; Do this 5 times (250 iterations in total).
 FOR I=0,4 DO BEGIN a = cxs_iterate(50) & cxs_apply_shrinkwrap & ENDFOR
 
-; Change to the error-reduction algorithm 
+
 cxs_set_algorithm, 'ER'
 
 ; Do another 150 iterations with shrink-wrap applied every 50 iterations

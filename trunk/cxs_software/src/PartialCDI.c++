@@ -18,6 +18,7 @@
 #include <typeinfo>
 #include "utils.h"
 
+
 using namespace std;
 
 //constructor for the class which handles partially coherent diffractive imaging.
@@ -619,39 +620,6 @@ void PartialCDI::propagate_from_detector(Complex_2D & c){
   c.perform_backward_fft();
 
 }
-
-//find and return the current intensity
-Double_2D PartialCDI::get_intensity(){
-
-  Double_2D magnitude(nx, ny);
-
-  singleCDI.clear();
-  for(unsigned int i=0; i<singlemode.size(); i++){
-    singleCDI.push_back(singlemode.at(i));
-    apply_transmission(singleCDI.at(i));
-  }
-
-  //set the intensities to 0
-  for(int i=0; i< nx; i++){
-    for(int j=0; j< ny; j++){
-      magnitude.set(i,j,0.0);
-    }
-  }
-
-  for(unsigned int mode=0; mode<singleCDI.size(); mode++){
-
-    for(int i=0; i< nx; i++){
-      for(int j=0; j< ny; j++){
-
-	double mag_total = magnitude.get(i,j)+eigen.at(mode)*singleCDI.at(mode).get_mag(i,j)*singleCDI.at(mode).get_mag(i,j);
-	magnitude.set(i,j,mag_total);
-      }
-    }
-  }
-
-  return(magnitude);
-}
-
 
 //propagate each mode to the detector. This is specifically
 //for use in simulations.

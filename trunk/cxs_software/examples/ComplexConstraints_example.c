@@ -224,7 +224,7 @@ int main(int argc, char * argv[]){
 
   //Now set the contraint to use (here we use Example 2), but
   //you can change to another to see what happens.
-  proj.set_complex_constraint(tc2);
+  proj.set_complex_constraint(tc1);
   //just change tc2 in the line above.
 
   //------------------------------------------------
