@@ -8,6 +8,9 @@
 #include <string>
 #include <cstdlib> 
 #include <cmath>
+//#include <map>
+#include <string>
+#include "Double_2D.h"
 #include "Complex_2D.h"
 #include "BaseCDI.h"
 #include "TransmissionConstraint.h"

@@ -3602,7 +3602,7 @@ fi
   $as_echo "$ac_cv_lib_lapack_main" >&6; }
   if test "x$ac_cv_lib_lapack_main" = x""yes; then :
     cat >>confdefs.h <<_ACEOF
-    #define HAVE_LIBLAPACK 1
+    #define HAVE_LIBlapack 1
 _ACEOF
   LIBS="-llapack $LIBS"
 else

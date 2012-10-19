@@ -1813,7 +1813,7 @@ void solve_gep(Complex_2D & A, Complex_2D & B, vector<double> & eigen){
 
   zhegv_(&ITYPE, &JOB, &UPLO, &N, Afort, &LDA, Bfort,&LDB, eigenfort, WORK, &LWORK, RWORK, &INFO);
 
-  eigen.clear();
+//  eigen.clear();
 
   for(int i=0; i<A.get_size_x(); i++){
 

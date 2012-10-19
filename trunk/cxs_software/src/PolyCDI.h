@@ -33,22 +33,22 @@ class PolyCDI:public BaseCDI {
 protected:
 
 
-  /* A vector holding a pointer to each of the FresnelCDI/PlanarCDI objects */
+  /** A vector holding a pointer to each of the FresnelCDI/PlanarCDI objects */
   std::vector<Complex_2D> singleCDI;
 
-  /*A vector holding the initial wave described as a series of modes.*/
+  /** A vector holding the initial wave described as a series of modes.*/
   std::vector<Complex_2D> singlemode;
 
   /** A vector holding the weighting function for each frame */  
   std::vector<Double_2D * > weights; 
 
-  /* A vector of the transverse positions in x */
+  /** A vector of the transverse positions in x */
   std::vector<double> x_position;
 
-  /* A vector of the transverse positions in y */
+  /** A vector of the transverse positions in y */
   std::vector<double> y_position;
 
-  //parameters controlling the feedback
+  /** parameters controlling the feedback */
   double beta;
 
   /** An array of the eigenvectors for the system of JC=nSC */
@@ -98,40 +98,10 @@ public:
   enum {CROSS_CORRELATION,MINIMUM_ERROR};
 
   /** 
-   * Construct a PhaseDiverseCDI object for phase diverse or
-   * ptychographic reconstruction. The data should be entered later
-   * using the 'add_new_position' function.
-   *
-   * @param beta The feedback parameter. By default this is 1 (no feedback).
-   * @param gamma The amplification factor. By default this is 1 (no
-   * amplification).
-   * @param parallel true - run in parallel mode, false - run in series
-   *        mode. By default series mode is set.
-   * @param granularity  A factor which controls sub-pixel alignment. 
-   *   1 = regular, 2 = 2 'global' pixels for every 1 'local' pixel.
-   *   i.e. 2 allows alignment to within half a pixel. 
-   *   NOTE: This is not currently working properly!
-   */
-
-  /*  PolyCDI(double beta=1.0, 
-      double gamma=1.0,
-      bool parallel=false,
-      int granularity=1
-      );
-   */
-  /** 
    * Destructor for PhaseDiverseCDI
    */
   ~PolyCDI();
 
-
-  /**
-   *  
-   *
-   */
-  void add_new_position(BaseCDI * local, 
-      double x=0, double y=0, 
-      double alpha=1);
 
   /**
    * Initialise the estimate of the 'global' object function. The
@@ -153,14 +123,15 @@ public:
    */
   void apply_transmission(Complex_2D & c);
 
-  /* scale the highest occupancy mode 
+  /** scale the highest occupancy mode 
    * this overwrites the function of the same
    * name in BaseCDI
    */
   void scale_intensity(Complex_2D & c);
 
-  /* expand wavelengths from central wavelength 
-     */
+  /**
+    expand wavelengths from central wavelength 
+   */
   void expand_wl(Complex_2D & c);
 
 
@@ -189,7 +160,7 @@ public:
    */
   void update_transmission();
 
-  /*
+  /**
    * generate the S and J matrices for the decomposition 
    * of the partially coherent wave where JC=nSC where
    * H = integral(P*l(r1)J(r1, r2)Pm(r2)) dr1 dr2 and 

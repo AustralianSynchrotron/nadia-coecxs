@@ -310,7 +310,7 @@ extern "C" void IDL_fresnel_init(int argc, void * argv[])
 extern "C" void IDL_partial_init(int argc, void * argv[])
 {
 
-  common_init(argc, argv, 11);
+  common_init(argc, argv, 10);
 
   reco = new PartialCDI(*esw,
       *(double*) argv[2],
@@ -319,7 +319,8 @@ extern "C" void IDL_partial_init(int argc, void * argv[])
       *(double*) argv[5],
       *(double*) argv[6],
       *(double*) argv[7],
-      *(double*) argv[8]);
+      *(double*) argv[8],
+      4, 0);
 
 }
 
@@ -523,7 +524,7 @@ extern "C" void IDL_get_transmission_function(int argc, void * argv[]){
 
   ostringstream oss (ostringstream::out);
   oss << "Sorry, can't get the transmission function for "
-    << "anything other than "<< typeid(FresnelCDI).name() <<" reconstuction. "
+    << "anything other than "<< typeid(PartialCDI).name() <<" reconstuction. "
     << "You are doing "<<typeid(*reco).name()
     << " reconstruction." << endl;
   IDL_Message(IDL_M_GENERIC, IDL_MSG_INFO, oss.str().c_str());
@@ -561,10 +562,11 @@ extern "C" void IDL_set_transmission(int argc, void * argv[]){
     int ny = *(int*) argv[0];
     int nx = *(int*) argv[1];
 
-    Double_2D temp_2D(nx,ny);
-    copy_to_double_2d(temp_2D,(double*) argv[2]); 
+    Complex_2D temp_2D(nx,ny);
 
-    ((PartialCDI*) reco)->set_support(temp_2D);
+    copy_to_complex_2d(temp_2D, (IDL_COMPLEX*) argv[2]);
+
+    ((PartialCDI*) reco)->set_transmission(temp_2D);
     return;
   }
 
@@ -579,20 +581,86 @@ extern "C" void IDL_set_transmission(int argc, void * argv[]){
 
 extern "C" void IDL_initialise_matrices(int argc, void * argv[]){
 
+  //check_objects();
+  double dnleg = *(double*) argv[0];
+  double dnmodes = *(double*) argv[1];
+
+  if(dnleg < dnmodes){
+
+    ostringstream oss (ostringstream::out);
+    oss <<"The order of the legendre approximation"
+      <<" must be greater than or equal to the number"
+      <<" of modes. The matrices have not been"
+      <<" initialised" <<endl;
+
+    IDL_Message(IDL_M_GENERIC, IDL_MSG_INFO, oss.str().c_str());
+
+    return;
+
+  }
+
+  if(typeid(*reco)==typeid(PartialCDI)){
+
+    int nleg = (int) dnleg;
+    int nmodes = (int) dnmodes;
+
+    ((PartialCDI*) reco)->initialise_matrices(nleg, nmodes);
+
+  }else{
+
+    ostringstream oss (ostringstream::out);
+    oss << "Sorry, can't initialise the matrices for "
+      << "anything other than "<< typeid(PartialCDI).name() <<" reconstuction. "
+      << "You are doing "<<typeid(*reco).name()
+      << " reconstruction." << endl;
+    IDL_Message(IDL_M_GENERIC, IDL_MSG_INFO, oss.str().c_str());
+    return;
+  }
+
+}
+
+extern "C" void IDL_get_mode(int argc, void * argv[]){
   check_objects();
 
   if(typeid(*reco)==typeid(PartialCDI)){
 
-    int nleg = *(int*) argv[0];
-    int nmodes = *(int*) argv[1];
+    int nx = esw->get_size_x();
+    int ny = esw->get_size_y();
 
-    ((PartialCDI*) reco)->initialise_matrices(nleg, nmodes);
+    double dnmode = *(double*)argv[1];
 
+    int nmode = (int) dnmode;
+
+
+    Complex_2D temp(nx,ny);
+
+    temp=((PartialCDI*) reco)->get_mode(nmode);
+    copy_from_complex_2d(temp,(IDL_COMPLEX*) argv[0]);
     return;
   }
 
   ostringstream oss (ostringstream::out);
-  oss << "Sorry, can't iinitialise the matrices for "
+  oss << "Sorry, can't get the modes function for "
+    << "anything other than "<< typeid(PartialCDI).name() <<" reconstuction. "
+    << "You are doing "<<typeid(*reco).name()
+    << " reconstruction." << endl;
+  IDL_Message(IDL_M_GENERIC, IDL_MSG_INFO, oss.str().c_str());
+  return;
+}
+
+extern "C" void IDL_set_threshold(int argc, void * argv[]){
+  check_objects();
+
+  if(typeid(*reco)==typeid(PartialCDI)){
+
+    double thresh = *(double*) argv[0];
+
+    ((PartialCDI*) reco)->set_threshold(thresh);
+    return;
+  }
+
+  ostringstream oss (ostringstream::out);
+  oss << "Sorry, can't set the threshhold for "
     << "anything other than "<< typeid(PartialCDI).name() <<" reconstuction. "
     << "You are doing "<<typeid(*reco).name()
     << " reconstruction." << endl;

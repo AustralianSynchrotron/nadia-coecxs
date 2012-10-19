@@ -355,31 +355,133 @@ IF N_Params() LT 9 THEN $
 
 end
 
+;+
+; NAME:
+;       CXS_INIT_PARTIAL
+;
+; PURPOSE:
+;       Set-up a Partial CDI reconstruction. This will
+;       initialise the reconstruction with sample support and experimental 
+;       parameters. Some defaults will be set and memory will be
+;       allocated ready for reconstructing the sample
+;       exit-surface-wave. It is necessary to call this procedure before
+;       attempting to call any of the reconstruction methods
+;       (e.g. before setting the algorithm or calling CXS_ITERATE).
+;
+;       Calling this procedure will initialise the reconstruction algorithm
+;       to the error-reduction with a relaxation parameter of 0.9.
+;
+; CALLING SEQUENCE:
+;
+; CXS_INIT_PARTIAL, data, support, beta, lcx, lcy, pxsize, pysize, beam_energy
+;                   zsd [, starting_point ]
+;
+; INPUTS:
+;
+;       Please use metres for the lengths, and eV for the energy.
+;
+;       data: 
+;             The detector data with the sample in place. It should be
+;             in the form of a 2D array.
+;
+;       support: 
+;             A 2D array of integers or doubles which give the sample support.
+;             Values or 1 or greater are considered inside
+;             the support. All others are considered to be
+;             outside the support.
+;
+;       beta:
+;             The relaxation parameter.
+;             
+;       lcx:
+;             The coherence length in the x direction
+;             
+;       lcy:
+;             The coherence length in the y direction
+;
+;       pxsize:
+;             The size of the detector pixel in the x direction
+;
+;       pysize:
+;             The size of the detector pixel in the y direction
+;
+;       beam energy: 
+;             The beam energy in eV
+;
+;       starting_point: 
+;             As an option you may supply an initial 
+;             guess of the exit-surface-wave for the sample. 
+;             This maybe useful, for example, if you wish to 
+;             start from the end point of a previous run. The
+;             format of this parameter much be a 2D array of
+;             COMPLEX variables. If this parameter is not supplied,
+;             the initialisation described in Harry's review paper: 
+;             page 29. (in particular e.q. 137) is used.
+;
+; EXAMPLE:
+;
+;        cxs_init_fresnel, my_data, my_supports, my_white-field, $
+;                          4.892e-10, 0.9078777, 2.16e-3, $
+;                          13.5e-6
+;-
+pro cxs_init_partial, data, support, $
+                      beta, $
+                      lcx, lcy, $
+                      pxsize, pysize, $
+                      energy, $
+                      zsd, $
+                      complex_array
+                   
+n = size(data)
+nx = n[2]
+ny = n[1]
+IF N_Params() EQ 10 THEN $
+ b = call_external(lib_name(),'IDL_partial_init',long(nx),long(ny), $
+                    double(beta), $
+                    double(lcx), double(lcy), $
+                    double(pxsize), double(pysize), $
+                    double(energy), $
+                    double(zsd), $
+                    complex_array)
+IF N_Params() EQ 9 THEN $
+ b = call_external(lib_name(),'IDL_partial_init',long(nx),long(ny), $
+                    double(beta), $
+                    double(lcx), double(lcy), $
+                    double(pxsize), double(pysize), $
+                    double(energy), $
+                    double(zsd))
+cxs_set_support, support
+cxs_set_intensity, data
+
+IF N_Params() LT 9 THEN $
+  cxs_initialise_esw
+
+end
 
 ;+
 ; NAME:
 ;       CXS_SET_SUPPORT
 ;
 ; PURPOSE:
-;       Set the support shape to be used in reconstruction. This with override 
-;       the support given to any of the CXS_INIT methods and maybe called
-;       at any time during the reconstruction.  
+;       SET THE SUPPORT SHAPE TO BE USED IN RECONSTRUCTION. THIS WITH OVERRIDE 
+;       THE SUPPORT GIVEN TO ANY OF THE CXS_INIT METHODS AND MAYBE CALLED
+;       AT ANY TIME DURING THE RECONSTRUCTION.  
 ;
 ; CALLING SEQUENCE:
 ;
-;	CXS_SET_SUPPORT, support
+;	CXS_SET_SUPPORT, SUPPORT
 ;
 ; INPUTS:
 ;
-;       support: 
-;             A 2D array of doubles or integers giving the sample's 
-;             (or zone-plate's) support. Values of 1 or greater are 
-;             considered inside the support. All others are considered 
-;             to be outside the support.
+;       SUPPORT: 
+;             A 2D ARRAY OF DOUBLES OR INTEGERS GIVING THE SAMPLE'S 
+;             (OR ZONE-PLATE'S) SUPPORT. VALUES OF 1 OR GREATER ARE 
+;             CONSIDERED INSIDE THE SUPPORT. ALL OTHERS ARE CONSIDERED 
+;             TO BE OUTSIDE THE SUPPORT.
 ;
 ; EXAMPLE:
 ;
-;       cxs_set_support, my_support
+;       CXS_SET_SUPPORT, MY_SUPPORT
 ;
 ;-
 pro cxs_set_support, array
@@ -459,7 +561,7 @@ end
 ;
 ; EXAMPLE:
 ;
-;       cxs_set_beam_stop, my_beam_stop_regio
+;       cxs_set_beam_stop, my_beam_stop_region
 ;
 ;-
 pro cxs_set_beam_stop, array
@@ -533,6 +635,38 @@ IF N_Params() EQ 0 THEN $
 b = call_external(lib_name() ,'IDL_initialise_esw',long(seed)) 
 end
 
+;+
+; NAME:
+;       CXS_INITIALISE_MATRICES
+;
+; PURPOSE:
+;       generate the S and J matrices for the decomposition 
+;       of the partially coherent wave where JC=nSC where
+;       H = integral(P*l(r)J(r1, r2)Pm(r2)) dr1 dr2 and 
+;       S=integral(P*l(r)pm(r))dr where Pl is an orhtonormal
+;       basis set, in this case, the Legendre polynomials
+;
+; CALLING SEQUENCE:
+;
+; CXS_INITIALISE_MATRICES, nleg, nmodes
+;
+; INPUTS:
+;
+;       nleg: 
+;             Number of orthogonal components for the light source.
+;             
+;       nmodes: 
+;             Number of component modes for the light sources. nleg
+;             must be greater than nmodes.
+;
+;
+; EXAMPLE:
+;
+;       cxs_initialise_matrices, 5, 6
+;-
+pro cxs_initialise_matrices, nleg, nmodes
+b = call_external(lib_name() ,'IDL_initialise_matrices', double(nleg), double(nmodes)) 
+end
 ;+
 ; NAME:
 ;       CXS_ITERATE
@@ -853,6 +987,36 @@ end
 
 ;+
 ; NAME:
+;       CXS_SET_TRANSMISSION
+; 
+; PURPOSE:
+;       SET THE TRANSMISSION FUNCTION TO BE BEGIN THE RECONSTRUCTION. 
+;       THIS WILL OVERRIDE THE TRANSMISSION FUNCTION AND MAY BE CALLED
+;       AT ANY TIME DURING THE RECONSTRUCTION. NOTE THAT THIS FUNCTION 
+;       IS ONLY AVAILIBLE FOR THE FRESNEL CDI RECONSTRUCTION. 
+;
+; CALLING SEQUENCE:
+;
+; CXS_SET_TRANSMISSION, TRANSMISSION
+;
+; INPUTS:
+;
+;       TRANSMISSION_FUNCTION: 
+;             The transmission function. It should be in 
+;             the form of a 2D array.
+;
+; EXAMPLE:
+;
+;      cxs_transmission, transmission
+;
+;-
+pro cxs_set_transmission, array
+n = size(array)
+b = call_external(lib_name() ,'IDL_set_transmission', n[1],n[2],double(array)) 
+end
+
+;+
+; NAME:
 ;       CXS_GET_TRANSMISSION_FUNCTION
 ;
 ; PURPOSE:
@@ -910,7 +1074,70 @@ b = call_external(lib_name() ,'IDL_get_transmission',result)
 show, abs(result)
 return, result
 end
+
 ;+
+; NAME:
+;       CXS_GET_MODE
+;
+; PURPOSE:
+;       Get the nth mode. This maybe useful to see the ways the 
+;       modes have been divided for the partialCDI
+;
+; CALLING SEQUENCE:
+;
+;       mode = CXS_GET_MODE(n)
+;
+;INPUTS
+;       n: 
+;             The number of the mode retrieved. 0 is the most
+;             dominant mode. If the number is greater than the 
+;             number of availible modes it will return the 
+;             highest indexed modes
+;             
+; OUTPUTS:
+;
+;       mode:
+;             The nth mode. A 2D array of doubles. 
+;             
+; EXAMPLE:
+;       View the nth mode.
+; 
+;       a = cxs_get_mode(1) 
+;-
+function cxs_get_mode, n
+result = make_array(nx(),ny(),/COMPLEX)
+b = call_external(lib_name() ,'IDL_get_mode',result, double(n)) 
+show, abs(result)
+return, result
+end
+
+;+;+
+; NAME:
+;       CXS_SET_THRESHOLD
+; 
+; PURPOSE:
+;       SET THE THRESHOLD OF THE PROMINENCE OF THE LOWEST MODE 
+;       TO BE INCLUDED IN THE RECONSTRUCTION. THIS IS TO ELIMINATE
+;       MODES IN ORDER TO SPEED UP PROCESSING
+;       
+; CALLING SEQUENCE:
+;
+; CXS_SET_THRESHOLD, THRESHOLD_VALUE
+;
+; INPUTS:
+;
+;       THRESHOLD_VALUE: 
+;             The threshold value. It should be a double
+;
+; EXAMPLE:
+;
+;      cxs_set_threshold, 0.0001
+;
+;
+pro cxs_set_threshold, threshold_value
+b = call_external(lib_name() ,'IDL_set_transmission', threshold_value) 
+end
+
 ; NAME:
 ;       CXS_CLEAR_MEMORY
 ;
@@ -1635,7 +1862,7 @@ pro cxs_phase_diverse_adjust_positions, type=type, forward=forward, $
                     long(x_min),  long(x_max), $
                     long(y_min),  long(y_max), $
                     double(step_size))
-  
+   
 end
 
 function cxs_phase_diverse_get_final_x_position, nprobe

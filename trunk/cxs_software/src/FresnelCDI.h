@@ -128,22 +128,33 @@ class FresnelCDI: public BaseCDI{
    * sample plane and unity is added.
    *
    * @param result The transmission function is copied into "result".
-   * @param inforce_unit_mag Values above 1 (due to artifacts from the
-   * reconstruction are reduced to 1). This helps when plotting the
-   * magnitude. By default this is not done, but can be switched on by 
-   * passing "true" for this parameter.
    */
   virtual void get_transmission_function(Complex_2D & result,
 					 Complex_2D * esw = 0);
 					 //bool inforce_unit_mag=false);
 
 
+  /**
+   * Apply the support constraint.
+   * 
+   * @param c The complex field to apply the support constraint on
+   */
+
   virtual void apply_support(Complex_2D & complex);
 
-  virtual void set_transmission_function(Complex_2D & transmission,
-					 Complex_2D * esw = 0);
 
-  
+  /**
+   * Set the 'global' sample function. This method could be used, for
+   * example, instead of 'initialise_estimate' to initialise the
+   * results to those from a previous reconstruction.
+   *
+   * @param new_transmission The transmission function 
+   * exit-surface-wave to copy.
+   */
+  virtual void set_transmission_function(Complex_2D & transmission,
+      Complex_2D * esw = 0);
+
+
   /**
    * This method overrides the one in BaseCDI by adding/subtracting
    * the white-field before/after applying the intensity constraint.
@@ -179,40 +190,40 @@ class FresnelCDI: public BaseCDI{
   };
 
 
-   /**
-    * Reset the experimental parameters. This is called when an object
-    * of this type is constructed. I maybe called at any time during
-    * reconstruction, for example to refine the experimental
-    * parameters. This method resets the coefficient matricies which
-    * are used in the propagation between the detector and sample
-    * planes. All values should be given in the same length units.
-    *
-    * @param beam_wavelength The beam wavelength
-    * @param focal_detector_length The distance between the focal plane
-    *        and dector plane.
-    * @param focal_sample_length The distance between the focal plane
-    *        and sample plane.
-    * @param pixel_size The size of one detector pixel.
-    */ 
+  /**
+   * Reset the experimental parameters. This is called when an object
+   * of this type is constructed. I maybe called at any time during
+   * reconstruction, for example to refine the experimental
+   * parameters. This method resets the coefficient matricies which
+   * are used in the propagation between the detector and sample
+   * planes. All values should be given in the same length units.
+   *
+   * @param beam_wavelength The beam wavelength
+   * @param focal_detector_length The distance between the focal plane
+   *        and dector plane.
+   * @param focal_sample_length The distance between the focal plane
+   *        and sample plane.
+   * @param pixel_size The size of one detector pixel.
+   */ 
   void set_experimental_parameters(double beam_wavelength,
-				   double focal_detector_length,
-				   double focal_sample_length,
-				   double pixel_size);
-    
-  
+      double focal_detector_length,
+      double focal_sample_length,
+      double pixel_size);
+
+
   void set_norm(double new_normalisation);
 
-  
+
   const Complex_2D & get_illumination_at_sample();
 
 
 
   /**  double refine_sample_to_focal_length(double min=0, double max=0,
-				       int points_per_scan=8,
-				       double precision=0,
-				       int iterations_before_comparison=1,
-				       int crop_min_x=0, int crop_min_y=0,
-				       int crop_max_x=0, int crop_max_y=0 );**/
+    int points_per_scan=8,
+    double precision=0,
+    int iterations_before_comparison=1,
+    int crop_min_x=0, int crop_min_y=0,
+    int crop_max_x=0, int crop_max_y=0 );**/
 
  protected:
 

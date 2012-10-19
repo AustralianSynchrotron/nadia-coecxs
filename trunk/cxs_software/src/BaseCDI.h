@@ -64,8 +64,8 @@
 #define PHASERETRIEVALBASE_H
 
 #include <map>
-#include <string>
-#include "Double_2D.h"
+//#include <string>
+//#include "Double_2D.h"
 
 /** The number of reconstruction algorithms */
 #define NALGORITHMS 9 
@@ -218,12 +218,13 @@ public:
   Complex_2D * get_best_result(double & error, int index=0);
 
   /**
-   * Set the sample support. A "0" value in the Double_2D is
-   * interpreted as being outside the support. Pixels with the
-   * maximum value of the Double_2D are considered inside the
-   * support. Values between 0 and the maximum indict the soft edge
-   * of the support. In this case, when the support is applied, the
-   * esw magnitude is scaled relative to the support edge value.  
+   * Set the sample support and the initial sample support. A 
+   * "0" value in the Double_2D is interpreted as being outside 
+   * the support. Pixels with the maximum value of the Double_2D 
+   * are considered inside the support. Values between 0 and the 
+   * maximum indict the soft edge of the support. In this case, 
+   * when the support is applied, the esw magnitude is scaled 
+   * relative to the support edge value.  
    * 
    * By default, the edge of a given support will be softened by
    * convolution with a 3 pixel wide gaussian. This feature can be
@@ -238,6 +239,28 @@ public:
    * this option is off.
    */ 
   void set_support(const Double_2D & object_support, bool soften=false);
+
+  /**
+   * Set the sample support  but leave the initial support. A 
+   * "0" value in the Double_2D is interpreted as being outside 
+   * the support. Pixels with the maximum value of the Double_2D 
+   * are considered inside the support. Values between 0 and the 
+   * maximum indict the soft edge of the support. In this case, 
+   * when the support is applied, the esw magnitude is scaled 
+   * relative to the support edge value.  
+   * 
+   * By default, the edge of a given support will be softened by
+   * convolution with a 3 pixel wide gaussian. This feature can be
+   * turned off by setting the boolean flag to false.
+   *
+   * The support can be updated at anytime during reconstruction by
+   * calling this method.
+   *
+   * @param object_support The sample support 
+   * @param soften If true, the edges of the support will be
+   * softened by covolving it with a 3 pixel wide gaussian. By default
+   * this option is off.
+   */
 
   void set_support_new(const Double_2D & object_support, bool soften=false);
 
@@ -290,13 +313,28 @@ public:
     return ny;
   };
 
+  /**
+   *
+   * @return the ESW .
+   */
+
   const Complex_2D & get_exit_surface_wave(){
     return complex;
   }
 
+  /**
+   *
+   * @return the intensity at the detector.
+   */
+
   const Double_2D & get_intensity(){
     return intensity_sqrt;
   }
+
+  /**
+   *
+   * @set the ESW
+   */
 
   void set_exit_surface_wave(Complex_2D & esw){
     complex.copy(esw);
@@ -429,6 +467,12 @@ public:
    * @param c The complex field to apply the support constraint on
    */ 
   virtual void apply_support(Complex_2D & c);
+
+  /**
+   * Apply the initial support constraint to a Double_2d.
+   * 
+   * @param c The field to apply the support constraint on
+   */
   virtual void apply_support_init(Double_2D & c);
 
 
@@ -487,6 +531,9 @@ public:
   }
 
 
+  /**
+   *Reset the array of best guesses to 1
+   */
   void reset_best(){
     for(int i=0; i<n_best; i++)
       best_error_array[i]=1;
@@ -533,7 +580,19 @@ protected:
    */  
   void convolve(Double_2D & array, double gauss_width, int pixel_cut_off=4);
 
+  /**
+   *Apply the support to a Complex_2d
+   *
+   *@param c The Complex_2d to have the support applied.
+   */
   void support_constraint(Complex_2D & c);
+
+  /**
+   *Apply the support to a Double_2d, for applying the 
+   *initial support to the shrinkwrapped support
+   *
+   *@param c The Double_2d to have the support applied
+   */
   void support_constraint_init(Double_2D & c);
 
 

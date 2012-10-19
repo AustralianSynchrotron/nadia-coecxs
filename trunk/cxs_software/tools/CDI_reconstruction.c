@@ -50,6 +50,7 @@
 #include "PlanarCDI.h"
 #include "FresnelCDI.h"
 #include "FresnelCDI_WF.h"
+#include "Partial.h"
 #include "Config.h"
 
 using namespace std;
@@ -61,6 +62,7 @@ using namespace std;
 static const string planar_string="planar";
 static const string fresnel_string="fresnel";
 static const string fresnel_wf_string="fresnel_wf";
+static const string partial_string="partial";
 
 
 void print_usage(){
