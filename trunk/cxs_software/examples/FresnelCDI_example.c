@@ -52,7 +52,7 @@ int main(int argc, char * argv[]){
   if(!status){
     cout  << "Maybe you need to run ./FresnelCDI_WF_example.exe "
 	 << "first... exiting"  << endl;
-    return(1);
+    //return(1);
   }
 
 /*  Complex_2D illumination(nx, ny);
@@ -118,10 +118,10 @@ int main(int argc, char * argv[]){
     cout << "iteration " << i << endl;
 
     //apply the iterations  
-    proj.iterate(); 
+//    proj.iterate(); 
     cout << "Error: " << proj.get_error() << endl;
 
-    if(i%5==0){
+    //if(i%1==0){
       //output the current estimate of the object
       ostringstream temp_str ( ostringstream::out ) ;
       object_estimate.get_2d(MAG,result);
@@ -135,12 +135,13 @@ int main(int argc, char * argv[]){
       ostringstream temp_stra ( ostringstream::out ) ;
       object_estimate.get_2d(PHASE,result);
       temp_stra << "fcdi_ill_example_iter_" << i << ".ppm";
-      write_ppm(temp_stra.str(),result);
+      write_ppm(temp_stra.str(),data);//result);
       temp_str.clear();
 
       //apply the shrinkwrap algorithm
       proj.apply_shrinkwrap(2,0.1);
-    }
+    //}
+    proj.iterate(); 
   }
 
   //get the transmission function for the final iteration

@@ -24,25 +24,21 @@ using namespace std;
 //constructor for the class which handles partially coherent diffractive imaging.
 
 PartialCDI::PartialCDI(Complex_2D & initial_guess,
-    double beta, 
     double ilcx,
     double ilcy,
     double ipxsize,
     double ipysize,
     double energy,
     double zsd,
-    int n_best,
-    bool parallel
+    unsigned int n_best,
+    int nleg,
+    int nmode
     )
 :BaseCDI(initial_guess,n_best),
-  beta(beta), 
-  //lcx(lcx),
-  //lcy(lcy),
   pxsize(ipxsize),
   pysize(ipysize),
   energy(energy),
   zsd(zsd),
-  parallel(parallel),
   transmission(nx,ny),
   threshold(1.0e-5),
   iterations_per_cycle(1){
@@ -80,7 +76,7 @@ PartialCDI::PartialCDI(Complex_2D & initial_guess,
     }
 
 
-    initialise_matrices(2,2);
+    initialise_matrices(nleg, nmode);
   }
 
 //destructor for cleaning up

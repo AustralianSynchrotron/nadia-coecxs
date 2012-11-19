@@ -51,7 +51,7 @@ int main(void){
 
   //the file with the initial guess
   //string initial_guess_name = "08280_800.tiff";
-  const int cycles = 6;
+  const int cycles = 10;
 
   const int er_iterations1 = 50;
   //number of hybrid input-out iterations to perform.
@@ -108,25 +108,21 @@ int main(void){
   Complex_2D object_estimate(nx,ny);
   //read_image(initial_guess_name, object_estimate, nx, ny);
 
-  //create the planar CDI object which will be used to
-  //perform the reconstuction.
-  double beta = 0.9;
-
   //Coherence lengths x and y in m
-  double lcx = 13.3e-6;
-  double lcy = 40.0e-3;
+  double lcx = 1.5e-3;
+  double lcy = 1.5e-3;
 
   //Pixel size detector in m
-  double psize_x=13.5e-6;
-  double psize_y=13.5e-6;
+  double psize_x=53.5e-4;
+  double psize_y=53.5e-4;
 
   //Energy of the beam in eV
-  double e_beam=1400.0;
+  double e_beam=2.33;
 
   //Distance between detector and sample in metres
-  double z_sd=1.4;
+  double z_sd=1.0;
 
-  PartialCDI partial(object_estimate, beta, lcx, lcy, psize_x, psize_y, e_beam, z_sd, 4, 0);
+  PartialCDI partial(object_estimate, lcx, lcy, psize_x, psize_y, e_beam, z_sd, nleg, nmodes);
 
   // 10000.0, 10000.0, 1, 4, 0);
 
@@ -139,9 +135,6 @@ int main(void){
 
   //set the algorithm to hybrid input-output
   partial.set_algorithm(ER);
-
-  //Initialise the wave function
-  partial.initialise_matrices(nleg, nmodes);
 
   Double_2D result(nx, ny);
 
@@ -163,15 +156,15 @@ int main(void){
 */
 
   //Initialise the current object ESW with a random numbers
-  //"0" is the se:ed to the random number generator
-  partial.initialise_estimate(7);
+  //"0" is the seed to the random number generator
+  partial.initialise_estimate(0);
 
   //  partial.set_fftw_type(FFTW_ESTIMATE);
 
   //make a 2D object. This will be used to output the 
   //image of the current estimate.
 
-  //  Double_2D result(nx,ny);
+  //Double_2D result(nx,ny);
   object_estimate.get_2d(MAG,result);
 
   /******* for fun, let's get the autocorrelation *****/
@@ -191,7 +184,7 @@ int main(void){
 
     for(int i=0; i<er_iterations1; i++){
 
-      cout << "iteration " << i << endl;
+      cout << "iteration " << i+a*(hio_iterations+er_iterations1+er_iterations2) << endl;
 
       //apply the set of partial CDI projections 
       partial.iterate(); 
@@ -224,7 +217,7 @@ int main(void){
 
       }
       if(i%shrinkwrap_iterations==(shrinkwrap_iterations-1))
-	partial.apply_shrinkwrap(1.5,0.1);
+	partial.apply_shrinkwrap(2.0,0.1);
 
     }
 
@@ -233,7 +226,7 @@ int main(void){
 
     for(int i=er_iterations1; i<(hio_iterations+er_iterations1); i++){
 
-      cout << "iteration " << i << endl;
+      cout << "iteration " << i+a*(hio_iterations+er_iterations1+er_iterations2) << endl;
 
       partial.iterate(); 
 
@@ -251,14 +244,14 @@ int main(void){
 	//partial.apply_shrinkwrap(1.5,0.1);
       }
       if(i%shrinkwrap_iterations==(shrinkwrap_iterations-1))
-	partial.apply_shrinkwrap(1.5,0.1);
+	partial.apply_shrinkwrap(2.0,0.1);
 
     }
 
     partial.set_algorithm(ER);
     for(int i=er_iterations1+hio_iterations; i<(hio_iterations+er_iterations1+er_iterations2); i++){
 
-      cout << "iteration " << i << endl;
+      cout << "iteration " << i+a*(hio_iterations+er_iterations1+er_iterations2) << endl;
 
       partial.iterate();
 
@@ -276,7 +269,7 @@ int main(void){
 	//partial.apply_shrinkwrap(1.5,0.1);
       }
       if(i%shrinkwrap_iterations==(shrinkwrap_iterations-1))
-	partial.apply_shrinkwrap(1.5,0.1);
+	partial.apply_shrinkwrap(2.0,0.1);
 
     }
   }

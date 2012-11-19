@@ -310,7 +310,7 @@ extern "C" void IDL_fresnel_init(int argc, void * argv[])
 extern "C" void IDL_partial_init(int argc, void * argv[])
 {
 
-  common_init(argc, argv, 10);
+  common_init(argc, argv, 12);
 
   reco = new PartialCDI(*esw,
       *(double*) argv[2],
@@ -320,7 +320,8 @@ extern "C" void IDL_partial_init(int argc, void * argv[])
       *(double*) argv[6],
       *(double*) argv[7],
       *(double*) argv[8],
-      4, 0);
+      *(int*) argv[9],
+      *(int*) argv[10]);
 
 }
 

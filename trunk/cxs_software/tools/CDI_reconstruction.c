@@ -1,18 +1,18 @@
-// Copyright 2011 Nadia Davidson for The ARC Centre of Excellence in 
+// Copyright 2011 Nadia Davidson, 2012 T'Mir Julius for The ARC Centre of Excellence in 
 // Coherent X-ray Science. This program is distributed under the GNU  
 // General Public License. We also ask that you cite this software in 
 // publications where you made use of it for any part of the data     
 // analysis. 
 
-//author:  Nadia Davidson <nadiamd@unimelb.edu.au>
-//date last modified: 12/1/2011
+//author:  T'Mir Julius <tdjulius@unimelb.edu.au>
+//date last modified: 22/10/2012
 
 /**
  * @file CDI_reconstruction.c
  *
- * \a CDI_reconstruction.exe A tool for performing Planar or Fresnel
- * ESW reconstruction.  This tool is provided as a demonstrative tool
- * and to obtain results quickly.
+ * \a CDI_reconstruction.exe A tool for performing Planar, Fresnel or 
+ * Partially Sptially ESW reconstruction.  This tool is provided as a 
+ * demonstrative tool and to obtain results quickly.
  *
  * \par Usage: CDI_reconstruction.exe \<config filename\> \<reco_type\> \<seed\>
  *
@@ -22,6 +22,7 @@
  * - "fresnel_wf" - fresnel white-field reconstruction (3-plane propagation) 
  * - "fresnel" - fresnel object reconstruction. with the white-field 
  *               previously reconstructed.
+ * - "partial" - partial spatial reconstruction
  *
  * The seed should be an integer. If the seed is excluded from the
  * command line arguments, it is assumed to be "0". If reco_type is
@@ -50,7 +51,7 @@
 #include "PlanarCDI.h"
 #include "FresnelCDI.h"
 #include "FresnelCDI_WF.h"
-#include "Partial.h"
+#include "PartialCDI.h"
 #include "Config.h"
 
 using namespace std;
@@ -72,7 +73,8 @@ void print_usage(){
        << "<reco_type> <seed>" << endl << endl
        << "where <reco_type> may be: " << planar_string 
        << ", " << fresnel_string
-       << " or " << fresnel_wf_string << endl
+       << ", " << fresnel_wf_string 
+       << " or " << partial_string << endl
        << "<seed> should be an integer" << endl <<endl
        << "If <reco_type> and <seed> do not need to be specified."
        << "if they are not, <reco_type> will default to "<<planar_string 
@@ -197,25 +199,24 @@ int main(int argc, char * argv[]){
     proj = new PlanarCDI(object_estimate);
   }
   else{
-    /** get the experimental parameters needed for FCDI */
-    double beam_wavelength = c.getDouble("beam_wavelength");
-    double zone_focal_length = c.getDouble("zone_focal_length");
-    double focal_detector_length = c.getDouble("focal_detector_length");
-    double focal_sample_length = c.getDouble("focal_sample_length");
-    double pixel_size = c.getDouble("pixel_size");
-    double normalisation = c.getDouble("normalisation");
-    
 
     if(reco_type.compare(fresnel_string)==0){ //if Fresnel CDI
+
+      double beam_wavelength = c.getDouble("beam_wavelength");
+      double zone_focal_length = c.getDouble("zone_focal_length");
+      double focal_detector_length = c.getDouble("focal_detector_length");
+      double focal_sample_length = c.getDouble("focal_sample_length");
+      double pixel_size = c.getDouble("pixel_size");
+      double normalisation = c.getDouble("normalisation");
 
       //open the file where the reconstructed white field is
       Complex_2D white_field(pixels_x,pixels_y);
       int status = read_cplx(c.getString("white_field_reco_file_name"), 
-			     white_field); 
+	  white_field); 
       //check that the file could be opened okay
       if(!status){
 	cout << "failed to read white-field data " 
-	     <<".. exiting"  << endl;
+	  <<".. exiting"  << endl;
 	return(1);
       }
 
@@ -223,22 +224,29 @@ int main(int argc, char * argv[]){
 
       //create the iterator object
       proj = new FresnelCDI(object_estimate,
-			    white_field, 
-			    beam_wavelength, 
-			    focal_detector_length, 
-			    focal_sample_length, 
-			    pixel_size, 
-			    normalisation);
-      
+	  white_field, 
+	  beam_wavelength, 
+	  focal_detector_length, 
+	  focal_sample_length, 
+	  pixel_size, 
+	  normalisation);
+
     }
     //if reconstructing the Fresnel white field.
     else if(reco_type.compare(fresnel_wf_string)==0){
 
+      double beam_wavelength = c.getDouble("beam_wavelength");
+      double zone_focal_length = c.getDouble("zone_focal_length");
+      double focal_detector_length = c.getDouble("focal_detector_length");
+      double focal_sample_length = c.getDouble("focal_sample_length");
+      double pixel_size = c.getDouble("pixel_size");
+      double normalisation = c.getDouble("normalisation");
+
       proj = new FresnelCDI_WF(object_estimate,
-			       beam_wavelength, 
-			       zone_focal_length, 
-			       focal_detector_length, 
-			       pixel_size);
+	  beam_wavelength, 
+	  zone_focal_length, 
+	  focal_detector_length, 
+	  pixel_size);
       output_file_name = c.getString("white_field_reco_file_name");
       data_file_name = c.getString("white_field_data_file_name");
       support_file_name = c.getString("white_field_support_file_name");
@@ -252,13 +260,37 @@ int main(int argc, char * argv[]){
       //don't use shrink-wrap either
       shrinkwrap_iterations = 0; 
     }
+    //if reconstructing a Partial Spatial CDI.
+    else if(reco_type.compare(partial_string)==0){
+
+      double coherence_length_x = c.getDouble("coherence_length_x");
+      double coherence_length_y = c.getDouble("coherence_length_y");
+      double pixel_size_x = c.getDouble("pixel_size_x");
+      double pixel_size_y = c.getDouble("pixel_size_y");
+      double beam_energy = c.getDouble("beam_energy");
+      double sample_to_detector = c.getDouble("sample_to_detector");
+      double nleg = c.getDouble("nleg");
+      double nmode = c.getDouble("nmode");
+
+
+      proj = new PartialCDI(object_estimate,
+	  coherence_length_x,
+	  coherence_length_y,
+	  pixel_size_x,
+	  pixel_size_y,
+	  beam_energy,
+	  sample_to_detector,
+	  nleg,
+	  nmode);
+    }
+
     else{
       cout << "the reconstruction type specified ("
-	   << reco_type << ") is "
-	   << "unrecognised. Please use: "
-	   << planar_string << ", "
-	   << fresnel_string << " or "
-	   << fresnel_wf_string << endl;
+	<< reco_type << ") is "
+	<< "unrecognised. Please use: "
+	<< planar_string << ", "
+	<< fresnel_string << " or "
+	<< fresnel_wf_string << endl;
       exit(1);
     }
   }
@@ -266,7 +298,7 @@ int main(int argc, char * argv[]){
   /*** get the diffraction data from file and read into an array ***/
   Double_2D data;
   read_image(data_file_name, data, pixels_x, pixels_y);  
-  
+
   //read_image does the error checking for us and would exit if the file
   //was not read
 
@@ -305,41 +337,41 @@ int main(int argc, char * argv[]){
   int i=0;
   int cumulative_iterations = 0;
   while(algorithms_itr != algorithms->end()&&
-	iterations_itr != iterations->end()){
+      iterations_itr != iterations->end()){
 
     if(output_level!=OUTPUT_MINIMAL)
       cout << "Switching to the "<< (*algorithms_itr)
-    	   <<" algorithm" << endl;
-    
+	<<" algorithm" << endl;
+
     //get the projection
     int alg = PlanarCDI::getAlgFromName(*algorithms_itr);
     if(alg == -1 ){
       std::cout << "Could not find reconstruction algorithm"
-		<< " with the name "<< (*algorithms_itr)
-		<< ". Exiting" << endl;
+	<< " with the name "<< (*algorithms_itr)
+	<< ". Exiting" << endl;
       exit(0);
     }
 
     proj->set_algorithm(alg);
     cumulative_iterations+=(*iterations_itr);
-    
+
     for(; i < cumulative_iterations; i++){
       if(output_level!=OUTPUT_MINIMAL)
 	cout << "Iteration " << i << endl;
-      
+
 
       //apply the iterations  
       proj->iterate(); 
       if(output_level==OUTPUT_ERROR && i>0)
 	cout << "Error for iteration "<<(i-1)<<" is " 
-	     << proj->get_error() << endl;
+	  << proj->get_error() << endl;
 
       if(i%output_iterations==0){
 	//output the current estimate of the object
 	ostringstream temp_str ( ostringstream::out ) ;
 	object_estimate.get_2d(MAG,result);
 	temp_str << output_file_name_prefix << "_" << i << "."
-		 << output_file_type << flush;
+	  << output_file_type << flush;
 	write_image(temp_str.str(), result, use_log_scale_for_object);
 	//temp_str.clear();
 
@@ -350,17 +382,17 @@ int main(int argc, char * argv[]){
 	  proj->propagate_to_detector(*temp);
 	  temp->get_2d(MAG_SQ,result);
 	  temp_str << output_file_name_prefix 
-		   << "_diffraction_" << i 
-		   << "."<< output_file_type << flush;
+	    << "_diffraction_" << i 
+	    << "."<< output_file_type << flush;
 	  write_image(temp_str.str(), result, 
-		    use_log_scale_for_diffraction); 
+	      use_log_scale_for_diffraction); 
 	  delete temp;
 	}
       }
       if(shrinkwrap_iterations!=0&&
-	 i%shrinkwrap_iterations==(shrinkwrap_iterations-1)){
+	  i%shrinkwrap_iterations==(shrinkwrap_iterations-1)){
 	proj->apply_shrinkwrap(shrinkwrap_gauss_width, 
-			       shrinkwrap_threshold);
+	    shrinkwrap_threshold);
 	cout << "Applying shrink-wrap at iteration "<< i<<endl;
       }
     }
@@ -373,17 +405,17 @@ int main(int argc, char * argv[]){
 
   //if it's fresnel reconstruction also output the
   //transmission function
-  if(reco_type.compare(fresnel_string)==0){
+  if((reco_type.compare(fresnel_string)==0)||(reco_type.compare(partial_string)==0)){
     ((FresnelCDI*) proj)->get_transmission_function(object_estimate);
     write_cplx("transmission_function.cplx", object_estimate);
   }
 
-  
+
   //clean up
   delete algorithms;
   delete iterations;
   delete proj;
-  
+
   return 0;
 }
 

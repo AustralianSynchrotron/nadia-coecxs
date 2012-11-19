@@ -254,13 +254,13 @@ void PolyCDI::expand_wl(Complex_2D & c){
 
   Double_2D intensity(nx, ny);
 
-  for(int i=0; i<nx; i++){
+/*  for(int i=0; i<nx; i++){
     for(int j=0; j<ny; j++){
 
       intensity.set(i, j, 0.0);
     }
   }
-
+*/
   for(int sn=0; sn<nlambda; sn++){
 
     double lambda=spectrum.get(sn, WL);

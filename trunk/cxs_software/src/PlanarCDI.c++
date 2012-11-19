@@ -6,11 +6,8 @@
 
 #include <cstdlib> 
 #include <cmath>
-//#include <iostream>
-//#include <string>
 #include "Complex_2D.h"
 #include "PlanarCDI.h"
-//#include "io.h" 
 
 //double ** PlanarCDI::get_intensity_autocorrelation(){
 void PlanarCDI::get_intensity_autocorrelation(Double_2D & autoc){

@@ -430,26 +430,32 @@ pro cxs_init_partial, data, support, $
                       pxsize, pysize, $
                       energy, $
                       zsd, $
+		      nleg, $
+		      nmode, $
                       complex_array
                    
 n = size(data)
 nx = n[2]
 ny = n[1]
-IF N_Params() EQ 10 THEN $
+IF N_Params() EQ 12 THEN $
  b = call_external(lib_name(),'IDL_partial_init',long(nx),long(ny), $
                     double(beta), $
                     double(lcx), double(lcy), $
                     double(pxsize), double(pysize), $
                     double(energy), $
                     double(zsd), $
+		    nleg, $
+		    nmode, $
                     complex_array)
-IF N_Params() EQ 9 THEN $
+IF N_Params() EQ 11 THEN $
  b = call_external(lib_name(),'IDL_partial_init',long(nx),long(ny), $
                     double(beta), $
                     double(lcx), double(lcy), $
                     double(pxsize), double(pysize), $
                     double(energy), $
-                    double(zsd))
+                    zsd, $
+		    nleg, $
+		    double(nmode))
 cxs_set_support, support
 cxs_set_intensity, data
 

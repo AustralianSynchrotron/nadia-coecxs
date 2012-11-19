@@ -49,10 +49,6 @@ protected:
    * A vector of the transverse positions in y */
   std::vector<double> y_position;
 
-  /**
-   * parameter controlling the feedback*/
-  double beta;
-
   /** The current estimate of the transmission function */
   Complex_2D transmission;
 
@@ -105,21 +101,18 @@ protected:
    */
   Complex_2D * smatrix;
 
-  /** a flag for running in either series or parallel mode */
-  bool parallel; 
-
 public:
 
   PartialCDI(Complex_2D & initial_guess,
-      double beta=1.0,
       double lcx=1.0,
       double lcy=1.0,
       double pxsize=1.0,
       double pysize=1.0,
       double energy=1.0,
       double zsd=1.0,
-      int n_best=1,
-      bool parallel=0
+      unsigned int n_best=0,
+      int nleg = 2,
+      int nmode = 2
       );
 
 
