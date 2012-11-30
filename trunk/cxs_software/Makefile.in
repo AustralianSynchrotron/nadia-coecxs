@@ -44,7 +44,6 @@ clobber:
 	make clobber -C examples
 	make clobber -C tools
 	rm -f lib/libCOECXS.so lib/libCOECXS.a
-	rm -f include/*.h
 ifeq ($(DO_IDL), TRUE)
 	make clobber -C interfaces/idl
 endif

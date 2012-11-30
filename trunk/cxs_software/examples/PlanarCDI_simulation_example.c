@@ -37,7 +37,9 @@ int main(void){
   //define some constants which will be used in the code:
 
   //the data file name
-  const static char * data_file_name = "image_files/object.tiff";
+  const static char * data_file_name = "/home/tdjempire/Desktop/Harry Project/supporttdj.tiff";
+    //circular masked.tiff";
+    //"image_files/object.tiff";
 
   //the approx. level of background noise in the image
   const double noise_level = 15;
@@ -47,13 +49,13 @@ int main(void){
   const static char * support_file_name = "image_files/planar_support.tiff";
 
   //number of hybrid input-out iterations to perform.
-  const int hio_iterations = 200;
+  const int hio_iterations = 0;
 
   //the number of error-reduction iterations to perform.
-  const int er_iterations = 100;
+  const int er_iterations = 0;
 
   //output the current image ever "output_iterations"
-  const int output_iterations = 50;
+  const int output_iterations = 10;
 
 
   /****** get the object from an image file ****************/

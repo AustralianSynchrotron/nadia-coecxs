@@ -9,7 +9,7 @@
 #include <fstream>
 #include <iostream>
 #include <cstdlib>
-#include "Config.h"
+#include <Config.h>
 
 #define FAILURE 0
 #define SUCCESS 1

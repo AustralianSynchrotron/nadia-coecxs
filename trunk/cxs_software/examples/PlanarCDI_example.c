@@ -37,12 +37,15 @@ int main(void){
 
   //Define some constants which will be used in the code.
 
-  string data_file_name = "image_files/part_data.dbin";
+  string data_file_name ="image_files/part_data.dbin"; 
+    //"image_files/part_data.tif";
+    //"~/Desktop/Harry Project/object.tiff";
   //"part_sim_intensity.tiff";
 
 
 
   string support_file_name = "image_files/part_support.tiff";
+    //"image_files/part_support.tiff";
   //"image_files/planar_support.tiff";
   /*
   //the data file name
@@ -52,12 +55,12 @@ int main(void){
   //are considered as outside the object)
   string support_file_name = "image_files/planar_support.tiff";
    */
-  const int cycles=10;
+  const int cycles=15;
   //number of error reduction iterations to perform before the HIO.
   const int er_iterations1 = 50;
 
   //number of hybrid input-out iterations to perform.
-  const int hio_iterations = 100;
+  const int hio_iterations = 50;
 
   //number of error reduction iterations to perform after the HIO.
   const int er_iterations2 = 50;
@@ -66,7 +69,7 @@ int main(void){
   int output_iterations = 10;
 
   //apply the shrinkwrap algorithm every "shrinkwrap iterations"
-  int shrinkwrap_iterations = 200;
+  int shrinkwrap_iterations = 150;
 
   //the number of pixels in x and y
   int nx = 2048;
@@ -110,6 +113,7 @@ int main(void){
   //"0" is the seed to the random number generator
   planar.initialise_estimate(0);
   //planar.set_fftw_type(FFTW_ESTIMATE);
+  //read_cplx("Planar_trans.cplx", object_estimate);
 
   //make a 2D object. This will be used to output the 
   //image of the current estimate.
@@ -164,7 +168,7 @@ int main(void){
 
       }
       if(i%shrinkwrap_iterations==(shrinkwrap_iterations-1))
-	planar.apply_shrinkwrap(2.0,0.1);
+	planar.apply_shrinkwrap(5.0,0.1);
 
     }
 
@@ -191,7 +195,7 @@ int main(void){
 	//planar.apply_shrinkwrap(1.5,0.1);
       }
       if(i%shrinkwrap_iterations==(shrinkwrap_iterations-1))
-	planar.apply_shrinkwrap(2.0,0.1);
+	planar.apply_shrinkwrap(5.0,0.1);
 
     }
 
@@ -217,7 +221,7 @@ int main(void){
 	//planar.apply_shrinkwrap(1.5,0.1);
       }
       if(i%shrinkwrap_iterations==(shrinkwrap_iterations-1))
-	planar.apply_shrinkwrap(2.0,0.1);
+	planar.apply_shrinkwrap(5.0,0.1);
 
     }
   }

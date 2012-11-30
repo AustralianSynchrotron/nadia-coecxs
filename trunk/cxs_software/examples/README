@@ -70,6 +70,19 @@ It consists of 7 Fresnel diffraction images of the same object.
 For each image, the sample position is altered with respect to the focal
 point positions and/or transverse to the beam direction.
 
+PartialCDI_example.c
+--------------------
+This example shows how to reconstruct data taken with a partially
+spatially coherent beam. The data for this example was taken from the 
+data for "Diffractive imaging using partially coherent X rays, 
+Whitehead, L W, 
+Physical review letters, 2009, v 103, 24, 243902
+
+PartialCDI_simulation.c
+-----------------------
+This example shows how to simulate partially spatially coherent data. 
+In this case the simulation object is the same as the simulation object 
+for PlanarCDI_simulation.c
 
 IDL examples
 ------------

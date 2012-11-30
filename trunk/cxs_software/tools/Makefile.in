@@ -9,13 +9,13 @@ LIB_A=../lib/libCOECXS.a
 
 all: $(LIB_A) $(LIB_SO) $(EXEC_TOOLS)
 
-$(LIB_A): ../src/*.c++ ../src/*.h ../src/*.c
+$(LIB_A): ../src/*.c++ ../src/*.c
 	make -C ../src
 
-$(LIB_SO): ../src/*.c++ ../src/*.h ../src/*.c
+$(LIB_SO): ../src/*.c++ ../src/*.c
 	make -C ../src
 
-%.exe: %.c ../src/*.c++ ../src/*.h ../src/*.c
+%.exe: %.c ../src/*.c++ ../src/*.c
 	@CXX@ @CXXFLAGS@ -I@BASE@/include $< -o $@ \
 	-L@BASE@/lib -lCOECXS \
 	@LDFLAGS@ @LIBS@

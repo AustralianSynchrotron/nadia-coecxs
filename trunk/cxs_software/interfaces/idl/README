@@ -22,4 +22,8 @@ is familiar with the language.
   reconstruction, so it might be worth looking at fresnel_example.pro
   before running this example.
 
+- partial_example.pro shows which commands and in which order they
+  should be run for partial CDI reconstruction to be performed.
+
+
 Last modified: 21st June 2011,    Nadia Davidson

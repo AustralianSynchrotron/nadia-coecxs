@@ -17,8 +17,8 @@
 #include "mfhdf.h"
 #endif
 
-#include "io.h"
-#include "Double_2D.h"
+#include <io.h>
+#include <Double_2D.h>
 
 using namespace std;
 

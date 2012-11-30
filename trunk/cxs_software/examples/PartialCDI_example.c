@@ -6,12 +6,13 @@
 // use of it for any part of the data analysis.
 
 /**
- * @file PlanarCDI_example.c
+ * @file PartialCDI_example.c
  *
- * \a PlanarCDI_example.c This example reconstructs some planar
- * diffraction data (Lachie's data). The shrinkwrap algorithm is used
- * to improve the reconstruction. A combination of HIO and the
- * error-reduction algorithm are used.
+ * \a PartialCDI_example.c This example reconstructs some Partial
+ * diffraction data (Diffractive imaging using partially coherent X rays
+ * Whitehead, L W, Physical review letters, 2009, v 103, 24, 243902). The 
+ * shrinkwrap algorithm is used to improve the reconstruction. A 
+ * combination of HIO and the error-reduction algorithm are used.
  *
  */
 
@@ -23,10 +24,10 @@
 #include <stdlib.h>
 #include <fftw3.h>
 #include <cstdlib> 
-#include "io.h"
-#include "Complex_2D.h"
-#include "PartialCDI.h"
-#include "Double_2D.h"
+#include <io.h>
+#include <Complex_2D.h>
+#include <PartialCDI.h>
+#include <Double_2D.h>
 //#include <gperftools/profiler.h>
 
 
@@ -42,20 +43,15 @@ int main(void){
 
   //the data file name
   string data_file_name = "image_files/part_data.dbin";
-			  //"part_sim_intensity.tiff";
-
-
 
   string support_file_name = "image_files/part_support.tiff";
-			  //"image_files/planar_support.tiff";
 
-  //the file with the initial guess
-  //string initial_guess_name = "08280_800.tiff";
-  const int cycles = 10;
+  const int cycles = 15;
+  //number of cycles of ER, HIO,ER to perform.
 
   const int er_iterations1 = 50;
   //number of hybrid input-out iterations to perform.
-  const int hio_iterations = 100;
+  const int hio_iterations = 50;
   //number of error reduction iterations to perform after the HIO.
   const int er_iterations2 = 50;
 
@@ -63,7 +59,7 @@ int main(void){
   int output_iterations = 10;
 
   //apply the shrinkwrap algorithm every "shrinkwrap iterations"
-  int shrinkwrap_iterations = 200;
+  int shrinkwrap_iterations = 150;
 
   //the number of pixels in x and y
   int nx = 2048;
@@ -79,11 +75,6 @@ int main(void){
 
   Double_2D data;
   read_image(data_file_name, data, nx, ny);  
-
-  /*  ostringstream atemp_str ( ostringstream::out ) ;
-      atemp_str << "08280_log.ppm";
-      write_image(atemp_str.str(), data, true);
-   */
 
   /****** get the support from a file and read it into an array *****/
 
@@ -109,18 +100,18 @@ int main(void){
   //read_image(initial_guess_name, object_estimate, nx, ny);
 
   //Coherence lengths x and y in m
-  double lcx = 1.5e-3;
-  double lcy = 1.5e-3;
+  double lcx = 13.3e-6;
+  double lcy = 40.0e-3;
 
   //Pixel size detector in m
-  double psize_x=53.5e-4;
-  double psize_y=53.5e-4;
+  double psize_x=13.5e-6;
+  double psize_y=13.5e-6;
 
   //Energy of the beam in eV
-  double e_beam=2.33;
+  double e_beam=1400;
 
   //Distance between detector and sample in metres
-  double z_sd=1.0;
+  double z_sd=1.4;
 
   PartialCDI partial(object_estimate, lcx, lcy, psize_x, psize_y, e_beam, z_sd, nleg, nmodes);
 
@@ -135,8 +126,6 @@ int main(void){
 
   //set the algorithm to hybrid input-output
   partial.set_algorithm(ER);
-
-  Double_2D result(nx, ny);
 
   ostringstream temp_strsupp ( ostringstream::out ) ;
   temp_strsupp << "support_tmp.ppm";
@@ -159,28 +148,18 @@ int main(void){
   //"0" is the seed to the random number generator
   partial.initialise_estimate(0);
 
-  //  partial.set_fftw_type(FFTW_ESTIMATE);
+  //read_cplx("PCDI_trans.cplx", object_estimate);
 
   //make a 2D object. This will be used to output the 
   //image of the current estimate.
+  Double_2D result(nx,ny);
 
-  //Double_2D result(nx,ny);
   object_estimate.get_2d(MAG,result);
-
-  /******* for fun, let's get the autocorrelation *****/
-
-  //  Double_2D autoc(nx,ny);
-  //  partial.get_intensity_autocorrelation(autoc);
-  //  write_image("test_autocorrelation.ppm", autoc, true); //"true" means log scale
-
 
   //ProfilerStart("profile.txt");
 
-  //partial.set_algorithm(HIO);
-
   /*** run the reconstruction ************/
   for(int a=0; a<cycles; a++){
-
 
     for(int i=0; i<er_iterations1; i++){
 
@@ -190,11 +169,9 @@ int main(void){
       partial.iterate(); 
       cout << "Current error is "<<partial.get_error()<<endl;
 
-
       //every "output_iterations" 
       //output the current estimate of the object
       if(i%output_iterations==0){
-
 
 	ostringstream temp_str ( ostringstream::out ) ;
 	object_estimate.get_2d(MAG,result);
@@ -217,7 +194,7 @@ int main(void){
 
       }
       if(i%shrinkwrap_iterations==(shrinkwrap_iterations-1))
-	partial.apply_shrinkwrap(2.0,0.1);
+	partial.apply_shrinkwrap(5.0,0.1);
 
     }
 
@@ -244,7 +221,7 @@ int main(void){
 	//partial.apply_shrinkwrap(1.5,0.1);
       }
       if(i%shrinkwrap_iterations==(shrinkwrap_iterations-1))
-	partial.apply_shrinkwrap(2.0,0.1);
+	partial.apply_shrinkwrap(5.0,0.1);
 
     }
 
@@ -269,33 +246,13 @@ int main(void){
 	//partial.apply_shrinkwrap(1.5,0.1);
       }
       if(i%shrinkwrap_iterations==(shrinkwrap_iterations-1))
-	partial.apply_shrinkwrap(2.0,0.1);
+	partial.apply_shrinkwrap(5.0,0.1);
 
     }
   }
 
   //And we are done. "object_estimate" contained the final estimate of
   //the ESW.
-
-  /** ignore the stuff below  
-    Double_2D result2(nx,ny);
-
-    double error=0;
-    partial.get_best_result(0,error)->get_2d(MAG,result2);
-    write_ppm("best_error.ppm", result2);
-    cout << "Best error 0 is "<< error <<endl;
-
-    partial.get_best_result(1,error)->get_2d(MAG,result2);
-    write_ppm("best_error_1.ppm", result2);
-    cout << "Best error 1 is "<< error <<endl;
-
-    partial.get_best_result(2,error)->get_2d(MAG,result2);
-    write_ppm("best_error_2.ppm", result2);
-    cout << "Best error 2 is "<< error <<endl;
-
-    partial.get_best_result(3,error)->get_2d(MAG,result2);
-    write_ppm("best_error_3.ppm", result2);
-    cout << "Best error 3 is "<< error <<endl; **/
 
 //  ProfilerStop();
   write_cplx("PCDI_trans.cplx", object_estimate);

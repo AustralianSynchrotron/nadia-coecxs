@@ -22,10 +22,10 @@
 #include <math.h>
 #include <string>
 #include <cstdlib> 
-#include "io.h"
-#include "Complex_2D.h"
-#include "Double_2D.h"
-#include "PartialCDI.h"
+#include <io.h>
+#include <Complex_2D.h>
+#include <Double_2D.h>
+#include <PartialCDI.h>
 #include <sstream>
 
 using namespace std;
@@ -55,6 +55,8 @@ int main(void){
   //output the current image ever "output_iterations"
   const int output_iterations = 50;
 
+  //The number of legendre polynomials must be greater than or equal to the 
+  //number of modes
   int nleg=32;
   int nmodes=7;
 
@@ -62,7 +64,6 @@ int main(void){
   /****** get the object from an image file ****************/
 
   //get the data from file
-  
   Double_2D data;
 
   //read the data into an array
@@ -74,7 +75,7 @@ int main(void){
 
   int n_x = data.get_size_x();
   int n_y = data.get_size_y();
-  
+
   //fill the complex no. with image data
   Complex_2D input(n_x,n_y);
   for(int i=0; i<n_x; i++){
@@ -106,11 +107,9 @@ int main(void){
 
   PartialCDI my_partial(input, beta, lcx, lcy, psize_x, psize_y, e_beam, z_sd, 4, 0);
 
-
   Complex_2D pattern(n_x,n_y);
 
   my_partial.set_threshold(+1.0e-6);
-
 
   my_partial.initialise_matrices(nleg, nmodes);
 
@@ -126,12 +125,12 @@ int main(void){
   write_image(temp_str1.str(), result, true);
 
 
-    for(int i=0; i< nmodes*nmodes; i++){
-      ostringstream temp_str0 ( ostringstream::out ) ;
-      my_partial.get_mode(i).get_2d(REAL,result);
-      temp_str0 << "mode"<<i<<".ppm";
-      write_image(temp_str0.str(), result);
-      }
+  for(int i=0; i< nmodes*nmodes; i++){
+    ostringstream temp_str0 ( ostringstream::out ) ;
+    my_partial.get_mode(i).get_2d(REAL,result);
+    temp_str0 << "mode"<<i<<".ppm";
+    write_image(temp_str0.str(), result);
+  }
 
 
   //propagate to the detector plane
@@ -219,8 +218,6 @@ int main(void){
 
     }
   }
-
-
 
 
   return 0;

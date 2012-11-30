@@ -10,13 +10,13 @@
 #include <string>
 #include <stdlib.h>
 #include <cstdlib> 
-#include "Complex_2D.h"
-#include "Double_2D.h"
-#include "PartialCDI.h"
-#include "io.h" 
+#include <Complex_2D.h>
+#include <Double_2D.h>
+#include <PartialCDI.h>
+#include <io.h> 
 #include <sstream>
 #include <typeinfo>
-#include "utils.h"
+#include <utils.h>
 
 
 using namespace std;
@@ -115,6 +115,15 @@ void PartialCDI::set_transmission(Complex_2D & new_transmission){
 //0 everywhere else. Complex is then set to be 
 //the value of the transmission function
 void PartialCDI::initialise_estimate(int seed){
+
+  if(nleg < nmode){
+   nleg = nmode;
+
+    std::cout<<"The number of Legendre Polynomials "
+   <<"must be greater or equal to the number of modes."
+   <<" So the number of Legendre polynomials has been "
+   <<" set to the number of modes, "<<nleg <<endl;
+  }
 
   //initialise the random number generator
   srand(seed);

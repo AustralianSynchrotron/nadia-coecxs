@@ -10,9 +10,9 @@
 #include <vector>
 #include <sstream>
 #include <cmath>
-#include "tiffio.h"
-#include "io.h"
-#include "Double_2D.h"
+#include <tiffio.h>
+#include <io.h>
+#include <Double_2D.h>
 
 using namespace std;
 

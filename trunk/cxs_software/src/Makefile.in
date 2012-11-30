@@ -13,23 +13,23 @@ HEADER_FILES=$(SOURCE_FILES_CXX:.c++=.h) io.h utils.h Double_2D.h
 LIB_A= @BASE@/lib/libCOECXS.a
 LIB_SO= @BASE@/lib/libCOECXS.so
 
-all: $(LIB_A) $(LIB_SO) install_headers 
+all: $(LIB_A) $(LIB_SO) 
 
-$(LIB_A): $(OBJECT_FILES) *.h
+$(LIB_A): $(OBJECT_FILES) 
 	ar cr $(LIB_A)$  $(OBJECT_FILES)
 
-$(LIB_SO): $(OBJECT_FILES) *.h
-	@CXX@ -shared @LDFLAGS@ -o $(LIB_SO) $(OBJECT_FILES) @LIBS@
+$(LIB_SO): $(OBJECT_FILES)
+	@CXX@ -I@BASE@/include -shared @LDFLAGS@ -o $(LIB_SO) $(OBJECT_FILES) @LIBS@
 
-install_headers: $(HEADER_FILES)
-	cp $(HEADER_FILES) @BASE@/include
+#install_headers: $(HEADER_FILES)
+#	cp $(HEADER_FILES) @BASE@/include
 
 %.o: %.c++
-	@CXX@ @CXXFLAGS@ -c $< -o $@
+	@CXX@ @CXXFLAGS@ -I@BASE@/include -c $< -o $@
 
 
 %.o: %.c
-	@CXX@ @CXXFLAGS@ -c $< -o $@
+	@CXX@ @CXXFLAGS@ -I@BASE@/include -c $< -o $@
 
 clean:                                                     
 	rm -f *.o *~ 

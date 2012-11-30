@@ -11,8 +11,8 @@
 #include <sstream>
 #include <cmath>
 #include <ctype.h>
-#include "io.h"
-#include "Double_2D.h"
+#include <io.h>
+#include <Double_2D.h>
 
 using namespace std;
 
