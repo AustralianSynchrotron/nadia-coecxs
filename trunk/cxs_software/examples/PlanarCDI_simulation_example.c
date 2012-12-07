@@ -106,6 +106,7 @@ int main(void){
 
   //write the output to file (use log scale)
   write_tiff("real_sim_intensity.tiff",intensity,false);
+  write_tiff("log_sim_intensity.tiff",intensity,true);
 
   /******** get the support from file ****************************/
 

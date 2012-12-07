@@ -1,20 +1,23 @@
-// Copyright 2011 Nadia Davidson 
+// Copyright 2012 T'Mir Julius 
 // for The ARC Centre of Excellence in Coherent X-ray Science. 
 //
 // This program is distributed under the GNU General Public License. 
 // We also ask that you cite this software in publications where you made 
 // use of it for any part of the data analysis.
 //
-// date last modified: 17/01/2011
+// date last modified: 07/12/2012
 
 /**
- * @file PlanarCDI_simulation_example.c
+ * @file PolyCDI_simulation_example.c
  *
- * \a PlanarCDI_simulation_example.c The object from the
+ * \a PolycCDI_simulation_example.c The object from the
  * PlanarCDI_example (in fact I used the reconstructed image as the
- * object) is used to simulate a diffraction pattern for planar
- * CDI. The diffraction pattern is thresholded to make it more
- * realistic and then CDI reconstruction is performed.
+ * object) is used to simulate a diffraction pattern for polychromatic
+ * CDI. A beam is simulated according to the properties of the beam of
+ * thee Australain Synchrotron. The spectrum for this was generated using 
+ * SPECTRA (http://radiant.harima.riken.go.jp/spectra/) and saved as a 
+ * text file. The diffraction pattern is thresholded to make it more 
+ * realistic.
  *
  */
 
@@ -22,10 +25,10 @@
 #include <math.h>
 #include <string>
 #include <cstdlib> 
-#include "io.h"
-#include "Complex_2D.h"
-#include "Double_2D.h"
-#include "PolyCDI.h"
+#include <io.h>
+#include <Complex_2D.h>
+#include <Double_2D.h>
+#include <PolyCDI.h>
 #include <sstream>
 
 using namespace std;
@@ -46,23 +49,13 @@ int main(void){
   //are considered as outside the object)
   const static char * support_file_name = "image_files/planar_support.tiff";
 
+  //read in the spectrum from a Spectra text file
   const static char * data_spectrum_name = "image_files/spectrum.txt";
-  //image_files/planar_support.tiff";
-
-  //number of hybrid input-out iterations to perform.
-  const int hio_iterations = 200;
-
-  //the number of error-reduction iterations to perform.
-  const int er_iterations = 100;
-
-  //output the current image ever "output_iterations"
-  const int output_iterations = 50;
 
 
   /****** get the object from an image file ****************/
 
   //get the data from file
-  
   Double_2D data;
 
   //read the data into an array
@@ -86,33 +79,8 @@ int main(void){
 
   /**** create the projection/reconstruction object *****/
 
-  //Double_2D spectrum;
-  //read_spec(data_spectrum_name, spectrum);
-
-  double n=500.0;
-
-  Double_2D spectrum(n, 2);
-
-  double bw, sigma, mean, scale, del;
-
-  mean=1.4;
-  bw=0.1*mean;
-  sigma=bw/2.35482; //FWHM in to sigma
-  scale=1.0/(sqrt(2.0*3.14159));
-  //    del=(1.6-1.2)/n;
-  del=5.0*sigma/n;
-
-  for(double i=0; i<n; i++){
-
-
-    spectrum.set(int(i), 0, 1.0/(mean-(n/2.0-i)*del));
-    spectrum.set(int(i), 1, scale*exp(-(del*(i-(n/2))*del*(i-(n/2))/2.0/sigma/sigma)));
-
-    std::cout<<1/spectrum.get(i, 0)<<" "<<spectrum.get(i, 1)<<"\n";
-
-  }
-
-
+  Double_2D spectrum;
+  read_spec(data_spectrum_name, spectrum);
 
   Complex_2D first_guess(n_x,n_y);
   PolyCDI my_poly(first_guess, spectrum, 0.9, 4, 0);
@@ -138,68 +106,6 @@ int main(void){
   //write the output to file (use log scale)
   write_tiff("poly_sim_intensity.tiff",intensity,false);
   write_ppm("poly_sim_intensity.ppm", intensity, true);
-
-  /******** get the support from file ****************************/
-  /*
-     Double_2D support(n_x,n_y);
-     status = read_tiff(support_file_name, support);
-
-  /*************** do the reconstruction *******************/
-  /*
-  //create a project object and set the options.
-  my_poly.set_support(support);
-  my_poly.set_intensity(intensity);
-  my_poly.set_algorithm(HIO);
-
-  //set the inital guess to be random inside the support
-  //and zero outside. Note that this must be called
-  //after "my_poly.set_support()"
-  my_poly.initialise_estimate(0);
-
-  //make a temporary arrary
-  Double_2D result(n_x,n_y);
-
-  //apply the projection operators
-  for(int i=0; i<hio_iterations; i++){
-
-  cout << "iteration " << i << endl;
-
-  my_poly.iterate();
-
-  if(i%output_iterations==0){
-
-  ostringstream temp_str ( ostringstream::out ) ;
-  first_guess.get_2d(MAG,result);
-  temp_str << "sim_result_" << i << ".ppm";
-  write_ppm(temp_str.str(), result);
-
-  my_poly.apply_shrinkwrap();
-
-  }
-  }
-
-  my_poly.set_algorithm(ER);
-
-  for(int i=hio_iterations; i<(er_iterations+hio_iterations+1); i++){
-
-  cout << "iteration " << i << endl;
-
-  my_poly.iterate();
-
-  if(i%output_iterations==0){
-
-  ostringstream temp_str ( ostringstream::out ) ;
-  first_guess.get_2d(MAG,result);
-  temp_str << "sim_result_" << i << ".ppm";
-  write_ppm(temp_str.str(), result);
-
-  my_poly.apply_shrinkwrap();
-
-  }
-  }
-
-
-   */
 
   return 0;
 }

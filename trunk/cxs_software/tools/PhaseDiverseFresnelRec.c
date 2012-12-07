@@ -5,7 +5,7 @@
 // analysis. 
 
 /**
- * @file PhaseDiverseCDI_reconstruction
+ * @file PhaseDiverseFresnelRec.c
  *
  * A quick tool to run phase-diverse/ptychographic reconstruction
  * from the command line. The file format is similar to the one
@@ -20,13 +20,13 @@
 #include <iostream>
 #include <sstream>
 #include <fstream>
-#include "io.h"
-#include "TransmissionConstraint.h"
-#include "Complex_2D.h"
-#include "Double_2D.h"
-#include "FresnelCDI.h"
-#include "PhaseDiverseCDI.h"
-#include "Config.h"
+#include <io.h>
+#include <TransmissionConstraint.h>
+#include <Complex_2D.h>
+#include <Double_2D.h>
+#include <FresnelCDI.h>
+#include <PhaseDiverseCDI.h>
+#include <Config.h>
 #include <string>
 //#include "utils.h"
 #include <vector>

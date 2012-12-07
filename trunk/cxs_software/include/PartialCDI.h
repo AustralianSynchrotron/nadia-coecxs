@@ -17,10 +17,10 @@
  * polynomials used is defined by the user. The number of Legendre polynomial * must exceed the number of modes.
  */
 
-#ifndef PCDI_H
-#define PCDI_H
+#ifndef PARTIALCDI_H
+#define PARTIALCDI_H
 
-#include "BaseCDI.h"
+#include <BaseCDI.h>
 #include <vector>
 
 //forward declarations

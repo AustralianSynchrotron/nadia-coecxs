@@ -32,7 +32,7 @@ $(LIB_SO): $(OBJECT_FILES)
 	@CXX@ @CXXFLAGS@ -I@BASE@/include -c $< -o $@
 
 clean:                                                     
-	rm -f *.o *~ 
+	rm -f *.o *.exe *~ 
 
 clobber: clean
 	rm -f *.exe 

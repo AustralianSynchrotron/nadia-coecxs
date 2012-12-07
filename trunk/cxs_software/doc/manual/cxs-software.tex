@@ -154,11 +154,12 @@ CDI community.
 
 In this documentation, we introduce the software package, DIXE (also
 known as cxs-software), which is able to reconstruct and simulate
-X-ray diffraction data for plane-wave, Fresnel, ptychographic and
-phase-diverse CDI. To the best of our knowledge, this is the first
+X-ray diffraction data for plane-wave, Fresnel, ptychographic,
+phase-diverse and partially coherent (both spatially and temporally) 
+CDI. To the best of our knowledge, this is the first
 standard software package which includes all of these different
 approaches. The software allows for any choice of iterative algorithm,
-including customized algorithms, and also includes the 'shrinkwrap'
+including customised algorithms, and also includes the 'shrinkwrap'
 algorithm. For Fresnel CDI, additional complex constraints on the
 transmission function may also be used. The software consists of a C++
 library, binding to IDL and command-line tools, in addition to example
@@ -181,7 +182,7 @@ that this manual is used in the following ways:
   important routines, functions and classes provided by the \name
   library.
 \end{itemize}
-This version of the software is a developement (beta) version and we
+This version of the software is a development (beta) version and we
 welcome feedback on any aspect of the software package: functionality,
 installation, documentation etc. Please email
 cxs-software@physics.unimelb.edu.au for questions or comments.
@@ -255,30 +256,30 @@ compiled and the \name libraries linked.
   to register as a developer. Once installed, this is a nice text
   editor too.
 \item Install fink\cite{} but following their instructions exactly.
-  You can use fink like {\tt apt get} on linux to install the fftw and
+  You can use fink like {\tt apt get} on Linux to install the fftw and
   hdf packages. Make sure you select the correct releases of these.
 \item Get and build the fftw, libtiff and hdf packages using fink
 \item Download the \name source code from the website
-\item Follow the install instruction for linux, except, replace ./configure with 
+\item Follow the install instruction for Linux, except, replace ./configure with 
 \begin{myverbatim}
   ./configure --with-fftw_inc=/sw/include --with-fftw_lib=/sw/lib CXX=''g++ -arch i386'' --with-mfhdf_inc=/sw/include --enable-checking
 \end{myverbatim}
 The ``--with'' flags will tell the compiler where to look for the
 external packages.  The CXX="g++ -arch i386" relates to your
-computer's architecture. This is for a late 2010 macbook pro running
+computer's architecture. This is for a late 2010 Macbook pro running
 10.6, try this, if it doesn't work, try looking up the relevant
 information for your computer. %--enable-checking is just in case.
-\item Type make, as in the linux instructions.
+\item Type make, as in the Linux instructions.
 \end{enumerate}
 
 \subsubsection{Windows with Cygwin}
 
-Cygwin\cite{} provides a linux/unix type environment for Windows (the
-interface is basically a unix style terminal). Installing the CXS
+Cygwin\cite{} provides a Linux/Unix type environment for Windows (the
+interface is basically a Unix style terminal). Installing the CXS
 source code in this environment is very similar to installing it in
-linux/unix and (in my opinion) makes modifying and recompiling the
+Linux/Unix and (in my opinion) makes modifying and recompiling the
 code a bit easier than it would be in Windows otherwise. First you
-will need to install cygwin. You can do this by going to
+will need to install Cygwin. You can do this by going to
 http://www.cygwin.com/, scrolling to the bottom of the page and
 clicking on "Install or update now\ (using setup.exe)". Open setup.exe
 and follow the installation instructions. Apart from the "Package
@@ -298,25 +299,25 @@ additional packages by searching for them and then clicking on them:
 \end{itemize}
 
 Note that you can update the packages which are installed after you've
-installed cygwin just by clicking on setup.exe again (it remembers
+installed Cygwin just by clicking on setup.exe again (it remembers
 which are installed). If you get an error during the post-installation
 phase (error code 128) it maybe due to a virus checker interfering
-with the cygwin installation.
+with the Cygwin installation.
 
 Install the HDF4 libraries. There is no package for this in the
 package manager so go to http://www.hdfgroup.org/release4/obtain.html
-and download their cygwin binary. Unzip the file using the standard
-windows tool and extract it into your home cygwin directory (which
+and download their Cygwin binary. Unzip the file using the standard
+windows tool and extract it into your home Cygwin directory (which
 should be something like
 C:\textbackslash{}cygwin\textbackslash{}home\textbackslash{}your\_user\_name). The directory
 hdf4.2.5-cygwin-szip should be made. The HDF library also needs the
 szip library to work correctly. Download this from \\
 http://www.hdfgroup.org/ftp/lib-external/szip/2.0/bin/cygwin/szip\_cygwin\_encoder.zip  \\
-and also extract it into your home directory on cygwin.
+and also extract it into your home directory on Cygwin.
 
-Next, download the cxs software here and put it into your home
-directory on cygwin \\
-(C:\textbackslash{}cygwin\textbackslash{}home\textbackslash{}your\_user\_name). Open cygwin and
+Next, download the CXS software here and put it into your home
+directory on Cygwin \\
+(C:\textbackslash{}cygwin\textbackslash{}home\textbackslash{}your\_user\_name). Open Cygwin and
 unzip and untar the package:
 \begin{myverbatim}
 $ gunzip CXS.rel_0.4.tar.gz 
@@ -324,7 +325,7 @@ $ tar -xvvf CXS.rel_0.4.tar
 \end{myverbatim}
 
 When you type ``ls'' you should see the directory "cxs\_software" plus a
-few others. Change into the cxs\_software directory:
+few others. Change into the CXS\_software directory:
 \begin{myverbatim}
 $ cd cxs_software 
 \end{myverbatim}
@@ -334,7 +335,7 @@ Tell the package where your hdf and szip libraries files are located
 $ ./configure --with-mfhdf_lib=/home/"user_name"/hdf4.2.5-cygwin-szip/lib --with-mfhdf_inc=/home/"user_name"/hdf4.2.5-cygwin-szip/include --with-sz_lib=/home/"user_name"/szip_cygwin_encoder/lib 
 \end{myverbatim}
 
-If you get an errror, check that the paths given to configure are
+If you get an error, check that the paths given to configure are
 correct; the lib directories should have files starting with "lib" and
 the include directory should have files ending in ".h". If configure
 worked correctly, compile the libraries and examples:
@@ -401,7 +402,7 @@ Note: this section is only applicable to users who are members of
 the ARC Centre of Excellence in Coherent X-ray Science (CXS).
 
 If you want to quickly use the software without the hassle of
-installing many packages, the simplest way is by logging into osiris
+installing many packages, the simplest way is by logging into Osiris
 and using it there. This will also be useful to know how to do in the
 long run because the computing power available there is more than your
 laptop/desktop. The first step is to ask for an account on OSIRIS if
@@ -443,7 +444,7 @@ Xming~\cite{} to be good. I installed it with the default options
 ("normal Putty").
 
 I also found that I need to install Xming-fonts in order for the
-"emacs" text editor to disply fonts correctly. During the set-up I
+"emacs" text editor to display fonts correctly. During the set-up I
 ticked all the boxes so that all the fonts were installed.
 
 Now, each time you want to log into osiris you will need to run Xming
@@ -466,7 +467,7 @@ Finally go into putty again, and load your "osiris" session.
 \subsubsection{Setting up your environment on Osiris}
 \label{osiris-setup}
 Once you have successfully logged in, append your PATH variable to the
-directory where the cxs programs are located. This can be done by
+directory where the CXS programs are located. This can be done by
 typing:
 \begin{myverbatim}
   export PATH=$PATH:/data/DIXE/dixe/tags/rel_0.4/cxs_software/bin 
@@ -1519,7 +1520,7 @@ but restricting the type to double is sufficient our needs.
 \subsection{Complex\_2D}
 This class represents a 2D complex field. Setter and getter methods
 are provided along with some other useful functions (add, multiplying
-and fast fourier transforming). Complex\_2D objects are used in the CDI
+and fast Fourier transforming). Complex\_2D objects are used in the CDI
 reconstruction to represent the ESW in a single plane.
 
 \subsection{Config}

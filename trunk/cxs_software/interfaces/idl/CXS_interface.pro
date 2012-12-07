@@ -1256,7 +1256,7 @@ end
 ;
 ; EXAMPLE:
 ;       Performing the reconstruction with a new constraint applied in the
-;       sample plane (e.g. called "NEW_SUPPORT"):
+;       sample plane (e.g. called "NEW_SUPPORT")
 ;
 ;              FOR K = 0, 100 DO BEGIN 
 ;                  a = CXS_PROPAGATE_TO_DETECTOR(a,/SUPPRESS_DISPLAY)

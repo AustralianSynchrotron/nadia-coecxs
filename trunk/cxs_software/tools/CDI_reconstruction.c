@@ -44,15 +44,15 @@
 #include <stdlib.h>
 #include <fftw3.h>
 #include <cstdlib> 
-#include "io.h"
-#include "Complex_2D.h"
-#include "Double_2D.h"
-#include "BaseCDI.h"
-#include "PlanarCDI.h"
-#include "FresnelCDI.h"
-#include "FresnelCDI_WF.h"
-#include "PartialCDI.h"
-#include "Config.h"
+#include <io.h>
+#include <Complex_2D.h>
+#include <Double_2D.h>
+#include <BaseCDI.h>
+#include <PlanarCDI.h>
+#include <FresnelCDI.h>
+#include <FresnelCDI_WF.h>
+#include <PartialCDI.h>
+#include <Config.h>
 
 using namespace std;
 

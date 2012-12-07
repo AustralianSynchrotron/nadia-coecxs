@@ -25,9 +25,9 @@
 #include <stdlib.h>
 #include "io.h"
 //#include "utils.h"
-#include "Complex_2D.h"
-#include "Double_2D.h"
-#include "FresnelCDI.h"
+#include <Complex_2D.h>
+#include <Double_2D.h>
+#include <FresnelCDI.h>
 #include <cstdlib>
 #include <math.h>
 #include <string>

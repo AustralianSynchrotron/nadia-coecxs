@@ -20,7 +20,7 @@ all: $(EXAMPLE_EXEC)
 
 
 clean:                                                     
-	rm -f *~
+	rm -f *.exe* ~
 
 clobber: clean
 	rm -f *.exe

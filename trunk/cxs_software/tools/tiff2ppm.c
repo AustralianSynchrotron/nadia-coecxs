@@ -19,8 +19,8 @@
 
 #include <iostream>
 #include <stdlib.h>
-#include "Double_2D.h"
-#include "io.h"
+#include <Double_2D.h>
+#include <io.h>
 
 using namespace std;
 

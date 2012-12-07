@@ -12,9 +12,9 @@
 #include <cmath>
 
 #if defined(HAVE_HDF_MFHDF_H)
-#include "hdf/mfhdf.h"
+#include <hdf/mfhdf.h>
 #else
-#include "mfhdf.h"
+#include <mfhdf.h>
 #endif
 
 #include <io.h>

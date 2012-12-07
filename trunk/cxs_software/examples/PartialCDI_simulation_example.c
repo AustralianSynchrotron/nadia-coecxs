@@ -1,11 +1,11 @@
-// Copyright 2011 Nadia Davidson 
+// Copyright 2012 T'Mir Juliusn 
 // for The ARC Centre of Excellence in Coherent X-ray Science. 
 //
 // This program is distributed under the GNU General Public License. 
 // We also ask that you cite this software in publications where you made 
 // use of it for any part of the data analysis.
 //
-// date last modified: 17/01/2011
+// date last modified: 07/12/2012
 
 /**
  * @file PartialCDI_simulation_example.c
@@ -192,7 +192,7 @@ int main(void){
       ostringstream temp_str ( ostringstream::out ) ;
       pattern.get_2d(MAG,result);
       temp_str << "part_sim_result_" << i << ".ppm";
-      write_ppm(temp_str.str(), result);
+      write_ppm(temp_str.str(), result, true);
 
       my_partial.apply_shrinkwrap();
 
@@ -212,7 +212,7 @@ int main(void){
       ostringstream temp_str ( ostringstream::out ) ;
       pattern.get_2d(MAG,result);
       temp_str << "part_sim_result_" << i << ".ppm";
-      write_ppm(temp_str.str(), result);
+      write_ppm(temp_str.str(), result, true);
 
       my_partial.apply_shrinkwrap();
 

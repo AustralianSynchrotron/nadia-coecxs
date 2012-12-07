@@ -20,6 +20,9 @@
  <li> @copydoc PlanarCDI_simulation_example.c
  <li> @copydoc FresnelCDI_WF_example.c
  <li> @copydoc FresnelCDI_example.c
+ <li> @copydoc PartialCDI_example.c
+ <li> @copydoc PartialCDI_simulation_example.c
+ <li> @copydoc PolyCDI_example.c
  <li> \a PlanarCDI_example.sh - Some of the same reconstuctions as above will
  be performed using the CDI_reconstruction.exe command line program. A
  simple bash script and configuration file (planar_example.config)
