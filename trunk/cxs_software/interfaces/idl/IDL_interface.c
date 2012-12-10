@@ -16,16 +16,17 @@
 #include "idl_export.h"
 
 //cxs software headers
-#include "Complex_2D.h"
-#include "Double_2D.h"
-#include "BaseCDI.h"
-#include "PlanarCDI.h"
-#include "FresnelCDI.h"
-#include "FresnelCDI_WF.h"
-#include "PartialCDI.h"
-#include "PhaseDiverseCDI.h"
-#include "TransmissionConstraint.h"
-#include "io.h"
+#include <Complex_2D.h>
+#include <Double_2D.h>
+#include <BaseCDI.h>
+#include <PlanarCDI.h>
+#include <FresnelCDI.h>
+#include <FresnelCDI_WF.h>
+#include <PartialCDI.h>
+#include <PolyCDI.h>
+#include <PhaseDiverseCDI.h>
+#include <TransmissionConstraint.h>
+#include <io.h>
 
 Complex_2D* esw = 0;
 BaseCDI * reco = 0;
@@ -325,6 +326,16 @@ extern "C" void IDL_partial_init(int argc, void * argv[])
 
 }
 
+extern "C" void IDL_poly_init(int argc, void * argv[])
+{
+
+  common_init(argc, argv, 3);
+
+  reco = new PolyCDI(*esw);
+
+}
+
+
 /***** Getter and setter methods ********************/
 
 
@@ -587,7 +598,6 @@ extern "C" void IDL_initialise_matrices(int argc, void * argv[]){
   double dnmodes = *(double*) argv[1];
 
   if(dnleg < dnmodes){
-
     ostringstream oss (ostringstream::out);
     oss <<"The order of the legendre approximation"
       <<" must be greater than or equal to the number"
@@ -595,9 +605,7 @@ extern "C" void IDL_initialise_matrices(int argc, void * argv[]){
       <<" initialised" <<endl;
 
     IDL_Message(IDL_M_GENERIC, IDL_MSG_INFO, oss.str().c_str());
-
     return;
-
   }
 
   if(typeid(*reco)==typeid(PartialCDI)){
@@ -617,7 +625,22 @@ extern "C" void IDL_initialise_matrices(int argc, void * argv[]){
     IDL_Message(IDL_M_GENERIC, IDL_MSG_INFO, oss.str().c_str());
     return;
   }
+}
 
+extern "C" void IDL_set_spectrum(int argc, void * argv[]){
+
+  if(typeid(*reco)==typeid(PolyCDI)){
+    IDL_STRING filename = *(IDL_STRING*)argv[0];
+    ((PolyCDI*) reco)->set_spectrum(filename.s);
+  }else{
+    ostringstream oss (ostringstream::out);
+    oss << "Sorry, can't set the spectrum for "
+      << "anything other than "<< typeid(PolyCDI).name() <<" reconstuction. "
+      << "You are doing "<<typeid(*reco).name()
+      << " reconstruction." << endl;
+    IDL_Message(IDL_M_GENERIC, IDL_MSG_INFO, oss.str().c_str());
+    return;
+  }
 }
 
 extern "C" void IDL_get_mode(int argc, void * argv[]){

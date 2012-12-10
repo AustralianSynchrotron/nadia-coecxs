@@ -7,7 +7,7 @@
 #include <iostream>
 #include <fstream>
 #include <math.h>
-#include <string>
+#include <cstring>
 #include <stdlib.h>
 #include <cstdlib> 
 #include <Complex_2D.h>
@@ -23,42 +23,71 @@ using namespace std;
 //constructor for the class which handles partially coherent diffractive imaging.
 
 PolyCDI::PolyCDI(Complex_2D & initial_guess,
-    Double_2D & spectrum,
     double beta, 
     int n_best,
     bool parallel
     )
 : BaseCDI(initial_guess,n_best),
-  spectrum(spectrum),
   beta(beta), 
   parallel(parallel),
   intensity_sqrt_calc(nx, ny){
 
-    nlambda=spectrum.get_size_x();
-
-    double maxweight=0;
-    double totweight=0;
-
-    for(int i=0; i<nlambda; i++){
-      if(spectrum.get(i, WEIGHT) > maxweight){
-	lambdac = spectrum.get(i, WL);
-	maxweight=spectrum.get(i, WEIGHT);
-      }
-      totweight+=spectrum.get(i, WEIGHT);
-    }
-
-    //std::cout<<"lambdac is "<<lambdac<<endl;
-
-    for(int i=0; i<nlambda; i++){
-      spectrum.set(i, WEIGHT, spectrum.get(i, WEIGHT)/totweight);
-    }
-    //Create arrays for the x and y positions of pixels within the detector.
   }
 
 //destructor for cleaning up
 PolyCDI::~PolyCDI(){
 
 }
+
+//Initialise the spectrum Double_2D from a file
+void PolyCDI::set_spectrum(string file_name){
+
+  read_spec(file_name, spectrum);
+  nlambda=spectrum.get_size_x();
+
+  double maxweight=0;
+  double totweight=0;
+
+  for(int i=0; i<nlambda; i++){
+    if(spectrum.get(i, WEIGHT) > maxweight){
+      lambdac = spectrum.get(i, WL);
+      maxweight=spectrum.get(i, WEIGHT);
+    }
+    totweight+=spectrum.get(i, WEIGHT);
+  }
+
+  //std::cout<<"lambdac is "<<lambdac<<endl;
+
+  for(int i=0; i<nlambda; i++){
+    spectrum.set(i, WEIGHT, spectrum.get(i, WEIGHT)/totweight);
+  }
+
+}
+
+//Initialise the spectrum Double_2D from a Double_2D
+void PolyCDI::set_spectrum(Double_2D spectrum_in){
+  spectrum=spectrum_in;
+  nlambda=spectrum.get_size_x();
+
+  double maxweight=0;
+  double totweight=0;
+
+  for(int i=0; i<nlambda; i++){
+    if(spectrum.get(i, WEIGHT) > maxweight){
+      lambdac = spectrum.get(i, WL);
+      maxweight=spectrum.get(i, WEIGHT);
+    }
+    totweight+=spectrum.get(i, WEIGHT);
+  }
+
+  //std::cout<<"lambdac is "<<lambdac<<endl;
+
+  for(int i=0; i<nlambda; i++){
+    spectrum.set(i, WEIGHT, spectrum.get(i, WEIGHT)/totweight);
+  }
+
+}
+
 
 //set the initial guess.
 //fills the transmission function with a random 
@@ -254,13 +283,13 @@ void PolyCDI::expand_wl(Complex_2D & c){
 
   Double_2D intensity(nx, ny);
 
-/*  for(int i=0; i<nx; i++){
-    for(int j=0; j<ny; j++){
+  /*  for(int i=0; i<nx; i++){
+      for(int j=0; j<ny; j++){
 
       intensity.set(i, j, 0.0);
-    }
-  }
-*/
+      }
+      }
+   */
   for(int sn=0; sn<nlambda; sn++){
 
     double lambda=spectrum.get(sn, WL);

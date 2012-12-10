@@ -83,7 +83,9 @@ int main(void){
   read_spec(data_spectrum_name, spectrum);
 
   Complex_2D first_guess(n_x,n_y);
-  PolyCDI my_poly(first_guess, spectrum, 0.9, 4, 0);
+  PolyCDI my_poly(first_guess, 0.9, 4, 0);
+
+  my_poly.set_spectrum(spectrum);
 
   //propagate to the detector plane
   my_poly.propagate_to_detector(input);

@@ -5,14 +5,14 @@
 // analysis. 
 
 //author:  T'Mir Julius <tdjulius@unimelb.edu.au>
-//date last modified: 22/10/2012
+//date last modified: 07/12/2012
 
 /**
  * @file CDI_reconstruction.c
  *
  * \a CDI_reconstruction.exe A tool for performing Planar, Fresnel or 
- * Partially Sptially ESW reconstruction.  This tool is provided as a 
- * demonstrative tool and to obtain results quickly.
+ * Partial Coherent (spatial and temporal) ESW reconstruction.  This 
+ * tool is provided as a demonstrative tool and to obtain results quickly.
  *
  * \par Usage: CDI_reconstruction.exe \<config filename\> \<reco_type\> \<seed\>
  *
@@ -22,7 +22,8 @@
  * - "fresnel_wf" - fresnel white-field reconstruction (3-plane propagation) 
  * - "fresnel" - fresnel object reconstruction. with the white-field 
  *               previously reconstructed.
- * - "partial" - partial spatial reconstruction
+ * - "partial" - partial spatial reconstruction.
+ * - "poly" - polychromatic or partially spatial reconstruction.
  *
  * The seed should be an integer. If the seed is excluded from the
  * command line arguments, it is assumed to be "0". If reco_type is
@@ -52,6 +53,7 @@
 #include <FresnelCDI.h>
 #include <FresnelCDI_WF.h>
 #include <PartialCDI.h>
+#include <PolyCDI.h>
 #include <Config.h>
 
 using namespace std;
@@ -64,6 +66,8 @@ static const string planar_string="planar";
 static const string fresnel_string="fresnel";
 static const string fresnel_wf_string="fresnel_wf";
 static const string partial_string="partial";
+static const string poly_string="poly";
+
 
 
 void print_usage(){
@@ -282,15 +286,27 @@ int main(int argc, char * argv[]){
 	  sample_to_detector,
 	  nleg,
 	  nmode);
+
     }
+    else if(reco_type.compare(poly_string)==0){
+
+      string spectrum_file_name = c.getString("spectrum_file_name");
+
+      proj = new PolyCDI(object_estimate);
+      proj.set_spectrum(spectrum_file_name);
+
+    }
+
 
     else{
       cout << "the reconstruction type specified ("
 	<< reco_type << ") is "
 	<< "unrecognised. Please use: "
 	<< planar_string << ", "
-	<< fresnel_string << " or "
-	<< fresnel_wf_string << endl;
+	<< fresnel_string << ", "
+	<< fresnel_wf_string << ", "
+	<< partial_string << " or "
+	<< poly_string << endl;
       exit(1);
     }
   }

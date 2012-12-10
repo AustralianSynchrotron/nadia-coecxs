@@ -66,3 +66,14 @@
 	  configuration can still be used through the configure option
 	  --enable-double-precision
 -------------------------------------------------------------------
+07/12/2012 T'Mir Julius
+	* rel_0.5
+	* src/PartialCDI.c++ and src/PolyCDI.c++ added. These allow 
+	  reconstruction of Partially Spatially Coherent and 
+	  Polychromatic data.
+	* example/PolyCDI_example.c, example/PolyCDI_simulation_example.c
+	  example/PartialCDI_example.c and example/Partial_simulation_example.c
+	  have been added.
+	* interfaces/idl/partial_example.pro and idl/poly_example.pro and
+	  the IDL interface has been modified to allow for partial coherence
+--------------------------------------------------------------------

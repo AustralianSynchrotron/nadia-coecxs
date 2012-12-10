@@ -1,5 +1,5 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-; Copyright 2011 Nadia Davidson 
+; Copyright 2011 Nadia Davidson, 2012 T'Mir Julius
 ; for The ARC Centre of Excellence in Coherent X-ray Science. 
 ;
 ; This program is distributed under the GNU General Public License. 
@@ -459,8 +459,84 @@ IF N_Params() EQ 11 THEN $
 cxs_set_support, support
 cxs_set_intensity, data
 
-IF N_Params() LT 9 THEN $
+IF N_Params() LT 11 THEN $
   cxs_initialise_esw
+
+end
+
+;+
+; NAME:
+;       CXS_INIT_POLY
+;
+; PURPOSE:
+;       Set-up a Polychromatic CDI reconstruction. This will
+;       initialise the reconstruction with sample support and experimental 
+;       parameters. Some defaults will be set and memory will be
+;       allocated ready for reconstructing the sample
+;       exit-surface-wave. It is necessary to call this procedure before
+;       attempting to call any of the reconstruction methods
+;       (e.g. before setting the algorithm or calling CXS_ITERATE).
+;
+;       Calling this procedure will initialise the reconstruction algorithm
+;       to the error-reduction with a relaxation parameter of 0.9.
+;
+; CALLING SEQUENCE:
+;
+; CXS_INIT_PARTIAL, data, support, beta, [, starting_point ]
+;
+; INPUTS:
+;
+;       Please use metres for the lengths, and eV for the energy.
+;
+;       data: 
+;             The detector data with the sample in place. It should be
+;             in the form of a 2D array.
+;
+;       support: 
+;             A 2D array of integers or doubles which give the sample support.
+;             Values or 1 or greater are considered inside
+;             the support. All others are considered to be
+;             outside the support.
+;
+;       beta:
+;             The relaxation parameter.
+;	
+;       starting_point: 
+;             As an option you may supply an initial 
+;             guess of the exit-surface-wave for the sample. 
+;             This maybe useful, for example, if you wish to 
+;             start from the end point of a previous run. The
+;             format of this parameter much be a 2D array of
+;             COMPLEX variables. If this parameter is not supplied,
+;             the initialisation described in Harry's review paper: 
+;             page 29. (in particular e.q. 137) is used.
+;
+; EXAMPLE:
+;
+;        cxs_init_fresnel, my_data, my_supports
+;-
+pro cxs_init_poly, data, support, $
+                      beta, $
+                      complex_array
+                   
+n = size(data)
+nx = n[2]
+ny = n[1]
+IF N_Params() EQ 4 THEN $
+ b = call_external(lib_name(),'IDL_poly_init',long(nx),long(ny), $
+                    double(beta), $
+                    complex_array)
+IF N_Params() EQ 3 THEN $
+ b = call_external(lib_name(),'IDL_partial_init',long(nx),long(ny), $
+                    double(beta))
+
+IF N_Params() eq 2 THEN $
+  b = call_external(lib_name(),'IDL_poly_init',long(nx),long(ny))
+
+cxs_set_support, support
+cxs_set_intensity, data
+
+
 
 end
 
@@ -535,11 +611,11 @@ end
 ;       cxs_get_round_support, 1024, 1024, 0.25*1024
 ;-
 function cxs_get_round_support, n_x, n_y, radius
-  result = make_array(n_x,n_y,/DOUBLE)
-  b = call_external(lib_name() ,'IDL_get_round_support', $
-                    long(n_x),long(n_y),double(radius),result) 
-  show, result
-  return, result
+result = make_array(n_x,n_y,/DOUBLE)
+b = call_external(lib_name() ,'IDL_get_round_support', $
+  long(n_x),long(n_y),double(radius),result) 
+show, result
+return, result
 end
 
 
@@ -613,1272 +689,1296 @@ end
 ;       Initialise the exit-surface-wave guess. The initialisation
 ;       will depend on the reconstruction type (see the procedures
 ;       which begin "CXS_INIT_" for a description). The "INIT" procedure  
-;       will call this procedure if no starting guess is provided. 
-;       It is useful if you wish to run the same reconstruction
-;       several time with a different random starting point, or if 
-;       you wish to reset the reconstruction back to the original guess.
-;
-;
-; CALLING SEQUENCE:
-;
-;	CXS_INITIALISE_ESW, seed
-;
-; INPUTS:
-;
-;       seed: 
-;             Seed for the random number generator used to initialise
-;             the guess. It should be an integer. This is ignored in 
-;             the case of Fresnel CDI.
-;
-;
-; EXAMPLE:
-;
-;       cxs_initialise_esw, 6
-;-
-pro cxs_initialise_esw, seed
-IF N_Params() EQ 0 THEN $
-  seed = 0
-b = call_external(lib_name() ,'IDL_initialise_esw',long(seed)) 
-end
+  ;       will call this procedure if no starting guess is provided. 
+  ;       It is useful if you wish to run the same reconstruction
+  ;       several time with a different random starting point, or if 
+  ;       you wish to reset the reconstruction back to the original guess.
+  ;
+  ;
+  ; CALLING SEQUENCE:
+  ;
+  ;	CXS_INITIALISE_ESW, seed
+  ;
+  ; INPUTS:
+  ;
+  ;       seed: 
+  ;             Seed for the random number generator used to initialise
+  ;             the guess. It should be an integer. This is ignored in 
+  ;             the case of Fresnel CDI.
+  ;
+  ;
+  ; EXAMPLE:
+  ;
+  ;       cxs_initialise_esw, 6
+  ;-
+  pro cxs_initialise_esw, seed
+  IF N_Params() EQ 0 THEN $
+    seed = 0
+  b = call_external(lib_name() ,'IDL_initialise_esw',long(seed)) 
+  end
 
-;+
-; NAME:
-;       CXS_INITIALISE_MATRICES
-;
-; PURPOSE:
-;       generate the S and J matrices for the decomposition 
-;       of the partially coherent wave where JC=nSC where
-;       H = integral(P*l(r)J(r1, r2)Pm(r2)) dr1 dr2 and 
-;       S=integral(P*l(r)pm(r))dr where Pl is an orhtonormal
-;       basis set, in this case, the Legendre polynomials
-;
-; CALLING SEQUENCE:
-;
-; CXS_INITIALISE_MATRICES, nleg, nmodes
-;
-; INPUTS:
-;
-;       nleg: 
-;             Number of orthogonal components for the light source.
-;             
-;       nmodes: 
-;             Number of component modes for the light sources. nleg
-;             must be greater than nmodes.
-;
-;
-; EXAMPLE:
-;
-;       cxs_initialise_matrices, 5, 6
-;-
-pro cxs_initialise_matrices, nleg, nmodes
-b = call_external(lib_name() ,'IDL_initialise_matrices', double(nleg), double(nmodes)) 
-end
-;+
-; NAME:
-;       CXS_ITERATE
-;
-; PURPOSE:
-;       Perform the iterative reconstruction. The number of iterations
-;       to perform should be given and the result of the final
-;       iteration is returned. For planar and Fresnel CDI this will be
-;       the exit surface wave of the sample. For Fresnel white-field
-;       reconstruction it will be the white-field at the detector surface.
-;       The magnitude of the result is also displayed on the screen as
-;       a 512x512 pixel image. The iteration number and corresponding
-;       error (see CXS_GET_ERROR) will be printed on the screen.
-;
-;       CXS_ITERATE may be called several time and the reconstruction
-;       will start from where is ended. i.e. calling CXS_ITERATE(50),
-;       followed by a second CXS_ITERATE(50) is equivalent to calling
-;       CXS_ITERATE(100).
-;
-;       During the reconstruction, the best (lowest error) result is
-;       also stored. It maybe retrieved by calling CXS_GET_BEST_RESULT.
-; 
-;
-; CALLING SEQUENCE:
-;
-;	result = CXS_ITERATE([iterations])
-;
-; INPUTS:
-;
-;       iterations: 
-;             The number of iterations to perform (an integer). 
-;             If left empty, one iteration is performed.
-;
-; OUTPUTS:
-;
-;       result:
-;             A COMPLEX 2D array. For planar and Fresnel CDI this will be
-;             the exit surface wave of the sample. For Fresnel white-field
-;             reconstruction it will be the white-field at the detector surface.
-;
-;
-; EXAMPLE:
-;
-;       my_result = cxs_iterate(100)
-;-
-function cxs_iterate, iterations
-nx = call_external(lib_name(),'IDL_get_array_x_size')
-ny = call_external(lib_name(),'IDL_get_array_y_size')
-result = make_array(nx,ny,/COMPLEX)
-IF N_Params() EQ 0 THEN $
-   iterations = 1
-b = call_external(lib_name() ,'IDL_iterate',long(iterations),result) 
-show, ABS(result)
-return, result
-end
+  ;+
+  ; NAME:
+  ;       CXS_INITIALISE_MATRICES
+  ;
+  ; PURPOSE:
+  ;       generate the S and J matrices for the decomposition 
+  ;       of the partially coherent wave where JC=nSC where
+  ;       H = integral(P*l(r)J(r1, r2)Pm(r2)) dr1 dr2 and 
+  ;       S=integral(P*l(r)pm(r))dr where Pl is an orhtonormal
+  ;       basis set, in this case, the Legendre polynomials
+  ;
+  ; CALLING SEQUENCE:
+  ;
+  ; CXS_INITIALISE_MATRICES, nleg, nmodes
+  ;
+  ; INPUTS:
+  ;
+  ;       nleg: 
+  ;             Number of orthogonal components for the light source.
+  ;             
+  ;       nmodes: 
+  ;             Number of component modes for the light sources. nleg
+  ;             must be greater than nmodes.
+  ;
+  ;
+  ; EXAMPLE:
+  ;
+  ;       cxs_initialise_matrices, 5, 6
+  ;-
+  pro cxs_initialise_matrices, nleg, nmodes
+  b = call_external(lib_name() ,'IDL_initialise_matrices', double(nleg), double(nmodes)) 
+  end
 
-;+
-; NAME:
-;       CXS_SET_RELAXATION_PARAMETER
-;
-; PURPOSE:
-;       Set the relaxation parameter. The default relaxation
-;       parameter used in Planar and Fresnel reconstruction is 0.9.
-;       In Fresnel white-field reconstruction, this parameter is 
-;       not used.
-;
-; CALLING SEQUENCE:
-;
-;	CXS_SET_RELAXATION_PARAMETER, beta
-;
-; INPUTS:
-;
-;       beta: 
-;             The relaxation parameter.
-;
-; EXAMPLE:
-;
-;       cxs_set_relaxation_parameter, 0.9
-;-
-pro cxs_set_relaxation_parameter, beta
-b = call_external(lib_name() ,'IDL_set_relaxation_parameter',double(beta)) 
-end
-
-;+
-; NAME:
-;       CXS_APPLY_SHRINKWRAP
-;
-; PURPOSE:
-;       Apply the shrinkwrap algorithm. The current exit-surface-wave
-;       magnitude is used to update the support; it is convoluted with
-;       a Gaussian and then a threshold is applied. You can use the
-;       cxs_get_support function to see how the support have been
-;       modified after calling this procedure.
-;
-; CALLING SEQUENCE:
-;
-;	CXS_APPLY_SHRINKWRAP [,gauss_width, threshold ]
-;
-; INPUTS:
-;
-;       gauss_width: 
-;             The width (1-standard deviation. in pixels) of the Gaussian
-;             used for smearing. If this parameter is not passed, 
-;             a width of 1.5 pixels is used.
-;
-;       threshold:
-;             All pixels which are below the threshold are set to zero 
-;             (outside the support). The threshold should be given as
-;             a fraction of the maximum pixel value (in double format). 
-;             If this parameter is not passed a threshold of 0.1 (10%)
-;             is used.
-;
-; EXAMPLE:
-;       Perform 1000 iterations in total, applying shrink-wrap at the 400th iteration:
-;
-;       ....
-;       a = CXS_ITERATE(400)
-;       CXS_APPLY_SHRINKWRAP
-;       a = CXS_ITERATE(600)
-;-
-pro cxs_apply_shrinkwrap, gauss_width, threshold
-if N_Params() lt 2 then threshold = 0.1 
-if N_Params() lt 1 then gauss_width = 1.5
-b = call_external(lib_name() ,'IDL_apply_shrinkwrap',double(gauss_width),double(threshold))
-end
-
-;+
-; NAME:
-;       CXS_SET_ALGORITHM
-;
-; PURPOSE:
-;       Select the reconstruction algorithm to use. Options are:
-;       'ER' - error reduction 
-;       'BIO' - basic input-output 
-;       'BOO' - basic output-output 
-;       'HIO' - hybrid input-output 
-;       'DM' - difference map 
-;       'SF' - solvent-flipping 
-;       'ASR' - averaged successive reflections 
-;       'HPR' - hybrid projection reflection 
-;       'RAAR' - relaxed averaged alternating reflectors
-;
-; CALLING SEQUENCE:
-;
-;       CXS_SET_ALGORITHM, algorithm
-;
-; INPUTS:
-;
-;       algorithm:
-;             Set the reconstruction algorithm. It should be
-;             one of the options listed above. Note that it is
-;             passed as a string.
-;
-; EXAMPLE:
-;       Perform 1000 iterations in total, changing to error-reduction at the 400th iteration:
-;       ....
-;       a = CXS_ITERATE(400)
-;       CXS_SET_ALGORITHM, 'ER'
-;       a = CXS_ITERATE(600)
-;-
-pro cxs_set_algorithm, algorithm
-b = call_external(lib_name() ,'IDL_set_algorithm',algorithm)
-end
-
-;+
-; NAME:
-;       CXS_SET_CUSTOM_ALGORITHM
-;
-; PURPOSE:
-;       Set a custom reconstruction algorithm.
-;       
-;       Iterative reconstruction algorithms can be expressed as a
-;       combination of several operators. The parameters to this
-;       procedure set the coefficients for combinations of these
-;       operators. For a description, please see page 22 of the
-;       H.M. Quiney review: TUTORIAL REVIEW, Coherent diffractive
-;       imaging using short wavelength light sources, Journal of
-;       Modern Optics, 2010, DOI: 10.1080/09500340.2010.495459.  Some
-;       description is also given in the C++ doxygen documentation
-;       for PlanarCDI::set_custom_algorithm.
-;
-;
-; CALLING SEQUENCE:
-;
-;       CXS_SET_CUSTOM_ALGORITHM, m1, m2, m3, m4, m5, m6, m7, m8, m9, m10
-;
-; INPUTS:
-;
-;       m1-m10:
-;             Coefficients to the operator combinations.
-;
-; EXAMPLE:
-;       Perform 1000 iterations in total, changing to a custom
-;       algorithm at the 400th iteration and print the algorithm to screen:
-
-;       ....
-;       a = CXS_ITERATE(400)
-;       CXS_SET_ALGORITHM, 0.5, 0.5, 0.5, 0.5, 0.5, $ 
-;                          0.5, 0.5, 0.5, 0.5, 0.5
-;       CXS_PRINT_ALGORITHM                    
-;       a = CXS_ITERATE(600)
-;-
-pro cxs_set_custom_algorithm, m1, m2, m3, m4, m5, m6, m7, m8, m9, m10
-b = call_external(lib_name() ,'IDL_set_custom_algorithm', $
-                  double(m1), $
-                  double(m2), $
-                  double(m3), $ 
-                  double(m4), $ 
-                  double(m5), $
-                  double(m6), $
-                  double(m7), $
-                  double(m8), $
-                  double(m9), $
-                  double(m10) )
-end
-
-
-;+
-; NAME:
-;       CXS_GET_BEST_RESULT
-;
-; PURPOSE:
-;       Get the best (lowest error) result found during the reconstruction.
-;       The result is returned and the magnitude of the result is
-;       displayed as a 512x512 pixel image on the screen.
-;
-; CALLING SEQUENCE:
-;
-;       result = CXS_GET_BEST_RESULT()
-;
-; OUTPUTS:
-;
-;       result:
-;             A 2D array of COMPLEX variables. For planar and Fresnel
-;             reconstruction this will be the  exit-surface-wave for
-;             the sample. For Fresnel white-field reconstruction, this
-;             will be the complex white-field in the detector plane.
-;
-;
-; EXAMPLE:
-;       Perform 1000 iterations and get the lowest error result.
-;       ....
-;       a = CXS_ITERATE(1000)
-;       a = CXS_GET_BEST_RESULT()
-;-
-function cxs_get_best_result 
-result = make_array(nx(),ny(),/COMPLEX)
-b = call_external(lib_name() ,'IDL_get_best_result',result)
-show, ABS(result)
-return, result
-end
-
-;+
-; NAME:
-;       CXS_GET_SUPPORT
-;
-; PURPOSE:
-;       Get the support. This maybe useful to see how shrinkwrap has
-;       effected the support. The result is displayed as a 512x512 
-;       pixel image on the screen.
-;
-; CALLING SEQUENCE:
-;
-;       support = CXS_GET_SUPPORT()
-;
-; OUTPUTS:
-;
-;       support:
-;             The support. A 2D array of doubles. A pixel with value below 1
-;             is outside the support and 1 and above is inside the support.
-;
-; EXAMPLE:
-;       View the support after applying shrink-wrap.
-; 
-;       CXS_APPLY_SHRINKWRAP
-;       a = CXS_GET_SUPPORT()
-;-
-function cxs_get_support
-result = make_array(nx(),ny(),/DOUBLE)
-b = call_external(lib_name() ,'IDL_get_support',result) 
-show, result
-return, result
-end
-
-;+
-; NAME:
-;       CXS_GET_ERROR
-;
-; PURPOSE:
-;       Get the error metric. This is defined as the difference
-;       between the estimated diffraction and the actual diffraction
-;       pattern and is calculated as:
-;           sum over pixels of ( M - sqrt(I) ) ^2 / sum(I) 
-;       Where I is the detector data and M is the magnitude of the
-;       estimate in the detector plane. Note that due to the way this
-;       quantity is calculated, it actually corresponds to the
-;       previous estimate rather than the current iteration.
-;
-;
-; CALLING SEQUENCE:
-;
-;       error = CXS_GET_ERROR()
-;
-; OUTPUTS:
-;
-;       error:
-;             The error. 
-;
-; EXAMPLE:
-;
-;       a = CXS_GET_ERROR()
-;- 
-function cxs_get_error
-result = double(0.0)
-b = call_external(lib_name(),'IDL_get_error',result)
-return, result
-end
-
-;+
-; NAME:
-;       CXS_SET_TRANSMISSION
-; 
-; PURPOSE:
-;       SET THE TRANSMISSION FUNCTION TO BE BEGIN THE RECONSTRUCTION. 
-;       THIS WILL OVERRIDE THE TRANSMISSION FUNCTION AND MAY BE CALLED
-;       AT ANY TIME DURING THE RECONSTRUCTION. NOTE THAT THIS FUNCTION 
-;       IS ONLY AVAILIBLE FOR THE FRESNEL CDI RECONSTRUCTION. 
-;
-; CALLING SEQUENCE:
-;
-; CXS_SET_TRANSMISSION, TRANSMISSION
-;
-; INPUTS:
-;
-;       TRANSMISSION_FUNCTION: 
-;             The transmission function. It should be in 
-;             the form of a 2D array.
-;
-; EXAMPLE:
-;
-;      cxs_transmission, transmission
-;
-;-
-pro cxs_set_transmission, array
-n = size(array)
-b = call_external(lib_name() ,'IDL_set_transmission', n[1],n[2],double(array)) 
-end
-
-;+
-; NAME:
-;       CXS_GET_TRANSMISSION_FUNCTION
-;
-; PURPOSE:
-;       Get the transmission function from the current estimate of the
-;       exit-surface-wave. The magnitude of the result will be
-;       displayed on the screen. Note that this functions
-;       is only available for Fresnel CDI reconstruction.
-;
-; CALLING SEQUENCE:
-;
-;       result = CXS_GET_TRANSMISSION_FUNCTION()
-;
-; OUTPUTS:
-;
-;       result:
-;             The transmission function for the sample. A 2D array of
-;             COMPLEX variables is returned. 
-;
-; EXAMPLE:
-;       a = CXS_GET_TRANSMISSION_FUNCTION()
-;-
-function cxs_get_transmission_function
-result = make_array(nx(),ny(),/COMPLEX)
-b = call_external(lib_name() ,'IDL_get_transmission_function',result) 
-show, abs(result)
-return, result
-end
-
-;+
-; NAME:
-;       CXS_GET_TRANSMISSION
-;
-; PURPOSE:
-;       Get the transmission function from the current estimate of the
-;       exit-surface-wave. The magnitude of the result will be
-;       displayed on the screen. Note that this functions
-;       is only available for Fresnel CDI reconstruction.
-;
-; CALLING SEQUENCE:
-;
-;       result = CXS_GET_TRANSMISSION()
-;
-; OUTPUTS:
-;
-;       result:
-;             The transmission function for the sample. A 2D array of
-;             COMPLEX variables is returned. 
-;
-; EXAMPLE:
-;       a = CXS_GET_TRANSMISSION()
-;-
-function cxs_get_transmission
-result = make_array(nx(),ny(),/COMPLEX)
-b = call_external(lib_name() ,'IDL_get_transmission',result) 
-show, abs(result)
-return, result
-end
-
-;+
-; NAME:
-;       CXS_GET_MODE
-;
-; PURPOSE:
-;       Get the nth mode. This maybe useful to see the ways the 
-;       modes have been divided for the partialCDI
-;
-; CALLING SEQUENCE:
-;
-;       mode = CXS_GET_MODE(n)
-;
-;INPUTS
-;       n: 
-;             The number of the mode retrieved. 0 is the most
-;             dominant mode. If the number is greater than the 
-;             number of availible modes it will return the 
-;             highest indexed modes
-;             
-; OUTPUTS:
-;
-;       mode:
-;             The nth mode. A 2D array of doubles. 
-;             
-; EXAMPLE:
-;       View the nth mode.
-; 
-;       a = cxs_get_mode(1) 
-;-
-function cxs_get_mode, n
-result = make_array(nx(),ny(),/COMPLEX)
-b = call_external(lib_name() ,'IDL_get_mode',result, double(n)) 
-show, abs(result)
-return, result
-end
-
-;+;+
-; NAME:
-;       CXS_SET_THRESHOLD
-; 
-; PURPOSE:
-;       SET THE THRESHOLD OF THE PROMINENCE OF THE LOWEST MODE 
-;       TO BE INCLUDED IN THE RECONSTRUCTION. THIS IS TO ELIMINATE
-;       MODES IN ORDER TO SPEED UP PROCESSING
-;       
-; CALLING SEQUENCE:
-;
-; CXS_SET_THRESHOLD, THRESHOLD_VALUE
-;
-; INPUTS:
-;
-;       THRESHOLD_VALUE: 
-;             The threshold value. It should be a double
-;
-; EXAMPLE:
-;
-;      cxs_set_threshold, 0.0001
-;
-;
-pro cxs_set_threshold, threshold_value
-b = call_external(lib_name() ,'IDL_set_transmission', threshold_value) 
-end
-
-; NAME:
-;       CXS_CLEAR_MEMORY
-;
-; PURPOSE:
-;       Clean-up after a reconstruction has been performed. This 
-;       procedure should be called at the very end of a program.
-;       It will free up the memory that was allocated when one of 
-;       the "CXS_INIT_.." methods was called.
-;
-; CALLING SEQUENCE:
-;
-;       CXS_CLEAR_MEMORY
-;
-; EXAMPLE:
-;       CXS_CLEAR_MEMORY
-;-
-pro cxs_clear_memory
-b = call_external(lib_name() ,'IDL_deallocate_memory')
-end
-
-
-;+
-; NAME:
-;       CXS_GET_INTENSITY_AUTOCORRELATION
-;
-; PURPOSE:
-;       Get the autocorrelation function from the intensity data.
-;       This method is only useful for planar CDI reconstruction.
-;
-; CALLING SEQUENCE:
-;
-;       a = CXS_GET_INTENSITY_AUTOCORRELATION()
-;
-; OUTPUTS:
-;       a:
-;             The autocorrelation function (a 2D array of doubles).
-;
-; EXAMPLE:
-;       a = CXS_GET_INTENSITY_AUTOCORRELATION()
-;-
-function cxs_get_intensity_autocorrelation
-result = make_array(nx(),ny(),/DOUBLE)
-b = call_external(lib_name() ,'IDL_get_intensity_autocorrelation',result) 
-show, result
-return, result
-end
-
-
-
-;+
-; NAME:
-;       CXS_PRINT_ALGORITHM
-;
-; PURPOSE:
-;       Output the form of the current algorithm to the screen. 
-;       It will be written in terms of the support and intensity
-;       projection operators.
-
-;
-; CALLING SEQUENCE:
-;       CXS_PRINT_ALGORITHM
-;
-;
-; EXAMPLE:
-;       CXS_SET_ALGORITHM, 'RAAR'
-;       CXS_PRINT_ALGORITHM
-;-
-pro cxs_print_algorithm
-b = call_external(lib_name() ,'IDL_print_algorithm')
-end
-
-;+
-; NAME:
-;       CXS_PROPAGATE_FROM_DETECTOR
-;
-; PURPOSE:
-;       Propagate the given wave field from the detector plane to the 
-;       sample plane (planar and Fresnel) or zone-plate plane (Fresnel
-;       white-field reconstruction). The result will be returned and
-;       displayed on the screen by default.
-;
-;       This function is called when using (CXS_ITERATE) so generally
-;       won't need to be call explicitly. An exception to this is if
-;       the user wishes to extend the reconstruction with an addition
-;       constraint (see the example below).
-;
-;
-; CALLING SEQUENCE:
-;
-;	result = CXS_PROPAGATE_FROM_DETECTOR( complex_array [,/SUPPRESS_DISPLAY] )
-;
-; INPUTS:
-;
-;       complex_array:
-;             A 2D array of COMPLEX values which represents a wave in
-;             the detector plane.
-;
-; KEYWORD PARAMETERS:
-;
-;       /SUPPRESS_DISPLAY:
-;             Do not display the result on the screen. This maybe useful
-;             if this function is used within a for loop. 
-;
-; OUTPUTS:
-;
-;       result:
-;             A COMPLEX 2D array which is either the field in the
-;             sample plane (for planar and Fresnel reconstruction) or
-;             the zone-plate plane for Fresnel white-field reconstruction.
-;
-; EXAMPLE:
-;       Performing the reconstruction with a new constraint applied in the
-;       sample plane (e.g. called "NEW_SUPPORT")
-;
-;              FOR K = 0, 100 DO BEGIN 
-;                  a = CXS_PROPAGATE_TO_DETECTOR(a,/SUPPRESS_DISPLAY)
-;                  a = CXS_SCALE_INTENSITY(a,/SUPPRESS_DISPLAY)
-;                  a = CXS_PROPAGATE_FROM_DETECTOR(a,/SUPPRESS_DISPLAY)
-;                  a = CXS_APPLY_SUPPORT(a,/SUPPRESS_DISPLAY)
-;                  a = NEW_SUPPORT(a)
-;              ENDFOR 
-;
-;-
-function cxs_propagate_from_detector, complex_array, $
-                                      SUPPRESS_DISPLAY=suppress_display
-check_size, complex_array
-result = make_array(nx(),ny(),/COMPLEX)
-b = call_external(lib_name() ,'IDL_propagate_from_detector',complex_array,result) 
-if not KEYWORD_SET(suppress_display) THEN $
-  show, abs(result)
-return, result
-end
-
-;+
-; NAME:
-;       CXS_PROPAGATE_TO_DETECTOR
-;
-; PURPOSE:
-;       Propagate the given wave field to the detector plane from the 
-;       sample plane (planar and Fresnel) or zone-plate plane (Fresnel
-;       white-field reconstruction). The result will be returned and
-;       displayed on the screen by default.
-;
-;       This function is called when using (CXS_ITERATE) so generally
-;       won't need to be call explicitly. An exception to this is if
-;       the user wishes to perform simulation or to extend their
-;       reconstruction with an addition constraint (see the previous
-;       example).
-;
-;
-; CALLING SEQUENCE:
-;
-;	result = CXS_PROPAGATE_TO_DETECTOR( complex_array [,/SUPPRESS_DISPLAY] )
-;
-; INPUTS:
-;
-;       complex_array:
-;             A 2D array of COMPLEX values which represents a wave in
-;             either the sample plane (for planar and Fresnel
-;             reconstruction) or the zone-plate plane for Fresnel 
-;             white-field reconstruction.
-;
-; KEYWORD PARAMETERS:
-;
-;       /SUPPRESS_DISPLAY:
-;             Do not display the result on the screen. This maybe useful
-;             if this function is used within a for loop. 
-;
-; OUTPUTS:
-;
-;       result:
-;             A COMPLEX 2D array which is the field in the detector plane.
-;
-; EXAMPLE:
-;       Performing Fresnel simulation (assuming you already have a
-;       complex white-field called "white_field" and the transmission
-;       function of the object, "trans").
-;
-;       white_field_at_sample = CXS_PROPAGATE_FROM_DETECTOR(white_field)
-;       esw_at_sample = trans*white_field_at_sample
-;       esw_at_detector = CXS_PROPAGATE_TO_DETECTOR(esw_at_sample)
-;       diffraction_pattern = abs(esw_at_detector)^2
-;-
-function cxs_propagate_to_detector, complex_array, $
-                                    SUPPRESS_DISPLY=suppress_display
-check_size, complex_array
-result = make_array(nx(),ny(),/COMPLEX)
-b = call_external(lib_name() ,'IDL_propagate_to_detector',complex_array,result) 
-if not KEYWORD_SET(suppress_display) THEN $
-show, abs(result)
-return, result
-end
-
-
-;+
-; NAME:
-;       CXS_APPLY_SUPPORT
-;
-; PURPOSE:
-;       Apply the support constraint to the given complex array. All
-;       elements outside the support with be reset to zero. Elements
-;       within the support will be left as they are. The support must
-;       have been previously set using either one of the CXS_INIT 
-;       functions or CXS_SET_SUPPORT.
-;
-;       This function is called when using (CXS_ITERATE) so generally
-;       won't need to be call explicitly. An exception to this is if
-;       the user wishes to extend their reconstruction with an
-;       addition constraint.
-;
-;
-; CALLING SEQUENCE:
-;
-;	result = CXS_APPLY_SUPPORT( complex_array [,/SUPPRESS_DISPLAY] )
-;
-; INPUTS:
-;
-;       complex_array:
-;             A 2D array of COMPLEX values which represents a wave in
-;             either the sample plane (for planar and Fresnel
-;             reconstruction) or the zone-plate plane for Fresnel 
-;             white-field reconstruction.
-;
-; KEYWORD PARAMETERS:
-;
-;       /SUPPRESS_DISPLAY:
-;             Do not display the result on the screen. This maybe useful
-;             if this function is used within a for loop. 
-;
-; OUTPUTS:
-;
-;       result:
-;             A COMPLEX 2D array after the support is applied.
-;
-; EXAMPLE:
-;       See the example for CXS_PROPAGATE_FROM_DETECTOR
-;-
-function cxs_apply_support, complex_array, $
-                            SUPPRESS_DISPLY=suppress_display
-check_size, complex_array
-result = make_array(nx(),ny(),/COMPLEX)
-b = call_external(lib_name() ,'IDL_apply_support',complex_array,result) 
-if not KEYWORD_SET(suppress_display) THEN $
-show, abs(result)
-return, result
-end
-
-;+
-; NAME:
-;       CXS_SCALE_INTENSITY
-;
-; PURPOSE:
-;       Scale the intensity (magnitude squared) of the given complex
-;       array to the data. The intensity data must have been
-;       previously set using either one of the CXS_INIT functions or
-;       CXS_SET_INTENSITY.
-;
-;       If Fresnel reconstruction is being done, the white-field will
-;       automatically be added to the complex array prior to scaling,
-;       and will be subtracted afterward.
-;       
-;       This function is called when using (CXS_ITERATE) so generally
-;       won't need to be call explicitly. An exception to this is if
-;       the user wishes to extend their reconstruction with an
-;       addition constraint.
-;
-;
-; CALLING SEQUENCE:
-;
-;	result = CXS_SCALE_INTENSITY( complex_array [,/SUPPRESS_DISPLAY] )
-;
-; INPUTS:
-;
-;       complex_array:
-;             A 2D array of COMPLEX values which represents a wave in
-;             the detector plane.
-;
-; KEYWORD PARAMETERS:
-;
-;       /SUPPRESS_DISPLAY:
-;             Do not display the result on the screen. This maybe useful
-;             if this function is used within a for loop. 
-;
-; OUTPUTS:
-;
-;       result:
-;             A COMPLEX 2D array after the intensity has been scaled
-;             to data.
-;
-; EXAMPLE:
-;       See the example for CXS_PROPAGATE_FROM_DETECTOR
-;-
-function cxs_scale_intensity, complex_array, $
-                              SUPPRESS_DISPLY=suppress_display
-check_size, complex_array
-result = make_array(nx(),ny(),/COMPLEX)
-b = call_external(lib_name() ,'IDL_scale_intensity',complex_array,result) 
-if not KEYWORD_SET(suppress_display) THEN $
-show, abs(result)
-return, result
-end
-
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-; io functions
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-
-;+
-; NAME:
-;       CXS_READ_PPM
-;
-; PURPOSE:
-;       Read a ppm file.
-;
-; CALLING SEQUENCE:
-;
-;       image = CXS_READ_PPM( nx, ny, filename)
-;
-; INPUTS:
-;
-;       nx:
-;             The number of pixels horizontally (need to be checked?)
-;
-;       ny:
-;             The number of pixels vertically (need to be checked?)
-;
-;       filename:
-;             A string containing the name of the file to read.
-;
-; OUTPUTS:
-;       image:
-;             The image in the format of a 2D array of doubles.
-;
-; EXAMPLE:
-;       data = CXS_READ_PPM(1024, 1024, 'data_file.ppm')
-;-
-function cxs_read_ppm, nx, ny, filename
-result = make_array(nx,ny, /DOUBLE)
-b = call_external(lib_name() ,'IDL_read_ppm',long(nx),long(ny),filename,result)
-show, result
-return, result
-end
-
-;+
-; NAME:
-;       CXS_READ_DBIN
-;
-; PURPOSE:
-;       Read a double binary file (a binary file of doubles).
-;
-; CALLING SEQUENCE:
-;
-;       image = CXS_READ_DBIN( nx, ny, filename)
-;
-; INPUTS:
-;
-;       nx:
-;             The number of pixels horizontally (need to be checked?)
-;
-;       ny:
-;             The number of pixels vertically (need to be checked?)
-;
-;       filename:
-;             A string containing the name of the file to read.
-;
-; OUTPUTS:
-;       image:
-;             The image in the format of a 2D array of doubles.
-;
-; EXAMPLE:
-;       data = CXS_READ_DBIN(1024, 1024, 'data_file.dbin')
-;-
-function cxs_read_dbin, nx, ny, filename
-result = make_array(nx,ny, /DOUBLE)
-b = call_external(lib_name() ,'IDL_read_dbin',long(nx),long(ny),filename,result)
-show, result
-return, result
-end
-
-;+
-; NAME:
-;       CXS_READ_TIFF
-;
-; PURPOSE:
-;       Read a tiff image file. Note that there are other IDL commands
-;       which perform this same function.
-;
-; CALLING SEQUENCE:
-;
-;       image = CXS_READ_TIFF( nx, ny, filename)
-;
-; INPUTS:
-;
-;       nx:
-;             The number of pixels horizontally (need to be checked?)
-;
-;       ny:
-;             The number of pixels vertically (need to be checked?)
-;
-;       filename:
-;             A string containing the name of the file to read.
-;
-; OUTPUTS:
-;       image:
-;             The image in the format of a 2D array of doubles.
-;
-; EXAMPLE:
-;       data = CXS_READ_TIFF(1024, 1024, 'data_file.tif')
-;-
-function cxs_read_tiff, nx, ny, filename
-result = make_array(nx,ny, /DOUBLE)
-b = call_external(lib_name() ,'IDL_read_tiff',long(nx),long(ny),filename,result)
-show, result
-return, result
-end
-
-;+
-; NAME:
-;       CXS_READ_CPLX
-;
-; PURPOSE:
-;       Read a binary file of fftw complex numbers. This is
-;       useful for storing and restoring the result of a reconstruction.
-;
-; CALLING SEQUENCE:
-;
-;       complex_array = CXS_READ_CPLX( nx, ny, filename)
-;
-; INPUTS:
-;
-;       nx:
-;             The number of pixels horizontally (need to be checked?)
-;
-;       ny:
-;             The number of pixels vertically (need to be checked?)
-;
-;       filename:
-;             A string containing the name of the file to read.
-;
-; OUTPUTS:
-;       complex_array:
-;             A 2D array of COMPLEX numbers.
-;
-; EXAMPLE:
-;       white_field = CXS_READ_CPLX(1024, 1024, 'white_field_file.cplx')
-;-
-function cxs_read_cplx, nx, ny, filename
-result = make_array(nx,ny, /COMPLEX)
-b = call_external(lib_name() ,'IDL_read_cplx',long(nx),long(ny),filename,result)
-show, abs(result)
-return, result
-end
-
-;+
-; NAME:
-;       CXS_WRITE_CPLX
-;
-; PURPOSE:
-;       Write a binary file of fftw complex numbers. This is
-;       useful for storing and restoring the result of a reconstruction.
-;
-; CALLING SEQUENCE:
-;
-;       CXS_WRITE_CPLX( complex_array, filename )
-;
-; INPUTS:
-;
-;       complex_array:
-;             A 2D array of COMPLEX numbers
-;
-;       filename:
-;             A string containing the name of the file to write.
-;
-; EXAMPLE:
-;       CXS_WRITE_CPLX, white_field, 'white_field_file.cplx'
-;-
-pro cxs_write_cplx, complex_array, filename
-n = size(complex_array)
-b = call_external(lib_name() ,'IDL_write_cplx',n[1],n[2],complex_array, filename)
-end
-
-;+
-; NAME:
-;       CXS_WRITE_DBIN
-;
-; PURPOSE:
-;       Write a binary file of doubles. 
-;
-; CALLING SEQUENCE:
-;
-;       CXS_WRITE_DBIN( image, filename )
-;
-; INPUTS:
-;
-;       image:
-;             A 2D array of numbers
-;
-;       filename:
-;             A string containing the name of the file to write.
-;
-; EXAMPLE:
-;       CXS_WRITE_DBIN, result, 'reco_magnitude.dbin'
-;-
-pro cxs_write_dbin, array, filename
-n = size(array)
-b = call_external(lib_name() ,'IDL_write_dbin',n[1],n[2],double(array), filename)
-end
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-; Complex Constraint Code
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-;+
-; NAME:
-;       CXS_SET_CHARGE_FLIPPING
-;
-; PURPOSE: For use with FresnelCDI reconstruction. Enabeling this
-;       procedure will constrain the transmission function phase to
-;       lie between -PI and 0. During each iteration (directly after
-;       applying the support constraint), the phase of the
-;       transmission function will be flipped if it is positive
-;       (i.e. if the phase, phi, lies between 0 and PI it will be
-;       reset to -phi). If this procedure is called for a PlanarCDI
-;       reconstruction, the contraint will be applied to the
-;       exit-surface-wave.
-;
-; CALLING SEQUENCE:
-;
-;       CXS_SET_CHARGE_FLIPPING, enable
-;
-; INPUTS:
-;
-;       enable:
-;             This should be either 0 - turn off or 1 - turn on.
-;
-; EXAMPLE:
-;       CXS_SET_CHARGE_FLIPPING, 1
-;-
-pro cxs_set_charge_flipping, enable
-  b = call_external(lib_name() ,'IDL_set_charge_flipping',long(enable))
-end
-
-;+
-; NAME:
-;       CXS_SET_TRANS_UNITY_CONSTRAINT
-;
-; PURPOSE: For use with FresnelCDI reconstruction. Enabeling this
-;       procedure will constrain the transmission function magnitude
-;       to lie 0 and 1. During each iteration (directly after applying
-;       the support constraint), the magnitude of the transmission
-;       function will be reset to 1 at locations where it is greater
-;       than 1.
-;
-; CALLING SEQUENCE:
-;
-;       CXS_SET_TRANS_UNITY_CONSTRAINT, enable
-;
-; INPUTS:
-;
-;       enable:
-;             This should be either 0 - turn off or 1 - turn on.
-;
-; EXAMPLE:
-;       CXS_SET_TRANS_UNITY_CONSTRAINT, 1
-;-
-pro cxs_set_trans_unity_constraint, enable
-  b = call_external(lib_name() ,'IDL_set_trans_unity_constraint',long(enable))
-end
-
-
-;+
-; NAME:
-;       CXS_ADD_COMPLEX_CONSTRAINT_REGION
-;
-; PURPOSE: For use with FresnelCDI reconstruction. Calling this
-;       procedure will constrain the transmission function magnitude
-;       and phase using the method from the paper "Use of a complex
-;       constraint in coherent diffractive imaging", J. N. Clark
-;       et. al., 2010. The notation used there is also used
-;       here. Users should have knowledge of this or similar papers
-;       before using the procedure.
-;
-;       A section of the reconstructed transmission function will be
-;       updated according to a restriction on the value of c (c =
-;       beta/delta). If the material is of a known element, then c can
-;       be fixed to the know value, and the phase and magnitude of the
-;       transmission function updated accordingly. Alternatively, c
-;       can be left to float, and calculated for each iteration from a
-;       mean over the defined region. The parameters alpha1 and alpha2
-;       are used to control the strength of the constraint. This
-;       procedure should be called once before each region of
-;       homogenious material.
-;
-; CALLING SEQUENCE:
-;
-;       CXS_ADD_COMPLEX_CONSTRAINT_REGION, region, alpha1, alpha2 [, fixed_c]
-;
-; INPUTS:
-;
-;       region:
-;             A 2 array of doubles which is used to indicate which
-;             pixels the constraint should be applied to. 0 -
-;             indicated the array element does not belong to the
-;             region. Any other value indicated that it does.
-;
-;       alpha1:
-;             Constraint strength parameter for the amplitude (double
-;             type).
-;
-;       alpha2:
-;             Constraint strength parameter for the phase (double
-;             type).
-;             
-;       fixed_c:
-;             Optional parameter to fix the value of c = beta/delta
-;             (double type).
-;
-; EXAMPLE:
-;       Setting a complex constraint for two image regions.
-;       For the second, the value of c=beta/delta is fixed.
-;
-;       r1 =  cxs_read_tiff(1024,1024,'region_1.tiff')
-;       r2 =  cxs_read_tiff(1024,1024,'region_2.tiff')
-;
-;       delta = 6.45e-4;
-;       beta = 1.43e-4;
-;
-;       cxs_add_complex_constraint_region, r1, 0.5, 0.5
-;       cxs_add_complex_constraint_region, r2,   1,   0, beta/delta
-;-
-pro cxs_add_complex_constraint_region, region, alpha1, alpha2, fixed_c
-  IF N_Params() EQ 3 THEN $
-     b = call_external(lib_name() ,'IDL_add_complex_constraint_region', $
-                       region, double(alpha1), double(alpha2)) $
-  ELSE $
-     b = call_external(lib_name() ,'IDL_add_complex_constraint_region', $
-                       region, double(alpha1), double(alpha2), double(fixed_c))  
-end
-
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;   Phase Diverse Code
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;
-
-;
-function cxs_phase_diverse_init_estimate
-  ;dimensions are reversed.
-  nx = call_external(lib_name(),'IDL_get_phase_diverse_array_x_size')
-  ny = call_external(lib_name(),'IDL_get_phase_diverse_array_y_size')
-  result = make_array(nx,ny,/COMPLEX)
-  b = call_external(lib_name(),'IDL_phase_diverse_init_estimate',result)
-  show, ABS(result)
-  return, result
-end
-
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;
-;
-pro cxs_init_phase_diverse, beta = beta, gamma = gamma , parallel = parallel
-
-  ; set default values
-  if not keyword_set(beta) then beta = 1.0
-  if not keyword_set(gamma) then gamma = 1.0
-  if not keyword_set(parallel) then parallel = 0
-
-  b = call_external(lib_name(),'IDL_phase_diverse_init', $
-                    double(beta), double(gamma), long(parallel))
-
-end
-
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;
-;
-pro cxs_phase_diverse_add_position, x, y, alpha = alpha
-  ; set default values
-  if not keyword_set(alpha) then alpha = 1.0
-  b = call_external(lib_name(),'IDL_phase_diverse_add_position', $
-                    double(x), double(y), double(alpha))
-end
-
-function cxs_phase_diverse_iterate, iterations
-  ; dimensions are reversed in IDL compared to the library.
-  nx = call_external(lib_name(),'IDL_get_phase_diverse_array_x_size')
-  ny = call_external(lib_name(),'IDL_get_phase_diverse_array_y_size')
+  ;+
+  ; NAME:
+  ;       CXS_SET_SPECTRUM
+  ;
+  ; PURPOSE:
+  ;	Set the spectrum. This can be read in from a Spectra
+  ;	file.
+  ;
+  ; CALLING SEQUENCE:
+  ;
+  ; CXS_SET_SPECTRU, spectrum
+  ;
+  ; INPUTS:
+  ;
+  ;       spectrum:
+  ;
+  ; EXAMPLE:
+  ;
+  ;       cxs_initialise_matrices, spectrum
+  ;-
+  pro cxs_set_spectrum, spectrum
+  b = call_external(lib_name() ,'IDL_set_spectrum', spectrum)
+  end
+  ;+
+  ; NAME:
+  ;       CXS_ITERATE
+  ;
+  ; PURPOSE:
+  ;       Perform the iterative reconstruction. The number of iterations
+  ;       to perform should be given and the result of the final
+  ;       iteration is returned. For planar and Fresnel CDI this will be
+  ;       the exit surface wave of the sample. For Fresnel white-field
+  ;       reconstruction it will be the white-field at the detector surface.
+  ;       The magnitude of the result is also displayed on the screen as
+  ;       a 512x512 pixel image. The iteration number and corresponding
+  ;       error (see CXS_GET_ERROR) will be printed on the screen.
+  ;
+  ;       CXS_ITERATE may be called several time and the reconstruction
+  ;       will start from where is ended. i.e. calling CXS_ITERATE(50),
+  ;       followed by a second CXS_ITERATE(50) is equivalent to calling
+  ;       CXS_ITERATE(100).
+  ;
+  ;       During the reconstruction, the best (lowest error) result is
+  ;       also stored. It maybe retrieved by calling CXS_GET_BEST_RESULT.
+  ; 
+  ;
+  ; CALLING SEQUENCE:
+  ;
+  ;	result = CXS_ITERATE([iterations])
+  ;
+  ; INPUTS:
+  ;
+  ;       iterations: 
+  ;             The number of iterations to perform (an integer). 
+  ;             If left empty, one iteration is performed.
+  ;
+  ; OUTPUTS:
+  ;
+  ;       result:
+  ;             A COMPLEX 2D array. For planar and Fresnel CDI this will be
+  ;             the exit surface wave of the sample. For Fresnel white-field
+  ;             reconstruction it will be the white-field at the detector surface.
+  ;
+  ;
+  ; EXAMPLE:
+  ;
+  ;       my_result = cxs_iterate(100)
+  ;-
+  function cxs_iterate, iterations
+  nx = call_external(lib_name(),'IDL_get_array_x_size')
+  ny = call_external(lib_name(),'IDL_get_array_y_size')
   result = make_array(nx,ny,/COMPLEX)
   IF N_Params() EQ 0 THEN $
-     iterations = 1
-  b = call_external(lib_name() ,'IDL_phase_diverse_iterate',long(iterations),result) 
+    iterations = 1
+  b = call_external(lib_name() ,'IDL_iterate',long(iterations),result) 
   show, ABS(result)
   return, result
-end
+  end
+
+  ;+
+  ; NAME:
+  ;       CXS_SET_RELAXATION_PARAMETER
+  ;
+  ; PURPOSE:
+  ;       Set the relaxation parameter. The default relaxation
+  ;       parameter used in Planar and Fresnel reconstruction is 0.9.
+  ;       In Fresnel white-field reconstruction, this parameter is 
+  ;       not used.
+  ;
+  ; CALLING SEQUENCE:
+  ;
+  ;	CXS_SET_RELAXATION_PARAMETER, beta
+  ;
+  ; INPUTS:
+  ;
+  ;       beta: 
+  ;             The relaxation parameter.
+  ;
+  ; EXAMPLE:
+  ;
+  ;       cxs_set_relaxation_parameter, 0.9
+  ;-
+  pro cxs_set_relaxation_parameter, beta
+  b = call_external(lib_name() ,'IDL_set_relaxation_parameter',double(beta)) 
+  end
+
+  ;+
+  ; NAME:
+  ;       CXS_APPLY_SHRINKWRAP
+  ;
+  ; PURPOSE:
+  ;       Apply the shrinkwrap algorithm. The current exit-surface-wave
+  ;       magnitude is used to update the support; it is convoluted with
+  ;       a Gaussian and then a threshold is applied. You can use the
+  ;       cxs_get_support function to see how the support have been
+  ;       modified after calling this procedure.
+  ;
+  ; CALLING SEQUENCE:
+  ;
+  ;	CXS_APPLY_SHRINKWRAP [,gauss_width, threshold ]
+  ;
+  ; INPUTS:
+  ;
+  ;       gauss_width: 
+  ;             The width (1-standard deviation. in pixels) of the Gaussian
+  ;             used for smearing. If this parameter is not passed, 
+  ;             a width of 1.5 pixels is used.
+  ;
+  ;       threshold:
+  ;             All pixels which are below the threshold are set to zero 
+  ;             (outside the support). The threshold should be given as
+  ;             a fraction of the maximum pixel value (in double format). 
+  ;             If this parameter is not passed a threshold of 0.1 (10%)
+  ;             is used.
+  ;
+  ; EXAMPLE:
+  ;       Perform 1000 iterations in total, applying shrink-wrap at the 400th iteration:
+  ;
+  ;       ....
+  ;       a = CXS_ITERATE(400)
+  ;       CXS_APPLY_SHRINKWRAP
+  ;       a = CXS_ITERATE(600)
+  ;-
+  pro cxs_apply_shrinkwrap, gauss_width, threshold
+  if N_Params() lt 2 then threshold = 0.1 
+  if N_Params() lt 1 then gauss_width = 1.5
+  b = call_external(lib_name() ,'IDL_apply_shrinkwrap',double(gauss_width),double(threshold))
+  end
+
+  ;+
+  ; NAME:
+  ;       CXS_SET_ALGORITHM
+  ;
+  ; PURPOSE:
+  ;       Select the reconstruction algorithm to use. Options are:
+  ;       'ER' - error reduction 
+  ;       'BIO' - basic input-output 
+  ;       'BOO' - basic output-output 
+  ;       'HIO' - hybrid input-output 
+  ;       'DM' - difference map 
+  ;       'SF' - solvent-flipping 
+  ;       'ASR' - averaged successive reflections 
+  ;       'HPR' - hybrid projection reflection 
+  ;       'RAAR' - relaxed averaged alternating reflectors
+  ;
+  ; CALLING SEQUENCE:
+  ;
+  ;       CXS_SET_ALGORITHM, algorithm
+  ;
+  ; INPUTS:
+  ;
+  ;       algorithm:
+  ;             Set the reconstruction algorithm. It should be
+  ;             one of the options listed above. Note that it is
+  ;             passed as a string.
+  ;
+  ; EXAMPLE:
+  ;       Perform 1000 iterations in total, changing to error-reduction at the 400th iteration:
+  ;       ....
+  ;       a = CXS_ITERATE(400)
+  ;       CXS_SET_ALGORITHM, 'ER'
+  ;       a = CXS_ITERATE(600)
+  ;-
+  pro cxs_set_algorithm, algorithm
+  b = call_external(lib_name() ,'IDL_set_algorithm',algorithm)
+  end
+
+  ;+
+  ; NAME:
+  ;       CXS_SET_CUSTOM_ALGORITHM
+  ;
+  ; PURPOSE:
+  ;       Set a custom reconstruction algorithm.
+  ;       
+  ;       Iterative reconstruction algorithms can be expressed as a
+  ;       combination of several operators. The parameters to this
+  ;       procedure set the coefficients for combinations of these
+  ;       operators. For a description, please see page 22 of the
+  ;       H.M. Quiney review: TUTORIAL REVIEW, Coherent diffractive
+  ;       imaging using short wavelength light sources, Journal of
+  ;       Modern Optics, 2010, DOI: 10.1080/09500340.2010.495459.  Some
+  ;       description is also given in the C++ doxygen documentation
+  ;       for PlanarCDI::set_custom_algorithm.
+  ;
+  ;
+  ; CALLING SEQUENCE:
+  ;
+  ;       CXS_SET_CUSTOM_ALGORITHM, m1, m2, m3, m4, m5, m6, m7, m8, m9, m10
+  ;
+  ; INPUTS:
+  ;
+  ;       m1-m10:
+  ;             Coefficients to the operator combinations.
+  ;
+  ; EXAMPLE:
+  ;       Perform 1000 iterations in total, changing to a custom
+  ;       algorithm at the 400th iteration and print the algorithm to screen:
+
+  ;       ....
+  ;       a = CXS_ITERATE(400)
+  ;       CXS_SET_ALGORITHM, 0.5, 0.5, 0.5, 0.5, 0.5, $ 
+    ;                          0.5, 0.5, 0.5, 0.5, 0.5
+  ;       CXS_PRINT_ALGORITHM                    
+  ;       a = CXS_ITERATE(600)
+  ;-
+  pro cxs_set_custom_algorithm, m1, m2, m3, m4, m5, m6, m7, m8, m9, m10
+  b = call_external(lib_name() ,'IDL_set_custom_algorithm', $
+    double(m1), $
+    double(m2), $
+    double(m3), $ 
+    double(m4), $ 
+    double(m5), $
+    double(m6), $
+    double(m7), $
+    double(m8), $
+    double(m9), $
+    double(m10) )
+  end
 
 
-pro cxs_phase_diverse_iterations_per_cycle, iterations
-  b = call_external(lib_name(),'IDL_phase_diverse_iterations_per_cycle', long(iterations))
-end
+  ;+
+  ; NAME:
+  ;       CXS_GET_BEST_RESULT
+  ;
+  ; PURPOSE:
+  ;       Get the best (lowest error) result found during the reconstruction.
+  ;       The result is returned and the magnitude of the result is
+  ;       displayed as a 512x512 pixel image on the screen.
+  ;
+  ; CALLING SEQUENCE:
+  ;
+  ;       result = CXS_GET_BEST_RESULT()
+  ;
+  ; OUTPUTS:
+  ;
+  ;       result:
+  ;             A 2D array of COMPLEX variables. For planar and Fresnel
+  ;             reconstruction this will be the  exit-surface-wave for
+  ;             the sample. For Fresnel white-field reconstruction, this
+  ;             will be the complex white-field in the detector plane.
+  ;
+  ;
+  ; EXAMPLE:
+  ;       Perform 1000 iterations and get the lowest error result.
+  ;       ....
+  ;       a = CXS_ITERATE(1000)
+  ;       a = CXS_GET_BEST_RESULT()
+  ;-
+  function cxs_get_best_result 
+  result = make_array(nx(),ny(),/COMPLEX)
+  b = call_external(lib_name() ,'IDL_get_best_result',result)
+  show, ABS(result)
+  return, result
+  end
 
-pro cxs_phase_diverse_set_transmission, array
-  n = size(array)
-  b = call_external(lib_name(),'IDL_phase_diverse_set_transmission', long(n[2]), long(n[1]), double(array))
-end
+  ;+
+  ; NAME:
+  ;       CXS_GET_SUPPORT
+  ;
+  ; PURPOSE:
+  ;       Get the support. This maybe useful to see how shrinkwrap has
+  ;       effected the support. The result is displayed as a 512x512 
+  ;       pixel image on the screen.
+  ;
+  ; CALLING SEQUENCE:
+  ;
+  ;       support = CXS_GET_SUPPORT()
+  ;
+  ; OUTPUTS:
+  ;
+  ;       support:
+  ;             The support. A 2D array of doubles. A pixel with value below 1
+  ;             is outside the support and 1 and above is inside the support.
+  ;
+  ; EXAMPLE:
+  ;       View the support after applying shrink-wrap.
+  ; 
+  ;       CXS_APPLY_SHRINKWRAP
+  ;       a = CXS_GET_SUPPORT()
+  ;-
+  function cxs_get_support
+  result = make_array(nx(),ny(),/DOUBLE)
+  b = call_external(lib_name() ,'IDL_get_support',result) 
+  show, result
+  return, result
+  end
 
-pro cxs_phase_diverse_adjust_positions, type=type, forward=forward, $
-                                        x_min=x_min, x_max=x_max, $
-                                        y_min=y_min, y_max=y_max, $
-                                        step_size=step_size
-  
-  if not keyword_set(type) then type = 0
-  if not keyword_set(forward) then forward = 1
-  if not keyword_set(x_min) then x_min = -50
-  if not keyword_set(x_max) then x_max = 50
-  if not keyword_set(y_min) then y_min = -50
-  if not keyword_set(y_max) then y_max = 50
-  if not keyword_set(step_size) then step_size = 4
-  
-  b = call_external(lib_name(),'IDL_phase_diverse_adjust_positions', $
-                    long(type), long(forward), $
-                    long(x_min),  long(x_max), $
-                    long(y_min),  long(y_max), $
-                    double(step_size))
-   
-end
+  ;+
+  ; NAME:
+  ;       CXS_GET_ERROR
+  ;
+  ; PURPOSE:
+  ;       Get the error metric. This is defined as the difference
+  ;       between the estimated diffraction and the actual diffraction
+  ;       pattern and is calculated as:
+  ;           sum over pixels of ( M - sqrt(I) ) ^2 / sum(I) 
+  ;       Where I is the detector data and M is the magnitude of the
+  ;       estimate in the detector plane. Note that due to the way this
+  ;       quantity is calculated, it actually corresponds to the
+  ;       previous estimate rather than the current iteration.
+  ;
+  ;
+  ; CALLING SEQUENCE:
+  ;
+  ;       error = CXS_GET_ERROR()
+  ;
+  ; OUTPUTS:
+  ;
+  ;       error:
+  ;             The error. 
+  ;
+  ; EXAMPLE:
+  ;
+  ;       a = CXS_GET_ERROR()
+  ;- 
+  function cxs_get_error
+  result = double(0.0)
+  b = call_external(lib_name(),'IDL_get_error',result)
+  return, result
+  end
 
-function cxs_phase_diverse_get_final_x_position, nprobe
-  return, call_external(lib_name(), $
-                        'IDL_phase_diverse_get_final_x_position', $
-                        long(nprobe))
-end
+  ;+
+  ; NAME:
+  ;       CXS_SET_TRANSMISSION
+  ; 
+  ; PURPOSE:
+  ;       SET THE TRANSMISSION FUNCTION TO BE BEGIN THE RECONSTRUCTION. 
+    ;       THIS WILL OVERRIDE THE TRANSMISSION FUNCTION AND MAY BE CALLED
+    ;       AT ANY TIME DURING THE RECONSTRUCTION. NOTE THAT THIS FUNCTION 
+    ;       IS ONLY AVAILIBLE FOR THE FRESNEL CDI RECONSTRUCTION. 
+    ;
+    ; CALLING SEQUENCE:
+    ;
+    ; CXS_SET_TRANSMISSION, TRANSMISSION
+    ;
+    ; INPUTS:
+    ;
+    ;       TRANSMISSION_FUNCTION: 
+    ;             The transmission function. It should be in 
+    ;             the form of a 2D array.
+    ;
+    ; EXAMPLE:
+    ;
+    ;      cxs_transmission, transmission
+    ;
+    ;-
+    pro cxs_set_transmission, array
+    n = size(array)
+    b = call_external(lib_name() ,'IDL_set_transmission', n[1],n[2],double(array)) 
+    end
 
-function cxs_phase_diverse_get_final_y_position, nprobe
-  return, call_external(lib_name(), $
-                        'IDL_phase_diverse_get_final_y_position', $
-                        long(nprobe))
-end
+    ;+
+    ; NAME:
+    ;       CXS_GET_TRANSMISSION_FUNCTION
+    ;
+    ; PURPOSE:
+    ;       Get the transmission function from the current estimate of the
+    ;       exit-surface-wave. The magnitude of the result will be
+    ;       displayed on the screen. Note that this functions
+    ;       is only available for Fresnel CDI reconstruction.
+    ;
+    ; CALLING SEQUENCE:
+    ;
+    ;       result = CXS_GET_TRANSMISSION_FUNCTION()
+    ;
+    ; OUTPUTS:
+    ;
+    ;       result:
+    ;             The transmission function for the sample. A 2D array of
+    ;             COMPLEX variables is returned. 
+    ;
+    ; EXAMPLE:
+    ;       a = CXS_GET_TRANSMISSION_FUNCTION()
+    ;-
+    function cxs_get_transmission_function
+    result = make_array(nx(),ny(),/COMPLEX)
+    b = call_external(lib_name() ,'IDL_get_transmission_function',result) 
+    show, abs(result)
+    return, result
+    end
+
+    ;+
+    ; NAME:
+    ;       CXS_GET_TRANSMISSION
+    ;
+    ; PURPOSE:
+    ;       Get the transmission function from the current estimate of the
+    ;       exit-surface-wave. The magnitude of the result will be
+    ;       displayed on the screen. Note that this functions
+    ;       is only available for Fresnel CDI reconstruction.
+    ;
+    ; CALLING SEQUENCE:
+    ;
+    ;       result = CXS_GET_TRANSMISSION()
+    ;
+    ; OUTPUTS:
+    ;
+    ;       result:
+    ;             The transmission function for the sample. A 2D array of
+    ;             COMPLEX variables is returned. 
+    ;
+    ; EXAMPLE:
+    ;       a = CXS_GET_TRANSMISSION()
+    ;-
+    function cxs_get_transmission
+    result = make_array(nx(),ny(),/COMPLEX)
+    b = call_external(lib_name() ,'IDL_get_transmission',result) 
+    show, abs(result)
+    return, result
+    end
+
+    ;+
+    ; NAME:
+    ;       CXS_GET_MODE
+    ;
+    ; PURPOSE:
+    ;       Get the nth mode. This maybe useful to see the ways the 
+    ;       modes have been divided for the partialCDI
+    ;
+    ; CALLING SEQUENCE:
+    ;
+    ;       mode = CXS_GET_MODE(n)
+    ;
+    ;INPUTS
+    ;       n: 
+    ;             The number of the mode retrieved. 0 is the most
+    ;             dominant mode. If the number is greater than the 
+    ;             number of availible modes it will return the 
+    ;             highest indexed modes
+    ;             
+    ; OUTPUTS:
+    ;
+    ;       mode:
+    ;             The nth mode. A 2D array of doubles. 
+    ;             
+    ; EXAMPLE:
+    ;       View the nth mode.
+    ; 
+    ;       a = cxs_get_mode(1) 
+    ;-
+    function cxs_get_mode, n
+    result = make_array(nx(),ny(),/COMPLEX)
+    b = call_external(lib_name() ,'IDL_get_mode',result, double(n)) 
+    show, abs(result)
+    return, result
+    end
+
+    ;+;+
+    ; NAME:
+    ;       CXS_SET_THRESHOLD
+    ; 
+    ; PURPOSE:
+    ;       SET THE THRESHOLD OF THE PROMINENCE OF THE LOWEST MODE 
+    ;       TO BE INCLUDED IN THE RECONSTRUCTION. THIS IS TO ELIMINATE
+    ;       MODES IN ORDER TO SPEED UP PROCESSING
+    ;       
+    ; CALLING SEQUENCE:
+    ;
+    ; CXS_SET_THRESHOLD, THRESHOLD_VALUE
+    ;
+    ; INPUTS:
+    ;
+    ;       THRESHOLD_VALUE: 
+    ;             The threshold value. It should be a double
+    ;
+    ; EXAMPLE:
+    ;
+    ;      cxs_set_threshold, 0.0001
+    ;
+    ;
+    pro cxs_set_threshold, threshold_value
+    b = call_external(lib_name() ,'IDL_set_transmission', threshold_value) 
+    end
+
+    ; NAME:
+    ;       CXS_CLEAR_MEMORY
+    ;
+    ; PURPOSE:
+    ;       Clean-up after a reconstruction has been performed. This 
+    ;       procedure should be called at the very end of a program.
+    ;       It will free up the memory that was allocated when one of 
+    ;       the "CXS_INIT_.." methods was called.
+    ;
+    ; CALLING SEQUENCE:
+    ;
+    ;       CXS_CLEAR_MEMORY
+    ;
+    ; EXAMPLE:
+    ;       CXS_CLEAR_MEMORY
+    ;-
+    pro cxs_clear_memory
+    b = call_external(lib_name() ,'IDL_deallocate_memory')
+    end
+
+
+    ;+
+    ; NAME:
+    ;       CXS_GET_INTENSITY_AUTOCORRELATION
+    ;
+    ; PURPOSE:
+    ;       Get the autocorrelation function from the intensity data.
+    ;       This method is only useful for planar CDI reconstruction.
+    ;
+    ; CALLING SEQUENCE:
+    ;
+    ;       a = CXS_GET_INTENSITY_AUTOCORRELATION()
+    ;
+    ; OUTPUTS:
+    ;       a:
+    ;             The autocorrelation function (a 2D array of doubles).
+    ;
+    ; EXAMPLE:
+    ;       a = CXS_GET_INTENSITY_AUTOCORRELATION()
+    ;-
+    function cxs_get_intensity_autocorrelation
+    result = make_array(nx(),ny(),/DOUBLE)
+    b = call_external(lib_name() ,'IDL_get_intensity_autocorrelation',result) 
+    show, result
+    return, result
+    end
+
+
+
+    ;+
+    ; NAME:
+    ;       CXS_PRINT_ALGORITHM
+    ;
+    ; PURPOSE:
+    ;       Output the form of the current algorithm to the screen. 
+    ;       It will be written in terms of the support and intensity
+    ;       projection operators.
+
+    ;
+    ; CALLING SEQUENCE:
+    ;       CXS_PRINT_ALGORITHM
+    ;
+    ;
+    ; EXAMPLE:
+    ;       CXS_SET_ALGORITHM, 'RAAR'
+    ;       CXS_PRINT_ALGORITHM
+    ;-
+    pro cxs_print_algorithm
+    b = call_external(lib_name() ,'IDL_print_algorithm')
+    end
+
+    ;+
+    ; NAME:
+    ;       CXS_PROPAGATE_FROM_DETECTOR
+    ;
+    ; PURPOSE:
+    ;       Propagate the given wave field from the detector plane to the 
+    ;       sample plane (planar and Fresnel) or zone-plate plane (Fresnel
+    ;       white-field reconstruction). The result will be returned and
+    ;       displayed on the screen by default.
+    ;
+    ;       This function is called when using (CXS_ITERATE) so generally
+    ;       won't need to be call explicitly. An exception to this is if
+    ;       the user wishes to extend the reconstruction with an addition
+    ;       constraint (see the example below).
+    ;
+    ;
+    ; CALLING SEQUENCE:
+    ;
+    ;	result = CXS_PROPAGATE_FROM_DETECTOR( complex_array [,/SUPPRESS_DISPLAY] )
+    ;
+    ; INPUTS:
+    ;
+    ;       complex_array:
+    ;             A 2D array of COMPLEX values which represents a wave in
+    ;             the detector plane.
+    ;
+    ; KEYWORD PARAMETERS:
+    ;
+    ;       /SUPPRESS_DISPLAY:
+    ;             Do not display the result on the screen. This maybe useful
+    ;             if this function is used within a for loop. 
+    ;
+    ; OUTPUTS:
+    ;
+    ;       result:
+    ;             A COMPLEX 2D array which is either the field in the
+    ;             sample plane (for planar and Fresnel reconstruction) or
+    ;             the zone-plate plane for Fresnel white-field reconstruction.
+    ;
+    ; EXAMPLE:
+    ;       Performing the reconstruction with a new constraint applied in the
+    ;       sample plane (e.g. called "NEW_SUPPORT")
+    ;
+    ;              FOR K = 0, 100 DO BEGIN 
+      ;                  a = CXS_PROPAGATE_TO_DETECTOR(a,/SUPPRESS_DISPLAY)
+      ;                  a = CXS_SCALE_INTENSITY(a,/SUPPRESS_DISPLAY)
+      ;                  a = CXS_PROPAGATE_FROM_DETECTOR(a,/SUPPRESS_DISPLAY)
+      ;                  a = CXS_APPLY_SUPPORT(a,/SUPPRESS_DISPLAY)
+      ;                  a = NEW_SUPPORT(a)
+      ;              ENDFOR 
+      ;
+      ;-
+      function cxs_propagate_from_detector, complex_array, $
+	SUPPRESS_DISPLAY=suppress_display
+      check_size, complex_array
+      result = make_array(nx(),ny(),/COMPLEX)
+      b = call_external(lib_name() ,'IDL_propagate_from_detector',complex_array,result) 
+      if not KEYWORD_SET(suppress_display) THEN $
+	show, abs(result)
+      return, result
+      end
+
+      ;+
+      ; NAME:
+      ;       CXS_PROPAGATE_TO_DETECTOR
+      ;
+      ; PURPOSE:
+      ;       Propagate the given wave field to the detector plane from the 
+      ;       sample plane (planar and Fresnel) or zone-plate plane (Fresnel
+      ;       white-field reconstruction). The result will be returned and
+      ;       displayed on the screen by default.
+      ;
+      ;       This function is called when using (CXS_ITERATE) so generally
+      ;       won't need to be call explicitly. An exception to this is if
+      ;       the user wishes to perform simulation or to extend their
+      ;       reconstruction with an addition constraint (see the previous
+      ;       example).
+      ;
+      ;
+      ; CALLING SEQUENCE:
+      ;
+      ;	result = CXS_PROPAGATE_TO_DETECTOR( complex_array [,/SUPPRESS_DISPLAY] )
+      ;
+      ; INPUTS:
+      ;
+      ;       complex_array:
+      ;             A 2D array of COMPLEX values which represents a wave in
+      ;             either the sample plane (for planar and Fresnel
+      ;             reconstruction) or the zone-plate plane for Fresnel 
+      ;             white-field reconstruction.
+      ;
+      ; KEYWORD PARAMETERS:
+      ;
+      ;       /SUPPRESS_DISPLAY:
+      ;             Do not display the result on the screen. This maybe useful
+      ;             if this function is used within a for loop. 
+      ;
+      ; OUTPUTS:
+      ;
+      ;       result:
+      ;             A COMPLEX 2D array which is the field in the detector plane.
+      ;
+      ; EXAMPLE:
+      ;       Performing Fresnel simulation (assuming you already have a
+      ;       complex white-field called "white_field" and the transmission
+      ;       function of the object, "trans").
+      ;
+      ;       white_field_at_sample = CXS_PROPAGATE_FROM_DETECTOR(white_field)
+      ;       esw_at_sample = trans*white_field_at_sample
+      ;       esw_at_detector = CXS_PROPAGATE_TO_DETECTOR(esw_at_sample)
+      ;       diffraction_pattern = abs(esw_at_detector)^2
+      ;-
+      function cxs_propagate_to_detector, complex_array, $
+	SUPPRESS_DISPLY=suppress_display
+      check_size, complex_array
+      result = make_array(nx(),ny(),/COMPLEX)
+      b = call_external(lib_name() ,'IDL_propagate_to_detector',complex_array,result) 
+      if not KEYWORD_SET(suppress_display) THEN $
+	show, abs(result)
+      return, result
+      end
+
+
+      ;+
+      ; NAME:
+      ;       CXS_APPLY_SUPPORT
+      ;
+      ; PURPOSE:
+      ;       Apply the support constraint to the given complex array. All
+      ;       elements outside the support with be reset to zero. Elements
+      ;       within the support will be left as they are. The support must
+      ;       have been previously set using either one of the CXS_INIT 
+      ;       functions or CXS_SET_SUPPORT.
+      ;
+      ;       This function is called when using (CXS_ITERATE) so generally
+      ;       won't need to be call explicitly. An exception to this is if
+      ;       the user wishes to extend their reconstruction with an
+      ;       addition constraint.
+      ;
+      ;
+      ; CALLING SEQUENCE:
+      ;
+      ;	result = CXS_APPLY_SUPPORT( complex_array [,/SUPPRESS_DISPLAY] )
+      ;
+      ; INPUTS:
+      ;
+      ;       complex_array:
+      ;             A 2D array of COMPLEX values which represents a wave in
+      ;             either the sample plane (for planar and Fresnel
+      ;             reconstruction) or the zone-plate plane for Fresnel 
+      ;             white-field reconstruction.
+      ;
+      ; KEYWORD PARAMETERS:
+      ;
+      ;       /SUPPRESS_DISPLAY:
+      ;             Do not display the result on the screen. This maybe useful
+      ;             if this function is used within a for loop. 
+      ;
+      ; OUTPUTS:
+      ;
+      ;       result:
+      ;             A COMPLEX 2D array after the support is applied.
+      ;
+      ; EXAMPLE:
+      ;       See the example for CXS_PROPAGATE_FROM_DETECTOR
+      ;-
+      function cxs_apply_support, complex_array, $
+	SUPPRESS_DISPLY=suppress_display
+      check_size, complex_array
+      result = make_array(nx(),ny(),/COMPLEX)
+      b = call_external(lib_name() ,'IDL_apply_support',complex_array,result) 
+      if not KEYWORD_SET(suppress_display) THEN $
+	show, abs(result)
+      return, result
+      end
+
+      ;+
+      ; NAME:
+      ;       CXS_SCALE_INTENSITY
+      ;
+      ; PURPOSE:
+      ;       Scale the intensity (magnitude squared) of the given complex
+      ;       array to the data. The intensity data must have been
+      ;       previously set using either one of the CXS_INIT functions or
+      ;       CXS_SET_INTENSITY.
+      ;
+      ;       If Fresnel reconstruction is being done, the white-field will
+      ;       automatically be added to the complex array prior to scaling,
+      ;       and will be subtracted afterward.
+      ;       
+      ;       This function is called when using (CXS_ITERATE) so generally
+      ;       won't need to be call explicitly. An exception to this is if
+      ;       the user wishes to extend their reconstruction with an
+      ;       addition constraint.
+      ;
+      ;
+      ; CALLING SEQUENCE:
+      ;
+      ;	result = CXS_SCALE_INTENSITY( complex_array [,/SUPPRESS_DISPLAY] )
+      ;
+      ; INPUTS:
+      ;
+      ;       complex_array:
+      ;             A 2D array of COMPLEX values which represents a wave in
+      ;             the detector plane.
+      ;
+      ; KEYWORD PARAMETERS:
+      ;
+      ;       /SUPPRESS_DISPLAY:
+      ;             Do not display the result on the screen. This maybe useful
+      ;             if this function is used within a for loop. 
+      ;
+      ; OUTPUTS:
+      ;
+      ;       result:
+      ;             A COMPLEX 2D array after the intensity has been scaled
+      ;             to data.
+      ;
+      ; EXAMPLE:
+      ;       See the example for CXS_PROPAGATE_FROM_DETECTOR
+      ;-
+      function cxs_scale_intensity, complex_array, $
+	SUPPRESS_DISPLY=suppress_display
+      check_size, complex_array
+      result = make_array(nx(),ny(),/COMPLEX)
+      b = call_external(lib_name() ,'IDL_scale_intensity',complex_array,result) 
+      if not KEYWORD_SET(suppress_display) THEN $
+	show, abs(result)
+      return, result
+      end
+
+
+      ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+      ; io functions
+      ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+
+      ;+
+      ; NAME:
+      ;       CXS_READ_PPM
+      ;
+      ; PURPOSE:
+      ;       Read a ppm file.
+      ;
+      ; CALLING SEQUENCE:
+      ;
+      ;       image = CXS_READ_PPM( nx, ny, filename)
+      ;
+      ; INPUTS:
+      ;
+      ;       nx:
+      ;             The number of pixels horizontally (need to be checked?)
+      ;
+      ;       ny:
+      ;             The number of pixels vertically (need to be checked?)
+      ;
+      ;       filename:
+      ;             A string containing the name of the file to read.
+      ;
+      ; OUTPUTS:
+      ;       image:
+      ;             The image in the format of a 2D array of doubles.
+      ;
+      ; EXAMPLE:
+      ;       data = CXS_READ_PPM(1024, 1024, 'data_file.ppm')
+      ;-
+      function cxs_read_ppm, nx, ny, filename
+      result = make_array(nx,ny, /DOUBLE)
+      b = call_external(lib_name() ,'IDL_read_ppm',long(nx),long(ny),filename,result)
+      show, result
+      return, result
+      end
+
+      ;+
+      ; NAME:
+      ;       CXS_READ_DBIN
+      ;
+      ; PURPOSE:
+      ;       Read a double binary file (a binary file of doubles).
+      ;
+      ; CALLING SEQUENCE:
+      ;
+      ;       image = CXS_READ_DBIN( nx, ny, filename)
+      ;
+      ; INPUTS:
+      ;
+      ;       nx:
+      ;             The number of pixels horizontally (need to be checked?)
+      ;
+      ;       ny:
+      ;             The number of pixels vertically (need to be checked?)
+      ;
+      ;       filename:
+      ;             A string containing the name of the file to read.
+      ;
+      ; OUTPUTS:
+      ;       image:
+      ;             The image in the format of a 2D array of doubles.
+      ;
+      ; EXAMPLE:
+      ;       data = CXS_READ_DBIN(1024, 1024, 'data_file.dbin')
+      ;-
+      function cxs_read_dbin, nx, ny, filename
+      result = make_array(nx,ny, /DOUBLE)
+      b = call_external(lib_name() ,'IDL_read_dbin',long(nx),long(ny),filename,result)
+      show, result
+      return, result
+      end
+
+      ;+
+      ; NAME:
+      ;       CXS_READ_TIFF
+      ;
+      ; PURPOSE:
+      ;       Read a tiff image file. Note that there are other IDL commands
+      ;       which perform this same function.
+      ;
+      ; CALLING SEQUENCE:
+      ;
+      ;       image = CXS_READ_TIFF( nx, ny, filename)
+      ;
+      ; INPUTS:
+      ;
+      ;       nx:
+      ;             The number of pixels horizontally (need to be checked?)
+      ;
+      ;       ny:
+      ;             The number of pixels vertically (need to be checked?)
+      ;
+      ;       filename:
+      ;             A string containing the name of the file to read.
+      ;
+      ; OUTPUTS:
+      ;       image:
+      ;             The image in the format of a 2D array of doubles.
+      ;
+      ; EXAMPLE:
+      ;       data = CXS_READ_TIFF(1024, 1024, 'data_file.tif')
+      ;-
+      function cxs_read_tiff, nx, ny, filename
+      result = make_array(nx,ny, /DOUBLE)
+      b = call_external(lib_name() ,'IDL_read_tiff',long(nx),long(ny),filename,result)
+      show, result
+      return, result
+      end
+
+      ;+
+      ; NAME:
+      ;       CXS_READ_CPLX
+      ;
+      ; PURPOSE:
+      ;       Read a binary file of fftw complex numbers. This is
+      ;       useful for storing and restoring the result of a reconstruction.
+      ;
+      ; CALLING SEQUENCE:
+      ;
+      ;       complex_array = CXS_READ_CPLX( nx, ny, filename)
+      ;
+      ; INPUTS:
+      ;
+      ;       nx:
+      ;             The number of pixels horizontally (need to be checked?)
+      ;
+      ;       ny:
+      ;             The number of pixels vertically (need to be checked?)
+      ;
+      ;       filename:
+      ;             A string containing the name of the file to read.
+      ;
+      ; OUTPUTS:
+      ;       complex_array:
+      ;             A 2D array of COMPLEX numbers.
+      ;
+      ; EXAMPLE:
+      ;       white_field = CXS_READ_CPLX(1024, 1024, 'white_field_file.cplx')
+      ;-
+      function cxs_read_cplx, nx, ny, filename
+      result = make_array(nx,ny, /COMPLEX)
+      b = call_external(lib_name() ,'IDL_read_cplx',long(nx),long(ny),filename,result)
+      show, abs(result)
+      return, result
+      end
+
+      ;+
+      ; NAME:
+      ;       CXS_WRITE_CPLX
+      ;
+      ; PURPOSE:
+      ;       Write a binary file of fftw complex numbers. This is
+      ;       useful for storing and restoring the result of a reconstruction.
+      ;
+      ; CALLING SEQUENCE:
+      ;
+      ;       CXS_WRITE_CPLX( complex_array, filename )
+      ;
+      ; INPUTS:
+      ;
+      ;       complex_array:
+      ;             A 2D array of COMPLEX numbers
+      ;
+      ;       filename:
+      ;             A string containing the name of the file to write.
+      ;
+      ; EXAMPLE:
+      ;       CXS_WRITE_CPLX, white_field, 'white_field_file.cplx'
+      ;-
+      pro cxs_write_cplx, complex_array, filename
+      n = size(complex_array)
+      b = call_external(lib_name() ,'IDL_write_cplx',n[1],n[2],complex_array, filename)
+      end
+
+      ;+
+      ; NAME:
+      ;       CXS_WRITE_DBIN
+      ;
+      ; PURPOSE:
+      ;       Write a binary file of doubles. 
+      ;
+      ; CALLING SEQUENCE:
+      ;
+      ;       CXS_WRITE_DBIN( image, filename )
+      ;
+      ; INPUTS:
+      ;
+      ;       image:
+      ;             A 2D array of numbers
+      ;
+      ;       filename:
+      ;             A string containing the name of the file to write.
+      ;
+      ; EXAMPLE:
+      ;       CXS_WRITE_DBIN, result, 'reco_magnitude.dbin'
+      ;-
+      pro cxs_write_dbin, array, filename
+      n = size(array)
+      b = call_external(lib_name() ,'IDL_write_dbin',n[1],n[2],double(array), filename)
+      end
+
+      ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+      ; Complex Constraint Code
+      ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+      ;+
+      ; NAME:
+      ;       CXS_SET_CHARGE_FLIPPING
+      ;
+      ; PURPOSE: For use with FresnelCDI reconstruction. Enabeling this
+      ;       procedure will constrain the transmission function phase to
+      ;       lie between -PI and 0. During each iteration (directly after
+      ;       applying the support constraint), the phase of the
+      ;       transmission function will be flipped if it is positive
+      ;       (i.e. if the phase, phi, lies between 0 and PI it will be
+      ;       reset to -phi). If this procedure is called for a PlanarCDI
+      ;       reconstruction, the contraint will be applied to the
+      ;       exit-surface-wave.
+      ;
+      ; CALLING SEQUENCE:
+      ;
+      ;       CXS_SET_CHARGE_FLIPPING, enable
+      ;
+      ; INPUTS:
+      ;
+      ;       enable:
+      ;             This should be either 0 - turn off or 1 - turn on.
+      ;
+      ; EXAMPLE:
+      ;       CXS_SET_CHARGE_FLIPPING, 1
+      ;-
+      pro cxs_set_charge_flipping, enable
+      b = call_external(lib_name() ,'IDL_set_charge_flipping',long(enable))
+      end
+
+      ;+
+      ; NAME:
+      ;       CXS_SET_TRANS_UNITY_CONSTRAINT
+      ;
+      ; PURPOSE: For use with FresnelCDI reconstruction. Enabeling this
+      ;       procedure will constrain the transmission function magnitude
+      ;       to lie 0 and 1. During each iteration (directly after applying
+      ;       the support constraint), the magnitude of the transmission
+      ;       function will be reset to 1 at locations where it is greater
+      ;       than 1.
+      ;
+      ; CALLING SEQUENCE:
+      ;
+      ;       CXS_SET_TRANS_UNITY_CONSTRAINT, enable
+      ;
+      ; INPUTS:
+      ;
+      ;       enable:
+      ;             This should be either 0 - turn off or 1 - turn on.
+      ;
+      ; EXAMPLE:
+      ;       CXS_SET_TRANS_UNITY_CONSTRAINT, 1
+      ;-
+      pro cxs_set_trans_unity_constraint, enable
+      b = call_external(lib_name() ,'IDL_set_trans_unity_constraint',long(enable))
+      end
+
+
+      ;+
+      ; NAME:
+      ;       CXS_ADD_COMPLEX_CONSTRAINT_REGION
+      ;
+      ; PURPOSE: For use with FresnelCDI reconstruction. Calling this
+      ;       procedure will constrain the transmission function magnitude
+      ;       and phase using the method from the paper "Use of a complex
+      ;       constraint in coherent diffractive imaging", J. N. Clark
+      ;       et. al., 2010. The notation used there is also used
+      ;       here. Users should have knowledge of this or similar papers
+      ;       before using the procedure.
+      ;
+      ;       A section of the reconstructed transmission function will be
+      ;       updated according to a restriction on the value of c (c =
+      ;       beta/delta). If the material is of a known element, then c can
+      ;       be fixed to the know value, and the phase and magnitude of the
+      ;       transmission function updated accordingly. Alternatively, c
+      ;       can be left to float, and calculated for each iteration from a
+      ;       mean over the defined region. The parameters alpha1 and alpha2
+      ;       are used to control the strength of the constraint. This
+      ;       procedure should be called once before each region of
+      ;       homogenious material.
+      ;
+      ; CALLING SEQUENCE:
+      ;
+      ;       CXS_ADD_COMPLEX_CONSTRAINT_REGION, region, alpha1, alpha2 [, fixed_c]
+      ;
+      ; INPUTS:
+      ;
+      ;       region:
+      ;             A 2 array of doubles which is used to indicate which
+      ;             pixels the constraint should be applied to. 0 -
+      ;             indicated the array element does not belong to the
+      ;             region. Any other value indicated that it does.
+      ;
+      ;       alpha1:
+      ;             Constraint strength parameter for the amplitude (double
+      ;             type).
+      ;
+      ;       alpha2:
+      ;             Constraint strength parameter for the phase (double
+      ;             type).
+      ;             
+      ;       fixed_c:
+      ;             Optional parameter to fix the value of c = beta/delta
+      ;             (double type).
+      ;
+      ; EXAMPLE:
+      ;       Setting a complex constraint for two image regions.
+      ;       For the second, the value of c=beta/delta is fixed.
+      ;
+      ;       r1 =  cxs_read_tiff(1024,1024,'region_1.tiff')
+      ;       r2 =  cxs_read_tiff(1024,1024,'region_2.tiff')
+      ;
+      ;       delta = 6.45e-4;
+      ;       beta = 1.43e-4;
+      ;
+      ;       cxs_add_complex_constraint_region, r1, 0.5, 0.5
+      ;       cxs_add_complex_constraint_region, r2,   1,   0, beta/delta
+      ;-
+      pro cxs_add_complex_constraint_region, region, alpha1, alpha2, fixed_c
+      IF N_Params() EQ 3 THEN $
+	b = call_external(lib_name() ,'IDL_add_complex_constraint_region', $
+	region, double(alpha1), double(alpha2)) $
+	ELSE $
+	b = call_external(lib_name() ,'IDL_add_complex_constraint_region', $
+	region, double(alpha1), double(alpha2), double(fixed_c))  
+      end
+
+
+      ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+      ;;   Phase Diverse Code
+      ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+      ;
+
+      ;
+      function cxs_phase_diverse_init_estimate
+      ;dimensions are reversed.
+      nx = call_external(lib_name(),'IDL_get_phase_diverse_array_x_size')
+      ny = call_external(lib_name(),'IDL_get_phase_diverse_array_y_size')
+      result = make_array(nx,ny,/COMPLEX)
+      b = call_external(lib_name(),'IDL_phase_diverse_init_estimate',result)
+      show, ABS(result)
+      return, result
+      end
+
+
+      ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+      ;
+      ;
+      pro cxs_init_phase_diverse, beta = beta, gamma = gamma , parallel = parallel
+
+      ; set default values
+      if not keyword_set(beta) then beta = 1.0
+      if not keyword_set(gamma) then gamma = 1.0
+      if not keyword_set(parallel) then parallel = 0
+
+      b = call_external(lib_name(),'IDL_phase_diverse_init', $
+	double(beta), double(gamma), long(parallel))
+
+      end
+
+
+      ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+      ;
+      ;
+      pro cxs_phase_diverse_add_position, x, y, alpha = alpha
+      ; set default values
+      if not keyword_set(alpha) then alpha = 1.0
+      b = call_external(lib_name(),'IDL_phase_diverse_add_position', $
+	double(x), double(y), double(alpha))
+      end
+
+      function cxs_phase_diverse_iterate, iterations
+      ; dimensions are reversed in IDL compared to the library.
+      nx = call_external(lib_name(),'IDL_get_phase_diverse_array_x_size')
+      ny = call_external(lib_name(),'IDL_get_phase_diverse_array_y_size')
+      result = make_array(nx,ny,/COMPLEX)
+      IF N_Params() EQ 0 THEN $
+	iterations = 1
+      b = call_external(lib_name() ,'IDL_phase_diverse_iterate',long(iterations),result) 
+      show, ABS(result)
+      return, result
+      end
+
+
+      pro cxs_phase_diverse_iterations_per_cycle, iterations
+      b = call_external(lib_name(),'IDL_phase_diverse_iterations_per_cycle', long(iterations))
+      end
+
+      pro cxs_phase_diverse_set_transmission, array
+      n = size(array)
+      b = call_external(lib_name(),'IDL_phase_diverse_set_transmission', long(n[2]), long(n[1]), double(array))
+      end
+
+      pro cxs_phase_diverse_adjust_positions, type=type, forward=forward, $
+	x_min=x_min, x_max=x_max, $
+	y_min=y_min, y_max=y_max, $
+	step_size=step_size
+
+      if not keyword_set(type) then type = 0
+      if not keyword_set(forward) then forward = 1
+      if not keyword_set(x_min) then x_min = -50
+      if not keyword_set(x_max) then x_max = 50
+      if not keyword_set(y_min) then y_min = -50
+      if not keyword_set(y_max) then y_max = 50
+      if not keyword_set(step_size) then step_size = 4
+
+      b = call_external(lib_name(),'IDL_phase_diverse_adjust_positions', $
+	long(type), long(forward), $
+	long(x_min),  long(x_max), $
+	long(y_min),  long(y_max), $
+	double(step_size))
+
+      end
+
+      function cxs_phase_diverse_get_final_x_position, nprobe
+      return, call_external(lib_name(), $
+	'IDL_phase_diverse_get_final_x_position', $
+	long(nprobe))
+      end
+
+      function cxs_phase_diverse_get_final_y_position, nprobe
+      return, call_external(lib_name(), $
+	'IDL_phase_diverse_get_final_y_position', $
+	long(nprobe))
+      end
