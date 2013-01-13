@@ -1,6 +1,5 @@
-The instructions for how to install the software are changing
-frequently at the moment, so it is best to check the website for the
-latest details (http://www.ph.unimelb.edu.au/~ndavidson/cxs/).
+For up-to-date instructions, please check the COECXS website:
+www.coecxs.org
 
 Instructions for installing on a Linux/Unix system.
 ---------------------------------------------------
@@ -20,11 +19,9 @@ The result of compiling (if successful) are libraries and header files
 tools which are ready to execute.
 
 The Makefile in examples/ shows how the libraries can be linked and
-the source files in this directory e.g. real_example.c show how the
+the source files in this directory e.g. planar_example.c show how the
 libraries can be used.
 
 
-
-
-T'Mir Julius - tdjulius@unimelb.edu.au - 30/11/2011
+T'Mir Julius - tdjulius@unimelb.edu.au - 30/11/2012
 

@@ -23,7 +23,7 @@
  * - "fresnel" - fresnel object reconstruction. with the white-field 
  *               previously reconstructed.
  * - "partial" - partial spatial reconstruction.
- * - "poly" - polychromatic or partially spatial reconstruction.
+ * - "poly" - polychromatic or partially temporally coherent reconstruction.
  *
  * The seed should be an integer. If the seed is excluded from the
  * command line arguments, it is assumed to be "0". If reco_type is
@@ -41,7 +41,7 @@
 #include <fstream>
 #include <sstream>
 #include <math.h>
-#include <string>
+#include <cstring>
 #include <stdlib.h>
 #include <fftw3.h>
 #include <cstdlib> 
@@ -78,7 +78,8 @@ void print_usage(){
        << "where <reco_type> may be: " << planar_string 
        << ", " << fresnel_string
        << ", " << fresnel_wf_string 
-       << " or " << partial_string << endl
+       << ", " << partial_string
+       << " or " << poly_string << endl
        << "<seed> should be an integer" << endl <<endl
        << "If <reco_type> and <seed> do not need to be specified."
        << "if they are not, <reco_type> will default to "<<planar_string 
@@ -293,7 +294,7 @@ int main(int argc, char * argv[]){
       string spectrum_file_name = c.getString("spectrum_file_name");
 
       proj = new PolyCDI(object_estimate);
-      proj.set_spectrum(spectrum_file_name);
+      ((PolyCDI*) proj)->set_spectrum(spectrum_file_name);
 
     }
 

@@ -27,7 +27,7 @@ PolyCDI::PolyCDI(Complex_2D & initial_guess,
     int n_best,
     bool parallel
     )
-: BaseCDI(initial_guess,n_best),
+:BaseCDI(initial_guess,n_best),
   beta(beta), 
   parallel(parallel),
   intensity_sqrt_calc(nx, ny){
@@ -36,7 +36,6 @@ PolyCDI::PolyCDI(Complex_2D & initial_guess,
 
 //destructor for cleaning up
 PolyCDI::~PolyCDI(){
-
 }
 
 //Initialise the spectrum Double_2D from a file

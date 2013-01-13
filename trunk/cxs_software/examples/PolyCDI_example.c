@@ -23,10 +23,10 @@
 #include <stdlib.h>
 #include <fftw3.h>
 #include <cstdlib> 
-#include "io.h"
-#include "Complex_2D.h"
-#include "PolyCDI.h"
-#include "Double_2D.h"
+#include <io.h>
+#include <Complex_2D.h>
+#include <PolyCDI.h>
+#include <Double_2D.h>
 
 //#include "google/profiler.h"
 
@@ -37,7 +37,7 @@ int main(void){
   //Define some constants which will be used in the code.
 
   //the data file name
-  string data_file_name = "image_files/1_percent.tif";
+  string data_file_name = "image_files/poly_sim_intensity.tiff";
 
   //the file which provides the support (pixels with the value 0
   //are considered as outside the object)
@@ -91,16 +91,14 @@ int main(void){
   //the reconstruction.
   Complex_2D object_estimate(nx,ny);
 
-  Double_2D spectrum;
-  read_spec(data_spectrum_name, spectrum);
-
   //create the poly CDI object which will be used to
   //perform the reconstuction.
-  PolyCDI poly(object_estimate, spectrum, 0.9, 4, 0);
+  PolyCDI poly(object_estimate, 0.9, 4, 0);
 
   //set the support and intensity
   poly.set_support(support,false);
   poly.set_intensity(data);
+  poly.set_spectrum(data_spectrum_name);
 
   //set the algorithm to hybrid input-output
   poly.set_algorithm(ER);

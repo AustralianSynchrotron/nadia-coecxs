@@ -22,7 +22,5 @@ $(LIB_SO): ../src/*.c++ ../src/*.c
 	cp $@ @BASE@/bin/$@
 
 clean:                                                     
-	rm -f *.o *~ 
+	rm -f *.o *.exe  *~ 
 
-clobber: clean
-	rm -f *.exe 

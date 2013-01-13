@@ -33,7 +33,6 @@ clean:
 	make clean -C examples
 	make clean -C tools
 	make clean -C doc
-	rm -f *~
 	rm -f interfaces/*~
 ifeq ($(DO_IDL), TRUE)
 	make clean -C interfaces/idl

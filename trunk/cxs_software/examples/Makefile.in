@@ -4,9 +4,7 @@ EXAMPLE_SRC=PlanarCDI_example.c PlanarCDI_simulation_example.c  \
 	    FresnelCDI_example.c FresnelCDI_WF_example.c \
 	    FresnelCDI_simulation_example.c ComplexConstraints_example.c \
 	    PhaseDiverse_example.c PartialCDI_example.c \
-	    PartialCDI_simulation_example.c 
-
-#PolyCDI_example.c \
+	    PartialCDI_simulation_example.c PolyCDI_example.c \
 	    PolyCDI_simulation_example.c
 
 EXAMPLE_EXEC=$(EXAMPLE_SRC:.c=.exe)
@@ -20,7 +18,4 @@ all: $(EXAMPLE_EXEC)
 
 
 clean:                                                     
-	rm -f *.exe* ~
-
-clobber: clean
-	rm -f *.exe
+	rm -f *.exe* *~

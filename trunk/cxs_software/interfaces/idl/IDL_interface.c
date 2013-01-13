@@ -330,7 +330,6 @@ extern "C" void IDL_poly_init(int argc, void * argv[])
 {
 
   common_init(argc, argv, 3);
-
   reco = new PolyCDI(*esw);
 
 }
