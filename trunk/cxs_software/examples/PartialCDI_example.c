@@ -28,10 +28,6 @@
 #include <Complex_2D.h>
 #include <PartialCDI.h>
 #include <Double_2D.h>
-//#include <gperftools/profiler.h>
-
-
-//#include "google/profiler.h"
 
 //using namespace std;
 
