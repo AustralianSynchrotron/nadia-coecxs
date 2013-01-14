@@ -23,15 +23,14 @@
 #include <iostream>
 #include <sstream>
 #include <stdlib.h>
-#include "io.h"
-//#include "utils.h"
+#include <io.h>
 #include <Complex_2D.h>
 #include <Double_2D.h>
 #include <FresnelCDI.h>
 #include <cstdlib>
-#include <math.h>
-#include <string>
-#include "TransmissionConstraint.h"
+#include <cmath>
+#include <cstring>
+#include <TransmissionConstraint.h>
 
 using namespace std;
 

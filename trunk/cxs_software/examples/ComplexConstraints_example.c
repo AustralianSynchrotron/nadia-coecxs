@@ -32,8 +32,8 @@
 #include <Double_2D.h>
 #include <FresnelCDI.h>
 #include <cstdlib>
-#include <math.h>
-#include <string>
+#include <cmath>
+#include <cstring>
 
 using namespace std;
 

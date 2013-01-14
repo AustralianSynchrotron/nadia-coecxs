@@ -22,8 +22,8 @@
  */
 
 #include <iostream>
-#include <math.h>
-#include <string>
+#include <cmath>
+#include <cstring>
 #include <cstdlib> 
 #include <io.h>
 #include <Complex_2D.h>

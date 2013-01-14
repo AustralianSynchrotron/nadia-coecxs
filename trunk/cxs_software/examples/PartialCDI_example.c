@@ -19,8 +19,8 @@
 #include <iostream>
 #include <fstream>
 #include <sstream>
-#include <math.h>
-#include <string>
+#include <cmath>
+#include <cstring>
 #include <stdlib.h>
 #include <fftw3.h>
 #include <cstdlib> 

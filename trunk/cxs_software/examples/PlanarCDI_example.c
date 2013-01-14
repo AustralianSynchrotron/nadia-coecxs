@@ -18,8 +18,8 @@
 #include <iostream>
 #include <fstream>
 #include <sstream>
-#include <math.h>
-#include <string>
+#include <cmath>
+#include <cstring>
 #include <stdlib.h>
 #include <fftw3.h>
 #include <cstdlib> 
@@ -28,8 +28,6 @@
 #include <PlanarCDI.h>
 #include <Double_2D.h>
 #include <iomanip>
-
-//#include "google/profiler.h"
 
 using namespace std;
 

@@ -23,16 +23,16 @@
 #include <iostream>
 #include <sstream>
 #include <stdlib.h>
-#include "io.h"
-#include "TransmissionConstraint.h"
-#include "Complex_2D.h"
-#include "Double_2D.h"
-#include "FresnelCDI.h"
-#include "PhaseDiverseCDI.h"
+#include <io.h>
+#include <TransmissionConstraint.h>
+#include <Complex_2D.h>
+#include <Double_2D.h>
+#include <FresnelCDI.h>
+#include <PhaseDiverseCDI.h>
 #include <cstdlib>
-#include <math.h>
-#include <string>
-#include "utils.h"
+#include <cmath>
+#include <cstring>
+#include <utils.h>
 
 using namespace std;
 

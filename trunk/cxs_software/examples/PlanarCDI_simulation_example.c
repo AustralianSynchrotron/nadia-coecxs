@@ -19,13 +19,13 @@
  */
 
 #include <iostream>
-#include <math.h>
-#include <string>
+#include <cmath>
+#include <cstring>
 #include <cstdlib> 
-#include "io.h"
-#include "Complex_2D.h"
-#include "Double_2D.h"
-#include "PlanarCDI.h"
+#include <io.h>
+#include <Complex_2D.h>
+#include <Double_2D.h>
+#include <PlanarCDI.h>
 #include <sstream>
 
 using namespace std;
@@ -37,9 +37,7 @@ int main(void){
   //define some constants which will be used in the code:
 
   //the data file name
-  const static char * data_file_name = "/home/tdjempire/Desktop/Harry Project/supporttdj.tiff";
-    //circular masked.tiff";
-    //"image_files/object.tiff";
+  const static char * data_file_name = "image_files/object.tiff";
 
   //the approx. level of background noise in the image
   const double noise_level = 15;
