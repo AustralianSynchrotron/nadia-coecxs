@@ -10,7 +10,7 @@
  * \a hdf2ppm.exe - Extract the data from a HDF4 file and save as 
  * a ppm (grey-scale, 16 bit file). 
  * 
- * \par Usage: hdf2ppm.exe \<input hdf file\> \<output ppm file\> \<optional: data block name\> \par 
+ * Usage: hdf2ppm.exe \<input hdf file\> \<output ppm file\> \<optional: data block name\> \par 
  *
  * \par Example:
  * \verbatim  hdf2ppm.exe my_data.hdf my_data.ppm  \endverbatim
