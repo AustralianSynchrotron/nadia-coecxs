@@ -1697,7 +1697,7 @@ Double_2D  legroots(double n){
     double zl = 0;
     double dpk = 0;
 
-    while( fabs(z)*pow(10, -15) < fabs(z-zl)){
+    while( fabs(z)*pow(10.0, -15.0) < fabs(z-zl)){
 
       //If the polynomial is odd, the middle root will 
       //also be odd. We still need to recursively find
