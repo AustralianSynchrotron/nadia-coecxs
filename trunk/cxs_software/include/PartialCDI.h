@@ -20,7 +20,7 @@
 #ifndef PCDI_H
 #define PCDI_H
 
-#include "BaseCDI.h"
+#include <BaseCDI.h>
 #include <vector>
 
 //forward declarations

@@ -23,8 +23,8 @@
 #define COMPLEX_2D_H
 
 #include <math.h>
-#include "fftw3.h"
-#include "Double_2D.h"
+#include <fftw3.h>
+#include <Double_2D.h>
 
 //class Double_2D;
 

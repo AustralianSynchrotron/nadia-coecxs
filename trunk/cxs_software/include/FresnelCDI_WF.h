@@ -28,7 +28,7 @@
 #ifndef FCDI_WF_H
 #define FCDI_WF_H
 
-#include "BaseCDI.h"
+#include <BaseCDI.h>
 
 
 //forward declarations

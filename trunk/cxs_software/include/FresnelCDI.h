@@ -26,7 +26,7 @@
 #ifndef FCDI_H
 #define FCDI_H
 
-#include "BaseCDI.h"
+#include <BaseCDI.h>
 
 //forward declarations
 class Complex_2D;

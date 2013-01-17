@@ -20,7 +20,7 @@
 #ifndef POLYCDI_H
 #define POLYCDI_H
 
-#include "BaseCDI.h"
+#include <BaseCDI.h>
 #include <vector>
 #include <cstring>
 

@@ -86,7 +86,7 @@
 #ifndef PHASED_H
 #define PHASED_H
 
-#include "BaseCDI.h"
+#include <BaseCDI.h>
 #include <vector>
 
 //forward declarations
