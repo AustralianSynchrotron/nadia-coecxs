@@ -4,8 +4,8 @@ SOURCE_TOOLS=hdf2ppm.c tiff2ppm.c CDI_reconstruction.c dbin2ppm.c \
              cplx2ppm.c cplx2dbin.c dbin2tiff.c PhaseDiverseFresnelRec.c
 EXEC_TOOLS=$(SOURCE_TOOLS:.c=.exe)
 
-LIB_SO=../lib/libCOECXS.so
-LIB_A=../lib/libCOECXS.a
+LIB_SO=../lib/libNADIA.so
+LIB_A=../lib/libNADIA.a
 
 all: $(LIB_A) $(LIB_SO) $(EXEC_TOOLS)
 
@@ -17,7 +17,7 @@ $(LIB_SO): ../src/*.c++ ../src/*.c
 
 %.exe: %.c ../src/*.c++ ../src/*.c
 	@CXX@ @CXXFLAGS@ -I@BASE@/include $< -o $@ \
-	-L@BASE@/lib -lCOECXS \
+	-L@BASE@/lib -lNADIA \
 	@LDFLAGS@ @LIBS@
 	cp $@ @BASE@/bin/$@
 

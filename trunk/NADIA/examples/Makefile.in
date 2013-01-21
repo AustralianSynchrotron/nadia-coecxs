@@ -13,7 +13,7 @@ all: $(EXAMPLE_EXEC)
 
 %.exe: %.c
 	@CXX@ @CXXFLAGS@ -I@BASE@/include $< -o $@ \
-	  -L@BASE@/lib -lCOECXS \
+	  -L@BASE@/lib -lNADIA \
 	  @LDFLAGS@ @LIBS@
 
 

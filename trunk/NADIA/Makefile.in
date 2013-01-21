@@ -3,7 +3,7 @@
 
 all: 
 	make -C src
-	@echo "done making the COECXS libraries"
+	@echo "done making the NADIA libraries"
 	make -C tools
 	@echo "done making the tools"
 	make -C examples
@@ -42,7 +42,7 @@ clobber:
 	make clean
 	make clobber -C examples
 	make clobber -C tools
-	rm -f lib/libCOECXS.so lib/libCOECXS.a
+	rm -f lib/libNADIA.so lib/libNADIA.a
 ifeq ($(DO_IDL), TRUE)
 	make clobber -C interfaces/idl
 endif

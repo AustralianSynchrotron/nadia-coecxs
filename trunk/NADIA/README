@@ -12,7 +12,7 @@ libtiff - for reading (and not yet writing to) tiff files.
 HDF libraries - for reading (and not yet writing to) hdf4 files.
 LAPACK - for linear algebra and matrix manipulation/
 
-In the base cxs_software directory type "./configure" followed by "make" 
+In the base NADIA directory type "./configure" followed by "make" 
 
 The result of compiling (if successful) are libraries and header files
 (in the \lib and \include directories), some example programs and

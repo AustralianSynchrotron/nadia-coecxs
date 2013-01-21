@@ -15,7 +15,7 @@
 //idl header
 #include "idl_export.h"
 
-//cxs software headers
+//NADIA software headers
 #include <Complex_2D.h>
 #include <Double_2D.h>
 #include <BaseCDI.h>
@@ -43,55 +43,55 @@ using namespace std;
 /************ helper methods ******************/
 
 //methods for converting between the IDL types and the C++ types.
-void copy_to_double_2d(Double_2D & cxs_array, double * IDL_array){
+void copy_to_double_2d(Double_2D & nadia_array, double * IDL_array){
 
-  int ny = cxs_array.get_size_x();
-  int nx = cxs_array.get_size_y();
+  int ny = nadia_array.get_size_x();
+  int nx = nadia_array.get_size_y();
 
   for(int i=0; i<nx; i++){
     for(int j=0; j<ny; j++){
-      cxs_array.set(j,nx-1-i,*(IDL_array));
+      nadia_array.set(j,nx-1-i,*(IDL_array));
       IDL_array++;
     }
   }
 }
 
-void copy_from_double_2d(const Double_2D & cxs_array, double * IDL_array){
+void copy_from_double_2d(const Double_2D & nadia_array, double * IDL_array){
 
-  int ny = cxs_array.get_size_x();
-  int nx = cxs_array.get_size_y();
+  int ny = nadia_array.get_size_x();
+  int nx = nadia_array.get_size_y();
 
   for(int i=0; i<nx; i++){
     for(int j=0; j<ny; j++){
-      *(IDL_array)= cxs_array.get(j,nx-1-i);
+      *(IDL_array)= nadia_array.get(j,nx-1-i);
       IDL_array++;
     }
   }
 }
 
-void copy_to_complex_2d(Complex_2D & cxs_array, IDL_COMPLEX * IDL_array){
+void copy_to_complex_2d(Complex_2D & nadia_array, IDL_COMPLEX * IDL_array){
 
-  int ny = cxs_array.get_size_x();
-  int nx = cxs_array.get_size_y();
+  int ny = nadia_array.get_size_x();
+  int nx = nadia_array.get_size_y();
 
   for(int i=0; i<nx; i++){
     for(int j=0; j<ny; j++){
-      cxs_array.set_real(j,nx-1-i,(*IDL_array).r);
-      cxs_array.set_imag(j,nx-1-i,(*IDL_array).i);
+      nadia_array.set_real(j,nx-1-i,(*IDL_array).r);
+      nadia_array.set_imag(j,nx-1-i,(*IDL_array).i);
       IDL_array++;
     }
   }
 }
 
-void copy_from_complex_2d(const Complex_2D & cxs_array, IDL_COMPLEX * IDL_array){
+void copy_from_complex_2d(const Complex_2D & nadia_array, IDL_COMPLEX * IDL_array){
 
-  int ny = cxs_array.get_size_x();
-  int nx = cxs_array.get_size_y();  
+  int ny = nadia_array.get_size_x();
+  int nx = nadia_array.get_size_y();  
 
   for(int i=0; i<nx; i++){
     for(int j=0; j<ny; j++){
-      (*IDL_array).r= cxs_array.get_real(j,nx-1-i);
-      (*IDL_array).i= cxs_array.get_imag(j,nx-1-i);
+      (*IDL_array).r= nadia_array.get_real(j,nx-1-i);
+      (*IDL_array).i= nadia_array.get_imag(j,nx-1-i);
       IDL_array++;
     }
   }
@@ -100,7 +100,7 @@ void copy_from_complex_2d(const Complex_2D & cxs_array, IDL_COMPLEX * IDL_array)
 //error checking method. Make sure the objects have memory allocated.
 void check_objects(){
   if(!esw || !reco){
-    char buf[] = "You need to call one of the CXS_INIT_ routines before calling this routine";
+    char buf[] = "You need to call one of the NADIA_INIT_ routines before calling this routine";
     IDL_Message(IDL_M_GENERIC, IDL_MSG_INFO, buf); 
     exit(1);
   }
@@ -351,7 +351,7 @@ extern "C" void IDL_set_support(int argc, void * argv[]){
   reco->set_support(temp_2D);
 }
 
-//this doesn't actually call any of the cxs library code
+//this doesn't actually call any of the NADIA library code
 extern "C" void IDL_get_round_support(int argc, void * argv[]){
 
   int ny = *(int*) argv[0];

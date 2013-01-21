@@ -10,43 +10,43 @@
 
 
 ; Load up the module containing the wrapper code
-.Compile CXS_interface.pro
+.Compile NADIA_interface.pro
 
 ; Load some image files of the white-field data and 
 ; zone-plate support. A 2D array of doubles is returned.
 ; Please replace the file-name with your 
-; "cxs_software/example/image_files" directory if you are not
+; "NADIA/example/image_files" directory if you are not
 ; running this example on osiris.
-d = cxs_read_dbin(1024,1024,'../../examples/image_files/FCDI_wf_data.dbin')
-s = cxs_get_round_support(1024,1024,330)
+d = nadia_read_dbin(1024,1024,'../../examples/image_files/FCDI_wf_data.dbin')
+s = nadia_get_round_support(1024,1024,330)
 
 ; Set-up everything ready for reconstruction of the 
 ; white-field phase. You need to pass the data, support
 ; and experimental parameters.
-cxs_init_fresnel_wf, d, s, 4.892e-10, 16.353e-3, 0.9078777, 13.5e-6
+nadia_init_fresnel_wf, d, s, 4.892e-10, 16.353e-3, 0.9078777, 13.5e-6
 
 ; Perform 20 iterations.
-white_field = cxs_iterate(20)
+white_field = nadia_iterate(20)
 
 ; Now load the files of the sample support and data with the sample in place
-;s = cxs_read_tiff(1024,1024,'../../examples/image_files/FCDI_support.tiff')
-d = cxs_read_dbin(1024,1024,'../../examples/image_files/FCDI_data.dbin')
-s = cxs_get_round_support(1024,1024,320)
+;s = nadia_read_tiff(1024,1024,'../../examples/image_files/FCDI_support.tiff')
+d = nadia_read_dbin(1024,1024,'../../examples/image_files/FCDI_data.dbin')
+s = nadia_get_round_support(1024,1024,320)
 
 ; and set-up everything ready for the sample reconstruction.
-cxs_init_fresnel, d, s, white_field, 4.892e-10, 0.9078777, 2.16e-3, 13.5e-6, 1.0
+nadia_init_fresnel, d, s, white_field, 4.892e-10, 0.9078777, 2.16e-3, 13.5e-6, 1.0
 
 ; examples of extra constraint 
-cxs_set_charge_flipping, 1
-cxs_set_trans_unity_constraint, 1
+nadia_set_charge_flipping, 1
+nadia_set_trans_unity_constraint, 1
 
 ; Perform 20 iterations
-a = cxs_iterate(20)
+a = nadia_iterate(20)
 
 ; Now get the transmission function based on the result of the
 ; final iteration.
-;a = cxs_get_transmission_function()
-;cxs_clear_memory
+;a = nadia_get_transmission_function()
+;nadia_clear_memory
 
 ; We are finished with the white-field reconstruction now, so
 ; let free some memory

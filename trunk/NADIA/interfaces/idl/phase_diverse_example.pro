@@ -10,12 +10,12 @@
 ; Thanks for Corey for the data which this example replies on.
 
 ; Load up the module containing the wrapper code
-.Compile CXS_interface.pro
+.Compile NADIA_interface.pro
 
 ; Load some image files of the white-field data and 
 ; zone-plate support. A 2D array of doubles is returned.
 ; Please replace the file-name with your 
-; "cxs_software/example/image_files" directory if you are not
+; "NADIA/example/image_files" directory if you are not
 ; running this example on osiris.
 
 white_field = ["wf_A_1024.cplx", $
@@ -56,43 +56,43 @@ y_pos = [-150,-145,-134,-123,-150,-93,210]
 
 
 ;make a support (use the same for all frames)
-s = CXS_GET_ROUND_SUPPORT(1024,1024,0.5)
+s = NADIA_GET_ROUND_SUPPORT(1024,1024,0.5)
 
 ;Make a new PhaseDiverseCDI object
-; CXS_INIT_FRESNEL
-CXS_INIT_PHASE_DIVERSE, beta=1, gamma=3
+; NADIA_INIT_FRESNEL
+NADIA_INIT_PHASE_DIVERSE, beta=1, gamma=3
 
 
 FOR I=0,6 DO BEGIN $
-   d = CXS_READ_DBIN(1024,1024,data[I]) & $
-   w = CXS_READ_CPLX(1024,1024,white_field[I]) & $
+   d = NADIA_READ_DBIN(1024,1024,data[I]) & $
+   w = NADIA_READ_CPLX(1024,1024,white_field[I]) & $
 
-   CXS_INIT_FRESNEL, d, s, w, wavelength, fd[I]-fz, fs[I]-fz, ps, 1 & $
+   NADIA_INIT_FRESNEL, d, s, w, wavelength, fd[I]-fz, fs[I]-fz, ps, 1 & $
    ;norm[I] & $
    
-   CXS_SET_CHARGE_FLIPPING, 1 & $
-   CXS_SET_TRANS_UNITY_CONSTRAINT, 1 & $
+   NADIA_SET_CHARGE_FLIPPING, 1 & $
+   NADIA_SET_TRANS_UNITY_CONSTRAINT, 1 & $
    
-   CXS_PHASE_DIVERSE_ADD_POSITION, x_pos[I], y_pos[I] & $
+   NADIA_PHASE_DIVERSE_ADD_POSITION, x_pos[I], y_pos[I] & $
 
 ENDFOR
 
 
-a = CXS_PHASE_DIVERSE_INIT_ESTIMATE()
+a = NADIA_PHASE_DIVERSE_INIT_ESTIMATE()
 
-CXS_PHASE_DIVERSE_ADJUST_POSITIONS
+NADIA_PHASE_DIVERSE_ADJUST_POSITIONS
 
-a = CXS_PHASE_DIVERSE_ITERATE(10) 
+a = NADIA_PHASE_DIVERSE_ITERATE(10) 
 
-CXS_PHASE_DIVERSE_ADJUST_POSITIONS, TYPE=1
+NADIA_PHASE_DIVERSE_ADJUST_POSITIONS, TYPE=1
 
-b = CXS_PHASE_DIVERSE_ITERATE(5) 
+b = NADIA_PHASE_DIVERSE_ITERATE(5) 
 
 
 ; Now get the transmission function based on the result of the
 ; final iteration.
-; a = cxs_get_transmission_function()
-; cxs_clear_memory
+; a = nadia_get_transmission_function()
+; nadia_clear_memory
 
 ; We are finished with the white-field reconstruction now, so
 ; let free some memory
@@ -108,7 +108,7 @@ show, phase
 ; TVSCL, rebin(abs(a),512,512)
 
 ; or save the result to a file:
-; cxs_write_cplx(a, 'result_of_my_FCDI_CDI.cplx')
+; nadia_write_cplx(a, 'result_of_my_FCDI_CDI.cplx')
 
-CXS_CLEAR_MEMORY
+NADIA_CLEAR_MEMORY
 

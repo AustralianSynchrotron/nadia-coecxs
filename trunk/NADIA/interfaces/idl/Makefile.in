@@ -2,13 +2,13 @@ export LD_RUN_PATH=@LD_RUN_PATH@:@BASE@/lib
 
 IDL_SRC=IDL_interface.c
 IDL_O=IDL_interface.o
-LIB=libIDLCOECXS.so
+LIB=libIDLNADIA.so
 
 all: $(LIB)
 
 $(LIB): $(IDL_O)
 	gcc -shared @CXXFLAGS@ -o $(LIB) $(IDL_O) \
-	-L@BASE@/lib/ -lCOECXS \
+	-L@BASE@/lib/ -lNADIA \
 	@LDFLAGS@ @LIBS@
 
 $(IDL_O): $(IDL_SRC)

@@ -1,4 +1,4 @@
-This directory contains the code for binding the libCOECXS library
+This directory contains the code for binding the libNADIA library
 to code in languages other than C/C++. Currently implemented is:
 
 - A wrapper for IDL with examples.

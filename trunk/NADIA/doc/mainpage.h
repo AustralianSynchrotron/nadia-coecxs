@@ -1,10 +1,10 @@
 /** 
 
- @mainpage The CXS Software Project
+ @mainpage The NADIA Project
  
  Instruction on how to install and begin using the software package
  are provided on the <a
- href=http://www.ph.unimelb.edu.au/~ndavidson/cxs/index.html>main
+ href=http://cxscode.ph.unimelb.edu.au>main
  website</a>.  The doxygen documentation provided here is aimed at
  more advanced users who are comfortable with c++ and this style of
  reference documentation.

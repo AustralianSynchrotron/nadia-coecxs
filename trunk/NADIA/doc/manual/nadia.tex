@@ -1,7 +1,7 @@
-% Copyright 2011 Nadia Davidson 
+% Copyright 2011 Nadia Davidson, 2012 T'Mir Julius 
 % for The ARC Centre of Excellence in Coherent X-ray Science. 
 
-\documentclass[]{cxs-software}
+\documentclass[]{nadia}
 \usepackage{graphicx}
 \usepackage{hyperref}
 \usepackage{eurosym}
@@ -226,8 +226,8 @@ libtiff4-dev, liblapack, and libhdf4-dev.
 Next, download our source code from the website and put it into an
 appropriate directory. Unzip and untar the source code:
 \begin{myverbatim}
-  gunzip CXS.rel_0.5.tar.gz 
-  tar -xvvf CXS.rel_0.5.tar
+  gunzip NADIA.0.5.tar.gz 
+  tar -xvvf NADIA.0.5.tar
 \end{myverbatim}
 
 Change into the directory NADIA and compile the source code: 
@@ -276,7 +276,7 @@ information for your computer. %--enable-checking is just in case.
 \subsubsection{Windows with Cygwin}
 
 Cygwin\cite{} provides a Linux/Unix type environment for Windows (the
-interface is basically a Unix style terminal). Installing the CXS
+interface is basically a Unix style terminal). Installing the NADIA
 source code in this environment is very similar to installing it in
 Linux/Unix and (in my opinion) makes modifying and recompiling the
 code a bit easier than it would be in Windows otherwise. First you
@@ -311,7 +311,7 @@ and download their Windows binary for your system (32 or 64 bit).
 Unzip the file using the standard Windows tool and install to a directory 
 without any spaces (Cygwin sometimes struggles with spaces)
 
-Some of the HDF files are named in such a way that the CXS software cannot 
+Some of the HDF files are named in such a way that the NADIA cannot 
 find them. So go in to the bin directory of your HDF install (something like 
 c:\textbackslash{}HDF\_Group\textbackslash{}HDF\textbackslash{}4.2.8\textbackslash{}bin)
 and create some dynamic links:
@@ -327,14 +327,14 @@ directory on Cygwin \\
 (C:\textbackslash{}cygwin\textbackslash{}home\textbackslash{}your\_user\_name). Open Cygwin and
 unzip and untar the package:
 \begin{myverbatim}
-$ gunzip CXS.rel_0.5.tar.gz 
-$ tar -xvf CXS.rel_0.5.tar 
+$ gunzip NADIA.0.5.tar.gz 
+$ tar -xvf NADIA.0.5.tar 
 \end{myverbatim}
 
 When you type ``ls'' you should see the directory "NADIA" plus a
 few others. Change into the NADIA directory:
 \begin{myverbatim}
-$ cd cxs_software 
+$ cd NADIA 
 \end{myverbatim}
 Tell the package where your hdf and szip libraries files are located
 (replace the "user\_name" with your cygwin user name):
@@ -474,7 +474,7 @@ Finally go into putty again, and load your "osiris" session.
 \subsubsection{Setting up your environment on Osiris}
 \label{osiris-setup}
 Once you have successfully logged in, append your PATH variable to the
-directory where the CXS programs are located. This can be done by
+directory where the NADIA programs are located. This can be done by
 typing:
 \begin{myverbatim}
   export PATH=$PATH:/data/DIXE/dixe/tags/rel_0.5/NADIA/bin 
@@ -638,7 +638,7 @@ options is described below.
 If you have IDL installed, you can import the library routines by
 simply executing:
 \begin{myverbatim}
-   .Compile CXS_interface.pro
+   .Compile NADIA_interface.pro
 \end{myverbatim}
 in IDL. Documentation for each of the routines can be found in
 Appendix \ref{sec:idl_routines} and on the website and examples are
@@ -652,7 +652,7 @@ To run the IDL examples:
   example image files are stored on your system. It should be
   something like,
   \begin{myverbatim}
-    C:\<path you installed the package>\cxs_software\examples\image_files\<file_name>
+    C:\<path you installed the package>\NADIA\examples\image_files\<file_name>
   \end{myverbatim}
      Note how the "/"s should be changed to `''\textbackslash''s.
    \item Run the examples by copying and pasting each line of the
@@ -716,11 +716,11 @@ the software library.  If your reconstruction requires a lot of
 computing power (for example you plan on run on osiris or similar,
 rather than a desktop), this is the best option in our opinion.
 
-Five examples showing how to write c code using the CXS software for
+Five examples showing how to write c code using the NADIA software for
 CDI reconstruction and simulation are given in the ``examples''
-directory.  The header files for the CXS software project can be found
+directory.  The header files for the NADIA software project can be found
 in the "include" directory and the libraries in the "bin" (libraries
-which the CXS software depends on are also provided in this directory.
+which the NADIA software depends on are also provided in this directory.
 
 We will leave the details of how to compile in Windows to the users,
 as this will be compiler and system dependant. However, we do
@@ -740,7 +740,7 @@ arises.
 %\item open a command line terminal: click on "Start", click on "run",
 %  type "cmd" in the open field and click on okay
 %\item change into the directory where the examples are, using the "cd"
-%  command, for example: "cd <directory name>\\cxs\_software\\examples"
+%  command, for example: "cd <directory name>\\NADIA\\examples"
 %  where <directory name> is the directory where you copied the package
 %\item open "Makefile" in a text editor. Note that you might need a
 %  text editor for linux/unix style files, otherwise the new lines
@@ -823,7 +823,7 @@ followed by "make".
 
 \item[{\tt IDL examples}] - \\ Examples for performing planar, Fresnel
   and phase-diverse/ptychographic reconstruction in IDL can be found
-  in the directory cxs\_software/interfaces/idl, with the filenames
+  in the directory NADIA/interfaces/idl, with the filenames
   planar\_example.pro, fresnel\_example.pro and
   phase\_diverse\_example.pro.
 
@@ -914,7 +914,7 @@ detail.
                           
                           {\bf In IDL}
                           \begin{myverbatim}[language=IDL]
-                            data = CXS_READ_PPM(1024, 1024, 'data_file.ppm')
+                            data = NADIA_READ_PPM(1024, 1024, 'data_file.ppm')
                           \end{myverbatim}
                           etc. or use one of IDLs built in libraries to get
                           the input in matrix form.
@@ -941,7 +941,7 @@ detail.
                           \end{myverbatim}
                               {\bf In IDL}
                               \begin{myverbatim}[language=IDL]
-                                CXS_INIT_PLANAR, data, support
+                                NADIA_INIT_PLANAR, data, support
                               \end{myverbatim}
                         }
                           
@@ -974,7 +974,7 @@ file of fftw~\cite{} complex number types.
 
 {\bf In IDL}
 \begin{myverbatim}[language=IDL]
-   data = CXS_READ_PPM(1024, 1024, 'data_file.ppm')
+   data = NADIA_READ_PPM(1024, 1024, 'data_file.ppm')
 \end{myverbatim}
 etc. or use one of IDLs built in libraries to get
 the input in matrix form.
@@ -998,7 +998,7 @@ Save the result to file.\\
 {\bf In IDL}
 \begin{myverbatim}[language=IDL]
   ; Record the complex field to a binary file
-  CXS_WRITE_CPLX, result, 'result_file.cplx'
+  NADIA_WRITE_CPLX, result, 'result_file.cplx'
 \end{myverbatim}
 The magnitude and phase of the complex matrix
 can be viewed and saved using the standard IDL
@@ -1062,10 +1062,10 @@ steps:
       \begin{myverbatim}[language=IDL]
         ; Perform one iteration. The exit-
         ; surface-wave is return to 'result'  
-        result = CXS_ITERATE()
+        result = NADIA_ITERATE()
         
         ; Perform 50 iterations
-        result = CXS_ITERATE(50)
+        result = NADIA_ITERATE(50)
       \end{myverbatim}
 
       Various aspects of the reconstruction can be controlled, for
@@ -1265,7 +1265,7 @@ X - number of arrays needed for a single reconstruction).
 \section{Directory Structure}
 
 \begin{itemize}
-   \item[] {\tt cxs\_software/} ...... base directory, where ./configure and make should be executed from.
+   \item[] {\tt NADIA/} ...... base directory, where ./configure and make should be executed from.
    \begin{itemize}
       \item[] {\tt bin/} ...... contains the command-line tool executable files after compilation.
       \item[] {\tt doc/} ...... contains configuration files for doxygen.
@@ -1292,7 +1292,7 @@ X - number of arrays needed for a single reconstruction).
 %\section{Directory Structure}
 
 %\dirtree{% 
-%.1 cxs\_software/\DTcomment{base directory, where ./configure and make should be executed from}.
+%.1 NADIA/\DTcomment{base directory, where ./configure and make should be executed from}.
 %.2 bin/ \DTcomment{contains the tool executable files are compilation}.
 %.2 doc/ \DTcomment{contains configuration files for doxygen}.
 %.3 manual/\DTcomment{contains the latex source for the software manual (this file)}.
@@ -1332,7 +1332,7 @@ accepts multiple objects of type BaseCDI.
 
 \begin{figure}[htbp]
 \centering \includegraphics*[scale=0.32,viewport = 0 0 1500
-  1200]{cxs_class_diagram.eps}
+  1200]{nadia_class_diagram.eps}
 \caption[]{The relationship between classes of the \name package.
 \label{fig:class_diagram}}
 \end{figure}

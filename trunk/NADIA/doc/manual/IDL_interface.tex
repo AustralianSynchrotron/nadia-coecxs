@@ -1,9 +1,9 @@
 
-\subsection{CXS\_ADD\_COMPLEX\_CONSTRAINT\_REGION}
+\subsection{NADIA\_ADD\_COMPLEX\_CONSTRAINT\_REGION}
 \begin{verbatim}
 
  NAME:
-       CXS_ADD_COMPLEX_CONSTRAINT_REGION
+       NADIA_ADD_COMPLEX_CONSTRAINT_REGION
 
  PURPOSE: For use with FresnelCDI reconstruction. Calling this
        procedure will constrain the transmission function magnitude
@@ -26,7 +26,7 @@
 
  CALLING SEQUENCE:
 
-       CXS_ADD_COMPLEX_CONSTRAINT_REGION, region, alpha1, alpha2 [, fixed_c]
+       NADIA_ADD_COMPLEX_CONSTRAINT_REGION, region, alpha1, alpha2 [, fixed_c]
 
  INPUTS:
 
@@ -52,14 +52,14 @@
        Setting a complex constraint for two image regions.
        For the second, the value of c=beta/delta is fixed.
 
-       r1 =  cxs_read_tiff(1024,1024,'region_1.tiff')
-       r2 =  cxs_read_tiff(1024,1024,'region_2.tiff')
+       r1 =  nadia_read_tiff(1024,1024,'region_1.tiff')
+       r2 =  nadia_read_tiff(1024,1024,'region_2.tiff')
 
        delta = 6.45e-4;
        beta = 1.43e-4;
 
-       cxs_add_complex_constraint_region, r1, 0.5, 0.5
-       cxs_add_complex_constraint_region, r2,   1,   0, beta/delta
+       nadia_add_complex_constraint_region, r1, 0.5, 0.5
+       nadia_add_complex_constraint_region, r2,   1,   0, beta/delta
 
 \end{verbatim}
 
@@ -67,22 +67,22 @@
 
   
  
-\subsection{CXS\_APPLY\_SHRINKWRAP}
+\subsection{NADIA\_APPLY\_SHRINKWRAP}
 \begin{verbatim}
 
  NAME:
-       CXS_APPLY_SHRINKWRAP
+       NADIA_APPLY_SHRINKWRAP
 
  PURPOSE:
        Apply the shrinkwrap algorithm. The current exit-surface-wave
        magnitude is used to update the support; it is convoluted with
        a Gaussian and then a threshold is applied. You can use the
-       cxs_get_support function to see how the support have been
+       nadia_get_support function to see how the support have been
        modified after calling this procedure.
 
  CALLING SEQUENCE:
 
-	CXS_APPLY_SHRINKWRAP [,gauss_width, threshold ]
+	NADIA_APPLY_SHRINKWRAP [,gauss_width, threshold ]
 
  INPUTS:
 
@@ -102,27 +102,27 @@
        Perform 1000 iterations in total, applying shrink-wrap at the 400th iteration:
 
        ....
-       a = CXS_ITERATE(400)
-       CXS_APPLY_SHRINKWRAP
-       a = CXS_ITERATE(600)
+       a = NADIA_ITERATE(400)
+       NADIA_APPLY_SHRINKWRAP
+       a = NADIA_ITERATE(600)
 
 \end{verbatim}
 
 
-\subsection{CXS\_APPLY\_SUPPORT}
+\subsection{NADIA\_APPLY\_SUPPORT}
 \begin{verbatim}
 
  NAME:
-       CXS_APPLY_SUPPORT
+       NADIA_APPLY_SUPPORT
 
  PURPOSE:
        Apply the support constraint to the given complex array. All
        elements outside the support with be reset to zero. Elements
        within the support will be left as they are. The support must
-       have been previously set using either one of the CXS_INIT 
-       functions or CXS_SET_SUPPORT.
+       have been previously set using either one of the NADIA_INIT 
+       functions or NADIA_SET_SUPPORT.
 
-       This function is called when using (CXS_ITERATE) so generally
+       This function is called when using (NADIA_ITERATE) so generally
        won't need to be call explicitly. An exception to this is if
        the user wishes to extend their reconstruction with an
        addition constraint.
@@ -130,7 +130,7 @@
 
  CALLING SEQUENCE:
 
-	result = CXS_APPLY_SUPPORT( complex_array [,/SUPPRESS_DISPLAY] )
+	result = NADIA_APPLY_SUPPORT( complex_array [,/SUPPRESS_DISPLAY] )
 
  INPUTS:
 
@@ -152,39 +152,39 @@
              A COMPLEX 2D array after the support is applied.
 
  EXAMPLE:
-       See the example for CXS_PROPAGATE_FROM_DETECTOR
+       See the example for NADIA_PROPAGATE_FROM_DETECTOR
 
 \end{verbatim}
 
 
 
 
-\subsection{CXS\_CLEAR\_MEMORY}
+\subsection{NADIA\_CLEAR\_MEMORY}
 \begin{verbatim}
 
  NAME:
-       CXS_CLEAR_MEMORY
+       NADIA_CLEAR_MEMORY
 
  PURPOSE:
        Clean-up after a reconstruction has been performed. This 
        procedure should be called at the very end of a program.
        It will free up the memory that was allocated when one of 
-       the "CXS_INIT_.." methods was called.
+       the "NADIA_INIT_.." methods was called.
 
  CALLING SEQUENCE:
 
-       CXS_CLEAR_MEMORY
+       NADIA_CLEAR_MEMORY
 
  EXAMPLE:
-       CXS_CLEAR_MEMORY
+       NADIA_CLEAR_MEMORY
 
 \end{verbatim}
 
-\subsection{CXS\_GET\_BEST\_RESULT}
+\subsection{NADIA\_GET\_BEST\_RESULT}
 \begin{verbatim}
 
  NAME:
-       CXS_GET_BEST_RESULT
+       NADIA_GET_BEST_RESULT
 
  PURPOSE:
        Get the best (lowest error) result found during the reconstruction.
@@ -193,7 +193,7 @@
 
  CALLING SEQUENCE:
 
-       result = CXS_GET_BEST_RESULT()
+       result = NADIA_GET_BEST_RESULT()
 
  OUTPUTS:
 
@@ -207,16 +207,16 @@
  EXAMPLE:
        Perform 1000 iterations and get the lowest error result.
        ....
-       a = CXS_ITERATE(1000)
-       a = CXS_GET_BEST_RESULT()
+       a = NADIA_ITERATE(1000)
+       a = NADIA_GET_BEST_RESULT()
 
 \end{verbatim}
 
-\subsection{CXS\_GET\_ERROR}
+\subsection{NADIA\_GET\_ERROR}
 \begin{verbatim}
 
  NAME:
-       CXS_GET_ERROR
+       NADIA_GET_ERROR
 
  PURPOSE:
        Get the error metric. This is defined as the difference
@@ -231,7 +231,7 @@
 
  CALLING SEQUENCE:
 
-       error = CXS_GET_ERROR()
+       error = NADIA_GET_ERROR()
 
  OUTPUTS:
 
@@ -240,16 +240,16 @@
 
  EXAMPLE:
 
-       a = CXS_GET_ERROR()
+       a = NADIA_GET_ERROR()
 
 \end{verbatim}
 
  
-\subsection{CXS\_GET\_INTENSITY\_AUTOCORRELATION}
+\subsection{NADIA\_GET\_INTENSITY\_AUTOCORRELATION}
 \begin{verbatim}
 
  NAME:
-       CXS_GET_INTENSITY_AUTOCORRELATION
+       NADIA_GET_INTENSITY_AUTOCORRELATION
 
  PURPOSE:
        Get the autocorrelation function from the intensity data.
@@ -257,22 +257,22 @@
 
  CALLING SEQUENCE:
 
-       a = CXS_GET_INTENSITY_AUTOCORRELATION()
+       a = NADIA_GET_INTENSITY_AUTOCORRELATION()
 
  OUTPUTS:
        a:
              The autocorrelation function (a 2D array of doubles).
 
  EXAMPLE:
-       a = CXS_GET_INTENSITY_AUTOCORRELATION()
+       a = NADIA_GET_INTENSITY_AUTOCORRELATION()
 
 \end{verbatim}
 
-\subsection{CXS\_GET\_ROUND\_SUPPORT}
+\subsection{NADIA\_GET\_ROUND\_SUPPORT}
 \begin{verbatim}
 
  NAME:
-       CXS_GET_ROUND_SUPPORT
+       NADIA_GET_ROUND_SUPPORT
 
  PURPOSE: 
        This function will return a simple array with a central
@@ -280,12 +280,12 @@
        the value returned is zero. This function has been written to
        allow each create of the support array. For example when
        reconstructing the white-field for Fresnel CDI reconstruction.
-       Note that it does not actually call any method from the cxs
+       Note that it does not actually call any method from the NADIA
        software library.
 
  CALLING SEQUENCE:
 
-	CXS_GET_ROUND_SUPPORT, nx, ny, radius
+	NADIA_GET_ROUND_SUPPORT, nx, ny, radius
 
  INPUTS:
 
@@ -304,16 +304,16 @@
 
  EXAMPLE:
 
-       cxs_get_round_support, 1024, 1024, 0.25*1024
+       nadia_get_round_support, 1024, 1024, 0.25*1024
 
 \end{verbatim}
 
  
-\subsection{CXS\_GET\_SUPPORT}
+\subsection{NADIA\_GET\_SUPPORT}
 \begin{verbatim}
 
  NAME:
-       CXS_GET_SUPPORT
+       NADIA_GET_SUPPORT
 
  PURPOSE:
        Get the support. This maybe useful to see how shrinkwrap has
@@ -322,7 +322,7 @@
 
  CALLING SEQUENCE:
 
-       support = CXS_GET_SUPPORT()
+       support = NADIA_GET_SUPPORT()
 
  OUTPUTS:
 
@@ -333,16 +333,16 @@
  EXAMPLE:
        View the support after applying shrink-wrap.
  
-       CXS_APPLY_SHRINKWRAP
-       a = CXS_GET_SUPPORT()
+       NADIA_APPLY_SHRINKWRAP
+       a = NADIA_GET_SUPPORT()
 
 \end{verbatim}
 
-\subsection{CXS\_GET\_TRANSMISSION\_FUNCTION}
+\subsection{NADIA\_GET\_TRANSMISSION\_FUNCTION}
 \begin{verbatim}
 
  NAME:
-       CXS_GET_TRANSMISSION_FUNCTION
+       NADIA_GET_TRANSMISSION_FUNCTION
 
  PURPOSE:
        Get the transmission function from the current estimate of the
@@ -352,7 +352,7 @@
 
  CALLING SEQUENCE:
 
-       result = CXS_GET_TRANSMISSION_FUNCTION()
+       result = NADIA_GET_TRANSMISSION_FUNCTION()
 
  OUTPUTS:
 
@@ -361,21 +361,21 @@
              COMPLEX variables is returned. 
 
  EXAMPLE:
-       a = CXS_GET_TRANSMISSION_FUNCTION()
+       a = NADIA_GET_TRANSMISSION_FUNCTION()
 
 \end{verbatim}
 
  
-\subsection{CXS\_INITIALISE\_ESW}
+\subsection{NADIA\_INITIALISE\_ESW}
 \begin{verbatim}
 
  NAME:
-       CXS_INITIALISE_ESW
+       NADIA_INITIALISE_ESW
 
  PURPOSE:
        Initialise the exit-surface-wave guess. The initialisation
        will depend on the reconstruction type (see the procedures
-       which begin "CXS_INIT_" for a description). The "INIT" procedure  
+       which begin "NADIA_INIT_" for a description). The "INIT" procedure  
        will call this procedure if no starting guess is provided. 
        It is useful if you wish to run the same reconstruction
        several time with a different random starting point, or if 
@@ -384,7 +384,7 @@
 
  CALLING SEQUENCE:
 
-	CXS_INITIALISE_ESW, seed
+	NADIA_INITIALISE_ESW, seed
 
  INPUTS:
 
@@ -396,16 +396,16 @@
 
  EXAMPLE:
 
-       cxs_initialise_esw, 6
+       nadia_initialise_esw, 6
 
 \end{verbatim}
 
 
-\subsection{CXS\_INIT\_FRESNEL}
+\subsection{NADIA\_INIT\_FRESNEL}
 \begin{verbatim}
 
  NAME:
-       CXS_INIT_FRESNEL
+       NADIA_INIT_FRESNEL
 
  PURPOSE:
        Set-up a Fresnel CDI reconstruction. This will
@@ -415,14 +415,14 @@
        allocated ready for reconstructing the sample
        exit-surface-wave. It is necessary to call this procedure before
        attempting to call any of the reconstruction methods
-       (e.g. before setting the algorithm or calling CXS_ITERATE).
+       (e.g. before setting the algorithm or calling NADIA_ITERATE).
 
        Calling this procedure will initialise the reconstruction algorithm
        to the error-reduction with a relaxation parameter of 0.9.
 
  CALLING SEQUENCE:
 
-	CXS_INIT_FRESNEL, data, support, white-field, beam_wavelength,
+	NADIA_INIT_FRESNEL, data, support, white-field, beam_wavelength,
 	                  focal_detector_length, focal_sample_length, 
                          pixel_size [, normalisation, starting_point ]
 
@@ -444,7 +444,7 @@
        white-field:
              A COMPLEX 2D array of the reconstructed white-field in
              the detector plane. This can be recovered using 
-             CXS_INIT_FRESNEL_WF followed by CXS_ITERATE.
+             NADIA_INIT_FRESNEL_WF followed by NADIA_ITERATE.
 
        beam_wavelength:
              The beam wavelength.
@@ -476,17 +476,17 @@
 
  EXAMPLE:
 
-        cxs_init_fresnel, my_data, my_supports, my_white-field, $
+        nadia_init_fresnel, my_data, my_supports, my_white-field, $
                           4.892e-10, 0.9078777, 2.16e-3, $
                           13.5e-6
 
 \end{verbatim}
 
-\subsection{CXS\_INIT\_FRESNEL\_WF}
+\subsection{NADIA\_INIT\_FRESNEL\_WF}
 \begin{verbatim}
 
  NAME:
-       CXS_INIT_FRESNEL_WF
+       NADIA_INIT_FRESNEL_WF
 
  PURPOSE:
        Set-up a Fresnel white-field CDI reconstruction. This will
@@ -496,11 +496,11 @@
        reconstructing the white-field (phase and magnitude) in the
        detector plane. It is necessary to call this procedure before
        attempting to call any of the reconstruction methods
-       (e.g. before setting the algorithm or calling CXS_ITERATE).
+       (e.g. before setting the algorithm or calling NADIA_ITERATE).
 
  CALLING SEQUENCE:
 
-	CXS_INIT_FRESNEL_WF, data, support, beam_wavelength,
+	NADIA_INIT_FRESNEL_WF, data, support, beam_wavelength,
                             zone_focal_length, focal_detector_length,
                             pixel_size [,starting_point]
 
@@ -546,18 +546,18 @@
         An example of loading two 2D arrays from file and using
         them to initialise the white-field reconstruction for FCDI:
 
-        my_support = cxs_read_tiff(1024,1024,'support.tiff')
-        my_data = cxs_read_tiff(1024,1024,'data.tiff')
-        cxs_init_fresnel_wf, my_data, my_support, $
+        my_support = nadia_read_tiff(1024,1024,'support.tiff')
+        my_data = nadia_read_tiff(1024,1024,'data.tiff')
+        nadia_init_fresnel_wf, my_data, my_support, $
                    4.892e-10, 16.353e-3, 0.9078777,13.5e-6
 
 \end{verbatim}
 
-\subsection{CXS\_INIT\_PLANAR}
+\subsection{NADIA\_INIT\_PLANAR}
 \begin{verbatim}
 
  NAME:
-       CXS_INIT_PLANAR
+       NADIA_INIT_PLANAR
 
  PURPOSE:
        Set-up a planar CDI reconstruction. This will
@@ -567,7 +567,7 @@
        It is necessary to call this procedure before
        attempting to call any of the reconstruction methods
        (e.g. before setting the algorithm or 
-       calling CXS_ITERATE).
+       calling NADIA_ITERATE).
 
        Calling this procedure will initialise the reconstruction 
        algorithm to hybrid-input-output with a relaxation parameter of 0.9.
@@ -575,7 +575,7 @@
 
  CALLING SEQUENCE:
 
-	CXS_INIT_PLANAR, Data, Support [,Starting_point]
+	NADIA_INIT_PLANAR, Data, Support [,Starting_point]
 
 
  INPUTS:
@@ -605,9 +605,9 @@
         An example of loading two 2D arrays from file and using
         them to initialise the planar reconstruction:
 
-        my_support = cxs_read_tiff(1024,1024,'planar_support.tiff')
-        my_data = cxs_read_tiff(1024,1024,'planar_data.tiff')
-        CXS_INIT_PLANAR, my_data, my_support
+        my_support = nadia_read_tiff(1024,1024,'planar_support.tiff')
+        my_data = nadia_read_tiff(1024,1024,'planar_data.tiff')
+        NADIA_INIT_PLANAR, my_data, my_support
 
 
 \end{verbatim}
@@ -619,11 +619,11 @@
 
   
  
-\subsection{CXS\_ITERATE}
+\subsection{NADIA\_ITERATE}
 \begin{verbatim}
 
  NAME:
-       CXS_ITERATE
+       NADIA_ITERATE
 
  PURPOSE:
        Perform the iterative reconstruction. The number of iterations
@@ -633,20 +633,20 @@
        reconstruction it will be the white-field at the detector surface.
        The magnitude of the result is also displayed on the screen as
        a 512x512 pixel image. The iteration number and corresponding
-       error (see CXS_GET_ERROR) will be printed on the screen.
+       error (see NADIA_GET_ERROR) will be printed on the screen.
 
-       CXS_ITERATE may be called several time and the reconstruction
-       will start from where is ended. i.e. calling CXS_ITERATE(50),
-       followed by a second CXS_ITERATE(50) is equivalent to calling
-       CXS_ITERATE(100).
+       NADIA_ITERATE may be called several time and the reconstruction
+       will start from where is ended. i.e. calling NADIA_ITERATE(50),
+       followed by a second NADIA_ITERATE(50) is equivalent to calling
+       NADIA_ITERATE(100).
 
        During the reconstruction, the best (lowest error) result is
-       also stored. It maybe retrieved by calling CXS_GET_BEST_RESULT.
+       also stored. It maybe retrieved by calling NADIA_GET_BEST_RESULT.
  
 
  CALLING SEQUENCE:
 
-	result = CXS_ITERATE([iterations])
+	result = NADIA_ITERATE([iterations])
 
  INPUTS:
 
@@ -664,7 +664,7 @@
 
  EXAMPLE:
 
-       my_result = cxs_iterate(100)
+       my_result = nadia_iterate(100)
 
 \end{verbatim}
 
@@ -675,11 +675,11 @@
 
   
  
-\subsection{CXS\_PRINT\_ALGORITHM}
+\subsection{NADIA\_PRINT\_ALGORITHM}
 \begin{verbatim}
 
  NAME:
-       CXS_PRINT_ALGORITHM
+       NADIA_PRINT_ALGORITHM
 
  PURPOSE:
        Output the form of the current algorithm to the screen. 
@@ -688,12 +688,12 @@
 
 
  CALLING SEQUENCE:
-       CXS_PRINT_ALGORITHM
+       NADIA_PRINT_ALGORITHM
 
 
  EXAMPLE:
-       CXS_SET_ALGORITHM, 'RAAR'
-       CXS_PRINT_ALGORITHM
+       NADIA_SET_ALGORITHM, 'RAAR'
+       NADIA_PRINT_ALGORITHM
 
 \end{verbatim}
 
@@ -701,11 +701,11 @@
 
   
  
-\subsection{CXS\_PROPAGATE\_FROM\_DETECTOR}
+\subsection{NADIA\_PROPAGATE\_FROM\_DETECTOR}
 \begin{verbatim}
 
  NAME:
-       CXS_PROPAGATE_FROM_DETECTOR
+       NADIA_PROPAGATE_FROM_DETECTOR
 
  PURPOSE:
        Propagate the given wave field from the detector plane to the 
@@ -713,7 +713,7 @@
        white-field reconstruction). The result will be returned and
        displayed on the screen by default.
 
-       This function is called when using (CXS_ITERATE) so generally
+       This function is called when using (NADIA_ITERATE) so generally
        won't need to be call explicitly. An exception to this is if
        the user wishes to extend the reconstruction with an addition
        constraint (see the example below).
@@ -721,7 +721,7 @@
 
  CALLING SEQUENCE:
 
-	result = CXS_PROPAGATE_FROM_DETECTOR( complex_array [,/SUPPRESS_DISPLAY] )
+	result = NADIA_PROPAGATE_FROM_DETECTOR( complex_array [,/SUPPRESS_DISPLAY] )
 
  INPUTS:
 
@@ -747,10 +747,10 @@
        sample plane (e.g. called "NEW_SUPPORT"):
 
               FOR K = 0, 100 DO BEGIN 
-                  a = CXS_PROPAGATE_TO_DETECTOR(a,/SUPPRESS_DISPLAY)
-                  a = CXS_SCALE_INTENSITY(a,/SUPPRESS_DISPLAY)
-                  a = CXS_PROPAGATE_FROM_DETECTOR(a,/SUPPRESS_DISPLAY)
-                  a = CXS_APPLY_SUPPORT(a,/SUPPRESS_DISPLAY)
+                  a = NADIA_PROPAGATE_TO_DETECTOR(a,/SUPPRESS_DISPLAY)
+                  a = NADIA_SCALE_INTENSITY(a,/SUPPRESS_DISPLAY)
+                  a = NADIA_PROPAGATE_FROM_DETECTOR(a,/SUPPRESS_DISPLAY)
+                  a = NADIA_APPLY_SUPPORT(a,/SUPPRESS_DISPLAY)
                   a = NEW_SUPPORT(a)
               ENDFOR 
 
@@ -764,11 +764,11 @@
 
   
  
-\subsection{CXS\_PROPAGATE\_TO\_DETECTOR}
+\subsection{NADIA\_PROPAGATE\_TO\_DETECTOR}
 \begin{verbatim}
 
  NAME:
-       CXS_PROPAGATE_TO_DETECTOR
+       NADIA_PROPAGATE_TO_DETECTOR
 
  PURPOSE:
        Propagate the given wave field to the detector plane from the 
@@ -776,7 +776,7 @@
        white-field reconstruction). The result will be returned and
        displayed on the screen by default.
 
-       This function is called when using (CXS_ITERATE) so generally
+       This function is called when using (NADIA_ITERATE) so generally
        won't need to be call explicitly. An exception to this is if
        the user wishes to perform simulation or to extend their
        reconstruction with an addition constraint (see the previous
@@ -785,7 +785,7 @@
 
  CALLING SEQUENCE:
 
-	result = CXS_PROPAGATE_TO_DETECTOR( complex_array [,/SUPPRESS_DISPLAY] )
+	result = NADIA_PROPAGATE_TO_DETECTOR( complex_array [,/SUPPRESS_DISPLAY] )
 
  INPUTS:
 
@@ -811,9 +811,9 @@
        complex white-field called "white_field" and the transmission
        function of the object, "trans").
 
-       white_field_at_sample = CXS_PROPAGATE_FROM_DETECTOR(white_field)
+       white_field_at_sample = NADIA_PROPAGATE_FROM_DETECTOR(white_field)
        esw_at_sample = trans*white_field_at_sample
-       esw_at_detector = CXS_PROPAGATE_TO_DETECTOR(esw_at_sample)
+       esw_at_detector = NADIA_PROPAGATE_TO_DETECTOR(esw_at_sample)
        diffraction_pattern = abs(esw_at_detector)^2
 
 \end{verbatim}
@@ -825,11 +825,11 @@
 
   
  
-\subsection{CXS\_READ\_CPLX}
+\subsection{NADIA\_READ\_CPLX}
 \begin{verbatim}
 
  NAME:
-       CXS_READ_CPLX
+       NADIA_READ_CPLX
 
  PURPOSE:
        Read a binary file of fftw complex numbers. This is
@@ -837,7 +837,7 @@
 
  CALLING SEQUENCE:
 
-       complex_array = CXS_READ_CPLX( nx, ny, filename)
+       complex_array = NADIA_READ_CPLX( nx, ny, filename)
 
  INPUTS:
 
@@ -855,7 +855,7 @@
              A 2D array of COMPLEX numbers.
 
  EXAMPLE:
-       white_field = CXS_READ_CPLX(1024, 1024, 'white_field_file.cplx')
+       white_field = NADIA_READ_CPLX(1024, 1024, 'white_field_file.cplx')
 
 \end{verbatim}
 
@@ -866,18 +866,18 @@
 
   
  
-\subsection{CXS\_READ\_DBIN}
+\subsection{NADIA\_READ\_DBIN}
 \begin{verbatim}
 
  NAME:
-       CXS_READ_DBIN
+       NADIA_READ_DBIN
 
  PURPOSE:
        Read a double binary file (a binary file of doubles).
 
  CALLING SEQUENCE:
 
-       image = CXS_READ_DBIN( nx, ny, filename)
+       image = NADIA_READ_DBIN( nx, ny, filename)
 
  INPUTS:
 
@@ -895,7 +895,7 @@
              The image in the format of a 2D array of doubles.
 
  EXAMPLE:
-       data = CXS_READ_DBIN(1024, 1024, 'data_file.dbin')
+       data = NADIA_READ_DBIN(1024, 1024, 'data_file.dbin')
 
 \end{verbatim}
 
@@ -906,18 +906,18 @@
 
   
  
-\subsection{CXS\_READ\_PPM}
+\subsection{NADIA\_READ\_PPM}
 \begin{verbatim}
 
  NAME:
-       CXS_READ_PPM
+       NADIA_READ_PPM
 
  PURPOSE:
        Read a ppm file.
 
  CALLING SEQUENCE:
 
-       image = CXS_READ_PPM( nx, ny, filename)
+       image = NADIA_READ_PPM( nx, ny, filename)
 
  INPUTS:
 
@@ -935,7 +935,7 @@
              The image in the format of a 2D array of doubles.
 
  EXAMPLE:
-       data = CXS_READ_PPM(1024, 1024, 'data_file.ppm')
+       data = NADIA_READ_PPM(1024, 1024, 'data_file.ppm')
 
 \end{verbatim}
 
@@ -946,11 +946,11 @@
 
   
  
-\subsection{CXS\_READ\_TIFF}
+\subsection{NADIA\_READ\_TIFF}
 \begin{verbatim}
 
  NAME:
-       CXS_READ_TIFF
+       NADIA_READ_TIFF
 
  PURPOSE:
        Read a tiff image file. Note that there are other IDL commands
@@ -958,7 +958,7 @@
 
  CALLING SEQUENCE:
 
-       image = CXS_READ_TIFF( nx, ny, filename)
+       image = NADIA_READ_TIFF( nx, ny, filename)
 
  INPUTS:
 
@@ -976,7 +976,7 @@
              The image in the format of a 2D array of doubles.
 
  EXAMPLE:
-       data = CXS_READ_TIFF(1024, 1024, 'data_file.tif')
+       data = NADIA_READ_TIFF(1024, 1024, 'data_file.tif')
 
 \end{verbatim}
 
@@ -987,23 +987,23 @@
 
   
  
-\subsection{CXS\_SCALE\_INTENSITY}
+\subsection{NADIA\_SCALE\_INTENSITY}
 \begin{verbatim}
 
  NAME:
-       CXS_SCALE_INTENSITY
+       NADIA_SCALE_INTENSITY
 
  PURPOSE:
        Scale the intensity (magnitude squared) of the given complex
        array to the data. The intensity data must have been
-       previously set using either one of the CXS_INIT functions or
-       CXS_SET_INTENSITY.
+       previously set using either one of the NADIA_INIT functions or
+       NADIA_SET_INTENSITY.
 
        If Fresnel reconstruction is being done, the white-field will
        automatically be added to the complex array prior to scaling,
        and will be subtracted afterward.
        
-       This function is called when using (CXS_ITERATE) so generally
+       This function is called when using (NADIA_ITERATE) so generally
        won't need to be call explicitly. An exception to this is if
        the user wishes to extend their reconstruction with an
        addition constraint.
@@ -1011,7 +1011,7 @@
 
  CALLING SEQUENCE:
 
-	result = CXS_SCALE_INTENSITY( complex_array [,/SUPPRESS_DISPLAY] )
+	result = NADIA_SCALE_INTENSITY( complex_array [,/SUPPRESS_DISPLAY] )
 
  INPUTS:
 
@@ -1032,7 +1032,7 @@
              to data.
 
  EXAMPLE:
-       See the example for CXS_PROPAGATE_FROM_DETECTOR
+       See the example for NADIA_PROPAGATE_FROM_DETECTOR
 
 \end{verbatim}
 
@@ -1043,11 +1043,11 @@
 
   
  
-\subsection{CXS\_SET\_ALGORITHM}
+\subsection{NADIA\_SET\_ALGORITHM}
 \begin{verbatim}
 
  NAME:
-       CXS_SET_ALGORITHM
+       NADIA_SET_ALGORITHM
 
  PURPOSE:
        Select the reconstruction algorithm to use. Options are:
@@ -1063,7 +1063,7 @@
 
  CALLING SEQUENCE:
 
-       CXS_SET_ALGORITHM, algorithm
+       NADIA_SET_ALGORITHM, algorithm
 
  INPUTS:
 
@@ -1076,9 +1076,9 @@
        Perform 1000 iterations in total, changing to 
        error-reduction at the 400th iteration:
        ....
-       a = CXS_ITERATE(400)
-       CXS_SET_ALGORITHM, 'ER'
-       a = CXS_ITERATE(600)
+       a = NADIA_ITERATE(400)
+       NADIA_SET_ALGORITHM, 'ER'
+       a = NADIA_ITERATE(600)
 
 \end{verbatim}
 
@@ -1089,11 +1089,11 @@
 
   
  
-\subsection{CXS\_SET\_BEAM\_STOP}
+\subsection{NADIA\_SET\_BEAM\_STOP}
 \begin{verbatim}
 
  NAME:
-       CXS_SET_BEAM_STOP
+       NADIA_SET_BEAM_STOP
 
  PURPOSE: 
        For PlanarCDI, you may set the beam stop region in the
@@ -1104,7 +1104,7 @@
 
  CALLING SEQUENCE:
 
-	CXS_SET_BEAM_STOP, beam_stop_region
+	NADIA_SET_BEAM_STOP, beam_stop_region
 
  INPUTS:
 
@@ -1115,7 +1115,7 @@
 
  EXAMPLE:
 
-       cxs_set_beam_stop, my_beam_stop_regio
+       nadia_set_beam_stop, my_beam_stop_regio
 
 
 \end{verbatim}
@@ -1127,11 +1127,11 @@
 
   
  
-\subsection{CXS\_SET\_CHARGE\_FLIPPING}
+\subsection{NADIA\_SET\_CHARGE\_FLIPPING}
 \begin{verbatim}
 
  NAME:
-       CXS_SET_CHARGE_FLIPPING
+       NADIA_SET_CHARGE_FLIPPING
 
  PURPOSE: For use with FresnelCDI reconstruction. Enabeling this
        procedure will constrain the transmission function phase to
@@ -1145,7 +1145,7 @@
 
  CALLING SEQUENCE:
 
-       CXS_SET_CHARGE_FLIPPING, enable
+       NADIA_SET_CHARGE_FLIPPING, enable
 
  INPUTS:
 
@@ -1153,7 +1153,7 @@
              This should be either 0 - turn off or 1 - turn on.
 
  EXAMPLE:
-       CXS_SET_CHARGE_FLIPPING, 1
+       NADIA_SET_CHARGE_FLIPPING, 1
 
 \end{verbatim}
 
@@ -1164,11 +1164,11 @@
 
   
  
-\subsection{CXS\_SET\_CUSTOM\_ALGORITHM}
+\subsection{NADIA\_SET\_CUSTOM\_ALGORITHM}
 \begin{verbatim}
 
  NAME:
-       CXS_SET_CUSTOM_ALGORITHM
+       NADIA_SET_CUSTOM_ALGORITHM
 
  PURPOSE:
        Set a custom reconstruction algorithm.
@@ -1186,7 +1186,7 @@
 
  CALLING SEQUENCE:
 
-       CXS_SET_CUSTOM_ALGORITHM, m1, m2, m3, m4, m5, m6, m7, m8, m9, m10
+       NADIA_SET_CUSTOM_ALGORITHM, m1, m2, m3, m4, m5, m6, m7, m8, m9, m10
 
  INPUTS:
 
@@ -1198,11 +1198,11 @@
        algorithm at the 400th iteration and print the algorithm to screen:
 
        ....
-       a = CXS_ITERATE(400)
-       CXS_SET_ALGORITHM, 0.5, 0.5, 0.5, 0.5, 0.5, $ 
+       a = NADIA_ITERATE(400)
+       NADIA_SET_ALGORITHM, 0.5, 0.5, 0.5, 0.5, 0.5, $ 
                           0.5, 0.5, 0.5, 0.5, 0.5
-       CXS_PRINT_ALGORITHM                    
-       a = CXS_ITERATE(600)
+       NADIA_PRINT_ALGORITHM                    
+       a = NADIA_ITERATE(600)
 
 \end{verbatim}
 
@@ -1213,20 +1213,20 @@
 
   
  
-\subsection{CXS\_SET\_INTENSITY}
+\subsection{NADIA\_SET\_INTENSITY}
 \begin{verbatim}
 
  NAME:
-       CXS_SET_INTENSITY
+       NADIA_SET_INTENSITY
 
  PURPOSE:
        Set the detector intensity data. This will override 
-       the intensity given to any of the CXS_INIT methods.
+       the intensity given to any of the NADIA_INIT methods.
        In general, users should not need to call this method.
 
  CALLING SEQUENCE:
 
-	CXS_SET_INTENSITY, data
+	NADIA_SET_INTENSITY, data
 
  INPUTS:
 
@@ -1237,7 +1237,7 @@
 
  EXAMPLE:
 
-       cxs_set_intensity, my_data
+       nadia_set_intensity, my_data
 
 
 \end{verbatim}
@@ -1249,11 +1249,11 @@
 
   
  
-\subsection{CXS\_SET\_RELAXATION\_PARAMETER}
+\subsection{NADIA\_SET\_RELAXATION\_PARAMETER}
 \begin{verbatim}
 
  NAME:
-       CXS_SET_RELAXATION_PARAMETER
+       NADIA_SET_RELAXATION_PARAMETER
 
  PURPOSE:
        Set the relaxation parameter. The default relaxation
@@ -1263,7 +1263,7 @@
 
  CALLING SEQUENCE:
 
-	CXS_SET_RELAXATION_PARAMETER, beta
+	NADIA_SET_RELAXATION_PARAMETER, beta
 
  INPUTS:
 
@@ -1272,7 +1272,7 @@
 
  EXAMPLE:
 
-       cxs_set_relaxation_parameter, 0.9
+       nadia_set_relaxation_parameter, 0.9
 
 \end{verbatim}
 
@@ -1283,20 +1283,20 @@
 
   
  
-\subsection{CXS\_SET\_SUPPORT}
+\subsection{NADIA\_SET\_SUPPORT}
 \begin{verbatim}
 
  NAME:
-       CXS_SET_SUPPORT
+       NADIA_SET_SUPPORT
 
  PURPOSE:
        Set the support shape to be used in reconstruction. This with override 
-       the support given to any of the CXS_INIT methods and maybe called
+       the support given to any of the NADIA_INIT methods and maybe called
        at any time during the reconstruction.  
 
  CALLING SEQUENCE:
 
-	CXS_SET_SUPPORT, support
+	NADIA_SET_SUPPORT, support
 
  INPUTS:
 
@@ -1308,7 +1308,7 @@
 
  EXAMPLE:
 
-       cxs_set_support, my_support
+       nadia_set_support, my_support
 
 
 \end{verbatim}
@@ -1320,11 +1320,11 @@
 
   
  
-\subsection{CXS\_SET\_TRANS\_UNITY\_CONSTRAINT}
+\subsection{NADIA\_SET\_TRANS\_UNITY\_CONSTRAINT}
 \begin{verbatim}
 
  NAME:
-       CXS_SET_TRANS_UNITY_CONSTRAINT
+       NADIA_SET_TRANS_UNITY_CONSTRAINT
 
  PURPOSE: For use with FresnelCDI reconstruction. Enabeling this
        procedure will constrain the transmission function magnitude
@@ -1335,7 +1335,7 @@
 
  CALLING SEQUENCE:
 
-       CXS_SET_TRANS_UNITY_CONSTRAINT, enable
+       NADIA_SET_TRANS_UNITY_CONSTRAINT, enable
 
  INPUTS:
 
@@ -1343,17 +1343,17 @@
              This should be either 0 - turn off or 1 - turn on.
 
  EXAMPLE:
-       CXS_SET_TRANS_UNITY_CONSTRAINT, 1
+       NADIA_SET_TRANS_UNITY_CONSTRAINT, 1
 
 \end{verbatim}
 
   
  
-\subsection{CXS\_WRITE\_CPLX}
+\subsection{NADIA\_WRITE\_CPLX}
 \begin{verbatim}
 
  NAME:
-       CXS_WRITE_CPLX
+       NADIA_WRITE_CPLX
 
  PURPOSE:
        Write a binary file of fftw complex numbers. This is
@@ -1361,7 +1361,7 @@
 
  CALLING SEQUENCE:
 
-       CXS_WRITE_CPLX( complex_array, filename )
+       NADIA_WRITE_CPLX( complex_array, filename )
 
  INPUTS:
 
@@ -1372,24 +1372,24 @@
              A string containing the name of the file to write.
 
  EXAMPLE:
-       CXS_WRITE_CPLX, white_field, 'white_field_file.cplx'
+       NADIA_WRITE_CPLX, white_field, 'white_field_file.cplx'
 
 \end{verbatim}
 
   
  
-\subsection{CXS\_WRITE\_DBIN}
+\subsection{NADIA\_WRITE\_DBIN}
 \begin{verbatim}
 
  NAME:
-       CXS_WRITE_DBIN
+       NADIA_WRITE_DBIN
 
  PURPOSE:
        Write a binary file of doubles. 
 
  CALLING SEQUENCE:
 
-       CXS_WRITE_DBIN( image, filename )
+       NADIA_WRITE_DBIN( image, filename )
 
  INPUTS:
 
@@ -1400,7 +1400,7 @@
              A string containing the name of the file to write.
 
  EXAMPLE:
-       CXS_WRITE_DBIN, result, 'reco_magnitude.dbin'
+       NADIA_WRITE_DBIN, result, 'reco_magnitude.dbin'
 
 \end{verbatim}
 
