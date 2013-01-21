@@ -14,10 +14,10 @@
 \newcommand{\abstractheading}[1]{\textsf{\textbf{\LARGE{#1}}}}
 \newcommand{\code}[1]{\texttt{\footnotesize{#1}}}
 
-\newcommand{\codename}{CXS.rel\_0.3.tar}
+\newcommand{\codename}{NADIA.0.5.tar}
 \newcommand{\name}{{\tt DIXE~}}
 \newcommand{\ver}{0.4}
-\newcommand{\website}{http://www.ph.unimelb.edu.au/\textasciitilde{}ndavidson/cxs/}
+\newcommand{\website}{http://coecxs.ph.unimelb.edu.au/}
 
 %\makeatletter
 %\renewcommand*\l@subsection{\@dottedtocline{2}{1.5em}{2.0em}}

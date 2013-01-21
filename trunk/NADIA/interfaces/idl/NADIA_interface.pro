@@ -6,9 +6,9 @@
 ; We also ask that you cite this software in publications where you made 
 ; use of it for any part of the data analysis.
 ;
-; This code provides wrappers to the functions in the COECXS C++
+; This code provides wrappers to the functions in the NADIA C++
 ; library. It calls the methods which are defined in the
-; IDL_interface.c file (and compiled into libIDLCOECXS.so), thus
+; IDL_interface.c file (and compiled into libIDLNADIA.so), thus
 ; allowing CDI reconstruction to be performed in IDL. Some examples
 ; are provided in this directory, showing how you can use these
 ; methods.
@@ -20,7 +20,7 @@
 ; so this is my way around it.
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 function lib_name
-return, 'libIDLCOECXS.so'
+return, 'libIDLNADIA.so'
 end
 
 
@@ -70,7 +70,7 @@ end
 
 ;+
 ; NAME:
-;       CXS_INIT_PLANAR
+;       NADIA_INIT_PLANAR
 ;
 ; PURPOSE:
 ;       Set-up a planar CDI reconstruction. This will
@@ -80,7 +80,7 @@ end
 ;       It is necessary to call this procedure before
 ;       attempting to call any of the reconstruction methods
 ;       (e.g. before setting the algorithm or 
-;       calling CXS_ITERATE).
+;       calling NADIA_ITERATE).
 ;
 ;       Calling this procedure will initialise the reconstruction 
 ;       algorithm to hybrid-input-output with a relaxation parameter of 0.9.
@@ -88,7 +88,7 @@ end
 ;
 ; CALLING SEQUENCE:
 ;
-;	CXS_INIT_PLANAR, Data, Support [,Starting_point]
+;	NADIA_INIT_PLANAR, Data, Support [,Starting_point]
 ;
 ;
 ; INPUTS:
@@ -118,12 +118,12 @@ end
 ;        An example of loading two 2D arrays from file and using
 ;        them to initialise the planar reconstruction:
 ;
-;        my_support = cxs_read_tiff(1024,1024,'planar_support.tiff')
-;        my_data = cxs_read_tiff(1024,1024,'planar_data.tiff')
-;        CXS_INIT_PLANAR, my_data, my_support
+;        my_support = nadia_read_tiff(1024,1024,'planar_support.tiff')
+;        my_data = nadia_read_tiff(1024,1024,'planar_data.tiff')
+;        NADIA_INIT_PLANAR, my_data, my_support
 ;
 ;-
-pro cxs_init_planar, data, support, complex_array
+pro nadia_init_planar, data, support, complex_array
 n = size(data)
 nx = n[2]
 ny = n[1]
@@ -131,16 +131,16 @@ IF N_Params() EQ 3 THEN $
   b = call_external(lib_name(),'IDL_planar_init',nx,ny,complex_array) $
 ELSE $
   b = call_external(lib_name(),'IDL_planar_init',nx,ny)
-cxs_set_support, support
-cxs_set_intensity, data
+nadia_set_support, support
+nadia_set_intensity, data
 IF N_Params() EQ 2 THEN $
-  cxs_initialise_esw
+  nadia_initialise_esw
 end
 
 
 ;+
 ; NAME:
-;       CXS_INIT_FRESNEL_WF
+;       NADIA_INIT_FRESNEL_WF
 ;
 ; PURPOSE:
 ;       Set-up a Fresnel white-field CDI reconstruction. This will
@@ -150,11 +150,11 @@ end
 ;       reconstructing the white-field (phase and magnitude) in the
 ;       detector plane. It is necessary to call this procedure before
 ;       attempting to call any of the reconstruction methods
-;       (e.g. before setting the algorithm or calling CXS_ITERATE).
+;       (e.g. before setting the algorithm or calling NADIA_ITERATE).
 ;
 ; CALLING SEQUENCE:
 ;
-;	CXS_INIT_FRESNEL_WF, data, support, beam_wavelength,
+;	NADIA_INIT_FRESNEL_WF, data, support, beam_wavelength,
 ;                            zone_focal_length, focal_detector_length,
 ;                            pixel_size [,starting_point]
 ;
@@ -200,11 +200,11 @@ end
 ;        An example of loading two 2D arrays from file and using
 ;        them to initialise the white-field reconstruction for FCDI:
 ;
-;        my_support = cxs_read_tiff(1024,1024,'support.tiff')
-;        my_data = cxs_read_tiff(1024,1024,'data.tiff')
-;        cxs_init_fresnel_wf, my_data, my_support, 4.892e-10, 16.353e-3, 0.9078777,13.5e-6
+;        my_support = nadia_read_tiff(1024,1024,'support.tiff')
+;        my_data = nadia_read_tiff(1024,1024,'data.tiff')
+;        nadia_init_fresnel_wf, my_data, my_support, 4.892e-10, 16.353e-3, 0.9078777,13.5e-6
 ;-
-pro cxs_init_fresnel_wf, data, $
+pro nadia_init_fresnel_wf, data, $
                          support, $
                          beam_wavelength, $
                          zone_focal_length, $
@@ -228,17 +228,17 @@ ELSE $
                     double(focal_detector_length), $
                     double(pixel_size))
 
-cxs_set_support, support
-cxs_set_intensity, data
+nadia_set_support, support
+nadia_set_intensity, data
 
 IF N_Params() EQ 6 THEN $
-  cxs_initialise_esw
+  nadia_initialise_esw
 
 end
 
 ;+
 ; NAME:
-;       CXS_INIT_FRESNEL
+;       NADIA_INIT_FRESNEL
 ;
 ; PURPOSE:
 ;       Set-up a Fresnel CDI reconstruction. This will
@@ -248,14 +248,14 @@ end
 ;       allocated ready for reconstructing the sample
 ;       exit-surface-wave. It is necessary to call this procedure before
 ;       attempting to call any of the reconstruction methods
-;       (e.g. before setting the algorithm or calling CXS_ITERATE).
+;       (e.g. before setting the algorithm or calling NADIA_ITERATE).
 ;
 ;       Calling this procedure will initialise the reconstruction algorithm
 ;       to the error-reduction with a relaxation parameter of 0.9.
 ;
 ; CALLING SEQUENCE:
 ;
-;	CXS_INIT_FRESNEL, data, support, white-field, beam_wavelength,
+;	NADIA_INIT_FRESNEL, data, support, white-field, beam_wavelength,
 ;	                  focal_detector_length, focal_sample_length, 
 ;                         pixel_size [, normalisation, starting_point ]
 ;
@@ -277,7 +277,7 @@ end
 ;       white-field:
 ;             A COMPLEX 2D array of the reconstructed white-field in
 ;             the detector plane. This can be recovered using 
-;             CXS_INIT_FRESNEL_WF followed by CXS_ITERATE.
+;             NADIA_INIT_FRESNEL_WF followed by NADIA_ITERATE.
 ;
 ;       beam_wavelength:
 ;             The beam wavelength.
@@ -309,11 +309,11 @@ end
 ;
 ; EXAMPLE:
 ;
-;        cxs_init_fresnel, my_data, my_supports, my_white-field, $
+;        nadia_init_fresnel, my_data, my_supports, my_white-field, $
 ;                          4.892e-10, 0.9078777, 2.16e-3, $
 ;                          13.5e-6
 ;-
-pro cxs_init_fresnel, data, support, $
+pro nadia_init_fresnel, data, support, $
                       white_field, $
                       beam_wavelength, $
                       focal_detector_length, $
@@ -347,17 +347,17 @@ ELSE $
                     double(pixel_size), $
                     double(normalisation))
 
-cxs_set_support, support
-cxs_set_intensity, data
+nadia_set_support, support
+nadia_set_intensity, data
 
 IF N_Params() LT 9 THEN $
-  cxs_initialise_esw
+  nadia_initialise_esw
 
 end
 
 ;+
 ; NAME:
-;       CXS_INIT_PARTIAL
+;       NADIA_INIT_PARTIAL
 ;
 ; PURPOSE:
 ;       Set-up a Partial CDI reconstruction. This will
@@ -366,14 +366,14 @@ end
 ;       allocated ready for reconstructing the sample
 ;       exit-surface-wave. It is necessary to call this procedure before
 ;       attempting to call any of the reconstruction methods
-;       (e.g. before setting the algorithm or calling CXS_ITERATE).
+;       (e.g. before setting the algorithm or calling NADIA_ITERATE).
 ;
 ;       Calling this procedure will initialise the reconstruction algorithm
 ;       to the error-reduction with a relaxation parameter of 0.9.
 ;
 ; CALLING SEQUENCE:
 ;
-; CXS_INIT_PARTIAL, data, support, beta, lcx, lcy, pxsize, pysize, beam_energy
+; NADIA_INIT_PARTIAL, data, support, beta, lcx, lcy, pxsize, pysize, beam_energy
 ;                   zsd [, starting_point ]
 ;
 ; INPUTS:
@@ -420,11 +420,11 @@ end
 ;
 ; EXAMPLE:
 ;
-;        cxs_init_fresnel, my_data, my_supports, my_white-field, $
+;        nadia_init_fresnel, my_data, my_supports, my_white-field, $
 ;                          4.892e-10, 0.9078777, 2.16e-3, $
 ;                          13.5e-6
 ;-
-pro cxs_init_partial, data, support, $
+pro nadia_init_partial, data, support, $
                       beta, $
                       lcx, lcy, $
                       pxsize, pysize, $
@@ -456,17 +456,17 @@ IF N_Params() EQ 11 THEN $
                     zsd, $
 		    nleg, $
 		    double(nmode))
-cxs_set_support, support
-cxs_set_intensity, data
+nadia_set_support, support
+nadia_set_intensity, data
 
 IF N_Params() LT 11 THEN $
-  cxs_initialise_esw
+  nadia_initialise_esw
 
 end
 
 ;+
 ; NAME:
-;       CXS_INIT_POLY
+;       NADIA_INIT_POLY
 ;
 ; PURPOSE:
 ;       Set-up a Polychromatic CDI reconstruction. This will
@@ -475,14 +475,14 @@ end
 ;       allocated ready for reconstructing the sample
 ;       exit-surface-wave. It is necessary to call this procedure before
 ;       attempting to call any of the reconstruction methods
-;       (e.g. before setting the algorithm or calling CXS_ITERATE).
+;       (e.g. before setting the algorithm or calling NADIA_ITERATE).
 ;
 ;       Calling this procedure will initialise the reconstruction algorithm
 ;       to the error-reduction with a relaxation parameter of 0.9.
 ;
 ; CALLING SEQUENCE:
 ;
-; CXS_INIT_PARTIAL, data, support, beta, [, starting_point ]
+; NADIA_INIT_PARTIAL, data, support, beta, [, starting_point ]
 ;
 ; INPUTS:
 ;
@@ -513,9 +513,9 @@ end
 ;
 ; EXAMPLE:
 ;
-;        cxs_init_fresnel, my_data, my_supports
+;        nadia_init_fresnel, my_data, my_supports
 ;-
-pro cxs_init_poly, data, support, $
+pro nadia_init_poly, data, support, $
                       beta, $
                       complex_array
                    
@@ -533,8 +533,8 @@ IF N_Params() EQ 3 THEN $
 IF N_Params() eq 2 THEN $
   b = call_external(lib_name(),'IDL_poly_init',long(nx),long(ny))
 
-cxs_set_support, support
-cxs_set_intensity, data
+nadia_set_support, support
+nadia_set_intensity, data
 
 
 
@@ -542,16 +542,16 @@ end
 
 ;+
 ; NAME:
-;       CXS_SET_SUPPORT
+;       NADIA_SET_SUPPORT
 ;
 ; PURPOSE:
 ;       SET THE SUPPORT SHAPE TO BE USED IN RECONSTRUCTION. THIS WITH OVERRIDE 
-;       THE SUPPORT GIVEN TO ANY OF THE CXS_INIT METHODS AND MAYBE CALLED
+;       THE SUPPORT GIVEN TO ANY OF THE NADIA_INIT METHODS AND MAYBE CALLED
 ;       AT ANY TIME DURING THE RECONSTRUCTION.  
 ;
 ; CALLING SEQUENCE:
 ;
-;	CXS_SET_SUPPORT, SUPPORT
+;	NADIA_SET_SUPPORT, SUPPORT
 ;
 ; INPUTS:
 ;
@@ -563,10 +563,10 @@ end
 ;
 ; EXAMPLE:
 ;
-;       CXS_SET_SUPPORT, MY_SUPPORT
+;       NADIA_SET_SUPPORT, MY_SUPPORT
 ;
 ;-
-pro cxs_set_support, array
+pro nadia_set_support, array
 n = size(array)
 a = call_external(lib_name(),'IDL_set_support',n[1],n[2],double(array))
 end
@@ -576,7 +576,7 @@ end
 
 ;+
 ; NAME:
-;       CXS_GET_ROUND_SUPPORT
+;       NADIA_GET_ROUND_SUPPORT
 ;
 ; PURPOSE: 
 ;       This function will return a simple array with a central
@@ -584,12 +584,12 @@ end
 ;       the value returned is zero. This function has been written to
 ;       allow each create of the support array. For example when
 ;       reconstructing the white-field for Fresnel CDI reconstruction.
-;       Note that it does not actually call any method from the cxs
+;       Note that it does not actually call any method from the nadia
 ;       software library.
 ;
 ; CALLING SEQUENCE:
 ;
-;	CXS_GET_ROUND_SUPPORT, nx, ny, radius
+;	NADIA_GET_ROUND_SUPPORT, nx, ny, radius
 ;
 ; INPUTS:
 ;
@@ -608,9 +608,9 @@ end
 ;
 ; EXAMPLE:
 ;
-;       cxs_get_round_support, 1024, 1024, 0.25*1024
+;       nadia_get_round_support, 1024, 1024, 0.25*1024
 ;-
-function cxs_get_round_support, n_x, n_y, radius
+function nadia_get_round_support, n_x, n_y, radius
 result = make_array(n_x,n_y,/DOUBLE)
 b = call_external(lib_name() ,'IDL_get_round_support', $
   long(n_x),long(n_y),double(radius),result) 
@@ -621,7 +621,7 @@ end
 
 ;+
 ; NAME:
-;       CXS_SET_BEAM_STOP
+;       NADIA_SET_BEAM_STOP
 ;
 ; PURPOSE: 
 ;       For PlanarCDI, you may set the beam stop region in the
@@ -632,7 +632,7 @@ end
 ;
 ; CALLING SEQUENCE:
 ;
-;	CXS_SET_BEAM_STOP, beam_stop_region
+;	NADIA_SET_BEAM_STOP, beam_stop_region
 ;
 ; INPUTS:
 ;
@@ -643,26 +643,26 @@ end
 ;
 ; EXAMPLE:
 ;
-;       cxs_set_beam_stop, my_beam_stop_region
+;       nadia_set_beam_stop, my_beam_stop_region
 ;
 ;-
-pro cxs_set_beam_stop, array
+pro nadia_set_beam_stop, array
 n = size(array)
 a = call_external(lib_name(),'IDL_set_beam_stop',n[1],n[2],double(array))
 end
 
 ;+
 ; NAME:
-;       CXS_SET_INTENSITY
+;       NADIA_SET_INTENSITY
 ;
 ; PURPOSE:
 ;       Set the detector intensity data. This will override 
-;       the intensity given to any of the CXS_INIT methods.
+;       the intensity given to any of the NADIA_INIT methods.
 ;       In general, users should not need to call this method.
 ;
 ; CALLING SEQUENCE:
 ;
-;	CXS_SET_INTENSITY, data
+;	NADIA_SET_INTENSITY, data
 ;
 ; INPUTS:
 ;
@@ -673,22 +673,22 @@ end
 ;
 ; EXAMPLE:
 ;
-;       cxs_set_intensity, my_data
+;       nadia_set_intensity, my_data
 ;
 ;-
-pro cxs_set_intensity, array
+pro nadia_set_intensity, array
 n = size(array)
 a= call_external(lib_name(),'IDL_set_intensity',n[1],n[2],double(array))
 end
 
 ;+
 ; NAME:
-;       CXS_INITIALISE_ESW
+;       NADIA_INITIALISE_ESW
 ;
 ; PURPOSE:
 ;       Initialise the exit-surface-wave guess. The initialisation
 ;       will depend on the reconstruction type (see the procedures
-;       which begin "CXS_INIT_" for a description). The "INIT" procedure  
+;       which begin "NADIA_INIT_" for a description). The "INIT" procedure  
   ;       will call this procedure if no starting guess is provided. 
   ;       It is useful if you wish to run the same reconstruction
   ;       several time with a different random starting point, or if 
@@ -697,7 +697,7 @@ end
   ;
   ; CALLING SEQUENCE:
   ;
-  ;	CXS_INITIALISE_ESW, seed
+  ;	NADIA_INITIALISE_ESW, seed
   ;
   ; INPUTS:
   ;
@@ -709,9 +709,9 @@ end
   ;
   ; EXAMPLE:
   ;
-  ;       cxs_initialise_esw, 6
+  ;       nadia_initialise_esw, 6
   ;-
-  pro cxs_initialise_esw, seed
+  pro nadia_initialise_esw, seed
   IF N_Params() EQ 0 THEN $
     seed = 0
   b = call_external(lib_name() ,'IDL_initialise_esw',long(seed)) 
@@ -719,7 +719,7 @@ end
 
   ;+
   ; NAME:
-  ;       CXS_INITIALISE_MATRICES
+  ;       NADIA_INITIALISE_MATRICES
   ;
   ; PURPOSE:
   ;       generate the S and J matrices for the decomposition 
@@ -730,7 +730,7 @@ end
   ;
   ; CALLING SEQUENCE:
   ;
-  ; CXS_INITIALISE_MATRICES, nleg, nmodes
+  ; NADIA_INITIALISE_MATRICES, nleg, nmodes
   ;
   ; INPUTS:
   ;
@@ -744,15 +744,15 @@ end
   ;
   ; EXAMPLE:
   ;
-  ;       cxs_initialise_matrices, 5, 6
+  ;       nadia_initialise_matrices, 5, 6
   ;-
-  pro cxs_initialise_matrices, nleg, nmodes
+  pro nadia_initialise_matrices, nleg, nmodes
   b = call_external(lib_name() ,'IDL_initialise_matrices', double(nleg), double(nmodes)) 
   end
 
   ;+
   ; NAME:
-  ;       CXS_SET_SPECTRUM
+  ;       NADIA_SET_SPECTRUM
   ;
   ; PURPOSE:
   ;	Set the spectrum. This can be read in from a Spectra
@@ -760,7 +760,7 @@ end
   ;
   ; CALLING SEQUENCE:
   ;
-  ; CXS_SET_SPECTRU, spectrum
+  ; NADIA_SET_SPECTRU, spectrum
   ;
   ; INPUTS:
   ;
@@ -768,14 +768,14 @@ end
   ;
   ; EXAMPLE:
   ;
-  ;       cxs_initialise_matrices, spectrum
+  ;       nadia_initialise_matrices, spectrum
   ;-
-  pro cxs_set_spectrum, spectrum
+  pro nadia_set_spectrum, spectrum
   b = call_external(lib_name() ,'IDL_set_spectrum', spectrum)
   end
   ;+
   ; NAME:
-  ;       CXS_ITERATE
+  ;       NADIA_ITERATE
   ;
   ; PURPOSE:
   ;       Perform the iterative reconstruction. The number of iterations
@@ -785,20 +785,20 @@ end
   ;       reconstruction it will be the white-field at the detector surface.
   ;       The magnitude of the result is also displayed on the screen as
   ;       a 512x512 pixel image. The iteration number and corresponding
-  ;       error (see CXS_GET_ERROR) will be printed on the screen.
+  ;       error (see NADIA_GET_ERROR) will be printed on the screen.
   ;
-  ;       CXS_ITERATE may be called several time and the reconstruction
-  ;       will start from where is ended. i.e. calling CXS_ITERATE(50),
-  ;       followed by a second CXS_ITERATE(50) is equivalent to calling
-  ;       CXS_ITERATE(100).
+  ;       NADIA_ITERATE may be called several time and the reconstruction
+  ;       will start from where is ended. i.e. calling NADIA_ITERATE(50),
+  ;       followed by a second NADIA_ITERATE(50) is equivalent to calling
+  ;       NADIA_ITERATE(100).
   ;
   ;       During the reconstruction, the best (lowest error) result is
-  ;       also stored. It maybe retrieved by calling CXS_GET_BEST_RESULT.
+  ;       also stored. It maybe retrieved by calling NADIA_GET_BEST_RESULT.
   ; 
   ;
   ; CALLING SEQUENCE:
   ;
-  ;	result = CXS_ITERATE([iterations])
+  ;	result = NADIA_ITERATE([iterations])
   ;
   ; INPUTS:
   ;
@@ -816,9 +816,9 @@ end
   ;
   ; EXAMPLE:
   ;
-  ;       my_result = cxs_iterate(100)
+  ;       my_result = nadia_iterate(100)
   ;-
-  function cxs_iterate, iterations
+  function nadia_iterate, iterations
   nx = call_external(lib_name(),'IDL_get_array_x_size')
   ny = call_external(lib_name(),'IDL_get_array_y_size')
   result = make_array(nx,ny,/COMPLEX)
@@ -831,7 +831,7 @@ end
 
   ;+
   ; NAME:
-  ;       CXS_SET_RELAXATION_PARAMETER
+  ;       NADIA_SET_RELAXATION_PARAMETER
   ;
   ; PURPOSE:
   ;       Set the relaxation parameter. The default relaxation
@@ -841,7 +841,7 @@ end
   ;
   ; CALLING SEQUENCE:
   ;
-  ;	CXS_SET_RELAXATION_PARAMETER, beta
+  ;	NADIA_SET_RELAXATION_PARAMETER, beta
   ;
   ; INPUTS:
   ;
@@ -850,26 +850,26 @@ end
   ;
   ; EXAMPLE:
   ;
-  ;       cxs_set_relaxation_parameter, 0.9
+  ;       nadia_set_relaxation_parameter, 0.9
   ;-
-  pro cxs_set_relaxation_parameter, beta
+  pro nadia_set_relaxation_parameter, beta
   b = call_external(lib_name() ,'IDL_set_relaxation_parameter',double(beta)) 
   end
 
   ;+
   ; NAME:
-  ;       CXS_APPLY_SHRINKWRAP
+  ;       NADIA_APPLY_SHRINKWRAP
   ;
   ; PURPOSE:
   ;       Apply the shrinkwrap algorithm. The current exit-surface-wave
   ;       magnitude is used to update the support; it is convoluted with
   ;       a Gaussian and then a threshold is applied. You can use the
-  ;       cxs_get_support function to see how the support have been
+  ;       nadia_get_support function to see how the support have been
   ;       modified after calling this procedure.
   ;
   ; CALLING SEQUENCE:
   ;
-  ;	CXS_APPLY_SHRINKWRAP [,gauss_width, threshold ]
+  ;	NADIA_APPLY_SHRINKWRAP [,gauss_width, threshold ]
   ;
   ; INPUTS:
   ;
@@ -889,11 +889,11 @@ end
   ;       Perform 1000 iterations in total, applying shrink-wrap at the 400th iteration:
   ;
   ;       ....
-  ;       a = CXS_ITERATE(400)
-  ;       CXS_APPLY_SHRINKWRAP
-  ;       a = CXS_ITERATE(600)
+  ;       a = NADIA_ITERATE(400)
+  ;       NADIA_APPLY_SHRINKWRAP
+  ;       a = NADIA_ITERATE(600)
   ;-
-  pro cxs_apply_shrinkwrap, gauss_width, threshold
+  pro nadia_apply_shrinkwrap, gauss_width, threshold
   if N_Params() lt 2 then threshold = 0.1 
   if N_Params() lt 1 then gauss_width = 1.5
   b = call_external(lib_name() ,'IDL_apply_shrinkwrap',double(gauss_width),double(threshold))
@@ -901,7 +901,7 @@ end
 
   ;+
   ; NAME:
-  ;       CXS_SET_ALGORITHM
+  ;       NADIA_SET_ALGORITHM
   ;
   ; PURPOSE:
   ;       Select the reconstruction algorithm to use. Options are:
@@ -917,7 +917,7 @@ end
   ;
   ; CALLING SEQUENCE:
   ;
-  ;       CXS_SET_ALGORITHM, algorithm
+  ;       NADIA_SET_ALGORITHM, algorithm
   ;
   ; INPUTS:
   ;
@@ -929,17 +929,17 @@ end
   ; EXAMPLE:
   ;       Perform 1000 iterations in total, changing to error-reduction at the 400th iteration:
   ;       ....
-  ;       a = CXS_ITERATE(400)
-  ;       CXS_SET_ALGORITHM, 'ER'
-  ;       a = CXS_ITERATE(600)
+  ;       a = NADIA_ITERATE(400)
+  ;       NADIA_SET_ALGORITHM, 'ER'
+  ;       a = NADIA_ITERATE(600)
   ;-
-  pro cxs_set_algorithm, algorithm
+  pro nadia_set_algorithm, algorithm
   b = call_external(lib_name() ,'IDL_set_algorithm',algorithm)
   end
 
   ;+
   ; NAME:
-  ;       CXS_SET_CUSTOM_ALGORITHM
+  ;       NADIA_SET_CUSTOM_ALGORITHM
   ;
   ; PURPOSE:
   ;       Set a custom reconstruction algorithm.
@@ -957,7 +957,7 @@ end
   ;
   ; CALLING SEQUENCE:
   ;
-  ;       CXS_SET_CUSTOM_ALGORITHM, m1, m2, m3, m4, m5, m6, m7, m8, m9, m10
+  ;       NADIA_SET_CUSTOM_ALGORITHM, m1, m2, m3, m4, m5, m6, m7, m8, m9, m10
   ;
   ; INPUTS:
   ;
@@ -969,13 +969,13 @@ end
   ;       algorithm at the 400th iteration and print the algorithm to screen:
 
   ;       ....
-  ;       a = CXS_ITERATE(400)
-  ;       CXS_SET_ALGORITHM, 0.5, 0.5, 0.5, 0.5, 0.5, $ 
+  ;       a = NADIA_ITERATE(400)
+  ;       NADIA_SET_ALGORITHM, 0.5, 0.5, 0.5, 0.5, 0.5, $ 
     ;                          0.5, 0.5, 0.5, 0.5, 0.5
-  ;       CXS_PRINT_ALGORITHM                    
-  ;       a = CXS_ITERATE(600)
+  ;       NADIA_PRINT_ALGORITHM                    
+  ;       a = NADIA_ITERATE(600)
   ;-
-  pro cxs_set_custom_algorithm, m1, m2, m3, m4, m5, m6, m7, m8, m9, m10
+  pro nadia_set_custom_algorithm, m1, m2, m3, m4, m5, m6, m7, m8, m9, m10
   b = call_external(lib_name() ,'IDL_set_custom_algorithm', $
     double(m1), $
     double(m2), $
@@ -992,7 +992,7 @@ end
 
   ;+
   ; NAME:
-  ;       CXS_GET_BEST_RESULT
+  ;       NADIA_GET_BEST_RESULT
   ;
   ; PURPOSE:
   ;       Get the best (lowest error) result found during the reconstruction.
@@ -1001,7 +1001,7 @@ end
   ;
   ; CALLING SEQUENCE:
   ;
-  ;       result = CXS_GET_BEST_RESULT()
+  ;       result = NADIA_GET_BEST_RESULT()
   ;
   ; OUTPUTS:
   ;
@@ -1015,10 +1015,10 @@ end
   ; EXAMPLE:
   ;       Perform 1000 iterations and get the lowest error result.
   ;       ....
-  ;       a = CXS_ITERATE(1000)
-  ;       a = CXS_GET_BEST_RESULT()
+  ;       a = NADIA_ITERATE(1000)
+  ;       a = NADIA_GET_BEST_RESULT()
   ;-
-  function cxs_get_best_result 
+  function nadia_get_best_result 
   result = make_array(nx(),ny(),/COMPLEX)
   b = call_external(lib_name() ,'IDL_get_best_result',result)
   show, ABS(result)
@@ -1027,7 +1027,7 @@ end
 
   ;+
   ; NAME:
-  ;       CXS_GET_SUPPORT
+  ;       NADIA_GET_SUPPORT
   ;
   ; PURPOSE:
   ;       Get the support. This maybe useful to see how shrinkwrap has
@@ -1036,7 +1036,7 @@ end
   ;
   ; CALLING SEQUENCE:
   ;
-  ;       support = CXS_GET_SUPPORT()
+  ;       support = NADIA_GET_SUPPORT()
   ;
   ; OUTPUTS:
   ;
@@ -1047,10 +1047,10 @@ end
   ; EXAMPLE:
   ;       View the support after applying shrink-wrap.
   ; 
-  ;       CXS_APPLY_SHRINKWRAP
-  ;       a = CXS_GET_SUPPORT()
+  ;       NADIA_APPLY_SHRINKWRAP
+  ;       a = NADIA_GET_SUPPORT()
   ;-
-  function cxs_get_support
+  function nadia_get_support
   result = make_array(nx(),ny(),/DOUBLE)
   b = call_external(lib_name() ,'IDL_get_support',result) 
   show, result
@@ -1059,7 +1059,7 @@ end
 
   ;+
   ; NAME:
-  ;       CXS_GET_ERROR
+  ;       NADIA_GET_ERROR
   ;
   ; PURPOSE:
   ;       Get the error metric. This is defined as the difference
@@ -1074,7 +1074,7 @@ end
   ;
   ; CALLING SEQUENCE:
   ;
-  ;       error = CXS_GET_ERROR()
+  ;       error = NADIA_GET_ERROR()
   ;
   ; OUTPUTS:
   ;
@@ -1083,9 +1083,9 @@ end
   ;
   ; EXAMPLE:
   ;
-  ;       a = CXS_GET_ERROR()
+  ;       a = NADIA_GET_ERROR()
   ;- 
-  function cxs_get_error
+  function nadia_get_error
   result = double(0.0)
   b = call_external(lib_name(),'IDL_get_error',result)
   return, result
@@ -1093,7 +1093,7 @@ end
 
   ;+
   ; NAME:
-  ;       CXS_SET_TRANSMISSION
+  ;       NADIA_SET_TRANSMISSION
   ; 
   ; PURPOSE:
   ;       SET THE TRANSMISSION FUNCTION TO BE BEGIN THE RECONSTRUCTION. 
@@ -1103,7 +1103,7 @@ end
     ;
     ; CALLING SEQUENCE:
     ;
-    ; CXS_SET_TRANSMISSION, TRANSMISSION
+    ; NADIA_SET_TRANSMISSION, TRANSMISSION
     ;
     ; INPUTS:
     ;
@@ -1113,17 +1113,17 @@ end
     ;
     ; EXAMPLE:
     ;
-    ;      cxs_transmission, transmission
+    ;      nadia_transmission, transmission
     ;
     ;-
-    pro cxs_set_transmission, array
+    pro nadia_set_transmission, array
     n = size(array)
     b = call_external(lib_name() ,'IDL_set_transmission', n[1],n[2],double(array)) 
     end
 
     ;+
     ; NAME:
-    ;       CXS_GET_TRANSMISSION_FUNCTION
+    ;       NADIA_GET_TRANSMISSION_FUNCTION
     ;
     ; PURPOSE:
     ;       Get the transmission function from the current estimate of the
@@ -1133,7 +1133,7 @@ end
     ;
     ; CALLING SEQUENCE:
     ;
-    ;       result = CXS_GET_TRANSMISSION_FUNCTION()
+    ;       result = NADIA_GET_TRANSMISSION_FUNCTION()
     ;
     ; OUTPUTS:
     ;
@@ -1142,9 +1142,9 @@ end
     ;             COMPLEX variables is returned. 
     ;
     ; EXAMPLE:
-    ;       a = CXS_GET_TRANSMISSION_FUNCTION()
+    ;       a = NADIA_GET_TRANSMISSION_FUNCTION()
     ;-
-    function cxs_get_transmission_function
+    function nadia_get_transmission_function
     result = make_array(nx(),ny(),/COMPLEX)
     b = call_external(lib_name() ,'IDL_get_transmission_function',result) 
     show, abs(result)
@@ -1153,7 +1153,7 @@ end
 
     ;+
     ; NAME:
-    ;       CXS_GET_TRANSMISSION
+    ;       NADIA_GET_TRANSMISSION
     ;
     ; PURPOSE:
     ;       Get the transmission function from the current estimate of the
@@ -1163,7 +1163,7 @@ end
     ;
     ; CALLING SEQUENCE:
     ;
-    ;       result = CXS_GET_TRANSMISSION()
+    ;       result = NADIA_GET_TRANSMISSION()
     ;
     ; OUTPUTS:
     ;
@@ -1172,9 +1172,9 @@ end
     ;             COMPLEX variables is returned. 
     ;
     ; EXAMPLE:
-    ;       a = CXS_GET_TRANSMISSION()
+    ;       a = NADIA_GET_TRANSMISSION()
     ;-
-    function cxs_get_transmission
+    function nadia_get_transmission
     result = make_array(nx(),ny(),/COMPLEX)
     b = call_external(lib_name() ,'IDL_get_transmission',result) 
     show, abs(result)
@@ -1183,7 +1183,7 @@ end
 
     ;+
     ; NAME:
-    ;       CXS_GET_MODE
+    ;       NADIA_GET_MODE
     ;
     ; PURPOSE:
     ;       Get the nth mode. This maybe useful to see the ways the 
@@ -1191,7 +1191,7 @@ end
     ;
     ; CALLING SEQUENCE:
     ;
-    ;       mode = CXS_GET_MODE(n)
+    ;       mode = NADIA_GET_MODE(n)
     ;
     ;INPUTS
     ;       n: 
@@ -1208,9 +1208,9 @@ end
     ; EXAMPLE:
     ;       View the nth mode.
     ; 
-    ;       a = cxs_get_mode(1) 
+    ;       a = nadia_get_mode(1) 
     ;-
-    function cxs_get_mode, n
+    function nadia_get_mode, n
     result = make_array(nx(),ny(),/COMPLEX)
     b = call_external(lib_name() ,'IDL_get_mode',result, double(n)) 
     show, abs(result)
@@ -1219,7 +1219,7 @@ end
 
     ;+;+
     ; NAME:
-    ;       CXS_SET_THRESHOLD
+    ;       NADIA_SET_THRESHOLD
     ; 
     ; PURPOSE:
     ;       SET THE THRESHOLD OF THE PROMINENCE OF THE LOWEST MODE 
@@ -1228,7 +1228,7 @@ end
     ;       
     ; CALLING SEQUENCE:
     ;
-    ; CXS_SET_THRESHOLD, THRESHOLD_VALUE
+    ; NADIA_SET_THRESHOLD, THRESHOLD_VALUE
     ;
     ; INPUTS:
     ;
@@ -1237,37 +1237,37 @@ end
     ;
     ; EXAMPLE:
     ;
-    ;      cxs_set_threshold, 0.0001
+    ;      nadia_set_threshold, 0.0001
     ;
     ;
-    pro cxs_set_threshold, threshold_value
+    pro nadia_set_threshold, threshold_value
     b = call_external(lib_name() ,'IDL_set_transmission', threshold_value) 
     end
 
     ; NAME:
-    ;       CXS_CLEAR_MEMORY
+    ;       NADIA_CLEAR_MEMORY
     ;
     ; PURPOSE:
     ;       Clean-up after a reconstruction has been performed. This 
     ;       procedure should be called at the very end of a program.
     ;       It will free up the memory that was allocated when one of 
-    ;       the "CXS_INIT_.." methods was called.
+    ;       the "NADIA_INIT_.." methods was called.
     ;
     ; CALLING SEQUENCE:
     ;
-    ;       CXS_CLEAR_MEMORY
+    ;       NADIA_CLEAR_MEMORY
     ;
     ; EXAMPLE:
-    ;       CXS_CLEAR_MEMORY
+    ;       NADIA_CLEAR_MEMORY
     ;-
-    pro cxs_clear_memory
+    pro nadia_clear_memory
     b = call_external(lib_name() ,'IDL_deallocate_memory')
     end
 
 
     ;+
     ; NAME:
-    ;       CXS_GET_INTENSITY_AUTOCORRELATION
+    ;       NADIA_GET_INTENSITY_AUTOCORRELATION
     ;
     ; PURPOSE:
     ;       Get the autocorrelation function from the intensity data.
@@ -1275,16 +1275,16 @@ end
     ;
     ; CALLING SEQUENCE:
     ;
-    ;       a = CXS_GET_INTENSITY_AUTOCORRELATION()
+    ;       a = NADIA_GET_INTENSITY_AUTOCORRELATION()
     ;
     ; OUTPUTS:
     ;       a:
     ;             The autocorrelation function (a 2D array of doubles).
     ;
     ; EXAMPLE:
-    ;       a = CXS_GET_INTENSITY_AUTOCORRELATION()
+    ;       a = NADIA_GET_INTENSITY_AUTOCORRELATION()
     ;-
-    function cxs_get_intensity_autocorrelation
+    function nadia_get_intensity_autocorrelation
     result = make_array(nx(),ny(),/DOUBLE)
     b = call_external(lib_name() ,'IDL_get_intensity_autocorrelation',result) 
     show, result
@@ -1295,7 +1295,7 @@ end
 
     ;+
     ; NAME:
-    ;       CXS_PRINT_ALGORITHM
+    ;       NADIA_PRINT_ALGORITHM
     ;
     ; PURPOSE:
     ;       Output the form of the current algorithm to the screen. 
@@ -1304,20 +1304,20 @@ end
 
     ;
     ; CALLING SEQUENCE:
-    ;       CXS_PRINT_ALGORITHM
+    ;       NADIA_PRINT_ALGORITHM
     ;
     ;
     ; EXAMPLE:
-    ;       CXS_SET_ALGORITHM, 'RAAR'
-    ;       CXS_PRINT_ALGORITHM
+    ;       NADIA_SET_ALGORITHM, 'RAAR'
+    ;       NADIA_PRINT_ALGORITHM
     ;-
-    pro cxs_print_algorithm
+    pro nadia_print_algorithm
     b = call_external(lib_name() ,'IDL_print_algorithm')
     end
 
     ;+
     ; NAME:
-    ;       CXS_PROPAGATE_FROM_DETECTOR
+    ;       NADIA_PROPAGATE_FROM_DETECTOR
     ;
     ; PURPOSE:
     ;       Propagate the given wave field from the detector plane to the 
@@ -1325,7 +1325,7 @@ end
     ;       white-field reconstruction). The result will be returned and
     ;       displayed on the screen by default.
     ;
-    ;       This function is called when using (CXS_ITERATE) so generally
+    ;       This function is called when using (NADIA_ITERATE) so generally
     ;       won't need to be call explicitly. An exception to this is if
     ;       the user wishes to extend the reconstruction with an addition
     ;       constraint (see the example below).
@@ -1333,7 +1333,7 @@ end
     ;
     ; CALLING SEQUENCE:
     ;
-    ;	result = CXS_PROPAGATE_FROM_DETECTOR( complex_array [,/SUPPRESS_DISPLAY] )
+    ;	result = NADIA_PROPAGATE_FROM_DETECTOR( complex_array [,/SUPPRESS_DISPLAY] )
     ;
     ; INPUTS:
     ;
@@ -1359,15 +1359,15 @@ end
     ;       sample plane (e.g. called "NEW_SUPPORT")
     ;
     ;              FOR K = 0, 100 DO BEGIN 
-      ;                  a = CXS_PROPAGATE_TO_DETECTOR(a,/SUPPRESS_DISPLAY)
-      ;                  a = CXS_SCALE_INTENSITY(a,/SUPPRESS_DISPLAY)
-      ;                  a = CXS_PROPAGATE_FROM_DETECTOR(a,/SUPPRESS_DISPLAY)
-      ;                  a = CXS_APPLY_SUPPORT(a,/SUPPRESS_DISPLAY)
+      ;                  a = NADIA_PROPAGATE_TO_DETECTOR(a,/SUPPRESS_DISPLAY)
+      ;                  a = NADIA_SCALE_INTENSITY(a,/SUPPRESS_DISPLAY)
+      ;                  a = NADIA_PROPAGATE_FROM_DETECTOR(a,/SUPPRESS_DISPLAY)
+      ;                  a = NADIA_APPLY_SUPPORT(a,/SUPPRESS_DISPLAY)
       ;                  a = NEW_SUPPORT(a)
       ;              ENDFOR 
       ;
       ;-
-      function cxs_propagate_from_detector, complex_array, $
+      function nadia_propagate_from_detector, complex_array, $
 	SUPPRESS_DISPLAY=suppress_display
       check_size, complex_array
       result = make_array(nx(),ny(),/COMPLEX)
@@ -1379,7 +1379,7 @@ end
 
       ;+
       ; NAME:
-      ;       CXS_PROPAGATE_TO_DETECTOR
+      ;       NADIA_PROPAGATE_TO_DETECTOR
       ;
       ; PURPOSE:
       ;       Propagate the given wave field to the detector plane from the 
@@ -1387,7 +1387,7 @@ end
       ;       white-field reconstruction). The result will be returned and
       ;       displayed on the screen by default.
       ;
-      ;       This function is called when using (CXS_ITERATE) so generally
+      ;       This function is called when using (NADIA_ITERATE) so generally
       ;       won't need to be call explicitly. An exception to this is if
       ;       the user wishes to perform simulation or to extend their
       ;       reconstruction with an addition constraint (see the previous
@@ -1396,7 +1396,7 @@ end
       ;
       ; CALLING SEQUENCE:
       ;
-      ;	result = CXS_PROPAGATE_TO_DETECTOR( complex_array [,/SUPPRESS_DISPLAY] )
+      ;	result = NADIA_PROPAGATE_TO_DETECTOR( complex_array [,/SUPPRESS_DISPLAY] )
       ;
       ; INPUTS:
       ;
@@ -1422,12 +1422,12 @@ end
       ;       complex white-field called "white_field" and the transmission
       ;       function of the object, "trans").
       ;
-      ;       white_field_at_sample = CXS_PROPAGATE_FROM_DETECTOR(white_field)
+      ;       white_field_at_sample = NADIA_PROPAGATE_FROM_DETECTOR(white_field)
       ;       esw_at_sample = trans*white_field_at_sample
-      ;       esw_at_detector = CXS_PROPAGATE_TO_DETECTOR(esw_at_sample)
+      ;       esw_at_detector = NADIA_PROPAGATE_TO_DETECTOR(esw_at_sample)
       ;       diffraction_pattern = abs(esw_at_detector)^2
       ;-
-      function cxs_propagate_to_detector, complex_array, $
+      function nadia_propagate_to_detector, complex_array, $
 	SUPPRESS_DISPLY=suppress_display
       check_size, complex_array
       result = make_array(nx(),ny(),/COMPLEX)
@@ -1440,16 +1440,16 @@ end
 
       ;+
       ; NAME:
-      ;       CXS_APPLY_SUPPORT
+      ;       NADIA_APPLY_SUPPORT
       ;
       ; PURPOSE:
       ;       Apply the support constraint to the given complex array. All
       ;       elements outside the support with be reset to zero. Elements
       ;       within the support will be left as they are. The support must
-      ;       have been previously set using either one of the CXS_INIT 
-      ;       functions or CXS_SET_SUPPORT.
+      ;       have been previously set using either one of the NADIA_INIT 
+      ;       functions or NADIA_SET_SUPPORT.
       ;
-      ;       This function is called when using (CXS_ITERATE) so generally
+      ;       This function is called when using (NADIA_ITERATE) so generally
       ;       won't need to be call explicitly. An exception to this is if
       ;       the user wishes to extend their reconstruction with an
       ;       addition constraint.
@@ -1457,7 +1457,7 @@ end
       ;
       ; CALLING SEQUENCE:
       ;
-      ;	result = CXS_APPLY_SUPPORT( complex_array [,/SUPPRESS_DISPLAY] )
+      ;	result = NADIA_APPLY_SUPPORT( complex_array [,/SUPPRESS_DISPLAY] )
       ;
       ; INPUTS:
       ;
@@ -1479,9 +1479,9 @@ end
       ;             A COMPLEX 2D array after the support is applied.
       ;
       ; EXAMPLE:
-      ;       See the example for CXS_PROPAGATE_FROM_DETECTOR
+      ;       See the example for NADIA_PROPAGATE_FROM_DETECTOR
       ;-
-      function cxs_apply_support, complex_array, $
+      function nadia_apply_support, complex_array, $
 	SUPPRESS_DISPLY=suppress_display
       check_size, complex_array
       result = make_array(nx(),ny(),/COMPLEX)
@@ -1493,19 +1493,19 @@ end
 
       ;+
       ; NAME:
-      ;       CXS_SCALE_INTENSITY
+      ;       NADIA_SCALE_INTENSITY
       ;
       ; PURPOSE:
       ;       Scale the intensity (magnitude squared) of the given complex
       ;       array to the data. The intensity data must have been
-      ;       previously set using either one of the CXS_INIT functions or
-      ;       CXS_SET_INTENSITY.
+      ;       previously set using either one of the NADIA_INIT functions or
+      ;       NADIA_SET_INTENSITY.
       ;
       ;       If Fresnel reconstruction is being done, the white-field will
       ;       automatically be added to the complex array prior to scaling,
       ;       and will be subtracted afterward.
       ;       
-      ;       This function is called when using (CXS_ITERATE) so generally
+      ;       This function is called when using (NADIA_ITERATE) so generally
       ;       won't need to be call explicitly. An exception to this is if
       ;       the user wishes to extend their reconstruction with an
       ;       addition constraint.
@@ -1513,7 +1513,7 @@ end
       ;
       ; CALLING SEQUENCE:
       ;
-      ;	result = CXS_SCALE_INTENSITY( complex_array [,/SUPPRESS_DISPLAY] )
+      ;	result = NADIA_SCALE_INTENSITY( complex_array [,/SUPPRESS_DISPLAY] )
       ;
       ; INPUTS:
       ;
@@ -1534,9 +1534,9 @@ end
       ;             to data.
       ;
       ; EXAMPLE:
-      ;       See the example for CXS_PROPAGATE_FROM_DETECTOR
+      ;       See the example for NADIA_PROPAGATE_FROM_DETECTOR
       ;-
-      function cxs_scale_intensity, complex_array, $
+      function nadia_scale_intensity, complex_array, $
 	SUPPRESS_DISPLY=suppress_display
       check_size, complex_array
       result = make_array(nx(),ny(),/COMPLEX)
@@ -1554,14 +1554,14 @@ end
 
       ;+
       ; NAME:
-      ;       CXS_READ_PPM
+      ;       NADIA_READ_PPM
       ;
       ; PURPOSE:
       ;       Read a ppm file.
       ;
       ; CALLING SEQUENCE:
       ;
-      ;       image = CXS_READ_PPM( nx, ny, filename)
+      ;       image = NADIA_READ_PPM( nx, ny, filename)
       ;
       ; INPUTS:
       ;
@@ -1579,9 +1579,9 @@ end
       ;             The image in the format of a 2D array of doubles.
       ;
       ; EXAMPLE:
-      ;       data = CXS_READ_PPM(1024, 1024, 'data_file.ppm')
+      ;       data = NADIA_READ_PPM(1024, 1024, 'data_file.ppm')
       ;-
-      function cxs_read_ppm, nx, ny, filename
+      function nadia_read_ppm, nx, ny, filename
       result = make_array(nx,ny, /DOUBLE)
       b = call_external(lib_name() ,'IDL_read_ppm',long(nx),long(ny),filename,result)
       show, result
@@ -1590,14 +1590,14 @@ end
 
       ;+
       ; NAME:
-      ;       CXS_READ_DBIN
+      ;       NADIA_READ_DBIN
       ;
       ; PURPOSE:
       ;       Read a double binary file (a binary file of doubles).
       ;
       ; CALLING SEQUENCE:
       ;
-      ;       image = CXS_READ_DBIN( nx, ny, filename)
+      ;       image = NADIA_READ_DBIN( nx, ny, filename)
       ;
       ; INPUTS:
       ;
@@ -1615,9 +1615,9 @@ end
       ;             The image in the format of a 2D array of doubles.
       ;
       ; EXAMPLE:
-      ;       data = CXS_READ_DBIN(1024, 1024, 'data_file.dbin')
+      ;       data = NADIA_READ_DBIN(1024, 1024, 'data_file.dbin')
       ;-
-      function cxs_read_dbin, nx, ny, filename
+      function nadia_read_dbin, nx, ny, filename
       result = make_array(nx,ny, /DOUBLE)
       b = call_external(lib_name() ,'IDL_read_dbin',long(nx),long(ny),filename,result)
       show, result
@@ -1626,7 +1626,7 @@ end
 
       ;+
       ; NAME:
-      ;       CXS_READ_TIFF
+      ;       NADIA_READ_TIFF
       ;
       ; PURPOSE:
       ;       Read a tiff image file. Note that there are other IDL commands
@@ -1634,7 +1634,7 @@ end
       ;
       ; CALLING SEQUENCE:
       ;
-      ;       image = CXS_READ_TIFF( nx, ny, filename)
+      ;       image = NADIA_READ_TIFF( nx, ny, filename)
       ;
       ; INPUTS:
       ;
@@ -1652,9 +1652,9 @@ end
       ;             The image in the format of a 2D array of doubles.
       ;
       ; EXAMPLE:
-      ;       data = CXS_READ_TIFF(1024, 1024, 'data_file.tif')
+      ;       data = NADIA_READ_TIFF(1024, 1024, 'data_file.tif')
       ;-
-      function cxs_read_tiff, nx, ny, filename
+      function nadia_read_tiff, nx, ny, filename
       result = make_array(nx,ny, /DOUBLE)
       b = call_external(lib_name() ,'IDL_read_tiff',long(nx),long(ny),filename,result)
       show, result
@@ -1663,7 +1663,7 @@ end
 
       ;+
       ; NAME:
-      ;       CXS_READ_CPLX
+      ;       NADIA_READ_CPLX
       ;
       ; PURPOSE:
       ;       Read a binary file of fftw complex numbers. This is
@@ -1671,7 +1671,7 @@ end
       ;
       ; CALLING SEQUENCE:
       ;
-      ;       complex_array = CXS_READ_CPLX( nx, ny, filename)
+      ;       complex_array = NADIA_READ_CPLX( nx, ny, filename)
       ;
       ; INPUTS:
       ;
@@ -1689,9 +1689,9 @@ end
       ;             A 2D array of COMPLEX numbers.
       ;
       ; EXAMPLE:
-      ;       white_field = CXS_READ_CPLX(1024, 1024, 'white_field_file.cplx')
+      ;       white_field = NADIA_READ_CPLX(1024, 1024, 'white_field_file.cplx')
       ;-
-      function cxs_read_cplx, nx, ny, filename
+      function nadia_read_cplx, nx, ny, filename
       result = make_array(nx,ny, /COMPLEX)
       b = call_external(lib_name() ,'IDL_read_cplx',long(nx),long(ny),filename,result)
       show, abs(result)
@@ -1700,7 +1700,7 @@ end
 
       ;+
       ; NAME:
-      ;       CXS_WRITE_CPLX
+      ;       NADIA_WRITE_CPLX
       ;
       ; PURPOSE:
       ;       Write a binary file of fftw complex numbers. This is
@@ -1708,7 +1708,7 @@ end
       ;
       ; CALLING SEQUENCE:
       ;
-      ;       CXS_WRITE_CPLX( complex_array, filename )
+      ;       NADIA_WRITE_CPLX( complex_array, filename )
       ;
       ; INPUTS:
       ;
@@ -1719,23 +1719,23 @@ end
       ;             A string containing the name of the file to write.
       ;
       ; EXAMPLE:
-      ;       CXS_WRITE_CPLX, white_field, 'white_field_file.cplx'
+      ;       NADIA_WRITE_CPLX, white_field, 'white_field_file.cplx'
       ;-
-      pro cxs_write_cplx, complex_array, filename
+      pro nadia_write_cplx, complex_array, filename
       n = size(complex_array)
       b = call_external(lib_name() ,'IDL_write_cplx',n[1],n[2],complex_array, filename)
       end
 
       ;+
       ; NAME:
-      ;       CXS_WRITE_DBIN
+      ;       NADIA_WRITE_DBIN
       ;
       ; PURPOSE:
       ;       Write a binary file of doubles. 
       ;
       ; CALLING SEQUENCE:
       ;
-      ;       CXS_WRITE_DBIN( image, filename )
+      ;       NADIA_WRITE_DBIN( image, filename )
       ;
       ; INPUTS:
       ;
@@ -1746,9 +1746,9 @@ end
       ;             A string containing the name of the file to write.
       ;
       ; EXAMPLE:
-      ;       CXS_WRITE_DBIN, result, 'reco_magnitude.dbin'
+      ;       NADIA_WRITE_DBIN, result, 'reco_magnitude.dbin'
       ;-
-      pro cxs_write_dbin, array, filename
+      pro nadia_write_dbin, array, filename
       n = size(array)
       b = call_external(lib_name() ,'IDL_write_dbin',n[1],n[2],double(array), filename)
       end
@@ -1759,7 +1759,7 @@ end
 
       ;+
       ; NAME:
-      ;       CXS_SET_CHARGE_FLIPPING
+      ;       NADIA_SET_CHARGE_FLIPPING
       ;
       ; PURPOSE: For use with FresnelCDI reconstruction. Enabeling this
       ;       procedure will constrain the transmission function phase to
@@ -1773,7 +1773,7 @@ end
       ;
       ; CALLING SEQUENCE:
       ;
-      ;       CXS_SET_CHARGE_FLIPPING, enable
+      ;       NADIA_SET_CHARGE_FLIPPING, enable
       ;
       ; INPUTS:
       ;
@@ -1781,15 +1781,15 @@ end
       ;             This should be either 0 - turn off or 1 - turn on.
       ;
       ; EXAMPLE:
-      ;       CXS_SET_CHARGE_FLIPPING, 1
+      ;       NADIA_SET_CHARGE_FLIPPING, 1
       ;-
-      pro cxs_set_charge_flipping, enable
+      pro nadia_set_charge_flipping, enable
       b = call_external(lib_name() ,'IDL_set_charge_flipping',long(enable))
       end
 
       ;+
       ; NAME:
-      ;       CXS_SET_TRANS_UNITY_CONSTRAINT
+      ;       NADIA_SET_TRANS_UNITY_CONSTRAINT
       ;
       ; PURPOSE: For use with FresnelCDI reconstruction. Enabeling this
       ;       procedure will constrain the transmission function magnitude
@@ -1800,7 +1800,7 @@ end
       ;
       ; CALLING SEQUENCE:
       ;
-      ;       CXS_SET_TRANS_UNITY_CONSTRAINT, enable
+      ;       NADIA_SET_TRANS_UNITY_CONSTRAINT, enable
       ;
       ; INPUTS:
       ;
@@ -1808,16 +1808,16 @@ end
       ;             This should be either 0 - turn off or 1 - turn on.
       ;
       ; EXAMPLE:
-      ;       CXS_SET_TRANS_UNITY_CONSTRAINT, 1
+      ;       NADIA_SET_TRANS_UNITY_CONSTRAINT, 1
       ;-
-      pro cxs_set_trans_unity_constraint, enable
+      pro nadia_set_trans_unity_constraint, enable
       b = call_external(lib_name() ,'IDL_set_trans_unity_constraint',long(enable))
       end
 
 
       ;+
       ; NAME:
-      ;       CXS_ADD_COMPLEX_CONSTRAINT_REGION
+      ;       NADIA_ADD_COMPLEX_CONSTRAINT_REGION
       ;
       ; PURPOSE: For use with FresnelCDI reconstruction. Calling this
       ;       procedure will constrain the transmission function magnitude
@@ -1840,7 +1840,7 @@ end
       ;
       ; CALLING SEQUENCE:
       ;
-      ;       CXS_ADD_COMPLEX_CONSTRAINT_REGION, region, alpha1, alpha2 [, fixed_c]
+      ;       NADIA_ADD_COMPLEX_CONSTRAINT_REGION, region, alpha1, alpha2 [, fixed_c]
       ;
       ; INPUTS:
       ;
@@ -1866,16 +1866,16 @@ end
       ;       Setting a complex constraint for two image regions.
       ;       For the second, the value of c=beta/delta is fixed.
       ;
-      ;       r1 =  cxs_read_tiff(1024,1024,'region_1.tiff')
-      ;       r2 =  cxs_read_tiff(1024,1024,'region_2.tiff')
+      ;       r1 =  nadia_read_tiff(1024,1024,'region_1.tiff')
+      ;       r2 =  nadia_read_tiff(1024,1024,'region_2.tiff')
       ;
       ;       delta = 6.45e-4;
       ;       beta = 1.43e-4;
       ;
-      ;       cxs_add_complex_constraint_region, r1, 0.5, 0.5
-      ;       cxs_add_complex_constraint_region, r2,   1,   0, beta/delta
+      ;       nadia_add_complex_constraint_region, r1, 0.5, 0.5
+      ;       nadia_add_complex_constraint_region, r2,   1,   0, beta/delta
       ;-
-      pro cxs_add_complex_constraint_region, region, alpha1, alpha2, fixed_c
+      pro nadia_add_complex_constraint_region, region, alpha1, alpha2, fixed_c
       IF N_Params() EQ 3 THEN $
 	b = call_external(lib_name() ,'IDL_add_complex_constraint_region', $
 	region, double(alpha1), double(alpha2)) $
@@ -1891,7 +1891,7 @@ end
       ;
 
       ;
-      function cxs_phase_diverse_init_estimate
+      function nadia_phase_diverse_init_estimate
       ;dimensions are reversed.
       nx = call_external(lib_name(),'IDL_get_phase_diverse_array_x_size')
       ny = call_external(lib_name(),'IDL_get_phase_diverse_array_y_size')
@@ -1905,7 +1905,7 @@ end
       ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
       ;
       ;
-      pro cxs_init_phase_diverse, beta = beta, gamma = gamma , parallel = parallel
+      pro nadia_init_phase_diverse, beta = beta, gamma = gamma , parallel = parallel
 
       ; set default values
       if not keyword_set(beta) then beta = 1.0
@@ -1921,14 +1921,14 @@ end
       ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
       ;
       ;
-      pro cxs_phase_diverse_add_position, x, y, alpha = alpha
+      pro nadia_phase_diverse_add_position, x, y, alpha = alpha
       ; set default values
       if not keyword_set(alpha) then alpha = 1.0
       b = call_external(lib_name(),'IDL_phase_diverse_add_position', $
 	double(x), double(y), double(alpha))
       end
 
-      function cxs_phase_diverse_iterate, iterations
+      function nadia_phase_diverse_iterate, iterations
       ; dimensions are reversed in IDL compared to the library.
       nx = call_external(lib_name(),'IDL_get_phase_diverse_array_x_size')
       ny = call_external(lib_name(),'IDL_get_phase_diverse_array_y_size')
@@ -1941,16 +1941,16 @@ end
       end
 
 
-      pro cxs_phase_diverse_iterations_per_cycle, iterations
+      pro nadia_phase_diverse_iterations_per_cycle, iterations
       b = call_external(lib_name(),'IDL_phase_diverse_iterations_per_cycle', long(iterations))
       end
 
-      pro cxs_phase_diverse_set_transmission, array
+      pro nadia_phase_diverse_set_transmission, array
       n = size(array)
       b = call_external(lib_name(),'IDL_phase_diverse_set_transmission', long(n[2]), long(n[1]), double(array))
       end
 
-      pro cxs_phase_diverse_adjust_positions, type=type, forward=forward, $
+      pro nadia_phase_diverse_adjust_positions, type=type, forward=forward, $
 	x_min=x_min, x_max=x_max, $
 	y_min=y_min, y_max=y_max, $
 	step_size=step_size
@@ -1971,13 +1971,13 @@ end
 
       end
 
-      function cxs_phase_diverse_get_final_x_position, nprobe
+      function nadia_phase_diverse_get_final_x_position, nprobe
       return, call_external(lib_name(), $
 	'IDL_phase_diverse_get_final_x_position', $
 	long(nprobe))
       end
 
-      function cxs_phase_diverse_get_final_y_position, nprobe
+      function nadia_phase_diverse_get_final_y_position, nprobe
       return, call_external(lib_name(), $
 	'IDL_phase_diverse_get_final_y_position', $
 	long(nprobe))
