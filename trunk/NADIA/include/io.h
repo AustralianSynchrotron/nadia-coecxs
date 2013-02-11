@@ -97,7 +97,7 @@ int write_spec(string file_name, const Double_2D & data);
  * @param file_name The name of the file to write to
  * @param data The array to be written to file
  */
-int write_ppm(string file_name, const Double_2D & data, int nx, int ny);
+int write_spec(string file_name, const Double_2D & data, int nx, int ny);
 
 /** 
  * Write a 2D array into a binary file. The data will be saved in 64
