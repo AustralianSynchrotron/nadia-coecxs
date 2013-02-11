@@ -1,9 +1,7 @@
-
 .Compile NADIA_interface.pro
 
 support = nadia_read_tiff(1024,1024,'../../examples/image_files/planar_support.tiff')
 data = nadia_read_tiff(1024,1024,'../../examples/image_files/planar_data.tif')
-
 
 nadia_init_planar, data, support
 
