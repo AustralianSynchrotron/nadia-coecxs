@@ -43,7 +43,7 @@ int main(void){
   string support_file_name = "image_files/planar_support.tiff";
 
   //number of cycles of ER and HIO to repeat
-  const int cycles=2;
+  const int cycles=9;
 
   //number of error reduction iterations to perform before the HIO.
   const int er_iterations1 = 50;
@@ -61,8 +61,8 @@ int main(void){
   int shrinkwrap_iterations = 50;
 
   //the number of pixels in x and y
-  int nx = 1024;
-  int ny = 1024;
+  int nx = 2048;//1024;
+  int ny = 2048;//1024;
 
   /**** get the diffraction data from file and read into an array *****/
 

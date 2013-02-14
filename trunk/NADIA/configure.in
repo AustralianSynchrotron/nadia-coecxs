@@ -8,7 +8,7 @@ AC_INIT([NADIA], [0.5], [<cxs-software@physics.unimelb.edu.au>])
 
 # Checks for programs.
 #AC_PROG_CC
-CXXFLAGS="-O3 -ffast-math $CXXFLAGS"
+CXXFLAGS="-O3 -fPIC -ffast-math $CXXFLAGS"
 
 AC_PROG_CXX()
 AC_LANG(C++)

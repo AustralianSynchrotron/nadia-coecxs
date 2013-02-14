@@ -40,8 +40,6 @@ endif
 
 clobber:
 	make clean
-	make clobber -C examples
-	make clobber -C tools
 	rm -f lib/libNADIA.so lib/libNADIA.a
 ifeq ($(DO_IDL), TRUE)
 	make clobber -C interfaces/idl
