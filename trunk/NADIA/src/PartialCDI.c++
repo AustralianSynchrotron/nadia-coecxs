@@ -59,8 +59,8 @@ PartialCDI::PartialCDI(Complex_2D & initial_guess,
     lcx = 2*ilcx/(nx*psx);
     lcy = 2*ilcy/(ny*psy);
 
-    psx=2.0/nx;
-    psy=2.0/ny;
+    //psx=2.0/nx;
+    //psy=2.0/ny;
 
     double x_0=(nx/2*(-psx))+(psx/2);
     double y_0=(ny/2*(-psy))+(psy/2);
