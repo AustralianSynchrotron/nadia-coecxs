@@ -61,8 +61,8 @@ int main(void){
   int shrinkwrap_iterations = 50;
 
   //the number of pixels in x and y
-  int nx = 2048;//1024;
-  int ny = 2048;//1024;
+  int nx = 1024;
+  int ny = 1024;
 
   /**** get the diffraction data from file and read into an array *****/
 
