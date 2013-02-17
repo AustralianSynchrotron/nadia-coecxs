@@ -7,10 +7,10 @@ Instructions for installing on a Linux/Unix system.
 Currently the code depends on a few other libraries which will need to
 be installed prior to installing this package:
 
-fftw - for fast fourier transforms.  
-libtiff - for reading (and not yet writing to) tiff files.
-HDF libraries - for reading (and not yet writing to) hdf4 files.
-LAPACK - for linear algebra and matrix manipulation/
+libfftw3-dev - for fast fourier transforms.  
+libtiff-dev - for reading (and not yet writing to) tiff files.
+libhdf4-dev - for reading (and not yet writing to) hdf4 files.
+liblapack-dev - for linear algebra and matrix manipulation/
 
 In the base NADIA directory type "./configure" followed by "make" 
 

@@ -1,4 +1,4 @@
-// Copyright 2011 Nadia Davidson for The ARC Centre of Excellence in 
+// Copyright 2011-2013 Nadia Davidson & Daniel Rodgers-Pryor for The ARC Centre of Excellence in 
 // Coherent X-ray Science. This program is distributed under the GNU  
 // General Public License. We also ask that you cite this software in 
 // publications where you made use of it for any part of the data     
@@ -527,6 +527,8 @@ double laplace_gradient(Double_2D & image){
 }
 
 
+/*
+// I've reimplemented this below using seperability (ie. doing two 1D convolutions with 1D gaussians). [Daniel R-P, djrodgerspryor@gmail.com, 7/1/2013]
 void convolve(Double_2D & array, double gauss_width, 
     int pixel_cut_off){
   //to speed up computation we only convolve 
@@ -572,7 +574,7 @@ void convolve(Double_2D & array, double gauss_width,
 
   array.copy(temp_array);
 
-}
+}*/
 
 
 double sobel_gradient(Double_2D & image){
@@ -1835,3 +1837,208 @@ return;
 
 ////////////////////////////////
 
+
+/** Safe malloc() - exits with message on out of memory error */
+void* smalloc(size_t size){
+  void *p = malloc(size);
+  
+  if(p == NULL){
+    fprintf(stderr,"\nSystem out of memory. Request for %zd bytes denied.\n \
+\tterminating...\n", size);
+    exit(1);
+  }
+  return p;
+}
+
+/** Shorthand function for squaring a value */
+double sq(double x){
+  return x*x;
+}
+
+/** Shorthand function for averaging two values */
+double avg(double a, double b){
+  return 0.5*(a+b);
+}
+
+/** Fuzzy equality check for floating point numbers */
+int fuzzy_eq(double a, double b, double tolerance){
+  return abs(b-a) < tolerance;
+}
+
+/** 
+ * Return an array of length n containing a discrete gaussian function
+ * of the given standard deviation (measured in array-cells)
+ */
+double* get_gaussian_vector(double std_dev, unsigned int n){
+  double mean = ((float) (n-1))/2.0;
+  double* gaussian = (double*) smalloc(sizeof(double) * n); // Allocate memory for gaussian vector
+
+  // Set the first half (but not the centre if there is one):
+  double x = 0, sum = 0;
+  for (int i=0; i<mean; i++){
+    x = i - mean; // Position relative to centre of vector
+    gaussian[i] = exp(-0.5*sq(x/std_dev));
+    sum += gaussian[i]; // Increment the sum (for normalisation later)
+  }
+  
+  // Set the centre point if there is one:
+  if (n%2 != 0){
+    gaussian[(n-1)/2] = 1; // exp(-0.5*sq(0/std_dev)) = exp(0) = 1
+    sum += 1;
+  }
+
+  // Set the second half (after the centre if there is one):
+  int mirror_coord = 0;
+  for (int i=((int) floor(mean + 1)); i<n; i++){ 
+    mirror_coord = (n-1) - i; // Coord from the first half with the same value (thanks to reflection symmetry)
+    gaussian[i] = gaussian[mirror_coord]; // Set this half of the vector by copying the first half in reverse
+    sum += gaussian[i];
+ }
+
+  // Normalise:
+  for (int i=0; i<n; i++){
+    gaussian[i] /= sum;
+  }
+
+  return gaussian;
+}
+
+/**
+ * A one dimensional convolution of a vector with a matrix. Ideal for 2D
+ * convolutions with seperable functions (eg. gaussians).
+ *
+ * n is the length of v and MUST be odd!
+ *
+ * If rowwise is false, then convolution will be done column-wise. To perform a seperable,
+ * 2D convolution, just run this once with rowwise=true and again (on the result of
+ * the first run) with rowwise=false.
+ */
+
+Double_2D vector_convolution(Double_2D const & m, double* v, unsigned int n, bool rowwise){
+  int radius = (n-1)/2;
+  Double_2D convolution(m.get_size_x(), m.get_size_y()); // Result matrix
+
+  // For element in m:
+  double sum = 0, pixel = 0;
+  int l = 0; // v index coordinate
+  int permuted_coord = 0; // The coordinate (either i or j) that will be shifted up or down at each pixel to form a vector to take the dot product with v.
+  int min_k = 0, max_k = 0; // Iteration bounds (on the permutation of permuted_coord), calculated to only select regions where the vector and matrix overlap.
+	for(int i=0; i<m.get_size_x(); i++){
+	  for(int j=0; j<m.get_size_y(); j++){
+
+      // Set which coord will be permuted to loop the the vector-matrix overlap region
+      permuted_coord = rowwise ? i:j;
+
+      // Set bounds to loop over regions in m where the vector centred at (i,j) overlaps the matrix
+      min_k = max(permuted_coord - radius, 0);
+      max_k = min(permuted_coord + radius + 1, m.get_size_y());
+      
+      // For pixel ((k,j) if rowwise else (i,k)) in m that overlaps the gaussian vector centred on (i,j). Calculate the dot-product of v and this region:
+      for(int k=min_k; k<max_k; k++){
+        l = k - permuted_coord + radius; // Index of vector element overlapping the pixel (i,k) [or (k,j)] in m
+        
+        pixel = rowwise ? m.get(k, j):m.get(i, k); // Select pixel by shifting either row or column to k
+
+        sum += pixel * v[l]; // Add vector-element-weighted pixel to sum
+      }
+
+      convolution.set(i, j, sum);
+
+      sum = 0;
+    }
+  }
+
+  return convolution;
+}
+
+/**
+ * Use seperability to calculate a gaussian convolution of the given matrix using 1D gaussian
+ * vectors in x and y.
+ * lx and ly are the standard deviations of the gaussian in x and y respectivley.
+ */
+Double_2D gaussian_convolution(Double_2D const & m, double lx, double ly, double kernel_x_size_in_std_dev, double kernel_y_size_in_std_dev){
+  // Ensure that std_deviations are positive
+  lx = fabs(lx);
+  ly = fabs(ly);
+ 
+  // Calculate gaussian vector sizes based on std_deviation to give fixed accuracy:
+  unsigned int x_gaussian_length = (unsigned int) ceil(lx * kernel_x_size_in_std_dev);
+  if (x_gaussian_length%2 == 0){ // Enforce that length is odd to simplify computation
+    x_gaussian_length += 1;
+  }
+  unsigned int y_gaussian_length = (unsigned int) ceil(ly * kernel_y_size_in_std_dev);
+  if (y_gaussian_length%2 == 0){ // Enforce that length is odd to simplify computation
+    y_gaussian_length += 1;
+  }
+
+  double* g; // Gaussian vector
+  Double_2D convolution; // Result matrix
+
+  if(x_gaussian_length > 1){ // If the gaussian is only of length 1, then it will just be a delta-fn and thus do nothing
+    g = get_gaussian_vector(lx, x_gaussian_length); // Gaussian x-vector
+    convolution = vector_convolution(m, g, x_gaussian_length, false); // Column-wise (x-aligned) convolution (intermediate result)
+    free(g); // Prevent memory leak
+  } else{
+    convolution = m; // Leave the original matrix unchanged and set it to be the intermediate result
+  }
+
+  if(y_gaussian_length > 1){ // If the gaussian is only of length 1, then it will just  be a delta-fn and thus do nothing
+    g = get_gaussian_vector(ly, y_gaussian_length); // Gaussian y-vector
+    convolution = vector_convolution(convolution, g, y_gaussian_length, true); // Row-wise (y-aligned) convolution
+    free(g); // Prevent memory leak
+  }
+
+  return convolution;
+}
+
+/** Gaussian convolution with std deviation lr */
+Double_2D radial_gaussian_convolution(Double_2D const & m, double lr, double kernel_size_in_std_dev){
+  return gaussian_convolution(m, lr, lr, kernel_size_in_std_dev, kernel_size_in_std_dev);
+}
+
+/**
+ * A rewrite of the old convolve function to use gaussian seperability; this should be faster.
+ * Specifically, this should be O(m*n^2) rather than O(n^2*m^2) (for n being the size of array and m being pixel_cut_off)
+ */
+void convolve(Double_2D & array, double gauss_width, int pixel_cut_off){
+  gauss_width *= sqrt(2);
+  Double_2D temp_array = radial_gaussian_convolution(array, gauss_width, ((double) pixel_cut_off)/gauss_width);
+  array.copy(temp_array);
+}
+
+/** 
+ * Golden-Mean/Brent minima search.
+ * f must be a MathFunction object with a method: double call(double)
+ * Returns x (to within tolerance) such that f.call(x) is minimal in a neighborhood of the initial guess.
+ * f must be unimodal within the given bounds (that is, monotonic either size of exactly one minima).
+ * Require that left < guess < right
+ */
+double minimise_function(MathFunction & f, double left, double guess, double right, double tolerance){
+  double x, left_bracket_size, right_bracket_size;
+
+  while(fabs(right-left) > tolerance){
+    left_bracket_size = fabs(guess - left);
+    right_bracket_size = fabs(right-guess);
+
+    // x is chosen to be offset by a fraction of 0.38197 (ie. the golden ratio) from the guess into the larger of the two brackets:
+    x = 0.38197 * max(left_bracket_size, right_bracket_size) * ((left_bracket_size > right_bracket_size) ? -1:1) + guess;
+
+    // Choose the new bracket by evaluating f at guess and at x
+    if(f.call(guess) < f.call(x)){
+      if(left_bracket_size > right_bracket_size){
+        left = x;
+      } else{
+        right = x;
+      }
+    } else{
+      if(left_bracket_size > right_bracket_size){
+        right = guess;
+      } else{
+        left = guess;
+      }
+      guess = x;
+    }
+  }
+  
+  return guess;
+}

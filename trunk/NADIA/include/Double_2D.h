@@ -100,7 +100,7 @@ class Real_2D{
    * Copy the contents of another Real_2D array to this one.  Note
    * that this is a quick copy method and no bounds checking is done.
    * 
-   * @param double_array The array to copy from
+   * @param other_array The array to copy from
    */
   void copy(const Real_2D<T> & other_array){
     memcpy(array,other_array.array, sizeof(T)*nx*ny);
@@ -166,6 +166,20 @@ class Real_2D{
 	total+=array[i*ny+j];
     return total;
   };
+  
+  /**
+   * Get the sum of the abolute value of all elements in the array.
+   * 
+   * @return The sum of the abosulute values of all elements in the array
+   *  
+   */
+  T get_abs_sum() const{
+    T total = 0;
+    for(int i=0; i<nx; i++)
+      for(int j=0; j<ny; j++)
+      	total+=fabs(array[i*ny+j]);
+    return total;
+  };
 
 
   /**
@@ -208,8 +222,7 @@ class Real_2D{
     return min;
     
   };
-
-
+  
   void add(const Real_2D<T> & other_array, double norm=1.0){
     for(int i=0; i< nx; i++)
       for(int j=0; j< ny; j++)
@@ -220,6 +233,25 @@ class Real_2D{
     for(int i=0; i< nx; i++)
       for(int j=0; j< ny; j++)
 	array[i*ny+j]*=scale_by;
+  };
+  
+  
+  /**
+   * Square all array values in-place. 
+   */
+  void square(){
+    for(int i=0; i< nx; i++)
+      for(int j=0; j< ny; j++)
+        array[i*ny+j] *= array[i*ny+j];
+  };
+  
+  /**
+   * Square-root all array values in-place. 
+   */
+  void sq_root(){
+    for(int i=0; i< nx; i++)
+      for(int j=0; j< ny; j++)
+        array[i*ny+j] = sqrt(array[i*ny+j]);
   };
 
   /**

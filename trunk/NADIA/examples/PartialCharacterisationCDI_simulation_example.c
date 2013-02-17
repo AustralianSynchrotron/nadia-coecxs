@@ -23,9 +23,10 @@
 #include <cstring>
 #include <cstdlib> 
 #include <io.h>
+#include <utils.h>
 #include <Complex_2D.h>
 #include <Double_2D.h>
-#include <PlanarCDI.h>
+#include <PartialCharacterisationCDI.h>
 #include <sstream>
 
 using namespace std;
@@ -55,7 +56,21 @@ int main(void){
   //output the current image ever "output_iterations"
   const int output_iterations = 10;
 
+  //Coherence lengths of simulated beam (in meters)
+  double lx = 2.0e-5;
+  double ly = 2.0e-5;
+  
+  //Pixel size detector in m
+  double psize_x=13.5e-6;
+  double psize_y=13.5e-6;
 
+  //Energy of the beam in eV
+  double e_beam=1400;
+
+  //Distance between detector and sample in metres
+  double z_sd=1.4;
+
+  
   /****** get the object from an image file ****************/
 
   //get the data from file
@@ -71,6 +86,18 @@ int main(void){
   int n_x = data.get_size_x();
   int n_y = data.get_size_y();
   
+  /**** create the projection/reconstruction object *****/
+
+  Complex_2D first_guess(n_x,n_y);
+  PartialCharacterisationCDI my_partial(first_guess, z_sd, e_beam, psize_x, psize_y);
+
+  // Convert coherence lengths in object-plane-meters to detector-pixels (using the native conversion methods in PartialCharacterisationCDI):
+  my_partial.set_initial_coherence_guess_in_m(lx, ly);
+  lx = my_partial.get_x_coherence_length_in_pixels();
+  ly = my_partial.get_y_coherence_length_in_pixels();
+
+  data = gaussian_convolution(data, lx, ly); // Apply simulated incoherence-blur to the object before feeding it to the CDI algorithm
+
   //fill the complex no. with image data
   Complex_2D input(n_x,n_y);
   for(int i=0; i<n_x; i++){
@@ -80,30 +107,28 @@ int main(void){
     }
   }
 
-  /**** create the projection/reconstruction object *****/
-
-  Complex_2D first_guess(n_x,n_y);
-  PlanarCDI my_planar(first_guess);
-
   //propagate to the detector plane
-  my_planar.propagate_to_detector(input);
+  my_partial.propagate_to_detector(input);
+  
 
   //write the fourier transform to file.
   Double_2D intensity(n_x,n_y);
   input.get_2d(MAG_SQ,intensity);
-
+  
   //apply a threshold to make the simulation a bit more realistic
   for(int i=0; i<n_x; i++){
     for(int j=0; j<n_y; j++){
       intensity.set(i,j,intensity.get(i,j)-noise_level);
       if(intensity.get(i,j)<0)
-	intensity.set(i,j,0);
+        intensity.set(i,j,0);
     }
   }
 
   //write the output to file (use log scale)
-  write_tiff("real_sim_intensity.tiff",intensity,false);
-  write_tiff("log_sim_intensity.tiff",intensity,true);
+  write_tiff("part_char_real_sim_intensity.tiff",intensity,false);
+  write_tiff("part_char_log_sim_intensity.tiff",intensity,true);
+  
+  write_dbin("image_files/part_char_sim.dbin",intensity);
 
   /******** get the support from file ****************************/
 
@@ -113,14 +138,14 @@ int main(void){
   /*************** do the reconstruction *******************/
 
   //create a project object and set the options.
-  my_planar.set_support(support);
-  my_planar.set_intensity(intensity);
-  my_planar.set_algorithm(HIO);
+  my_partial.set_support(support);
+  my_partial.set_intensity(intensity);
+  my_partial.set_algorithm(HIO);
 
   //set the inital guess to be random inside the support
   //and zero outside. Note that this must be called
-  //after "my_planar.set_support()"
-  my_planar.initialise_estimate(0);
+  //after "my_partial.set_support()"
+  my_partial.initialise_estimate(0);
   
   //make a temporary arrary
   Double_2D result(n_x,n_y);
@@ -130,7 +155,7 @@ int main(void){
 
     cout << "iteration " << i << endl;
 
-    my_planar.iterate();
+    my_partial.iterate();
 
     if(i%output_iterations==0){
 
@@ -139,18 +164,18 @@ int main(void){
       temp_str << "sim_result_" << i << ".ppm";
       write_ppm(temp_str.str(), result);
 
-      my_planar.apply_shrinkwrap();
+      my_partial.apply_shrinkwrap();
 
     }
   }
 
-  my_planar.set_algorithm(ER);
+  my_partial.set_algorithm(ER);
 
   for(int i=hio_iterations; i<(er_iterations+hio_iterations+1); i++){
     
     cout << "iteration " << i << endl;
     
-    my_planar.iterate();
+    my_partial.iterate();
 
     if(i%output_iterations==0){
 
@@ -159,7 +184,7 @@ int main(void){
       temp_str << "sim_result_" << i << ".ppm";
       write_ppm(temp_str.str(), result);
 
-      my_planar.apply_shrinkwrap();
+      my_partial.apply_shrinkwrap();
 
     }
   }

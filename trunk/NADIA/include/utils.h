@@ -1,4 +1,4 @@
-// Copyright 2011 Nadia Davidson for The ARC Centre of Excellence in 
+// Copyright 2011-2013 Nadia Davidson & Daniel Rodgers-Pryor for The ARC Centre of Excellence in 
 // Coherent X-ray Science. This program is distributed under the GNU  
 // General Public License. We also ask that you cite this software in 
 // publications where you made use of it for any part of the data     
@@ -9,6 +9,10 @@
 
 #include <vector>
 #include <Double_2D.h>
+
+#define DEFAULT_GAUSSIAN_KERNEL_SIZE_IN_STD_DEVIATIONS 5 // Use a matrix that is (at least) this many std deviations wide/high to discretly represent gaussians
+
+
 //class Double_2D;
 class Complex_2D;
 
@@ -17,12 +21,12 @@ void rescale(Double_2D & image, double scale);
 void slow_align(Double_2D & image1, Double_2D & image2, int & offset_x, int & offset_y, int step_size=8.0, int min_x=0, int max_x=0, int min_y=0, int max_y=0);
 
 void align(Double_2D & first_image, Double_2D & second_image,
-	   int & offset_x, int & offset_y,
-	   int min_x=0, int max_x=0,
-	   int min_y=0, int max_y=0,
-	   Double_2D * first_image_weights = 0,
-	   Double_2D * second_image_weights = 0,
-	   double overlap_fraction = 0.2);
+	int & offset_x, int & offset_y,
+  int min_x=0, int max_x=0,
+	int min_y=0, int max_y=0,
+	Double_2D * first_image_weights = 0,
+	Double_2D * second_image_weights = 0,
+	double overlap_fraction = 0.2);
 
 double edges(Double_2D & image);
 double line_out(Double_2D & image);
@@ -53,6 +57,30 @@ Double_2D fill_legmatrix(std::vector<double>, int norder);
 
 void solve_gep(Complex_2D & A, Complex_2D & B, std::vector<double> & eigen);
 
+void* smalloc(size_t size);
+double sq(double x);
+double avg(double a, double b);
+int fuzzy_eq(double a, double b, double tolerance);
+double* get_gaussian_vector(double std_dev, unsigned int n);
+Double_2D vector_convolution(Double_2D const & m, double* v, unsigned int n, bool rowwise);
+Double_2D gaussian_convolution(Double_2D const & m, double lx, double ly,
+  double kernel_x_size_in_std_dev=DEFAULT_GAUSSIAN_KERNEL_SIZE_IN_STD_DEVIATIONS, double kernel_y_size_in_std_dev=DEFAULT_GAUSSIAN_KERNEL_SIZE_IN_STD_DEVIATIONS);
+Double_2D radial_gaussian_convolution(Double_2D const & m, double lr, double kernel_size_in_std_dev=DEFAULT_GAUSSIAN_KERNEL_SIZE_IN_STD_DEVIATIONS);
+void convolve(Double_2D & array, double gauss_width, int pixel_cut_off);
+
+/**
+ * Template class for a generic function of the form:
+ *   f:R->R
+ *
+ * An instance of a subclass of this must be used as the argument to minimise_function
+ */
+class MathFunction {
+  public:
+      virtual double call(double x) = 0;
+};
+
+// Find minima of f, within bounds, to within tolerance
+double minimise_function(MathFunction & f, double left, double guess, double right, double tolerance);
 
 #endif
 
