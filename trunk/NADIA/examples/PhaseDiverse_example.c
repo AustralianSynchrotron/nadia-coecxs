@@ -94,22 +94,22 @@ int main(int argc, char * argv[]){
 
   
   //reconstructed white-field file names
-  std::string wf_string[frames] = {"wf_A_1024.cplx",
-				   "wf_B_1024.cplx",
-				   "wf_C_1024.cplx",
-				   "wf_D_1024.cplx",
-				   "wf_E_1024.cplx",
-				   "wf_F_1024.cplx",
-				   "wf_G_1024.cplx"};
+  std::string wf_string[frames] = {"image_files/phasediverse_data/wf_A_1024.cplx",
+				   "image_files/phasediverse_data/wf_B_1024.cplx",
+				   "image_files/phasediverse_data/wf_C_1024.cplx",
+				   "image_files/phasediverse_data/wf_D_1024.cplx",
+				   "image_files/phasediverse_data/wf_E_1024.cplx",
+				   "image_files/phasediverse_data/wf_F_1024.cplx",
+				   "image_files/phasediverse_data/wf_G_1024.cplx"};
 
   //data file names
-  std::string diff_string[frames] = {"A.dbin",
-				     "B.dbin",
-				     "C.dbin",
-				     "D.dbin",
-				     "E.dbin",
-				     "F.dbin",
-				     "G.dbin"};
+  std::string diff_string[frames] = {"image_files/phasediverse_data/A.dbin",
+				     "image_files/phasediverse_data/B.dbin",
+				     "image_files/phasediverse_data/C.dbin",
+				     "image_files/phasediverse_data/D.dbin",
+				     "image_files/phasediverse_data/E.dbin",
+				     "image_files/phasediverse_data/F.dbin",
+				     "image_files/phasediverse_data/G.dbin"};
 
   //these are the correct coordinates
   // double x_pos[frames] = {0,26,6,28,-14,34,38};

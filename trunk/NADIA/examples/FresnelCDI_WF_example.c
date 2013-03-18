@@ -91,7 +91,7 @@ int main(int argc, char * argv[]){
   //current estimate.
   //Double_2D result(nx,nx);
 
-  for(int i=0; i<25; i++){
+  for(int i=0; i<400; i++){
 
     cout << "iteration " << i << endl;
 
@@ -117,7 +117,7 @@ int main(int argc, char * argv[]){
   }
 
   //copy the result back into an array which is 1024x1024
-  Complex_2D wf_(original_nx, original_nx);//=proj.get_detector();//(original_nx,original_nx); 
+/*  Complex_2D wf_(original_nx, original_nx);//=proj.get_detector();//(original_nx,original_nx); 
   Complex_2D wf_i(original_nx, original_nx);
   Complex_2D tmp=proj.get_detector();
   for(int i=0; i<original_nx; i++){
@@ -128,7 +128,7 @@ int main(int argc, char * argv[]){
       wf_i.set_imag(i,j,wf.get_imag(i+padding,j+padding));
     }
   }
-
+/*
   ostringstream temp_str3 ( ostringstream::out ) ;
   wf_.get_2d(PHASE,result);
   temp_str3 << "fcdi_wf_phase.ppm";
@@ -153,7 +153,7 @@ int main(int argc, char * argv[]){
 
   status = write_cplx("wf_recovered.cplx", wf_);
   write_cplx("fillumination_recovered.cplx", wf_i);
-
+*/
   if(status!=0)
     cout << "Successfully wrote out the reconstucted white field"
       << " into wf_recovered.cplx"<<endl;

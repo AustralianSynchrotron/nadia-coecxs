@@ -26,8 +26,7 @@
 //#define DOUBLE_PRECISION 
 
 #include <math.h>
-
-
+#include <cstring>
 #include <iostream>
 
 template <class T>
