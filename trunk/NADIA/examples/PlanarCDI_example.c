@@ -43,7 +43,7 @@ int main(void){
   string support_file_name = "image_files/planar_support.tiff";
 
   //number of cycles of ER and HIO to repeat
-  const int cycles=1;
+  const int cycles=2;
 
   //number of error reduction iterations to perform before the HIO.
   const int er_iterations1 = 50;
@@ -58,7 +58,7 @@ int main(void){
   int output_iterations = 10;
 
   //apply the shrinkwrap algorithm every "shrinkwrap iterations"
-  int shrinkwrap_iterations = 10;
+  int shrinkwrap_iterations = 50;
 
   //the number of pixels in x and y
   int nx = 1024;

@@ -26,7 +26,7 @@
 #include <utils.h>
 #include <Complex_2D.h>
 #include <Double_2D.h>
-#include <PartialCharacterisationCDI.h>
+#include <PartialCharCDI.h>
 #include <sstream>
 
 using namespace std;
@@ -89,9 +89,9 @@ int main(void){
   /**** create the projection/reconstruction object *****/
 
   Complex_2D first_guess(n_x,n_y);
-  PartialCharacterisationCDI my_partial(first_guess, z_sd, e_beam, psize_x, psize_y);
+  PartialCharCDI my_partial(first_guess, z_sd, e_beam, psize_x, psize_y);
 
-  // Convert coherence lengths in object-plane-meters to detector-pixels (using the native conversion methods in PartialCharacterisationCDI):
+  // Convert coherence lengths in object-plane-meters to detector-pixels (using the native conversion methods in PartialCharCDI):
   my_partial.set_initial_coherence_guess_in_m(lx, ly);
   lx = my_partial.get_x_coherence_length_in_pixels();
   ly = my_partial.get_y_coherence_length_in_pixels();

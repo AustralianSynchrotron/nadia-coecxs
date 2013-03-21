@@ -10,13 +10,18 @@
 #include <Complex_2D.h>
 #include <sstream>
 #include <utils.h>
-#include <PartialCharacterisationCDI.h>
+#include <PartialCharCDI.h>
 #include <cstdlib> 
 
 using namespace std;
 
 
-PartialCharacterisationCDI::PartialCharacterisationCDI(Complex_2D & initial_guess, double z_dist, double beam_energy, double pixel_x_size, double pixel_y_size, unsigned int n_best)
+PartialCharCDI::PartialCharCDI(Complex_2D & initial_guess, 
+			      double z_dist, 
+			      double beam_energy, 
+			      double pixel_x_size, 
+			      double pixel_y_size, 
+			      unsigned int n_best)
   :BaseCDI(initial_guess,n_best),
     iteration(0),
     lx(DEFAULT_INITIAL_LY),
@@ -39,7 +44,7 @@ PartialCharacterisationCDI::PartialCharacterisationCDI(Complex_2D & initial_gues
  *
  * Note that while bad values for this guess won't stop convergence, they can slow it down significantly.
  */
-void PartialCharacterisationCDI::set_initial_coherence_guess(double lx_, double ly_){
+void PartialCharCDI::set_initial_coherence_guess(double lx_, double ly_){
   // Invert to FT into fourier space
   lx = 1.0/lx_;
   ly = 1.0/ly_;
@@ -48,7 +53,7 @@ void PartialCharacterisationCDI::set_initial_coherence_guess(double lx_, double 
 /**
  * Set an initial guess for the beam coherence lengths in m, measured in the object plane.
  */
-void PartialCharacterisationCDI::set_initial_coherence_guess_in_m(double lx_, double ly_){
+void PartialCharCDI::set_initial_coherence_guess_in_m(double lx_, double ly_){
   lx = 2*px_x_size/(lx_*z*wavelength);
   ly = 2*px_y_size/(ly_*z*wavelength);
 }
@@ -63,7 +68,7 @@ void PartialCharacterisationCDI::set_initial_coherence_guess_in_m(double lx_, do
  * or if you are just using the default guess of 0.7 pixels in each direction, then you might want to
  * increase this to 3.
  */
-void PartialCharacterisationCDI::set_minima_search_bounds_coefficient(double coef){
+void PartialCharCDI::set_minima_search_bounds_coefficient(double coef){
   minima_search_bounds_coefficient = coef;
 }
 
@@ -72,7 +77,7 @@ void PartialCharacterisationCDI::set_minima_search_bounds_coefficient(double coe
  *
  * The the tolerance of the lx/ly minima search in pixels (search will terminate when uncertainty is less than this value).
  */
-void PartialCharacterisationCDI::set_minima_search_tolerance(double tol){
+void PartialCharCDI::set_minima_search_tolerance(double tol){
   // Invert to FT into fourier space
   minima_search_tolerance = 1.0/tol;
 }
@@ -80,7 +85,7 @@ void PartialCharacterisationCDI::set_minima_search_tolerance(double tol){
 /**
  * The the tolerance of the lx/ly minima search in object-plane-meters (search will terminate when uncertainty is less than this value).
  */
-void PartialCharacterisationCDI::set_minima_search_tolerance_in_m(double tol){
+void PartialCharCDI::set_minima_search_tolerance_in_m(double tol){
   double px_radial_size = avg(px_x_size, px_y_size); // Use an average pixel size since this tolerance will apply to both dimensions
   minima_search_tolerance = 2*px_radial_size/(tol*z*wavelength);
 }
@@ -96,7 +101,7 @@ void PartialCharacterisationCDI::set_minima_search_tolerance_in_m(double tol){
  *
  * Setting w to 1.0 will be the same as having no moving average.
  */
-void PartialCharacterisationCDI::set_minima_moving_average_weight(double w){
+void PartialCharCDI::set_minima_moving_average_weight(double w){
   minima_moving_average_weight = min(max(w, 0.0), 1.0); // Ensure that the weight is in the range [0,1]
 }
 
@@ -107,7 +112,7 @@ void PartialCharacterisationCDI::set_minima_moving_average_weight(double w){
  * There's not much advantage to doing this more frquently than the default of 5 unless there are very few
  * total iterations being calculated.
  */
-void PartialCharacterisationCDI::set_minima_recalculation_interval(unsigned int ival){
+void PartialCharCDI::set_minima_recalculation_interval(unsigned int ival){
   minima_recalculation_interval = ival;
 }
 
@@ -118,7 +123,7 @@ void PartialCharacterisationCDI::set_minima_recalculation_interval(unsigned int 
  * Call this after iterating enough to produce a satisfactory image.
  * This value will only be accurate to within the tolerances set by set_minima_search_tolerance_in_m.
  */
-double PartialCharacterisationCDI::get_x_coherence_length(){
+double PartialCharCDI::get_x_coherence_length(){
   return 0.5*z*wavelength/(lx*px_x_size);
 }
 
@@ -129,7 +134,7 @@ double PartialCharacterisationCDI::get_x_coherence_length(){
  * Call this after iterating enough to produce a satisfactory image.
  * This value will only be accurate to within the tolerances set by set_minima_search_tolerance_in_m.
  */
-double PartialCharacterisationCDI::get_y_coherence_length(){
+double PartialCharCDI::get_y_coherence_length(){
   return 0.5*z*wavelength/(ly*px_y_size);
 }
 
@@ -137,7 +142,7 @@ double PartialCharacterisationCDI::get_y_coherence_length(){
  * Retrieve the calculated x coherence length of the beam in pixels. This can be useful for interacting
  * simulated data on a pixel-scale.
  */
-double PartialCharacterisationCDI::get_x_coherence_length_in_pixels(){
+double PartialCharCDI::get_x_coherence_length_in_pixels(){
   // Invert to FFT back into real space
   return 1.0/lx;
 }
@@ -146,13 +151,13 @@ double PartialCharacterisationCDI::get_x_coherence_length_in_pixels(){
  * Retrieve the calculated y coherence length of the beam in pixels. This can be useful for interacting
  * simulated data on a pixel-scale.
  */
-double PartialCharacterisationCDI::get_y_coherence_length_in_pixels(){
+double PartialCharCDI::get_y_coherence_length_in_pixels(){
   // Invert to FFT back into real space
   return 1.0/ly;
 }
 
 
-void PartialCharacterisationCDI::initialise_estimate(int seed){
+void PartialCharCDI::initialise_estimate(int seed){
   //initialise the random number generator
   srand(seed);
 
@@ -177,7 +182,7 @@ void PartialCharacterisationCDI::initialise_estimate(int seed){
 
 }
 
-void PartialCharacterisationCDI::set_intensity(const Double_2D &detector_intensity){
+void PartialCharCDI::set_intensity(const Double_2D &detector_intensity){
   for(int i=0; i< nx; i++){
     for(int j=0; j< ny; j++){
       intensity_sqrt.set(i,j,sqrt(detector_intensity.get(i,j)));
@@ -188,12 +193,12 @@ void PartialCharacterisationCDI::set_intensity(const Double_2D &detector_intensi
   measured_intensity = detector_intensity;
 }
 
-void PartialCharacterisationCDI::propagate_to_detector(Complex_2D & c){
+void PartialCharCDI::propagate_to_detector(Complex_2D & c){
     c.perform_forward_fft();
     c.invert(true);
 }
 
-void PartialCharacterisationCDI::propagate_from_detector(Complex_2D & c){
+void PartialCharCDI::propagate_from_detector(Complex_2D & c){
   c.invert(true);
   c.perform_backward_fft(); 
 }
@@ -201,7 +206,7 @@ void PartialCharacterisationCDI::propagate_from_detector(Complex_2D & c){
 
 //this overwrites the function of the same
 //name in BaseCDI
-void PartialCharacterisationCDI::scale_intensity(Complex_2D & c){
+void PartialCharCDI::scale_intensity(Complex_2D & c){
   double norm2_mag=0;
   double norm2_diff=0;
   double current_int_sqrt=0;
@@ -253,7 +258,7 @@ void PartialCharacterisationCDI::scale_intensity(Complex_2D & c){
  * coherence characterisation using diffractive imaging' [doi: 10.1063/1.3650265]
  * for further details.
  */
-Double_2D PartialCharacterisationCDI::get_convoluted_intensity_estimate(Double_2D const & estimated_intensity, Double_2D const & measured_intensity){
+Double_2D PartialCharCDI::get_convoluted_intensity_estimate(Double_2D const & estimated_intensity, Double_2D const & measured_intensity){
   double lbound, rbound;
 
   // Find optimal lx estimate with exponential moving average:
@@ -280,7 +285,7 @@ Double_2D PartialCharacterisationCDI::get_convoluted_intensity_estimate(Double_2
  * Returns the energy difference between the measureed intensity, and the intensity
  * estimate assuming partial coherence described by gaussian std deviation parameters lx & ly
  */
-double PartialCharacterisationCDI::convoluted_estimate_error(Double_2D const & measured_intensity, Double_2D const & estimated_intensity, double lx, double ly){
+double PartialCharCDI::convoluted_estimate_error(Double_2D const & measured_intensity, Double_2D const & estimated_intensity, double lx, double ly){
   Double_2D convoluted_estimate = gaussian_convolution(estimated_intensity, lx, ly);
 
   // Subtract the convoluted_estimate from measured_intensity in preparation for summing differences:

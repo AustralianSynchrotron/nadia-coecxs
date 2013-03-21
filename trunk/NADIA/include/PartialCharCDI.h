@@ -29,9 +29,9 @@ const double plank_h = 4.13566733e-15;
 const double speed_c = 2.99792458e8;
 
 
-class PartialCharacterisationCDI:public BaseCDI {
+class PartialCharCDI:public BaseCDI {
   public:
-    PartialCharacterisationCDI(Complex_2D & initial_guess, double z_dist=2, double beam_energy=1.239841e-6, double pixel_x_size=1, double pixel_y_size=1, unsigned int n_best=0);
+    PartialCharCDI(Complex_2D & initial_guess, double z_dist=2, double beam_energy=1.239841e-6, double pixel_x_size=1, double pixel_y_size=1, unsigned int n_best=0);
     
     // Accessor functions to alter initial parameters:
     void set_initial_coherence_guess(double lx_, double ly_);
@@ -116,7 +116,7 @@ class error_in_lx : public MathFunction {
       virtual double call(double lx){
         double result;
         if(cache.find(lx) == cache.end()){ // Cache the expensive call
-          result = PartialCharacterisationCDI::convoluted_estimate_error(measured_intensity_, estimated_intensity_, lx, ly_);
+          result = PartialCharCDI::convoluted_estimate_error(measured_intensity_, estimated_intensity_, lx, ly_);
           cache[lx] = result;
         } else{
           result = cache[lx];
@@ -140,7 +140,7 @@ class error_in_ly : public MathFunction {
       virtual double call(double ly){
         double result;
         if(cache.find(ly) == cache.end()){ // Cache the expensive call
-          result = PartialCharacterisationCDI::convoluted_estimate_error(measured_intensity_, estimated_intensity_, lx_, ly);
+          result = PartialCharCDI::convoluted_estimate_error(measured_intensity_, estimated_intensity_, lx_, ly);
           cache[ly] = result;
         } else{
           result = cache[ly];

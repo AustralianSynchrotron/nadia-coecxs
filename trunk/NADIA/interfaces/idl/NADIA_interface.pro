@@ -420,9 +420,10 @@ end
 ;
 ; EXAMPLE:
 ;
-;        nadia_init_fresnel, my_data, my_supports, my_white-field, $
-;                          4.892e-10, 0.9078777, 2.16e-3, $
-;                          13.5e-6
+;        nadia_init_partial, my_data, my_supports, 13.3e-6, $
+;			    40.0e-3, 13.5e-6, 13.5e-6, 1400, 1.4, 32, 7
+;
+;
 ;-
 pro nadia_init_partial, data, support, $
                       beta, $
@@ -460,6 +461,102 @@ nadia_set_support, support
 nadia_set_intensity, data
 
 IF N_Params() LT 11 THEN $
+  nadia_initialise_esw
+
+end
+
+;+
+; NAME:
+;       NADIA_INIT_PARTIAL_CHAR
+;
+; PURPOSE:
+;       Set-up a Partial Charactrisation CDI reconstruction. This will
+;       initialise the reconstruction with sample support and experimental 
+;       parameters. Some defaults will be set and memory will be
+;       allocated ready for reconstructing the sample
+;       exit-surface-wave. It is necessary to call this procedure before
+;       attempting to call any of the reconstruction methods
+;       (e.g. before setting the algorithm or calling NADIA_ITERATE).
+;
+;       Calling this procedure will initialise the reconstruction algorithm
+;       to the error-reduction with a relaxation parameter of 0.9.
+;
+; CALLING SEQUENCE:
+;
+; NADIA_INIT_PARTIAL, data, support, beta, zsd, beam_energy, pxsize, pysize
+;                   [, starting_point ]
+;
+; INPUTS:
+;
+;       Please use metres for the lengths, and eV for the energy.
+;
+;       data: 
+;             The detector data with the sample in place. It should be
+;             in the form of a 2D array.
+;
+;       support: 
+;             A 2D array of integers or doubles which give the sample support.
+;             Values or 1 or greater are considered inside
+;             the support. All others are considered to be
+;             outside the support.
+;
+;       beta:
+;             The relaxation parameter.
+;             
+;
+;       pxsize:
+;             The size of the detector pixel in the x direction
+;
+;       pysize:
+;             The size of the detector pixel in the y direction
+;
+;       beam energy: 
+;             The beam energy in eV
+;
+;       starting_point: 
+;             As an option you may supply an initial 
+;             guess of the exit-surface-wave for the sample. 
+;             This maybe useful, for example, if you wish to 
+;             start from the end point of a previous run. The
+;             format of this parameter much be a 2D array of
+;             COMPLEX variables. If this parameter is not supplied,
+;             the initialisation described in Harry's review paper: 
+;             page 29. (in particular e.q. 137) is used.
+;
+; EXAMPLE:
+;
+;        nadia_init_partial_char, my_data, my_support, 1.4,$
+;				    1400, 13.5e-6, 13.5e-6
+;
+;
+;-
+pro nadia_init_partial_char, data, support, $
+  beta, $
+  zsd, $
+  energy, $
+  pxsize, pysize, $
+n = size(data)
+nx = n[2]
+ny = n[1]
+IF N_Params() EQ 8 THEN $
+  b = call_external(lib_name(),'IDL_partial_char_init',long(nx),long(ny), $
+  double(beta), $
+  double(zsd), $
+  double(energy), $
+  double(pxsize), double(pysize), $
+  complex_array)$
+
+IF N_Params() EQ 7 THEN $
+  b = call_external(lib_name(),'IDL_partial_char_init',long(nx),long(ny), $
+  double(beta), $
+  double(zsd), $
+  double(energy), $
+  double(pxsize), double(pysize))
+
+nadia_set_support, support
+nadia_set_intensity, data
+
+IF N_Params() LT 7 THEN $
   nadia_initialise_esw
 
 end
@@ -516,19 +613,19 @@ end
 ;        nadia_init_fresnel, my_data, my_supports
 ;-
 pro nadia_init_poly, data, support, $
-                      beta, $
-                      complex_array
-                   
+  beta, $
+  complex_array
+
 n = size(data)
 nx = n[2]
 ny = n[1]
 IF N_Params() EQ 4 THEN $
- b = call_external(lib_name(),'IDL_poly_init',long(nx),long(ny), $
-                    double(beta), $
-                    complex_array)
+  b = call_external(lib_name(),'IDL_poly_init',long(nx),long(ny), $
+  double(beta), $
+  complex_array)
 IF N_Params() EQ 3 THEN $
- b = call_external(lib_name(),'IDL_partial_init',long(nx),long(ny), $
-                    double(beta))
+  b = call_external(lib_name(),'IDL_partial_init',long(nx),long(ny), $
+  double(beta))
 
 IF N_Params() eq 2 THEN $
   b = call_external(lib_name(),'IDL_poly_init',long(nx),long(ny))
@@ -1244,6 +1341,365 @@ end
     b = call_external(lib_name() ,'IDL_set_transmission', threshold_value) 
     end
 
+    ;+;+
+    ; NAME:
+    ;       NADIA_SET_INITIAL_COHERENCE_GUESS 
+    ; 
+    ; PURPOSE:
+    ;       SET AN INITIAL GUESS FOR THE BEAM COHERENCE LENGTH IN PIXELS
+    ;	    NOTE: WHILE BAD VALUES FOR THIS GUESS WON'T STOP CONVERGENCE,
+    ;	    THEY WILL SLOW IT DOWN CONSIDERABLY
+    ;
+    ;       TO BE INCLUDED IN THE RECONSTRUCTION. THIS IS TO ELIMINATE
+    ;       MODES IN ORDER TO SPEED UP PROCESSING
+    ;       
+    ; CALLING SEQUENCE:
+    ;
+    ; NADIA_SET_INITIAL_COHERENCE_GUESS, GUESS_X, GUESS_Y
+    ;
+    ; INPUTS:
+    ;
+    ;       GUESS_X: 
+    ;             The initial guess for the coherence length in pixels in the x direction
+    ;
+    ;	    GUESS_Y: 
+    ;             The initial guess for the coherence length in pixels in the y direction
+    ;
+    ; EXAMPLE:
+    ;
+    ;      nadia_set_initial_coherence_guess, 0.7, 0.7
+    ;
+    ;
+    pro nadia_set_initial_coherence_guess, guess_x, guess_y
+    b = call_external(lib_name() ,'IDL_set_initial_coherence_guess', guess_x, guess_y)
+    end
+
+    ;+;+
+    ; NAME:
+    ;       NADIA_SET_INITIAL_COHERENCE_GUESS_IN_M 
+    ; 
+    ; PURPOSE:
+    ;       SET AN INITIAL GUESS FOR THE BEAM COHERENCE LENGTH IN METRES
+    ;       NOTE: WHILE BAD VALUES FOR THIS GUESS WON'T STOP CONVERGENCE,
+    ;       THEY WILL SLOW IT DOWN CONSIDERABLY
+    ;
+    ;       TO BE INCLUDED IN THE RECONSTRUCTION. THIS IS TO ELIMINATE
+    ;       MODES IN ORDER TO SPEED UP PROCESSING
+    ;       
+    ; CALLING SEQUENCE:
+    ;
+    ; NADIA_SET_INITIAL_COHERENCE_GUESS_IN_M, GUESS_X, GUESS_Y
+    ;
+    ; INPUTS:
+    ;
+    ;       GUESS_X: 
+    ;             The initial guess for the coherence length in pixels in the x direction
+    ;
+    ;       GUESS_Y: 
+    ;             The initial guess for the coherence length in pixels in the y direction
+    ;
+    ; EXAMPLE:
+    ;
+    ;      nadia_set_initial_coherence_guess_in_m, 9e-6, 9e-6
+    ;
+    ;
+    pro nadia_set_initial_coherence_guess_in_m, guess_x, guess_y
+    b = call_external(lib_name() ,'IDL_set_initial_coherence_guess_in_m', guess_x, guess_y)
+    end
+
+    ;+;+
+    ; NAME:
+    ;       NADIA_SET_MINIMA_SEARCH_BOUNDS_COEFFICIENT
+    ; 
+    ; PURPOSE:
+    ;       SET THE FACTOR THAT WILL BE USED TO DETERMINE THE SEARCH
+    ;	    REGION. THE SEARCH WILL GO FROM 1/COEF TO COEF TIMES THE 
+    ;	    CURRENT ESTIMATE.
+    ;       
+    ; CALLING SEQUENCE:
+    ;
+    ; NADIA_SET_MINIMA_SEARCH_BOUNDS_COEFFICIENT, COEF
+    ;
+    ; INPUTS:
+    ;
+    ;       COEF:
+    ;             The coefficient that will determine the search region
+    ;
+    ; EXAMPLE:
+    ;
+    ;      nadia_set_minima_search_bounds_coefficient, 3.0
+    ;
+    ;
+    pro nadia_set_minima_search_bounds_coefficient, coef
+    b = call_external(lib_name() ,'IDL_set_minima_search_bounds_coefficient', coef)
+    end
+
+    ;+;+
+    ; NAME:
+    ;       NADIA_SET_MINIMA_SEARCH_TOLERANCE
+    ;                                       
+    ; PURPOSE:                                  
+    ;       SET THE TOLERANCE OF THE LX/LY MINIMA IN PIXELS.
+    ;       THE SEARCH WILL TERMNATE WHEN THE UNCERTAINTY IS 
+    ;       LESS THAN THIS VALUE
+    ;       
+    ; CALLING SEQUENCE:
+    ;
+    ; NADIA_SET_MINIMA_SEARCH_TOLERANCE, TOL
+    ;
+    ; INPUTS:
+    ;
+    ;       TOL:
+    ;             The tolerance of the lx/ly minima in pixels. It should be a double
+    ;
+    ; EXAMPLE:
+    ;
+    ;      nadia_set_minima_search_bounds_tolerance, 0.1
+    ;
+    pro nadia_set_minima_search_bounds_tolerance, tol
+    b = call_external(lib_name() ,'IDL_set_minima_search_bounds_tolerance', tol)
+    end
+
+    ;+;+
+    ; NAME:
+    ;       NADIA_SET_MINIMA_SEARCH_TOLERANCE_IN_M
+    ;                                       
+    ; PURPOSE:                                  
+    ;       SET THE TOLERANCE OF THE LX/LY MINIMA IN METRES.
+    ;       THE SEARCH WILL TERMNATE WHEN THE UNCERTAINTY IS 
+    ;       LESS THAN THIS VALUE
+    ;       
+    ; CALLING SEQUENCE:
+    ;
+    ; NADIA_SET_MINIMA_SEARCH_TOLERANCE_IN_M, TOL
+    ;
+    ; INPUTS:
+    ;
+    ;       TOL:
+    ;             The tolerance of the lx/ly minima in metres. It should be a double
+    ;
+    ; EXAMPLE:
+    ;
+    ;      nadia_set_minima_search_bounds_tolerance_in_m, 1e-6
+    ;
+    pro nadia_set_minima_search_bounds_tolerance_in_m, tol
+    b = call_external(lib_name() ,'IDL_set_minima_search_bounds_tolerance_in_m', tol)
+    end
+
+    ;+;+
+    ; NAME:
+    ;       NADIA_SET_MINIMA_MOVING_AVERAGE_WEIGHT
+    ;                                       
+    ; PURPOSE:                                  
+    ;	    LX AND LY VALUES WILL BE TIME AVERAGED WITH THE PREVIOUS ESTIMATE IN
+    ;	    ORDER TO SMOOTH THE SLIGHTLY ERRATIC CHANGES FROM ITERATION TO ITERATION
+    ;	    W IS THE WEIGHT OF THE NEWLY CALCULATED VALUE. THE CURRENT ESTIMATE 
+    ;	    WILL BE WEIGHTED AT (1-W) TO FORM A NEW CURRENT ESTIMATE. THIS IS AN 
+    ;	    EXPONENTIAL MOVING AVERAGE.
+    ;       
+    ; CALLING SEQUENCE:
+    ;	    NADIA_SET_MINIMA_MOVING_AVERAGE_WEIGHT, W
+    ;
+    ; INPUTS:
+    ;
+    ;       W:
+    ;           W is the weight of the newly calculated value. the current estimate 
+    ;		will be weighted at (1-w) to form a new current estimate. This is an
+    ;		exponential moving average.
+    ;
+    ; EXAMPLE:
+    ;
+    ;      nadia_set_minima_moving_average_weight, 0.01
+    ;
+    pro nadia_set_minima_moving_average_weight, w
+    b = call_external(lib_name() ,'IDL_set_minima_moving_average_weight', w)
+    end
+
+    ;+;+
+    ; NAME:
+    ;       NADIA_SET_MINIMA_RECALCULATION_INTERVAL
+    ;                                       
+    ; PURPOSE:                                  
+    ;	    THE VALUES OF LX AND LY WILL ONLY BE UPADATED EVERY IVAL ITERATIONS
+    ;	    (AS THE PROCESS IS SOMEWHAT TIME CONSUMING).
+    ;	    THERE ISN'T MUCH ADVANTAGE TO INCREASING THE UPDATE FREQUENCY UNLESS 
+    ;	    THERE ARE VERY FEW ITERATIONS BEING CALCULATED OVERALL.
+    ;       
+    ; CALLING SEQUENCE:
+    ;       NADIA_SET_MINIMA_RECALCULATION_INTERVAL, IVAL
+    ;
+    ; INPUTS:
+    ;
+    ;       IVAL:
+    ;           The number of iterations between updating lx and ly.
+    ;
+    ; EXAMPLE:
+    ;
+    ;      nadia_set_minima_recalculation_interval, 5
+    ;
+    pro nadia_set_minima_recalculation_interval, ival
+    b = call_external(lib_name() ,'IDL_set_minima_recalculation_interval', ival)
+    end
+
+    ;+;+
+    ; NAME:                                                 
+    ;       NADIA_GET_X_COHERENCE_LENGTH
+    ;                                                               
+    ; PURPOSE:                                                          
+    ;       RETRIEVE THE CALCULATED COHERENCE LENGTH OF THE BEAM (DEFINED AS THE 
+    ;	    STD. DEVIATION OF THE FITTED GAUSSIAN IN THE X DIRECTION IN METRES
+    ;	    AT THE OBJECT PLANE.
+    ;	    THIS SHOULD BE CALLED ONLY AFTER ITERATING UNTIL A SATISFACTORY 
+    ;	    IMAGE HAS BEEN PRODUCED, AND THEN IT WILL ONLY BE ACCURATE TO
+    ;	    WITHIN THE TOLERANCES SET USING NADIA_SET_MINIMA_SEARCH_TOLERANCE_IN_M
+    ;	    (Z*WL*NADIA_SET_MINIMA_SEARCH_TOLERANCE/(2*AVERAGE(P_SIZE_X, P_SIZE_Y)
+    ;
+    ; CALLING SEQUENCE:
+    ;
+    ;       result = NADIA_GET_X_COHERENCE_LENGTH()
+    ;
+    ; OUTPUTS:
+    ;
+    ;       result:
+    ;		the calculated coherence length of the beam (the std. deviation 
+    ;		of the fitted gaussian) in the x direction, in meters, in the 
+    ;		object plane.
+    ;
+    ;
+    ; EXAMPLE:
+    ;       Perform enough iterations to produce a satisfactory image.
+    ;	    ..... 
+    ;       a = NADIA_ITERATE(100)
+    ;       coh_l_x = NADIA_GET_X_COHERENCE_LENGTH()
+    ;-
+    function nadia_get_x_coherence_length()
+    return,  call_external(lib_name() ,'IDL_get_x_coherence_length()')
+    end
+
+    ;+;+
+    ; NAME:                                                 
+    ;       NADIA_GET_Y_COHERENCE_LENGTH
+    ;                                                               
+    ; PURPOSE:                                                          
+    ;       RETRIEVE THE CALCULATED COHERENCE LENGTH OF THE BEAM (DEFINED AS THE 
+    ;       STD. DEVIATION OF THE FITTED GAUSSIAN IN THE Y DIRECTION IN METRES
+    ;       AT THE OBJECT PLANE.
+    ;       THIS SHOULD BE CALLED ONLY AFTER ITERATING UNTIL A SATISFACTORY 
+    ;       IMAGE HAS BEEN PRODUCED, AND THEN IT WILL ONLY BE ACCURATE TO
+    ;       WITHIN THE TOLERANCES SET USING NADIA_SET_MINIMA_SEARCH_TOLERANCE_IN_M
+    ;       (Z*WL*NADIA_SET_MINIMA_SEARCH_TOLERANCE/(2*AVERAGE(P_SIZE_X, P_SIZE_Y)
+    ;
+    ; CALLING SEQUENCE:
+    ;
+    ;       result = NADIA_GET_Y_COHERENCE_LENGTH()
+    ;
+    ; OUTPUTS:
+    ;
+    ;       result:
+    ;           the calculated coherence length of the beam (the std. deviation 
+    ;           of the fitted gaussian) in the y direction, in meters, in the 
+    ;           object plane.
+    ;
+    ;
+    ; EXAMPLE:
+    ;       Perform enough iterations to produce a satisfactory image.
+    ;       ..... 
+    ;       a = NADIA_ITERATE(100)
+    ;       coh_l_y = NADIA_GET_Y_COHERENCE_LENGTH()
+    ;-
+    function nadia_get_y_coherence_length()
+    return,  call_external(lib_name() ,'IDL_get_y_coherence_length()')
+    end
+
+
+    ;+;+
+    ; NAME:                                                 
+    ;       NADIA_GET_X_COHERENCE_LENGTH_IN_PIXELS
+    ;                                                               
+    ; PURPOSE:                                                          
+    ;       RETRIEVE THE CALCULATED COHERENCE LENGTH OF THE BEAM (DEFINED AS THE 
+    ;       STD. DEVIATION OF THE FITTED GAUSSIAN IN THE X DIRECTION IN PIXELS
+    ;       AT THE OBJECT PLANE.
+    ;       THIS SHOULD BE CALLED ONLY AFTER ITERATING UNTIL A SATISFACTORY 
+    ;       IMAGE HAS BEEN PRODUCED, AND THEN IT WILL ONLY BE ACCURATE TO
+    ;       WITHIN THE TOLERANCES SET USING NADIA_SET_MINIMA_SEARCH_TOLERANCE
+    ;
+    ; CALLING SEQUENCE:
+    ;
+    ;       result = NADIA_GET_X_COHERENCE_LENGTH_IN_PIXELS()
+    ;
+    ; OUTPUTS:
+    ;
+    ;       result:
+    ;           the calculated coherence length of the beam (the std. deviation 
+    ;           of the fitted gaussian) in the x direction, in pixels, in the 
+    ;           object plane.
+    ;
+    ;
+    ; EXAMPLE:
+    ;       Perform enough iterations to produce a satisfactory image.
+    ;       ..... 
+    ;       a = NADIA_ITERATE(100)
+    ;       coh_l_x = NADIA_GET_X_COHERENCE_LENGTH_IN_PIXELS()
+    ;-
+    function nadia_get_x_coherence_length_in_pixels()
+    return,  call_external(lib_name() ,'IDL_get_x_coherence_length()')
+    end
+
+    ;+;+
+    ; NAME:                                                 
+    ;       NADIA_GET_Y_COHERENCE_LENGTH_IN_PIXELS
+    ;                                                               
+    ; PURPOSE:                                                          
+    ;       RETRIEVE THE CALCULATED COHERENCE LENGTH OF THE BEAM (DEFINED AS THE 
+    ;       STD. DEVIATION OF THE FITTED GAUSSIAN IN THE Y DIRECTION IN PIXELS
+    ;       AT THE OBJECT PLANE.
+    ;       THIS SHOULD BE CALLED ONLY AFTER ITERATING UNTIL A SATISFACTORY 
+    ;       IMAGE HAS BEEN PRODUCED, AND THEN IT WILL ONLY BE ACCURATE TO
+    ;       WITHIN THE TOLERANCES SET USING NADIA_SET_MINIMA_SEARCH_TOLERANCE
+    ;                                   
+    ; CALLING SEQUENCE:
+    ;                                       
+    ;       result = NADIA_GET_Y_COHERENCE_LENGTH_IN_PIXELS()
+    ;                                           
+    ; OUTPUTS:
+    ;                                               
+    ;       result:                                     
+    ;           the calculated coherence length of the beam (the std. deviation 
+    ;           of the fitted gaussian) in the y direction, in pixels, in the 
+    ;           object plane.
+    ;                                                               
+    ;                                                                   
+    ; EXAMPLE:                                                              
+    ;       Perform enough iterations to produce a satisfactory image.          
+    ;       ..... 
+    ;       a = NADIA_ITERATE(100)                                                  
+    ;       coh_l_y = NADIA_GET_Y_COHERENCE_LENGTH_IN_PIXELS()
+    ;-
+    function nadia_get_y_coherence_length_in_pixels()
+    return,  call_external(lib_name() ,'IDL_get_y_coherence_length()')
+    end
+
+
+
+    ;
+    ;       
+    ; CALLING SEQUENCE:
+    ;       NADIA_GET_MINIMA_RECALCULATION_INTERVAL, IVAL
+    ;
+    ; INPUTS:
+    ;
+    ;       IVAL:
+    ;           The number of iterations between updating lx and ly.
+    ;
+    ; EXAMPLE:
+    ;
+    ;      nadia_set_minima_recalculation_interval, 5
+    ;
+    pro nadia_set_minima_recalculation_interval, ival
+    b = call_external(lib_name() ,'IDL_set_minima_recalculation_interval', ival)
+    end
+
     ; NAME:
     ;       NADIA_CLEAR_MEMORY
     ;
@@ -1301,7 +1757,7 @@ end
     ;       Output the form of the current algorithm to the screen. 
     ;       It will be written in terms of the support and intensity
     ;       projection operators.
-
+    ;
     ;
     ; CALLING SEQUENCE:
     ;       NADIA_PRINT_ALGORITHM

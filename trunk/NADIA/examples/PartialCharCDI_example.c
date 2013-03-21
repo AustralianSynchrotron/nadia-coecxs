@@ -5,9 +5,9 @@
 // analysis.
 
 /**
- * @file PartialCharacterisationCDI_example.c
+ * @file PartialCharCDI_example.c
  *
- * PartialCharacterisationCDI_example.c This example reconstructs some Partial
+ * PartialCharCDI_example.c This example reconstructs some Partial
  * diffraction data (Diffractive imaging using partially coherent X rays).
  * This approach assumes a gaussian coherence function and can characterise,
  * the coherence of the beam as it reconstructs the image.
@@ -28,7 +28,7 @@
 #include <cstdlib> 
 #include <io.h>
 #include <Complex_2D.h>
-#include <PartialCharacterisationCDI.h>
+#include <PartialCharCDI.h>
 #include <Double_2D.h>
 
 //using namespace std;
@@ -45,7 +45,7 @@ int main(void){
 
   string support_file_name = "image_files/part_support.tiff";
 
-  const int cycles = 15;
+  const int cycles = 2;
   //number of cycles of ER, HIO,ER to perform.
 
   const int er_iterations = 50;
@@ -103,7 +103,7 @@ int main(void){
   Complex_2D object_estimate(nx,ny);
   //read_image(initial_guess_name, object_estimate, nx, ny);
 
-  PartialCharacterisationCDI partial(object_estimate, z_sd, e_beam, psize_x, psize_y, 4);
+  PartialCharCDI partial(object_estimate, z_sd, e_beam, psize_x, psize_y, 4);
 
   
   

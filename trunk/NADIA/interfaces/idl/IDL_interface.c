@@ -23,6 +23,7 @@
 #include <FresnelCDI.h>
 #include <FresnelCDI_WF.h>
 #include <PartialCDI.h>
+#include <PartialCharCDI.h>
 #include <PolyCDI.h>
 #include <PhaseDiverseCDI.h>
 #include <TransmissionConstraint.h>
@@ -204,7 +205,7 @@ extern "C" void IDL_write_cplx(int argc, void * argv[])
 }
 
 
-/************ reconstuction methods ******************/
+/************ reconstruction methods ******************/
 
 
 
@@ -324,6 +325,19 @@ extern "C" void IDL_partial_init(int argc, void * argv[])
       *(int*) argv[9],
       *(int*) argv[10]);
 
+}
+
+extern "C" void IDL_part_char_init(int argc, void * argv[])
+{
+
+  common_init(argc, argv, 8);
+
+  reco = new PartialCharCDI(*esw,
+      *(double*) argv[2],
+      *(double*) argv[3],
+      *(double*) argv[4],
+      *(double*) argv[5],
+      *(int*) argv[6]);
 }
 
 extern "C" void IDL_poly_init(int argc, void * argv[])
@@ -487,7 +501,7 @@ extern "C" void IDL_get_intensity_autocorrelation(int argc, void * argv[]){
 
     ostringstream oss (ostringstream::out);
     oss << "Sorry, can't get the autocorrelation function for "
-      << "anything other than "<< typeid(PlanarCDI).name() <<" reconstuction. "
+      << "anything other than "<< typeid(PlanarCDI).name() <<" reconstruction. "
       << "You are doing "<<typeid(*reco).name() 
       << " reconstruction." << endl;
     IDL_Message(IDL_M_GENERIC, IDL_MSG_INFO, oss.str().c_str());    
@@ -535,7 +549,7 @@ extern "C" void IDL_get_transmission_function(int argc, void * argv[]){
 
   ostringstream oss (ostringstream::out);
   oss << "Sorry, can't get the transmission function for "
-    << "anything other than "<< typeid(PartialCDI).name() <<" reconstuction. "
+    << "anything other than "<< typeid(PartialCDI).name() <<" reconstruction. "
     << "You are doing "<<typeid(*reco).name()
     << " reconstruction." << endl;
   IDL_Message(IDL_M_GENERIC, IDL_MSG_INFO, oss.str().c_str());
@@ -558,7 +572,7 @@ extern "C" void IDL_get_transmission(int argc, void * argv[]){
 
   ostringstream oss (ostringstream::out);
   oss << "Sorry, can't get the transmission function for "
-    << "anything other than "<< typeid(PartialCDI).name() <<" reconstuction. "
+    << "anything other than "<< typeid(PartialCDI).name() <<" reconstruction. "
     << "You are doing "<<typeid(*reco).name()
     << " reconstruction." << endl;
   IDL_Message(IDL_M_GENERIC, IDL_MSG_INFO, oss.str().c_str());
@@ -583,7 +597,7 @@ extern "C" void IDL_set_transmission(int argc, void * argv[]){
 
   ostringstream oss (ostringstream::out);
   oss << "Sorry, can't set the transmission function for "
-    << "anything other than "<< typeid(PartialCDI).name() <<" reconstuction. "
+    << "anything other than "<< typeid(PartialCDI).name() <<" reconstruction. "
     << "You are doing "<<typeid(*reco).name()
     << " reconstruction." << endl;
   IDL_Message(IDL_M_GENERIC, IDL_MSG_INFO, oss.str().c_str());
@@ -618,7 +632,7 @@ extern "C" void IDL_initialise_matrices(int argc, void * argv[]){
 
     ostringstream oss (ostringstream::out);
     oss << "Sorry, can't initialise the matrices for "
-      << "anything other than "<< typeid(PartialCDI).name() <<" reconstuction. "
+      << "anything other than "<< typeid(PartialCDI).name() <<" reconstruction. "
       << "You are doing "<<typeid(*reco).name()
       << " reconstruction." << endl;
     IDL_Message(IDL_M_GENERIC, IDL_MSG_INFO, oss.str().c_str());
@@ -634,7 +648,7 @@ extern "C" void IDL_set_spectrum(int argc, void * argv[]){
   }else{
     ostringstream oss (ostringstream::out);
     oss << "Sorry, can't set the spectrum for "
-      << "anything other than "<< typeid(PolyCDI).name() <<" reconstuction. "
+      << "anything other than "<< typeid(PolyCDI).name() <<" reconstruction. "
       << "You are doing "<<typeid(*reco).name()
       << " reconstruction." << endl;
     IDL_Message(IDL_M_GENERIC, IDL_MSG_INFO, oss.str().c_str());
@@ -664,7 +678,7 @@ extern "C" void IDL_get_mode(int argc, void * argv[]){
 
   ostringstream oss (ostringstream::out);
   oss << "Sorry, can't get the modes function for "
-    << "anything other than "<< typeid(PartialCDI).name() <<" reconstuction. "
+    << "anything other than "<< typeid(PartialCDI).name() <<" reconstruction. "
     << "You are doing "<<typeid(*reco).name()
     << " reconstruction." << endl;
   IDL_Message(IDL_M_GENERIC, IDL_MSG_INFO, oss.str().c_str());
@@ -684,12 +698,226 @@ extern "C" void IDL_set_threshold(int argc, void * argv[]){
 
   ostringstream oss (ostringstream::out);
   oss << "Sorry, can't set the threshhold for "
-    << "anything other than "<< typeid(PartialCDI).name() <<" reconstuction. "
+    << "anything other than "<< typeid(PartialCDI).name() <<" reconstruction. "
     << "You are doing "<<typeid(*reco).name()
     << " reconstruction." << endl;
   IDL_Message(IDL_M_GENERIC, IDL_MSG_INFO, oss.str().c_str());
   return;
 }
+
+extern "C" void IDL_set_initial_coherence_guess(int argc, void * argv[]){
+  check_objects();
+
+  if(typeid(*reco)==typeid(PartialCharCDI)){
+
+    double lx = *(double*) argv[0];
+    double ly = *(double*) argv[1];
+
+    ((PartialCharCDI*) reco)->set_initial_coherence_guess(lx, ly);
+    return;
+  }
+
+  ostringstream oss (ostringstream::out);
+  oss << "Sorry, can't set the initial coherence guess for "
+    << "anything other than "<< typeid(PartialCharCDI).name() <<" reconstruction. "
+    << "You are doing "<<typeid(*reco).name()
+    << " reconstruction." << endl;
+  IDL_Message(IDL_M_GENERIC, IDL_MSG_INFO, oss.str().c_str());
+  return;
+}
+
+extern "C" void IDL_set_initial_coherence_guess_in_m(int argc, void * argv[]){
+  check_objects();
+
+  if(typeid(*reco)==typeid(PartialCharCDI)){
+
+    double lx = *(double*) argv[0];
+    double ly = *(double*) argv[1];
+
+    ((PartialCharCDI*) reco)->set_initial_coherence_guess_in_m(lx, ly);
+    return;           
+  }
+
+  ostringstream oss (ostringstream::out);
+  oss << "Sorry, can't set the initial coherence guess for "
+    << "anything other than "<< typeid(PartialCharCDI).name() <<" reconstruction. "
+    << "You are doing "<<typeid(*reco).name()
+    << " reconstruction." << endl;
+  IDL_Message(IDL_M_GENERIC, IDL_MSG_INFO, oss.str().c_str());
+  return;     
+}
+
+extern "C" void IDL_set_minima_search_bounds_coefficient(int argc, void * argv[]){
+  check_objects();
+
+  if(typeid(*reco)==typeid(PartialCharCDI)){
+
+    double coef = *(double*) argv[0];
+
+    ((PartialCharCDI*) reco)->set_minima_search_bounds_coefficient(coef);
+    return;
+  }
+
+  ostringstream oss (ostringstream::out);
+  oss << "Sorry, can't set the minima search bound coefficient for "
+    << "anything other than "<< typeid(PartialCharCDI).name() <<" reconstruction. "
+    << "You are doing "<<typeid(*reco).name()
+    << " reconstruction." << endl;
+  IDL_Message(IDL_M_GENERIC, IDL_MSG_INFO, oss.str().c_str());
+  return;
+}
+
+extern "C" void IDL_set_minima_search_tolerance(int argc, void * argv[]){
+  check_objects();
+
+  if(typeid(*reco)==typeid(PartialCharCDI)){
+
+    double tol = *(double*) argv[0];
+
+    ((PartialCharCDI*) reco)->set_minima_search_tolerance(tol);
+    return;             
+  }                       
+
+  ostringstream oss (ostringstream::out);
+  oss << "Sorry, can't set the minima search tolerance for "
+    << "anything other than "<< typeid(PartialCharCDI).name() <<" reconstruction. "
+    << "You are doing "<<typeid(*reco).name()
+    << " reconstruction." << endl;
+  IDL_Message(IDL_M_GENERIC, IDL_MSG_INFO, oss.str().c_str());
+  return;     
+} 
+
+extern "C" void IDL_set_minima_search_tolerance_in_m(int argc, void * argv[]){
+  check_objects();
+
+  if(typeid(*reco)==typeid(PartialCharCDI)){
+
+    double tol = *(double*) argv[0];
+
+    ((PartialCharCDI*) reco)->set_minima_search_tolerance_in_m(tol);
+    return;            
+  }
+
+  ostringstream oss (ostringstream::out);
+  oss << "Sorry, can't set the minima search tolerance for "
+    << "anything other than "<< typeid(PartialCharCDI).name() <<" reconstruction. "
+    << "You are doing "<<typeid(*reco).name()
+    << " reconstruction." << endl;
+  IDL_Message(IDL_M_GENERIC, IDL_MSG_INFO, oss.str().c_str());
+  return;     
+}
+
+extern "C" void IDL_set_minima_moving_average_weight(int argc, void * argv[]){
+  check_objects();
+
+  if(typeid(*reco)==typeid(PartialCharCDI)){
+
+    double w = *(double*) argv[0];
+
+    ((PartialCharCDI*) reco)->set_minima_moving_average_weight(w);
+    return;
+  }
+
+  ostringstream oss (ostringstream::out);
+  oss << "Sorry, can't set the minima average weight for "
+    << "anything other than "<< typeid(PartialCharCDI).name() <<" reconstruction. "
+    << "You are doing "<<typeid(*reco).name()
+    << " reconstruction." << endl;
+  IDL_Message(IDL_M_GENERIC, IDL_MSG_INFO, oss.str().c_str());
+  return;
+}
+
+extern "C" void IDL_set_minima_recalculation_interval(int argc, void * argv[]){
+  check_objects();
+
+  if(typeid(*reco)==typeid(PartialCharCDI)){
+
+    int ival = *(int*) argv[0];
+
+    ((PartialCharCDI*) reco)->set_minima_recalculation_interval(ival);
+    return;
+  }
+
+  ostringstream oss (ostringstream::out);
+  oss << "Sorry, can't set the minima recalculation interval "
+    << "anything other than "<< typeid(PartialCharCDI).name() <<" reconstruction. "
+    << "You are doing "<<typeid(*reco).name()
+    << " reconstruction." << endl;
+  IDL_Message(IDL_M_GENERIC, IDL_MSG_INFO, oss.str().c_str());
+  return;
+}
+
+extern "C" IDL_LONG IDL_get_x_coherence_length(int argc, void * argv[]){
+  check_objects();
+
+  if(typeid(*reco)==typeid(PartialCharCDI)){
+
+    return ((PartialCharCDI*) reco)->get_x_coherence_length();
+
+  }
+
+  ostringstream oss (ostringstream::out);
+  oss << "Sorry, can't get the coherence length for "
+    << "anything other than "<< typeid(PartialCharCDI).name() <<" reconstruction. "
+    << "You are doing "<<typeid(*reco).name()
+    << " reconstruction." << endl;
+  IDL_Message(IDL_M_GENERIC, IDL_MSG_INFO, oss.str().c_str());
+  return 0;
+}
+
+extern "C" IDL_LONG IDL_get_y_coherence_length(int argc, void * argv[]){
+  check_objects();
+
+  if(typeid(*reco)==typeid(PartialCharCDI)){
+
+    return ((PartialCharCDI*) reco)->get_y_coherence_length();
+  }
+
+  ostringstream oss (ostringstream::out);
+  oss << "Sorry, can't get the coherence length for "
+    << "anything other than "<< typeid(PartialCharCDI).name() <<" reconstruction. "
+    << "You are doing "<<typeid(*reco).name()
+    << " reconstruction." << endl;
+  IDL_Message(IDL_M_GENERIC, IDL_MSG_INFO, oss.str().c_str());
+  return 0;
+}
+
+extern "C" IDL_LONG IDL_get_x_coherence_length_in_pixels(int argc, void * argv[]){
+  check_objects();
+
+  if(typeid(*reco)==typeid(PartialCharCDI)){
+
+    return ((PartialCharCDI*) reco)->get_x_coherence_length_in_pixels();
+
+  }
+
+  ostringstream oss (ostringstream::out);
+  oss << "Sorry, can't get the coherence length for "
+    << "anything other than "<< typeid(PartialCharCDI).name() <<" reconstruction. "
+    << "You are doing "<<typeid(*reco).name()
+    << " reconstruction." << endl;
+  IDL_Message(IDL_M_GENERIC, IDL_MSG_INFO, oss.str().c_str());
+  return 0;
+}
+
+extern "C" IDL_LONG IDL_get_y_coherence_length_in_pixels(int argc, void * argv[]){
+  check_objects();
+
+  if(typeid(*reco)==typeid(PartialCharCDI)){
+
+    return ((PartialCharCDI*) reco)->get_y_coherence_length_in_pixels();
+
+  }               
+
+  ostringstream oss (ostringstream::out);
+  oss << "Sorry, can't get the coherence length for "
+    << "anything other than "<< typeid(PartialCharCDI).name() <<" reconstruction. "
+    << "You are doing "<<typeid(*reco).name()
+    << " reconstruction." << endl;
+  IDL_Message(IDL_M_GENERIC, IDL_MSG_INFO, oss.str().c_str());
+  return 0;     
+}
+
 
 extern "C" void IDL_print_algorithm(int argc, void * argv[]){
   check_objects();
