@@ -164,7 +164,7 @@ int main(void){
 
     //now change to the error reduction algorithm 
     planar.set_relaxation_parameter(0.5);
-    planar.set_algorithm(DM);
+    planar.set_algorithm(HIO);
 
     for(int i=er_iterations1; i<(hio_iterations+er_iterations1); i++){
 

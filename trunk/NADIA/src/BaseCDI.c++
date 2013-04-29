@@ -1,20 +1,11 @@
-// Copyright 2011 Nadia Davidson for The ARC Centre of Excellence in 
-// Coherent X-ray Science. This program is distributed under the GNU  
-// General Public License. We also ask that you cite this software in 
-// publications where you made use of it for any part of the data     
-// analysis.  
-
 #include <iostream>
 #include <string>
 #include <cstdlib> 
 #include <cmath>
-//#include <map>
-#include <string>
-#include <Double_2D.h>
-#include <Complex_2D.h>
-#include <BaseCDI.h>
-#include <TransmissionConstraint.h>
-#include <io.h> 
+#include "Complex_2D.h"
+#include "BaseCDI.h"
+#include "TransmissionConstraint.h"
+#include "io.h" 
 
 using namespace std;
 
@@ -40,41 +31,39 @@ map<string,int> * BaseCDI::set_up_algorithm_name_map(){
 /***************************************************************/
 BaseCDI::BaseCDI(Complex_2D & initial_guess, unsigned int n_best)
   : complex(initial_guess),
-  nx(initial_guess.get_size_x()),
-  ny(initial_guess.get_size_y()),
-  //    fft(nx,ny),
-  beta(0.9),
-  support(nx,ny),
-  support_init(nx, ny),
-  intensity_sqrt(nx,ny),
-  n_best(n_best){
-
-    //cout<<"nx, ny "<<nx<<" "<<ny;
-
-    //initialize the best estimates
-    if(n_best>0){
-      best_array = new Complex_2D*[n_best];
-      best_error_array = new double[n_best];
-      for(int i=0; i<n_best; i++){
-	best_array[i] = new Complex_2D(nx,ny);
-	best_error_array[i]=1;
-      }
+    nx(initial_guess.get_size_x()),
+    ny(initial_guess.get_size_y()),
+    //    fft(nx,ny),
+    beta(0.9),
+    support(nx,ny),
+    intensity_sqrt(nx,ny),
+    n_best(n_best){
+  
+  //initialize the best estimates
+  if(n_best>0){
+    best_array = new Complex_2D*[n_best];
+    best_error_array = new double[n_best];
+    for(int i=0; i<n_best; i++){
+      best_array[i] = new Complex_2D(nx,ny);
+      best_error_array[i]=1;
     }
+  }
 
-    //initialize the beam-stop mask to null (not in use)
-    beam_stop=0;
+  //initialize the beam-stop mask to null (not in use)
+  beam_stop=0;
 
-    temp_complex_PFS = 0;
-    temp_complex_PF = 0;
-    temp_complex_PS = 0;
-    temp_complex_PSF = 0;
+  temp_complex_PFS = 0;
+  temp_complex_PF = 0;
+  temp_complex_PS = 0;
+  temp_complex_PSF = 0;
 
-    //initialize the complex contraint to null;
-    transmission_constraint = NULL; 
+  //initialize the complex contraint to null;
+  transmission_constraint = NULL; 
+  
+  algorithm=CUSTOM;
+  set_algorithm(ER);
 
-    algorithm=CUSTOM;
-    set_algorithm(ER);
-  };
+};
 
 BaseCDI::~BaseCDI(){
   for(int i=0; i<n_best; i++)
@@ -95,42 +84,27 @@ Complex_2D * BaseCDI::get_best_result(double & error, int index){
     error = best_error_array[index];
     return best_array[index];
   }
-
+  
   cout << "index out of bounds in BaseCDI::get_best_result"<<endl;
   return NULL;
-
+  
 };
 
 
 
 void BaseCDI::set_support(const Double_2D & object_support, bool soften){
   double max = object_support.get_max();
-  for(int i=0; i< object_support.get_size_x(); i++){
-    for(int j=0; j< object_support.get_size_y(); j++){
+  for(int i=0; i< nx; i++){
+    for(int j=0; j< ny; j++){
       support.set(i,j,object_support.get(i,j)/max);
-      support_init.set(i,j,object_support.get(i,j)/max);
     }
   }
-  //if required, convolve the support with a Gaussian to soften the
+  //if required, convolve the support with a gaussian to soften the
   //edges
   if(soften) 
     convolve(support,3,5);
 
 }
-
-void BaseCDI::set_support_new(const Double_2D & object_support, bool soften){
-  double max = object_support.get_max();
-  for(int i=0; i< object_support.get_size_x(); i++){
-    for(int j=0; j< object_support.get_size_y(); j++){
-      support.set(i,j,object_support.get(i,j)/max);
-    }
-  }
-  //if required, convolve the support with a Gaussian to soften the
-  //edges
-  if(soften)
-    convolve(support,3,5);
-}
-
 
 void BaseCDI::set_beam_stop(const Double_2D & beam_stop_region){
   if(beam_stop==0)
@@ -156,43 +130,24 @@ void BaseCDI::apply_support(Complex_2D & c){
     transmission_constraint->apply_constraint(c);
 }
 
-void BaseCDI::apply_support_init(Double_2D & c){
-  support_constraint_init(c);
-  //  if(transmission_constraint)
-  //  transmission_constraint->apply_constraint(c);
-}
-
 void BaseCDI::support_constraint(Complex_2D & c){
   double support_value;
 
-  if((c.get_size_x()!=support.get_size_x())||(c.get_size_y()!=support.get_size_y())){
-    std::cout<<"Support does not have the correct dimensions"<<endl;
-    return;
-  }
-
-  for(int i=0; i< c.get_size_x(); i++){
-    for(int j=0; j< c.get_size_y(); j++){
+  for(int i=0; i< nx; i++){
+    for(int j=0; j< ny; j++){
 
       support_value = support.get(i,j);
-
-      c.set_real(i,j,c.get_real(i,j) * support_value);
-      c.set_imag(i,j,c.get_imag(i,j) * support_value);
+      if(support_value == 0){
+	c.set_real(i,j,0);
+	c.set_imag(i,j,0);
+      }
+      else if(support_value < 1){
+	c.set_real(i,j,c.get_real(i,j) * support_value);
+	c.set_imag(i,j,c.get_imag(i,j) * support_value);
+      }
     }
   }
-}
 
-void BaseCDI::support_constraint_init(Double_2D & c){
-  double support_value;
-
-  for(int i=0; i< c.get_size_x(); i++){
-    for(int j=0; j< c.get_size_y(); j++){
-
-      support_value = support_init.get(i,j);
-
-      c.set(i,j,c.get(i,j) * support_value);
-      //      c.set_imag(i,j,c.get_imag(i,j) * support_value);
-    }
-  }
 }
 
 void BaseCDI::project_intensity(Complex_2D & c){
@@ -213,12 +168,12 @@ void BaseCDI::scale_intensity(Complex_2D & c){
 
       //reset the magnitude
       if(beam_stop==0 || beam_stop->get(i,j)>0){
-
+	
 	current_int_sqrt=intensity_sqrt.get(i,j);
 	current_mag=c.get_mag(i,j);
-
+	
 	c.set_mag(i,j,current_int_sqrt);
-
+      
 	//calculate the error
 	norm2_mag += current_int_sqrt*current_int_sqrt;
 	norm2_diff += (current_mag-current_int_sqrt)
@@ -227,7 +182,7 @@ void BaseCDI::scale_intensity(Complex_2D & c){
     }
   }
   current_error = (norm2_diff/norm2_mag);
-
+  
 }
 
 
@@ -235,8 +190,8 @@ void BaseCDI::set_algorithm(int alg){
 
   if(algorithm==alg)
     return;
-  // cout << "Warning you are trying to set the algorithm"
-  //	 << " to the one already in use" << endl; 
+    // cout << "Warning you are trying to set the algorithm"
+    //	 << " to the one already in use" << endl; 
 
   switch(alg){
 
@@ -273,38 +228,38 @@ void BaseCDI::set_algorithm(int alg){
   }
 
   algorithm = alg;
-
+ 
 
   //  print_algorithm();
 }
 
 
 void BaseCDI::set_custom_algorithm(double m1, double m2, double m3, 
-    double m4, double m5, double m6, 
-    double m7, double m8,
-    double m9, double m10){
+				      double m4, double m5, double m6, 
+				      double m7, double m8,
+				      double m9, double m10){
 
   algorithm_structure[PSF]=  m1 + m2 + m3 + m4;
   algorithm_structure[PFS]= -m1 + m5 + m6 + m7;
   algorithm_structure[PS] = -m3 - m6 - m8 + m10;
   algorithm_structure[PF] = -m2 - m5 + m8 + m9;
   algorithm_structure[PI] = -m4 - m7 - m9 - m10;
-
+  
   reallocate_temp_complex_memory();
 
   algorithm = CUSTOM;
-
+ 
 }
 
 void BaseCDI::reallocate_temp_complex_memory(){
 
   Complex_2D ** temp_array[NTERMS-1] = {&temp_complex_PSF, 
-    &temp_complex_PFS, 
-    &temp_complex_PS, 
-    &temp_complex_PF};
-
+					&temp_complex_PFS, 
+					&temp_complex_PS, 
+					&temp_complex_PF};
+    
   for(int n=0; n < NTERMS-1; n++){
-
+    
     if(algorithm_structure[n]==0 && *(temp_array[n])!=0){
       delete *(temp_array[n]);
       *(temp_array[n])=0;  
@@ -321,19 +276,19 @@ void BaseCDI::print_algorithm(){
 
   if(algorithm==ER)
     cout << "Currently using error-reduction: "
-      << "x(k+1) = Ps Pf x(k)" <<endl;
+	 << "x(k+1) = Ps Pf x(k)" <<endl;
   else
     cout << "Currently using the algorithm: "
-      << "x(k+1) = x(k) + ("
-      << algorithm_structure[PSF]<<"*PsPf + "
-      << algorithm_structure[PFS]<<"*PfPs + "
-      << algorithm_structure[PS]<<"*Ps + "
-      << algorithm_structure[PF]<<"*Pf + "
-      << algorithm_structure[PI]<<"*I"
-      << ")x(k)"<< endl;
-
+	 << "x(k+1) = x(k) + ("
+	 << algorithm_structure[PSF]<<"*PsPf + "
+	 << algorithm_structure[PFS]<<"*PfPs + "
+	 << algorithm_structure[PS]<<"*Ps + "
+	 << algorithm_structure[PF]<<"*Pf + "
+	 << algorithm_structure[PI]<<"*I"
+	 << ")x(k)"<< endl;
+  
   cout << "Ps - support constraint, Pf - modulus constraint" << endl;
-
+  
 }
 
 int BaseCDI::iterate(){
@@ -342,12 +297,9 @@ int BaseCDI::iterate(){
   //this is faster than using the generic algorithm code
   //further down in this function.
 
-  //if(!c)
-  Complex_2D * c= &complex;
-
   if(algorithm==ER){
-    project_intensity(*c);
-    apply_support(*c);
+    project_intensity(complex);
+    apply_support(complex);
     update_n_best();
     return SUCCESS;
   }
@@ -357,20 +309,20 @@ int BaseCDI::iterate(){
 
   //PFS
   if(algorithm_structure[PFS]!=0){
-    temp_complex_PFS->copy(*c);
+    temp_complex_PFS->copy(complex);
     apply_support(*temp_complex_PFS);
     project_intensity(*temp_complex_PFS);
   }
 
   //F
   if(algorithm_structure[PF]!=0){
-    temp_complex_PF->copy(*c);
+    temp_complex_PF->copy(complex);
     project_intensity(*temp_complex_PF);
   }
-
+  
   //S
   if(algorithm_structure[PS]!=0){
-    temp_complex_PS->copy(*c);
+    temp_complex_PS->copy(complex);
     apply_support(*temp_complex_PS);
   } 
 
@@ -381,21 +333,21 @@ int BaseCDI::iterate(){
       apply_support(*temp_complex_PSF);
     }
     else{
-      temp_complex_PSF->copy(*c);
+      temp_complex_PSF->copy(complex);
       project_intensity(*temp_complex_PSF);
       apply_support(*temp_complex_PSF);
     }
   }
 
 
-  //combine the result of the separate operators
+  //combine the result of the seperate operators
   double value_real, value_imag;
   for(int i=0; i < nx; ++i){
     for(int j=0; j < ny; ++j){
-
+ 
       //Add the identity
-      value_real = (1+algorithm_structure[PI])*c->get_real(i,j);
-      value_imag = (1+algorithm_structure[PI])*c->get_imag(i,j);
+      value_real = (1+algorithm_structure[PI])*complex.get_real(i,j);
+      value_imag = (1+algorithm_structure[PI])*complex.get_imag(i,j);
 
       //Add the component from the PfPs operator
       if(algorithm_structure[PFS]!=0){
@@ -414,16 +366,16 @@ int BaseCDI::iterate(){
 	value_real+=algorithm_structure[PS]*temp_complex_PS->get_real(i,j);
 	value_imag+=algorithm_structure[PS]*temp_complex_PS->get_imag(i,j);
       }
-
+      
       //Add the component from the PsPf operator
       if(algorithm_structure[PSF]!=0){
 	value_real+=algorithm_structure[PSF]*temp_complex_PSF->get_real(i,j);
 	value_imag+=algorithm_structure[PSF]*temp_complex_PSF->get_imag(i,j);
       }
-
-      c->set_real(i,j,value_real);
-      c->set_imag(i,j,value_imag);
-
+      
+      complex.set_real(i,j,value_real);
+      complex.set_imag(i,j,value_imag);
+      
     }
   }
 
@@ -439,7 +391,7 @@ void BaseCDI::update_n_best(){
   // estimate just after the best one.
   int place = 0;
   for( ; place < n_best && current_error > best_error_array[place]; place++); 
-
+  
   //we found a new best estimate
   if(n_best>0 && place < n_best){
 
@@ -450,7 +402,7 @@ void BaseCDI::update_n_best(){
       best_error_array[i] = best_error_array[i-1];
       best_array[i] = best_array[i-1];
     }
-
+    
     best_error_array[place] = current_error;
     best_array[place] = temp_pointer;      
   }
@@ -459,32 +411,30 @@ void BaseCDI::update_n_best(){
 
 
 void BaseCDI::apply_shrinkwrap(double gauss_width, double threshold){
-
+  
   Double_2D recon(nx,ny);
   complex.get_2d(MAG,recon);
 
   //convolve
   convolve(recon,gauss_width);
-
+  
   //threshold
   apply_threshold(recon,threshold);
 
-  apply_support_init(recon);
-
-  set_support_new(recon);
+  set_support(recon);
 
 }
 
 
 void BaseCDI::convolve(Double_2D & array, double gauss_width, 
-    int pixel_cut_off){
-  //to speed up computation we only convolve 
-  //up to 4 pixels away from the Gaussian peak
+			 int pixel_cut_off){
+    //to speed up computation we only convolve 
+  //up to 4 pixels away from the gaussian peak
 
   //make a temporary array to hold the smeared image
-  Double_2D temp_array(array.get_size_x(),array.get_size_y());
-
-  //make a temporary array to hold the Gaussian distribution.
+  Double_2D temp_array(nx,ny);
+  
+  //make a temporary array to hold the gaussian distribution.
   Double_2D gauss_dist(pixel_cut_off+1, pixel_cut_off+1);
   for(int i=0; i <= pixel_cut_off; i++){
     for(int j=0; j <= pixel_cut_off; j++){
@@ -497,17 +447,17 @@ void BaseCDI::convolve(Double_2D & array, double gauss_width,
   //this is messy. First loop over the elements of
   //the array which was given as input
   double new_value;
-  for(int i=0; i < array.get_size_x(); i++){
-    for(int j=0; j < array.get_size_y(); j++){
-
-      //now loop over the convoluted array (the one we want to make).
+  for(int i=0; i < nx; i++){
+    for(int j=0; j < ny; j++){
+      
+      //now loop over the colvoluted array (the one we want to make).
       //Calculate the contribution to each element in it.
-
+      
       new_value = 0;
-
+      
       for(int i2=i-pixel_cut_off; i2 <= i+pixel_cut_off; i2++){
 	for(int j2=j-pixel_cut_off; j2 <= j+pixel_cut_off; j2++){
-	  if(i2<array.get_size_x() && i2>=0 && j2>=0 && j2<array.get_size_y()){
+	  if(i2<nx && i2>=0 && j2>=0 && j2<ny){
 	    new_value += array.get(i2,j2)*gauss_dist.get(fabs(i-i2),fabs(j-j2));
 	  }
 	}
@@ -520,23 +470,16 @@ void BaseCDI::convolve(Double_2D & array, double gauss_width,
 
 }
 
-/** set complex to a given value */
-void BaseCDI::initialise_guess(Complex_2D & c){
-
-  complex.copy(c);
-}
-
-
 /** threshold is a % of the maximum */
 void BaseCDI::apply_threshold(Double_2D & array, 
-    double threshold){
-
+				double threshold){
+  
   //find the maximum
   double max = array.get_max();
-
+  
   //apply the threshold
-  for(int i=0; i < array.get_size_x(); i++){
-    for(int j=0; j < array.get_size_y(); j++){ //these were both x, but I changed one to y. TDJ
+  for(int i=0; i < nx; i++){
+    for(int j=0; j < nx; j++){
       if( array.get(i,j) < (threshold*max) )
 	array.set(i,j,0.0);
       else

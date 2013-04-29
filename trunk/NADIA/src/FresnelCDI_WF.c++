@@ -185,8 +185,11 @@ void FresnelCDI_WF::set_support(double z_diameter, double size){
       double i_ = i-center_pixel;
       double j_ = j-center_pixel;
       double r = delta_z*sqrt(i_*i_+j_*j_);
-      if(r < size*z_diameter/2.0)
+      if(r < size*z_diameter/2.0){
 	support.set(i,j,1);
+//	support_init.set(i,j,1);
+
+      }
     }
   }
   convolve(support,3,5);

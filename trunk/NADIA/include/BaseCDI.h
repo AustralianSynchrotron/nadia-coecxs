@@ -1,9 +1,3 @@
-// Copyright 2011 Nadia Davidson for The ARC Centre of Excellence in 
-// Coherent X-ray Science. This program is distributed under the GNU  
-// General Public License. We also ask that you cite this software in 
-// publications where you made use of it for any part of the data     
-// analysis. 
-
 /**
  * @file BaseCDI.h
  * @class BaseCDI
@@ -64,8 +58,8 @@
 #define PHASERETRIEVALBASE_H
 
 #include <map>
-//#include <string>
-//#include "Double_2D.h"
+#include <string>
+#include "Double_2D.h"
 
 /** The number of reconstruction algorithms */
 #define NALGORITHMS 9 
@@ -90,10 +84,10 @@ class TransmissionConstraint;
 
 class BaseCDI{
 
-protected:
+ protected:
 
   /**a reference to the Complex_2D object which is altered during each
-    iteration */
+     iteration */
   Complex_2D & complex;
 
   /** The samplings in x */
@@ -103,11 +97,11 @@ protected:
   int ny;
 
   /**a Fourier transform objected used to perform 
-    the forward and backward transformations */
+     the forward and backward transformations */
   //  FourierT fft; 
 
-  /** temporary Complex_2Ds which are used in the computation of the
-    PFS and PF terms for each iteration. */
+   /** temporary Complex_2Ds which are used in the computation of the
+      PFS and PF terms for each iteration. */
   Complex_2D * temp_complex_PFS;
   Complex_2D * temp_complex_PF;
   Complex_2D * temp_complex_PS;
@@ -119,9 +113,6 @@ protected:
   /** a copy of the support */
   Double_2D support;
 
-  /** a copy of the original support. This one is not changed by shrinkwrapping **/
-  Double_2D support_init;
-
   /**a copy of the square root of the intensity at the detector plane. */
   Double_2D intensity_sqrt;
 
@@ -132,11 +123,11 @@ protected:
   int algorithm;
 
   /**an array which holds the structure of the algorithm. i.e. the 
-    coefficients for each term in the iteration equation.*/
+     coefficients for each term in the iteration equation.*/
   double algorithm_structure[NTERMS];
 
   /** the difference between the intensity in the detector plane 
-    the current estimated intensity. */
+      the current estimated intensity. */
   double current_error;
 
   /** how many best estimates to store */
@@ -146,7 +137,7 @@ protected:
   Complex_2D ** best_array;
 
   /** array of the error corresponding to each of the
-    best estimates */
+      best estimates */
   double * best_error_array;
 
   /** a function pointer to a cumstomized complex constraint */
@@ -154,11 +145,11 @@ protected:
   TransmissionConstraint * transmission_constraint;
 
   /** a mapping between the algorithm name (string) and identification
-    number */
+      number */
   static std::map<std::string,int> * algNameMap;
 
-public:
-
+ public:
+  
   /**
    * Constructor. The default algorithms is set to HIO with a relaxation
    * parameter of 0.9.
@@ -181,15 +172,15 @@ public:
    */
   virtual ~BaseCDI();
 
-  /**
-   * The main method for running the reconstruction!  This method
-   * transforms the Complex_2D given to it according to:
-   * <br>\f$ x_{k+1} = g ( x_{k} ) \f$
-   * <br> Where \f$g()\f$ depends on the algorithm used.
-   * The current error is also updated when this method is called.
-   */
+ /**
+  * The main method for running the reconstruction!  This method
+  * transforms the Complex_2D given to it according to:
+  * <br>\f$ x_{k+1} = g ( x_{k} ) \f$
+  * <br> Where \f$g()\f$ depends on the algorithm used.
+  * The current error is also updated when this method is called.
+  */
   virtual int iterate();
-
+  
   /**
    * Set the values in the Complex_2D to an initial estimate.  For
    * BaseCDI, this is set to random numbers inside the support for
@@ -200,7 +191,7 @@ public:
    * this is 0.
    */
   virtual void initialise_estimate(int seed=0) = 0;
-
+  
 
   /**
    * While the reconstruction is running this object will store the
@@ -217,53 +208,28 @@ public:
    */
   Complex_2D * get_best_result(double & error, int index=0);
 
-  /**
-   * Set the sample support and the initial sample support. A 
-   * "0" value in the Double_2D is interpreted as being outside 
-   * the support. Pixels with the maximum value of the Double_2D 
-   * are considered inside the support. Values between 0 and the 
-   * maximum indict the soft edge of the support. In this case, 
-   * when the support is applied, the esw magnitude is scaled 
-   * relative to the support edge value.  
-   * 
-   * By default, the edge of a given support will be softened by
-   * convolution with a 3 pixel wide gaussian. This feature can be
-   * turned off by setting the boolean flag to false.
-   *
-   * The support can be updated at anytime during reconstruction by
-   * calling this method.
-   *
-   * @param object_support The sample support 
-   * @param soften If true, the edges of the support will be
-   * softened by covolving it with a 3 pixel wide gaussian. By default
-   * this option is off.
-   */ 
+   /**
+    * Set the sample support. A "0" value in the Double_2D is
+    * interpreted as being outside the support. Pixels with the
+    * maximum value of the Double_2D are considered inside the
+    * support. Values between 0 and the maximum indict the soft edge
+    * of the support. In this case, when the support is applied, the
+    * esw magnitude is scaled relative to the support edge value.  
+    * 
+    * By default, the edge of a given support will be softened by
+    * convolution with a 3 pixel wide gaussian. This feature can be
+    * turned off by setting the boolean flag to false.
+    *
+    * The support can be updated at anytime during reconstruction by
+    * calling this method.
+    *
+    * @param object_support The sample support 
+    * @param soften If true, the edges of the support will be
+    * softened by covolving it with a 3 pixel wide gaussian. By default
+    * this option is off.
+    */ 
   void set_support(const Double_2D & object_support, bool soften=false);
-
-  /**
-   * Set the sample support  but leave the initial support. A 
-   * "0" value in the Double_2D is interpreted as being outside 
-   * the support. Pixels with the maximum value of the Double_2D 
-   * are considered inside the support. Values between 0 and the 
-   * maximum indict the soft edge of the support. In this case, 
-   * when the support is applied, the esw magnitude is scaled 
-   * relative to the support edge value.  
-   * 
-   * By default, the edge of a given support will be softened by
-   * convolution with a 3 pixel wide gaussian. This feature can be
-   * turned off by setting the boolean flag to false.
-   *
-   * The support can be updated at anytime during reconstruction by
-   * calling this method.
-   *
-   * @param object_support The sample support 
-   * @param soften If true, the edges of the support will be
-   * softened by covolving it with a 3 pixel wide gaussian. By default
-   * this option is off.
-   */
-
-  void set_support_new(const Double_2D & object_support, bool soften=false);
-
+  
   /**
    * Set the detector diffraction image (i.e. the square of the
    * amplitude of the wavefield at the detector).
@@ -296,7 +262,7 @@ public:
     beta = relaxation_parameter;
     set_algorithm(algorithm); //force algorithm constants to update
   };
-
+  
 
   /**
    * @return the number of pixel along the x-axis.
@@ -313,34 +279,15 @@ public:
     return ny;
   };
 
-  /**
-   *
-   * @return the ESW .
-   */
-
   const Complex_2D & get_exit_surface_wave(){
     return complex;
   }
-
-  /**
-   *
-   * @return the intensity at the detector.
-   */
-
-  const Double_2D & get_intensity(){
-    return intensity_sqrt;
-  }
-
-  /**
-   *
-   * @set the ESW
-   */
-
+  
   void set_exit_surface_wave(Complex_2D & esw){
     complex.copy(esw);
   }
 
-
+  
   /**
    * Set the algorithm. By default HIO is used.
    *
@@ -357,7 +304,7 @@ public:
    */ 
   void set_algorithm(int alg);
 
-  /**
+   /**
    * Iterative reconstruction algorithms can be expressed as a
    * combination of the following 5 operators:<br>\f$ \hat{P}_S
    * \hat{P}_F\f$, \f$\hat{P}_F \hat{P}_S\f$ , \f$ \hat{P}_S \f$ , \f$
@@ -392,11 +339,11 @@ public:
    * @param m10 Coefficient to the \f$ [ \hat{P}_S - \hat{I} ]x_k \f$ term
    */  
   void set_custom_algorithm(double m1, double m2, double m3, 
-      double m4, double m5, double m6, 
-      double m7, double m8,
-      double m9, double m10);
-
-
+			    double m4, double m5, double m6, 
+			    double m7, double m8,
+			    double m9, double m10);
+  
+  
   /**
    * Print the current algorithm to standard output. The algorithm is
    * in the form: <br> \f$ x_{k+1} = x_k + (a \hat{P}_S \hat{P}_F + b
@@ -436,7 +383,7 @@ public:
       return -1;
     return (alg->second);
   }
-
+  
   /**
    * Apply the shrinkwrap algorithm. The magnitude of the current ESW
    * estimate will be convolved with a Gaussian, thresholded and set
@@ -448,7 +395,7 @@ public:
    * as a fraction of the maximum pixel value. The default is 0.1 (10%).
    */  
   virtual void apply_shrinkwrap(double gauss_width=1.5, double threshold=0.1);  
-
+  
   /**
    * Get the current support. This might be useful if shrinkwrap has
    * been applied, as it allows you to get the updated support.
@@ -469,14 +416,6 @@ public:
   virtual void apply_support(Complex_2D & c);
 
   /**
-   * Apply the initial support constraint to a Double_2d.
-   * 
-   * @param c The field to apply the support constraint on
-   */
-  virtual void apply_support_init(Double_2D & c);
-
-
-  /**
    * Apply the intensity constraint. The ESW is projected to the
    * detector plane, the intensity is scaled to match the measured
    * data and the field is projected back into the sample plane.
@@ -486,7 +425,7 @@ public:
   virtual void project_intensity(Complex_2D & c);
 
 
-  /**
+   /**
    * The intensity is scaled to match the measured data. The error is
    * updated in this method.
    * 
@@ -530,22 +469,13 @@ public:
     transmission_constraint = &trans_constraint;
   }
 
-
-  /**
-   *Reset the array of best guesses to 1
-   */
+  
   void reset_best(){
     for(int i=0; i<n_best; i++)
       best_error_array[i]=1;
   }
-
-  /**
-   *Overwrite the current complex with a new complex
-   */
-  void initialise_guess(Complex_2D &);
-
-
-protected:
+  
+ protected:
 
   /**
    * Sets up the mapping between algorithm name and number. This is
@@ -565,7 +495,7 @@ protected:
    * as a fraction of the maximum pixel value. The default is 0.1 (10%).
    */    
   void apply_threshold(Double_2D & array, double threshold);
-
+  
 
   /**
    * Convolved "array" with a 2-D Gaussian function.  To speed up
@@ -579,27 +509,15 @@ protected:
    * Gaussian peak.
    */  
   void convolve(Double_2D & array, double gauss_width, int pixel_cut_off=4);
+  
 
-  /**
-   *Apply the support to a Complex_2d
-   *
-   *@param c The Complex_2d to have the support applied.
-   */
+  
   void support_constraint(Complex_2D & c);
-
-  /**
-   *Apply the support to a Double_2d, for applying the 
-   *initial support to the shrinkwrapped support
-   *
-   *@param c The Double_2d to have the support applied
-   */
-  void support_constraint_init(Double_2D & c);
-
 
   void reallocate_temp_complex_memory();
 
   void update_n_best();
-
+    
 };
 
 #endif
