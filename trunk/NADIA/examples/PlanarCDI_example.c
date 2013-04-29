@@ -43,22 +43,22 @@ int main(void){
   string support_file_name = "image_files/planar_support.tiff";
 
   //number of cycles of ER and HIO to repeat
-  const int cycles=2;
+  const int cycles=40;
 
   //number of error reduction iterations to perform before the HIO.
-  const int er_iterations1 = 50;
+  const int er_iterations1 = 10;
 
   //number of hybrid input-out iterations to perform.
-  const int hio_iterations = 100;
+  const int hio_iterations = 10;
 
   //number of error reduction iterations to perform after the HIO.
-  const int er_iterations2 = 50;
+  const int er_iterations2 = 10;
 
   //output the current image every "output_iterations"
   int output_iterations = 10;
 
   //apply the shrinkwrap algorithm every "shrinkwrap iterations"
-  int shrinkwrap_iterations = 50;
+  int shrinkwrap_iterations = 10;
 
   //the number of pixels in x and y
   int nx = 1024;
@@ -163,7 +163,8 @@ int main(void){
     }
 
     //now change to the error reduction algorithm 
-    planar.set_algorithm(HIO);
+    planar.set_relaxation_parameter(0.5);
+    planar.set_algorithm(DM);
 
     for(int i=er_iterations1; i<(hio_iterations+er_iterations1); i++){
 

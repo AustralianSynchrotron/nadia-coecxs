@@ -1,9 +1,3 @@
-// Copyright 2011 Nadia Davidson for The ARC Centre of Excellence in 
-// Coherent X-ray Science. This program is distributed under the GNU  
-// General Public License. We also ask that you cite this software in 
-// publications where you made use of it for any part of the data     
-// analysis. 
-
 /**
  * @file FresnelCDI_WF.h
  * @class FresnelCDI_WF
@@ -28,7 +22,7 @@
 #ifndef FCDI_WF_H
 #define FCDI_WF_H
 
-#include <BaseCDI.h>
+#include "BaseCDI.h"
 
 
 //forward declarations
@@ -50,13 +44,9 @@ class FresnelCDI_WF: public BaseCDI{
   /** the pixel size */
   double pixel_length;
 
-  /** an array which holds a constants we use when propagating between
+   /** an array which holds a constants we use when propagating between
        difference planes */
   Complex_2D coefficient;
-
-  /** an array to hold the phase and magnitude at the detector plane */
-
-  Complex_2D complex_detector;
   
   /** an array which holds a constants we use when propagating between
       difference planes */
@@ -189,12 +179,6 @@ class FresnelCDI_WF: public BaseCDI{
 
   
   void multiply_factors(Complex_2D & c, int direction);
-
-  /** Returns the estimate at the detector */
-
-  Complex_2D get_detector(){
-    return complex_detector;
-  };
 
 };
 

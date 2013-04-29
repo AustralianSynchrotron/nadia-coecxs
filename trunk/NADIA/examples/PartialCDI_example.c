@@ -64,8 +64,8 @@ int main(void){
   //The number of legendre polynomials and the square root of the modes
   //The number of legendre polynomials must be greater than or equal to the 
   //number of modes
-  int nleg = 32;
-  int nmodes = 7;
+  int nleg = 7;
+  int nmodes = 6;
 
   /**** get the diffraction data from file and read into an array *****/
 

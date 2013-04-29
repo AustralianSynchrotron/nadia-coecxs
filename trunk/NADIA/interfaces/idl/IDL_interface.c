@@ -264,10 +264,13 @@ void common_init(int argc, void * argv[], int max_args){
   int ny = *(int*) argv[0];
   int nx = *(int*) argv[1];
 
+//  std::cout<<"nx is "<<nx<<" and ny is "<<ny<<"\n\n";
+
   esw = new Complex_2D(nx,ny);  
 
-  if(argc == max_args)
+  if(argc == max_args){
     copy_to_complex_2d(*esw,(IDL_COMPLEX*) argv[max_args-1]);
+  }
 
 }
 
@@ -312,7 +315,7 @@ extern "C" void IDL_fresnel_init(int argc, void * argv[])
 extern "C" void IDL_partial_init(int argc, void * argv[])
 {
 
-  common_init(argc, argv, 12);
+  common_init(argc, argv, 11);
 
   reco = new PartialCDI(*esw,
       *(double*) argv[2],
@@ -322,8 +325,7 @@ extern "C" void IDL_partial_init(int argc, void * argv[])
       *(double*) argv[6],
       *(double*) argv[7],
       *(double*) argv[8],
-      *(int*) argv[9],
-      *(int*) argv[10]);
+      *(double*) argv[9]);
 
 }
 
@@ -337,7 +339,8 @@ extern "C" void IDL_part_char_init(int argc, void * argv[])
       *(double*) argv[3],
       *(double*) argv[4],
       *(double*) argv[5],
-      *(int*) argv[6]);
+      *(double*) argv[6]);
+
 }
 
 extern "C" void IDL_poly_init(int argc, void * argv[])

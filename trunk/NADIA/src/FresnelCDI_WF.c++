@@ -1,9 +1,3 @@
-// Copyright 2011 Nadia Davidson for The ARC Centre of Excellence in 
-// Coherent X-ray Science. This program is distributed under the GNU  
-// General Public License. We also ask that you cite this software in 
-// publications where you made use of it for any part of the data     
-// analysis. 
-
 #include <iostream>
 #include <fstream>
 #include <math.h>
@@ -12,7 +6,7 @@
 #include <cstdlib> 
 #include <Complex_2D.h>
 #include <FresnelCDI_WF.h>
-#include <io.h> //
+#include <io.h> 
 #include <sstream>
 
 using namespace std;
@@ -31,8 +25,7 @@ FresnelCDI_WF::FresnelCDI_WF(Complex_2D & initial_guess,
    zone_to_focal_length(zone_focal_length),
    focal_to_detector_length(focal_detector_length),
    pixel_length(pixel_size),
-   coefficient(nx/2,ny/2),
-   complex_detector(nx, ny)
+   coefficient(nx/2,ny/2)
    //   backward_coefficient(nx,ny)
 {
 
@@ -128,23 +121,8 @@ void FresnelCDI_WF::initialise_estimate(int seed){
 
 int FresnelCDI_WF::iterate(){
 
-  //apply_support(complex);
-
   //Double_2D result(nx,ny);
-
-  propagate_to_detector(complex);
-
-  //  complex.get_2d(PHASE,result);
-  // write_ppm("b4.ppm",result);
-  //complex_detector=complex;
-
-  scale_intensity(complex);
-
-  complex_detector=complex;
-
-  //  complex.get_2d(PHASE,result);
-  // write_ppm("b5.ppm",result);
-
+  
   // complex.get_2d(PHASE,result);
   // write_ppm("b0.ppm",result);
 
@@ -157,13 +135,13 @@ int FresnelCDI_WF::iterate(){
 
   //  complex.get_2d(PHASE,result);
   // write_ppm("b3.ppm",result);
-
-//  propagate_to_detector(complex);
+  
+  propagate_to_detector(complex);
 
   //  complex.get_2d(PHASE,result);
   // write_ppm("b4.ppm",result);
-
-//  scale_intensity(complex);
+  
+  scale_intensity(complex);
 
   //  complex.get_2d(PHASE,result);
   // write_ppm("b5.ppm",result);

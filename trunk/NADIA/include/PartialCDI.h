@@ -110,9 +110,9 @@ public:
       double pysize=1.0,
       double energy=1.0,
       double zsd=1.0,
-      unsigned int n_best=0,
       int nleg = 2,
-      int nmode = 2
+      int nmode = 2,
+      unsigned int n_best=0
       );
 
 

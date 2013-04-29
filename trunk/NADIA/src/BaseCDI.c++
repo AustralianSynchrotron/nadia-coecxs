@@ -74,7 +74,6 @@ BaseCDI::BaseCDI(Complex_2D & initial_guess, unsigned int n_best)
 
     algorithm=CUSTOM;
     set_algorithm(ER);
-
   };
 
 BaseCDI::~BaseCDI(){
@@ -116,6 +115,7 @@ void BaseCDI::set_support(const Double_2D & object_support, bool soften){
   //edges
   if(soften) 
     convolve(support,3,5);
+
 }
 
 void BaseCDI::set_support_new(const Double_2D & object_support, bool soften){
@@ -132,11 +132,11 @@ void BaseCDI::set_support_new(const Double_2D & object_support, bool soften){
 }
 
 
-  void BaseCDI::set_beam_stop(const Double_2D & beam_stop_region){
-    if(beam_stop==0)
-      beam_stop = new Double_2D(nx, ny);
-    beam_stop->copy(beam_stop_region);
-  }
+void BaseCDI::set_beam_stop(const Double_2D & beam_stop_region){
+  if(beam_stop==0)
+    beam_stop = new Double_2D(nx, ny);
+  beam_stop->copy(beam_stop_region);
+}
 
 void BaseCDI::set_intensity(const Double_2D &detector_intensity){
   for(int i=0; i< nx; i++){
@@ -158,8 +158,8 @@ void BaseCDI::apply_support(Complex_2D & c){
 
 void BaseCDI::apply_support_init(Double_2D & c){
   support_constraint_init(c);
-//  if(transmission_constraint)
-//  transmission_constraint->apply_constraint(c);
+  //  if(transmission_constraint)
+  //  transmission_constraint->apply_constraint(c);
 }
 
 void BaseCDI::support_constraint(Complex_2D & c){
@@ -254,7 +254,7 @@ void BaseCDI::set_algorithm(int alg){
     set_custom_algorithm(0,beta,1,0,0,0,0,0,0,0);
     break;
   case(DM): 
-    set_custom_algorithm(beta,0,-1,0,-1,0,0,0,0,0);
+    set_custom_algorithm(beta,0,1,0,1,0,0,0,0,0);
     break;
   case(SF):
     set_custom_algorithm(0,1,0,1,0,0,0,0,0,0);
@@ -545,11 +545,11 @@ void BaseCDI::apply_threshold(Double_2D & array,
   }
 }
 
-  void BaseCDI::set_fftw_type(int type){
-    if(temp_complex_PFS)
-      temp_complex_PFS->set_fftw_type(type);
-    if(temp_complex_PF)
-      temp_complex_PF->set_fftw_type(type);
-    complex.set_fftw_type(type);
-  }
+void BaseCDI::set_fftw_type(int type){
+  if(temp_complex_PFS)
+    temp_complex_PFS->set_fftw_type(type);
+  if(temp_complex_PF)
+    temp_complex_PF->set_fftw_type(type);
+  complex.set_fftw_type(type);
+}
 

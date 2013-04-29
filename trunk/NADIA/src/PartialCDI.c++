@@ -30,11 +30,11 @@ PartialCDI::PartialCDI(Complex_2D & initial_guess,
     double ipysize,
     double energy,
     double zsd,
-    unsigned int n_best,
     int nleg,
-    int nmode
+    int nmode,
+    unsigned int n_best
     )
-:BaseCDI(initial_guess,n_best),
+  :BaseCDI(initial_guess,0),
   pxsize(ipxsize),
   pysize(ipysize),
   energy(energy),
@@ -77,6 +77,7 @@ PartialCDI::PartialCDI(Complex_2D & initial_guess,
 
 
     initialise_matrices(nleg, nmode);
+
   }
 
 //destructor for cleaning up
@@ -117,12 +118,12 @@ void PartialCDI::set_transmission(Complex_2D & new_transmission){
 void PartialCDI::initialise_estimate(int seed){
 
   if(nleg < nmode){
-   nleg = nmode;
+    nleg = nmode;
 
     std::cout<<"The number of Legendre Polynomials "
-   <<"must be greater or equal to the number of modes."
-   <<" So the number of Legendre polynomials has been "
-   <<" set to the number of modes, "<<nleg <<endl;
+      <<"must be greater or equal to the number of modes."
+      <<" So the number of Legendre polynomials has been "
+      <<" set to the number of modes, "<<nleg <<endl;
   }
 
   //initialise the random number generator
@@ -409,8 +410,8 @@ void PartialCDI::update_transmission(){
     if(modes > leg){
 
       cout << "The order of the legendre approximation"
-       <<" must be greater than the number of modes. "
-       <<"The matrices have not bee initialised" <<endl;
+	<<" must be greater than the number of modes. "
+	<<"The matrices have not bee initialised" <<endl;
 
       return;
     }
@@ -420,6 +421,7 @@ void PartialCDI::update_transmission(){
 
     eigen.clear();
 
+    //    std::cout<<nleg<<"\n";
     Double_2D roots = legroots(nleg);
 
     vector<double> rootval;

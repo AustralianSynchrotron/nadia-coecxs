@@ -103,7 +103,7 @@ int main(void){
   Complex_2D object_estimate(nx,ny);
   //read_image(initial_guess_name, object_estimate, nx, ny);
 
-  PartialCharCDI partial(object_estimate, z_sd, e_beam, psize_x, psize_y, 4);
+  PartialCharCDI partial(object_estimate, psize_x, psize_y, e_beam, z_sd, 4);
 
   
   
@@ -124,19 +124,6 @@ int main(void){
   ostringstream temp_strsupp ( ostringstream::out ) ;
   temp_strsupp << "support_tmp.ppm";
   write_image(temp_strsupp.str(), support);
-/*
-  for(int i=0; i< nmodes*nmodes; i++){
-    ostringstream temp_str0 ( ostringstream::out ) ;
-    partial.get_mode(i).get_2d(MAG,result);
-    temp_str0 << "mode"<<i<<".ppm";
-    write_image(temp_str0.str(), result);
-  }
-
-  ostringstream temp_str0 ( ostringstream::out ) ;
-  object_estimate.get_2d(MAG,result);
-  temp_str0 << "modes.ppm";
-  write_image(temp_str0.str(), result);
-*/
 
   //Initialise the current object ESW with a random numbers
   //"0" is the seed to the random number generator

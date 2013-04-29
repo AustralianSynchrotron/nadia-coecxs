@@ -10,7 +10,7 @@
 #include <vector>
 #include <Double_2D.h>
 
-#define DEFAULT_GAUSSIAN_KERNEL_SIZE_IN_STD_DEVIATIONS 5 // Use a matrix that is (at least) this many std deviations wide/high to discretly represent gaussians
+#define DEFAULT_GAUSSIAN_KERNEL_SIZE_IN_STD_DEVIATIONS 3 // Use a matrix that is (at least) this many std deviations wide/high to discretly represent gaussians
 
 
 //class Double_2D;

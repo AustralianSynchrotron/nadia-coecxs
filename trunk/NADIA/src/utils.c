@@ -14,6 +14,7 @@
 #include <FresnelCDI.h>
 #include <cstdlib>
 #include <cmath>
+#include <limits>
 //#include <math.h>
 #include <string>
 #include <iomanip>
@@ -1823,16 +1824,31 @@ void solve_gep(Complex_2D & A, Complex_2D & B, vector<double> & eigen){
     //std::cout<< eigenfort[i]/4<<" "<<eigen.at(i)<<" is eigen"<<endl;
 
     for(int j=0; j<A.get_size_y(); j++){
-
+/*
+      if(Afort[2*(j+A.get_size_x()*i)]<1e-30){
+	Afort[2*(j+A.get_size_x()*i)]=0;
+      }
+      if(Afort[2*(j+A.get_size_x()*i)+1]<1e-30){
+	Afort[2*(j+A.get_size_x()*i)+1]=0;
+      }
+      if(Bfort[2*(j+B.get_size_x()*i)]<1e-30){
+	Bfort[2*(j+B.get_size_x()*i)]=0;
+      }
+      if(Bfort[2*(j+B.get_size_x()*i)+1]<1e-30){
+	Bfort[2*(j+B.get_size_x()*i)+1]=0;
+      }
+*/
       A.set_real(j,i, Afort[2*(j+A.get_size_x()*i)]);
+      //      std::cout<<A.get_real(j,i)<<"\n";
       A.set_imag(j,i, Afort[2*(j+A.get_size_x()*i)+1]);
       B.set_real(j,i, Bfort[2*(j+B.get_size_x()*i)]);
       B.set_imag(j,i, Bfort[2*(j+B.get_size_x()*i)+1]);
 
+
     }
   }
 
-return;
+  return;
 }
 
 ////////////////////////////////
@@ -1841,10 +1857,10 @@ return;
 /** Safe malloc() - exits with message on out of memory error */
 void* smalloc(size_t size){
   void *p = malloc(size);
-  
+
   if(p == NULL){
     fprintf(stderr,"\nSystem out of memory. Request for %zd bytes denied.\n \
-\tterminating...\n", size);
+	\tterminating...\n", size);
     exit(1);
   }
   return p;
@@ -1880,7 +1896,8 @@ double* get_gaussian_vector(double std_dev, unsigned int n){
     gaussian[i] = exp(-0.5*sq(x/std_dev));
     sum += gaussian[i]; // Increment the sum (for normalisation later)
   }
-  
+  //std::cout<<sum<<"\n";
+
   // Set the centre point if there is one:
   if (n%2 != 0){
     gaussian[(n-1)/2] = 1; // exp(-0.5*sq(0/std_dev)) = exp(0) = 1
@@ -1893,7 +1910,8 @@ double* get_gaussian_vector(double std_dev, unsigned int n){
     mirror_coord = (n-1) - i; // Coord from the first half with the same value (thanks to reflection symmetry)
     gaussian[i] = gaussian[mirror_coord]; // Set this half of the vector by copying the first half in reverse
     sum += gaussian[i];
- }
+  }
+  //std::cout<<sum<<"\n";
 
   // Normalise:
   for (int i=0; i<n; i++){
@@ -1923,26 +1941,41 @@ Double_2D vector_convolution(Double_2D const & m, double* v, unsigned int n, boo
   int l = 0; // v index coordinate
   int permuted_coord = 0; // The coordinate (either i or j) that will be shifted up or down at each pixel to form a vector to take the dot product with v.
   int min_k = 0, max_k = 0; // Iteration bounds (on the permutation of permuted_coord), calculated to only select regions where the vector and matrix overlap.
-	for(int i=0; i<m.get_size_x(); i++){
-	  for(int j=0; j<m.get_size_y(); j++){
+  for(int i=0; i<m.get_size_x(); i++){
+    for(int j=0; j<m.get_size_y(); j++){
 
       // Set which coord will be permuted to loop the the vector-matrix overlap region
-      permuted_coord = rowwise ? i:j;
+      if(rowwise){
+	permuted_coord=i;
+      }else{
+	permuted_coord=j;
+      }
+      //permuted_coord = rowwise ? i:j;
 
       // Set bounds to loop over regions in m where the vector centred at (i,j) overlaps the matrix
       min_k = max(permuted_coord - radius, 0);
       max_k = min(permuted_coord + radius + 1, m.get_size_y());
-      
+
       // For pixel ((k,j) if rowwise else (i,k)) in m that overlaps the gaussian vector centred on (i,j). Calculate the dot-product of v and this region:
       for(int k=min_k; k<max_k; k++){
-        l = k - permuted_coord + radius; // Index of vector element overlapping the pixel (i,k) [or (k,j)] in m
-        
-        pixel = rowwise ? m.get(k, j):m.get(i, k); // Select pixel by shifting either row or column to k
+	l = k - permuted_coord + radius; // Index of vector element overlapping the pixel (i,k) [or (k,j)] in m
 
-        sum += pixel * v[l]; // Add vector-element-weighted pixel to sum
+	if(rowwise){
+	  pixel=m.get(k, j);
+	}else{
+	  pixel=m.get(i, k);
+	}
+//	pixel = rowwise ? m.get(k, j):m.get(i, k); // Select pixel by shifting either row or column to k
+
+	sum += pixel * v[l]; // Add vector-element-weighted pixel to sum
+	//std::cout<<sum<<"\n";
       }
 
       convolution.set(i, j, sum);
+
+//      if(!isnormal(sum)){
+//	std::cout<<"BAD!!!!!\n\n";
+ //     }
 
       sum = 0;
     }
@@ -1960,7 +1993,7 @@ Double_2D gaussian_convolution(Double_2D const & m, double lx, double ly, double
   // Ensure that std_deviations are positive
   lx = fabs(lx);
   ly = fabs(ly);
- 
+
   // Calculate gaussian vector sizes based on std_deviation to give fixed accuracy:
   unsigned int x_gaussian_length = (unsigned int) ceil(lx * kernel_x_size_in_std_dev);
   if (x_gaussian_length%2 == 0){ // Enforce that length is odd to simplify computation
@@ -2026,19 +2059,19 @@ double minimise_function(MathFunction & f, double left, double guess, double rig
     // Choose the new bracket by evaluating f at guess and at x
     if(f.call(guess) < f.call(x)){
       if(left_bracket_size > right_bracket_size){
-        left = x;
+	left = x;
       } else{
-        right = x;
+	right = x;
       }
     } else{
       if(left_bracket_size > right_bracket_size){
-        right = guess;
+	right = guess;
       } else{
-        left = guess;
+	left = guess;
       }
       guess = x;
     }
   }
-  
+
   return guess;
 }

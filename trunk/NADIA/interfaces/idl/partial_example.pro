@@ -1,10 +1,10 @@
 .Compile NADIA_interface.pro
 
-support = nadia_read_tiff(1024,1024,'../../examples/image_files/planar_support.tiff')
-data = nadia_read_tiff(1024,1024,'../../examples/image_files/planar_data.tif')
+support = nadia_read_tiff(2048,2048,'../../examples/image_files/part_support.tiff')
+data = nadia_read_dbin(2048,2048,'../../examples/image_files/part_data.dbin')
 
 
-nadia_init_partial, data, support, 0.9, 0.0000133, 0.04, 0.0000135, 0.0000135, 1400.0, 1.4, 7.0, 6.0
+nadia_init_partial, data, support, 0.0000133, 0.04, 0.0000135, 0.0000135, 1400.0, 1.4, 7, 6
 
 nadia_set_algorithm, 'HIO'
 
