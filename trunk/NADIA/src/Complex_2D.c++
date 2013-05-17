@@ -21,7 +21,7 @@ Complex_2D::Complex_2D(int x_size, int y_size){
 #ifndef DOUBLE_PRECISION
   array = (fftwf_complex*) fftwf_malloc(sizeof(fftwf_complex)*nx*ny);
 #else
-  array = (fftw_complex*) fftw_malloc(sizeof(fftwf_complex)*nx*ny);
+  array = (fftw_complex*) fftw_malloc(sizeof(fftw_complex)*nx*ny);
 #endif
 
   //initalise the fftw plans to null (not created yet. We will
@@ -39,9 +39,9 @@ Complex_2D::Complex_2D(const Complex_2D& object){
 
 
 #ifndef DOUBLE_PRECISION
-  array = (fftwf_complex*) fftwf_malloc(sizeof(fftwf_complex)*nx*ny);//object.get_size_x()*object.get_size_y());
+  array = (fftwf_complex*) fftwf_malloc(sizeof(fftwf_complex)*nx*ny);
 #else
-  array = (fftw_complex*) fftw_malloc(sizeof(fftwf_complex)*object.get_size_x()*object.get_size_y());
+  array = (fftw_complex*) fftw_malloc(sizeof(fftw_complex)*nx*ny);
 #endif
 
   //initalise the fftw plans to null (not created yet. We will

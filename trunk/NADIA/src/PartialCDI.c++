@@ -40,7 +40,7 @@ PartialCDI::PartialCDI(Complex_2D & initial_guess,
   energy(energy),
   zsd(zsd),
   transmission(nx,ny),
-  threshold(1.0e-5),
+  threshold(5.0e-3),
   iterations_per_cycle(1){
 
     x_position.clear();
@@ -110,6 +110,17 @@ void PartialCDI::set_transmission(Complex_2D & new_transmission){
 
 }
 
+//set the transmission function 
+//this function can be used to set the initial estimate.
+void PartialCDI::set_threshold(double new_theshold){
+
+  threshold = new_theshold;
+  initialise_matrices(nleg, nmode);
+
+  return;
+}
+
+
 //set the initial guess.
 //fills the transmission function with a random 
 //value between 0 and 1 within the support, and
@@ -169,6 +180,7 @@ int PartialCDI::iterate(){
     singleCDI.push_back(singlemode.at(mode));
     apply_transmission(singleCDI.at(mode));
   }
+
 
   if(algorithm==ER){
     for(int mode=0; mode<singleCDI.size(); mode++){
@@ -273,6 +285,7 @@ int PartialCDI::iterate(){
   update_transmission();
   update_n_best();
   return SUCCESS;
+
 }
 
 //uses the complex_2d multiply function to apply 
@@ -321,6 +334,7 @@ void PartialCDI::scale_intensity(vector<Complex_2D> & c){
 	calc_int=sqrt(magnitude.get(i,j)); 
 
 	scaled_mag=c.back().get_mag(i,j)*measured_int/calc_int;
+	//std::cout<<scaled_mag<<"\n";
 	c.back().set_mag(i,j,scaled_mag);
 
 	//calculate the error
@@ -457,6 +471,7 @@ void PartialCDI::update_transmission(){
 	  mag_total += eigen.at(mode)*singlemode.at(mode).get_mag(i,j)*singlemode.at(mode).get_mag(i,j);
 	}
 	mags.set_real(i,j,mag_total);
+	//std::cout<<mag_total<<"\n";
       }
     }
 
@@ -613,10 +628,12 @@ void PartialCDI::update_transmission(){
 
 	      }
 	    }
+
 	    tmp.set_real(i, j, val_real);
 	    tmp.set_imag(i, j, val_imag);
 	  }
 	}
+
 	singlemode.push_back(tmp);
 
 	e_mode++;

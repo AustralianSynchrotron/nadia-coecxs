@@ -120,25 +120,26 @@ int main(void){
 
   partial.set_threshold(+0.4e-5);
 
+
   //set the algorithm to hybrid input-output
   partial.set_algorithm(ER);
 
   ostringstream temp_strsupp ( ostringstream::out ) ;
   temp_strsupp << "support_tmp.ppm";
-  write_image(temp_strsupp.str(), support);
-/*
-  for(int i=0; i< nmodes*nmodes; i++){
-    ostringstream temp_str0 ( ostringstream::out ) ;
-    partial.get_mode(i).get_2d(MAG,result);
-    temp_str0 << "mode"<<i<<".ppm";
-    write_image(temp_str0.str(), result);
-  }
+  write_image(temp_strsupp.str(), data);
+  /*
+     for(int i=0; i< nmodes*nmodes; i++){
+     ostringstream temp_str0 ( ostringstream::out ) ;
+     partial.get_mode(i).get_2d(MAG,result);
+     temp_str0 << "mode"<<i<<".ppm";
+     write_image(temp_str0.str(), result);
+     }
 
-  ostringstream temp_str0 ( ostringstream::out ) ;
-  object_estimate.get_2d(MAG,result);
-  temp_str0 << "modes.ppm";
-  write_image(temp_str0.str(), result);
-*/
+     ostringstream temp_str0 ( ostringstream::out ) ;
+     object_estimate.get_2d(MAG,result);
+     temp_str0 << "modes.ppm";
+     write_image(temp_str0.str(), result);
+   */
 
   //Initialise the current object ESW with a random numbers
   //"0" is the seed to the random number generator
@@ -250,7 +251,7 @@ int main(void){
   //And we are done. "object_estimate" contained the final estimate of
   //the ESW.
 
-//  ProfilerStop();
+  //  ProfilerStop();
   write_cplx("PCDI_trans.cplx", object_estimate);
 
   return 0;

@@ -187,9 +187,7 @@ public:
    * Set the minimum contribution of a mode as a proportion of the 
    * dominant mode for it to be included in the reconstruction 
    */
-  void set_threshold(double d){
-    threshold=d;
-  }
+  void set_threshold(double new_threshold);
 
 private:
 

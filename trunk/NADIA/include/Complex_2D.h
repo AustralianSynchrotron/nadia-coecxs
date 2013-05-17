@@ -144,7 +144,7 @@ class Complex_2D{
 #ifndef DOUBLE_PRECISION
     array = (fftwf_complex*) fftwf_malloc(sizeof(fftwf_complex)*rhs.get_size_x()*rhs.get_size_y());
 #else
-    array = (fftw_complex*) fftw_malloc(sizeof(fftwf_complex)*rhs.get_size_x()*rhs.get_size_y());
+    array = (fftw_complex*) fftw_malloc(sizeof(fftw_complex)*rhs.get_size_x()*rhs.get_size_y());
 #endif
 
     //initalise the fftw plans to null (not created yet. We will
