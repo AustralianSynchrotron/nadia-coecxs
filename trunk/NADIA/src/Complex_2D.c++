@@ -61,6 +61,7 @@ Complex_2D::Complex_2D(const Complex_2D& object){
 
 Complex_2D::~Complex_2D(){
 
+
 #ifndef DOUBLE_PRECISION
   //free the memory of the array.
   fftwf_free(array);
@@ -373,14 +374,19 @@ Complex_2D Complex_2D::get_unpadded(int x_add, int y_add){
 }
 
 
-
-
 void Complex_2D::initialise_fft(){
+
+
   //creating the plan will erase the content of the array
   //so we need to be a bit tricky here.
 
 #ifndef DOUBLE_PRECISION
   //make a new array 
+
+  #if defined(MULTI_THREADED)
+	int numthreads=fftwf_init_threads();
+	fftwf_plan_with_nthreads(NUM_THREADS);;
+  #endif
   fftwf_complex * tmp_array;
   tmp_array = (fftwf_complex*) fftwf_malloc(sizeof(fftwf_complex)*nx*ny);
 
@@ -396,6 +402,11 @@ void Complex_2D::initialise_fft(){
   fftwf_free(array);
 
 #else
+  #if defined(MULTI_THREADED)
+	int numthreads=fftw_init_threads();
+	fftw_plan_with_nthreads(NUM_THREADS);;
+  #endif
+
   fftw_complex * tmp_array;
   tmp_array = (fftw_complex*) fftw_malloc(sizeof(fftw_complex)*nx*ny);
 

@@ -34,6 +34,11 @@ AC_ARG_WITH(sz-lib, [  --with-sz_lib
 		  specify the directory where the sz libraries can be found])
 AC_ARG_WITH(jpeg-lib, [  --with-jpeg_lib     
 		  specify the directory where the jpeg libraries can be found])
+AC_ARG_WITH(lapack-lib, [  --with-lapack_lib     
+		  specify the directory where the lapack libraries can be found])
+AC_ARG_WITH(profiler-lib, [  --with-profiler_lib
+                  specify the directory where the gperftools libraries can be found])
+
 
 #Check to see if the user wants the IDL wrappers compiled
 #and check that the idl_export.h header can be found
@@ -47,13 +52,29 @@ AC_ARG_WITH(jpeg-lib, [  --with-jpeg_lib
 AC_ARG_ENABLE([double-precision], [ --enable-double-precision
 			use double rather than single precision in the reconstructions ])
 
+AC_ARG_ENABLE([threads], [--enable-threads
+			 use multithreaded fftw routines ])
+
+#PYTHON_INC=/usr/include/python2.7
+#PYTHON_LIB=/usr/lib/python2.7
+
+
 FFTW_LIB=fftw3f
 FFTW_LIB_FUNC=fftwf_plan_dft_2d
+LIBNADIAA=libNADIA.a
+LIBNADIASO=libNADIA.so
+
+FFTW_MULTI_LIB=fftw3f_threads
+FFTW_MULTI_LIB_FUNC=fftwf_init_threads
 
 if test "$enable_double_precision" = "yes"
 then
 	FFTW_LIB=fftw3
 	FFTW_LIB_FUNC=fftw_plan_dft_2d
+	FFTW_MULTI_LIB=fftw3_threads
+	FFTW_MULTI_LIB_FUNC=fftw_init_threads
+#	LIBNADIAA=libNADIAd.a
+#	LIBNADIASO=libNADIAd.so
 	CXXFLAGS="$CXXFLAGS -DDOUBLE_PRECISION"
 fi
 
@@ -151,6 +172,18 @@ then
 	LD_RUN_PATH="$LD_RUN_PATH:$with_jpeg_lib"
 fi
 
+if test "$with_lapack_lib" != ""
+then
+	LDFLAGS="-L$with_lapack_lib $LDFLAGS"
+	LD_RUN_PATH="$LD_RUN_PATH:$with_lapack_lib"
+fi
+
+if test "$with_profiler_lib" != ""
+then 
+	LDFLAGS="-L$with_profiler_lib $LDFLAGS"
+        LD_RUN_PATH="$LD_RUN_PATH:$with_profiler_lib"
+fi
+
 
 ### Finished setting up the variables. Now check the libraries and headers.
 
@@ -179,7 +212,11 @@ AC_CHECK_LIB([$FFTW_LIB], [$FFTW_LIB_FUNC], [], [
   exit -1
 ])
 
+
 AC_CHECK_LIB([m], [main])
+AC_CHECK_LIB([pthread], [main])
+
+AC_CHECK_LIB([profiler],[main])
 
 #Checks for mfhdf
 mfhdf_headers=false
@@ -250,7 +287,25 @@ AC_CHECK_HEADER([tiffio.h], [], [
   exit -1
 ])
 
+AC_CHECK_LIB([lapack], [main],[], [
+  echo "" &&
+  echo "ERROR: Could not find the lapack library." &&
+  echo "       Please specify the location with: " &&
+  echo "       './configure --with-lapack_lib=<path_to_lapack_library> " &&
+  exit -1
+])
 
+
+if test "$enable_threads" = "yes"
+then
+    AC_CHECK_LIB([$FFTW_MULTI_LIB], [$FFTW_MULTI_LIB_FUNC])
+    NUM_CPUS=`grep -c processor /proc/cpuinfo`
+    echo "num cpus available... $NUM_CPUS"
+    CXXFLAGS="$CXXFLAGS -DMULTI_THREADED -DNUM_THREADS=$NUM_CPUS" 
+fi
+
+#AC_CHECK_LIB([python][main])
+#AC_CHECK_HEADER()
 #Checks for typedefs, structures, and compiler characteristics.
 #AC_HEADER_STDBOOL
 #AC_C_INLINE
@@ -266,5 +321,9 @@ AC_CONFIG_FILES([Makefile
 
 AC_SUBST(LD_RUN_PATH,$LD_RUN_PATH)
 AC_SUBST(BASE,$PWD)
+#AC_SUBST(PYTHON_INC,$PYTHON_INC)
+#AC_SUBST(PYTHON_LIB,$PYTHON_LIB)
+AC_SUBST(LIBNADIAA,$LIBNADIAA)
+AC_SUBST(LIBNADIASO,$LIBNADIASO)
 
 AC_OUTPUT

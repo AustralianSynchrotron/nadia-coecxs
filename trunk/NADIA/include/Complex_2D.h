@@ -26,6 +26,12 @@
 #include <fftw3.h>
 #include <Double_2D.h>
 
+
+#ifndef NUM_THREADS
+#define NUM_THREADS 1
+#endif
+
+
 //class Double_2D;
 
 /** the function failed */
@@ -70,6 +76,7 @@ class Complex_2D{
 
   /* A fftw plan for backward fourier transforms */
   fftwf_plan f_backward;
+
 
 #else //If we are using double precision
 
