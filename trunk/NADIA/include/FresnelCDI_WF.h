@@ -175,9 +175,12 @@ class FresnelCDI_WF: public BaseCDI{
   void set_custom_algorithm(double m1, double m2, double m3, double m4, 
 			    double m5, double m6, double m7, double m8, 
 			    double m9, double m10){
+    std::cout << "WARNING: Algorithm can not be set when performing Fresnel "
+      << "CDI white field recovery" << std::endl;
+
   };
 
-  
+
   void multiply_factors(Complex_2D & c, int direction);
 
 };

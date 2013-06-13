@@ -105,13 +105,13 @@ int main(void){
   //Distance between detector and sampl in metres
   double z_sd=1.4;
 
-  PartialCDI my_partial(input, lcx, lcy, psize_x, psize_y, e_beam, z_sd, 4, 0);
+  PartialCDI my_partial(input, lcx, lcy, psize_x, psize_y, e_beam, z_sd, nleg, nmodes);
 
   Complex_2D pattern(n_x,n_y);
 
   my_partial.set_threshold(+1.0e-6);
 
-  my_partial.initialise_matrices(nleg, nmodes);
+  //my_partial.initialise_matrices(nleg, nmodes);
 
   Double_2D result(n_x, n_y);
 

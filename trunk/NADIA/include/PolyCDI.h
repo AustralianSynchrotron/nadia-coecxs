@@ -114,15 +114,6 @@ public:
 
   void initialise_estimate(int seed);
 
-  /** Initialise the wave matrices */
-  void initialise_matrices(int leg, int modes);
-
-  /**
-   *uses the complex_2d multiply function to apply 
-   *the transmission function
-   */
-  void apply_transmission(Complex_2D & c);
-
   /** scale the highest occupancy mode 
    * this overwrites the function of the same
    * name in BaseCDI
@@ -159,36 +150,6 @@ public:
    * highest occupancy mode at the detector
    */
   void update_transmission();
-
-  /**
-   * generate the S and J matrices for the decomposition 
-   * of the partially coherent wave where JC=nSC where
-   * H = integral(P*l(r1)J(r1, r2)Pm(r2)) dr1 dr2 and 
-   * S=integral(P*l(r)pm(r))dr where Pl is an orhtonormal
-   * basis set, in this case, the Legendre polynomials
-   */
-  void initialse_matrices(int leg, int modes);
-
-  /**
-   * the J matrix where J = integral(P*l(r1)J(r1, r2)Pm(r2))dr1dr2 
-   * the x and y are computed seperately, then multiplied together.
-   * The result is a matrix of xn+y by in+j where 
-   */
-  void fill_jmatrix(Double_2D legmatrix, Double_2D roots);
-
-  /**
-   * the S matrix = integral(P*l(r)pm(r))dr = 2/(2n+1)
-   * from the orthogonality requirments of Legendre 
-   * Polynomials. We then turn it in to a 2D matrix
-   * for the x and y dimensions
-   */
-  void fill_smatrix(Double_2D legmatrix, Double_2D roots);
-
-  /**
-   * fill a vector of Complex_2D for single modes. These 
-   * modes do not evolve over time, and so are not BaseCDI's
-   */
-  void fill_modes(Complex_2D & c);
 
   /////////////////////////////////
   // Get and setter methods

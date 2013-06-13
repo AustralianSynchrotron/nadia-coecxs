@@ -140,15 +140,6 @@ public:
    */ 
   int iterate();
 
-  /**
-   * generate the S and J matrices for the decomposition 
-   * of the partially coherent wave where JC=nSC where
-   * H = integral(P*l(r1)J(r1, r2)Pm(r2)) dr1 dr2 and 
-   * S=integral(P*l(r)pm(r))dr where Pl is an orhtonormal
-   * basis set, in this case, the Legendre polynomials
-   */
-  void initialise_matrices(int leg, int modes);
-
   /////////////////////////////////
   // Get and setter methods
   /////////////////////////////////
@@ -190,6 +181,17 @@ public:
   void set_threshold(double new_threshold);
 
 private:
+
+  /**
+   * generate the S and J matrices for the decomposition 
+   * of the partially coherent wave where JC=nSC where
+   * H = integral(P*l(r1)J(r1, r2)Pm(r2)) dr1 dr2 and 
+   * S=integral(P*l(r)pm(r))dr where Pl is an orhtonormal
+   * basis set, in this case, the Legendre polynomials
+   */
+  void initialise_matrices(int leg, int modes);
+
+
 
   /**
    * This function is used to reallocate memory for the 'global'
