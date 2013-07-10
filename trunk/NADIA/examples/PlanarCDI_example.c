@@ -36,7 +36,8 @@ int main(void){
   //Define some constants which will be used in the code.
 
   //the data file name
-  string data_file_name = "image_files/planar_data.tif";
+  //string data_file_name = "image_files/real_sim_intensity.tiff";
+  string data_file_name = "real_sim_intensity.tiff";
 
   //the file which provides the support (pixels with the value 0
   //are considered as outside the object)
@@ -46,13 +47,13 @@ int main(void){
   const int cycles=2;
 
   //number of error reduction iterations to perform before the HIO.
-  const int er_iterations1 = 50;
+  const int er_iterations1 = 500;
 
   //number of hybrid input-out iterations to perform.
-  const int hio_iterations = 100;
+  const int hio_iterations = 0;
 
   //number of error reduction iterations to perform after the HIO.
-  const int er_iterations2 = 50;
+  const int er_iterations2 = 0;
 
   //output the current image every "output_iterations"
   int output_iterations = 10;
@@ -95,7 +96,7 @@ int main(void){
   PlanarCDI planar(object_estimate, 4);
 
   //set the support and intensity
-  planar.set_support(support,false);
+  planar.set_support(support);
   planar.set_intensity(data);
 
   //Initialise the current object ESW with a random numbers

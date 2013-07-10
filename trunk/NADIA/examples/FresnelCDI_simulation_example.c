@@ -1,10 +1,3 @@
-// Copyright 2011 Michael Jones and Nadia Davidson 
-// for The ARC Centre of Excellence in Coherent X-ray Science. 
-//
-// This program is distributed under the GNU General Public License. 
-// We also ask that you cite this software in publications where you made 
-// use of it for any part of the data analysis. 
-
 /**
  * @file FresnelCDI_simulation_example.c
  *
@@ -23,14 +16,15 @@
 #include <iostream>
 #include <sstream>
 #include <stdlib.h>
-#include <io.h>
-#include <Complex_2D.h>
-#include <Double_2D.h>
-#include <FresnelCDI.h>
+#include "io.h"
+//#include "utils.h"
+#include "Complex_2D.h"
+#include "Double_2D.h"
+#include "FresnelCDI.h"
 #include <cstdlib>
-#include <cmath>
-#include <cstring>
-#include <TransmissionConstraint.h>
+#include <math.h>
+#include <string>
+#include "TransmissionConstraint.h"
 
 using namespace std;
 

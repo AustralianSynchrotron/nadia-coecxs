@@ -1,9 +1,3 @@
-// Copyright 2011 Nadia Davidson for The ARC Centre of Excellence in 
-// Coherent X-ray Science. This program is distributed under the GNU  
-// General Public License. We also ask that you cite this software in 
-// publications where you made use of it for any part of the data     
-// analysis. 
-
 /**
  * @file ComplexConstraints_example.c
  *
@@ -32,8 +26,8 @@
 #include <Double_2D.h>
 #include <FresnelCDI.h>
 #include <cstdlib>
-#include <cmath>
-#include <cstring>
+#include <math.h>
+#include <string>
 
 using namespace std;
 
@@ -224,7 +218,7 @@ int main(int argc, char * argv[]){
 
   //Now set the contraint to use (here we use Example 2), but
   //you can change to another to see what happens.
-  proj.set_complex_constraint(tc1);
+  proj.set_complex_constraint(tc2);
   //just change tc2 in the line above.
 
   //------------------------------------------------

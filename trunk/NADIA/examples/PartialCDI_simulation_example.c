@@ -108,7 +108,7 @@ int main(void){
   PartialCDI my_partial(input, lcx, lcy, psize_x, psize_y, e_beam, z_sd, nleg, nmodes);
 
   Complex_2D pattern(n_x,n_y);
-
+/*
   my_partial.set_threshold(+1.0e-6);
 
   //my_partial.initialise_matrices(nleg, nmodes);
@@ -162,11 +162,11 @@ int main(void){
 
   /******** get the support from file ****************************/
 
-  Double_2D support(n_x,n_y);
+/*  Double_2D support(n_x,n_y);
   status = read_tiff(support_file_name, support);
 
   /*************** do the reconstruction *******************/
-
+/*
   //create a project object and set the options.
   my_partial.set_support(support);
   my_partial.set_intensity(intensity);
@@ -219,7 +219,7 @@ int main(void){
     }
   }
 
-
+*/
   return 0;
 }
 

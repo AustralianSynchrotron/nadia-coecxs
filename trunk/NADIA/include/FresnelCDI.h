@@ -92,7 +92,6 @@ class FresnelCDI: public BaseCDI{
    */
   FresnelCDI(Complex_2D & initial_guess,
 	     Complex_2D & white_field,
-//	     Complex_2D & illumination_ast,
 	     double beam_wavelength,
 	     double focal_detector_length,
 	     double focal_sample_length,

@@ -129,68 +129,6 @@ int main(void){
   write_tiff("part_char_log_sim_intensity.tiff",intensity,true);
   
   write_dbin("image_files/part_char_sim.dbin",intensity);
-
-  /******** get the support from file ****************************/
-
-  Double_2D support(n_x,n_y);
-  status = read_tiff(support_file_name, support);
-
-  /*************** do the reconstruction *******************/
-
-  //create a project object and set the options.
-  my_partial.set_support(support);
-  my_partial.set_intensity(intensity);
-  my_partial.set_algorithm(HIO);
-
-  //set the inital guess to be random inside the support
-  //and zero outside. Note that this must be called
-  //after "my_partial.set_support()"
-  my_partial.initialise_estimate(0);
-  
-  //make a temporary arrary
-  Double_2D result(n_x,n_y);
-
-  //apply the projection operators
-  for(int i=0; i<hio_iterations; i++){
-
-    cout << "iteration " << i << endl;
-
-    my_partial.iterate();
-
-    if(i%output_iterations==0){
-
-      ostringstream temp_str ( ostringstream::out ) ;
-      first_guess.get_2d(MAG,result);
-      temp_str << "sim_result_" << i << ".ppm";
-      write_ppm(temp_str.str(), result);
-
-      my_partial.apply_shrinkwrap();
-
-    }
-  }
-
-  my_partial.set_algorithm(ER);
-
-  for(int i=hio_iterations; i<(er_iterations+hio_iterations+1); i++){
-    
-    cout << "iteration " << i << endl;
-    
-    my_partial.iterate();
-
-    if(i%output_iterations==0){
-
-      ostringstream temp_str ( ostringstream::out ) ;
-      first_guess.get_2d(MAG,result);
-      temp_str << "sim_result_" << i << ".ppm";
-      write_ppm(temp_str.str(), result);
-
-      my_partial.apply_shrinkwrap();
-
-    }
-  }
-
-
-
   
   return 0;
 }

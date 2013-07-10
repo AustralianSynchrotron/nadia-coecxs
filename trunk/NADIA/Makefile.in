@@ -8,6 +8,7 @@ all:
 	@echo "done making the tools"
 	make -C examples
 	@echo "done making the examples"
+
 ifeq ($(DO_IDL), TRUE)
 	make -C interfaces/idl
 	@echo "done making the IDL interface"

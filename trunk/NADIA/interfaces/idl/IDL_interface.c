@@ -607,7 +607,7 @@ extern "C" void IDL_set_transmission(int argc, void * argv[]){
   return;
 }
 
-extern "C" void IDL_initialise_matrices(int argc, void * argv[]){
+/*extern "C" void IDL_initialise_matrices(int argc, void * argv[]){
 
   //check_objects();
   double dnleg = *(double*) argv[0];
@@ -642,7 +642,7 @@ extern "C" void IDL_initialise_matrices(int argc, void * argv[]){
     return;
   }
 }
-
+*/
 extern "C" void IDL_set_spectrum(int argc, void * argv[]){
 
   if(typeid(*reco)==typeid(PolyCDI)){

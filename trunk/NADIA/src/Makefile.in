@@ -27,11 +27,11 @@ $(LIB_SO): $(OBJECT_FILES)
 #	cp $(HEADER_FILES) @BASE@/include
 
 %.o: %.c++
-	@CXX@ @CXXFLAGS@ -I@BASE@/include -c $< -o $@
+	@CXX@ @CPPFLAGS@ @CXXFLAGS@ -I@BASE@/include -c $< -o $@
 
 
 %.o: %.c
-	@CXX@ @CXXFLAGS@ -I@BASE@/include -c $< -o $@
+	@CXX@ @CPPFLAGS@ @CXXFLAGS@ -I@BASE@/include -c $< -o $@
 
 clean:                                                     
 	rm -f *.o *.exe *~ 

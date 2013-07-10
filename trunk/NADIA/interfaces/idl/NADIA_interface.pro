@@ -875,9 +875,9 @@ end
     ;
     ;       nadia_initialise_matrices, 5, 6
     ;-
-    pro nadia_initialise_matrices, nleg, nmodes
-    b = call_external(lib_name() ,'IDL_initialise_matrices', double(nleg), double(nmodes)) 
-    end
+;    pro nadia_initialise_matrices, nleg, nmodes
+;    b = call_external(lib_name() ,'IDL_initialise_matrices', double(nleg), double(nmodes)) 
+;    end
 
     ;+
     ; NAME:
