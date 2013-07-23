@@ -7,12 +7,12 @@ LIB=libIDLNADIA.so
 all: $(LIB)
 
 $(LIB): $(IDL_O)
-	gcc -shared @CXXFLAGS@ -o $(LIB) $(IDL_O) \
+	@CXX@ -shared @CXXFLAGS@ -o $(LIB) $(IDL_O) \
 	-L@BASE@/lib/ -lNADIA \
 	@LDFLAGS@ @LIBS@
 
 $(IDL_O): $(IDL_SRC)
-	g++ @CXXFLAGS@ -c \
+	@CXX@ @CXXFLAGS@ -c \
 	-I@BASE@/include \
 	$(IDL_SRC)
 
