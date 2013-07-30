@@ -39,7 +39,7 @@ int main(void){
 
   //the file which provides the support (pixels with the value 0
   //are considered as outside the object)
-  string support_file_name = "image_files/poly_support.tiff";
+  string support_file_name = "image_files/planar_support.tiff";
 
   string data_spectrum_name = "image_files/spectrum.txt";
 

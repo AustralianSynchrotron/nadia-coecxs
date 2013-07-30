@@ -105,14 +105,6 @@ int main(void){
 
   PartialCharCDI partial(object_estimate, psize_x, psize_y, e_beam, z_sd, 4);
 
-  
-  
-  //printf("%f %f\n", partial.get_x_coherence_length()*1e6, partial.get_y_coherence_length()*1e6);
-  
-  
-
-  // 10000.0, 10000.0, 1, 4, 0);
-
   //set the support and intensity
   partial.set_support(support,false);
 
@@ -129,15 +121,11 @@ int main(void){
   //"0" is the seed to the random number generator
   partial.initialise_estimate(0);
 
-  //read_cplx("PCDI_trans.cplx", object_estimate);
-
   //make a 2D object. This will be used to output the 
   //image of the current estimate.
   Double_2D result(nx,ny);
 
   object_estimate.get_2d(MAG,result);
-
-  //ProfilerStart("profile.txt");
 
   /*** run the reconstruction ************/
   for(int a=0; a<cycles; a++){
@@ -161,21 +149,9 @@ int main(void){
 
 	temp_str.clear();
 
-	//uncomment to output the estimated diffraction pattern
-	//partial.propagate_to_detector(object_estimate);
-	//object_estimate.get_2d(MAG_SQ,result);
-	//temp_str << "diffraction.ppm";
-	//write_ppm(temp_str.str(), result, true);
-	//partial.propagate_from_detector(object_estimate);
-	//object_estimate.get_2d(MAG,result);
-
-	//apply the shrinkwrap algorithm
-	//1.5 is the gaussian width in pixels
-	//0.1 is the threshold (10% of the maximum pixel).
-
       }
       if(i%shrinkwrap_iterations==(shrinkwrap_iterations-1))
-	partial.apply_shrinkwrap(5.0,0.1);
+	partial.apply_shrinkwrap(1.5,0.1);
 
     }
 
@@ -227,7 +203,7 @@ int main(void){
 	//partial.apply_shrinkwrap(1.5,0.1);
       }
       if(i%shrinkwrap_iterations==(shrinkwrap_iterations-1))
-	partial.apply_shrinkwrap(5.0,0.1);
+	partial.apply_shrinkwrap(1.5,0.1);
 
     }
   }

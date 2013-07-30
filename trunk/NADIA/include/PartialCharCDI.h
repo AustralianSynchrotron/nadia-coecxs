@@ -9,8 +9,8 @@
 
 #define _USE_MATH_DEFINES
 
-#include "BaseCDI.h"
-#include "utils.h"
+#include <BaseCDI.h>
+#include <utils.h>
 #include <map>
 
 // Initial guess for coherence-spread (measured in pixels)

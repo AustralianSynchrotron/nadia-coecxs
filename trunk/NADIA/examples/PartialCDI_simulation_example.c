@@ -1,11 +1,11 @@
-// Copyright 2012 T'Mir Juliusn 
+// Copyright 2012 T'Mir Julius <tdjulius@unimelb.edu.au>
 // for The ARC Centre of Excellence in Coherent X-ray Science. 
 //
 // This program is distributed under the GNU General Public License. 
 // We also ask that you cite this software in publications where you made 
 // use of it for any part of the data analysis.
 //
-// date last modified: 07/12/2012
+// date last modified: 26/07/2013
 
 /**
  * @file PartialCDI_simulation_example.c
@@ -45,15 +45,6 @@ int main(void){
   //the file which provides the support (pixels with the value 0
   //are considered as outside the object)
   const static char * support_file_name = "image_files/planar_support.tiff";
-
-  //number of hybrid input-out iterations to perform.
-  const int hio_iterations = 0;
-
-  //the number of error-reduction iterations to perform.
-  const int er_iterations = 0;
-
-  //output the current image ever "output_iterations"
-  const int output_iterations = 50;
 
   //The number of legendre polynomials must be greater than or equal to the 
   //number of modes
@@ -105,42 +96,21 @@ int main(void){
   //Distance between detector and sampl in metres
   double z_sd=1.4;
 
-  PartialCDI my_partial(input, lcx, lcy, psize_x, psize_y, e_beam, z_sd, nleg, nmodes);
+  Complex_2D object(n_x, n_y);
 
-  Complex_2D pattern(n_x,n_y);
-/*
+  PartialCDI my_partial(object, lcx, lcy, psize_x, psize_y, e_beam, z_sd, nleg, nmodes);
+
+
   my_partial.set_threshold(+1.0e-6);
 
   //my_partial.initialise_matrices(nleg, nmodes);
 
   Double_2D result(n_x, n_y);
 
-  ostringstream temp_str0 ( ostringstream::out ) ;
-  pattern.get_2d(MAG,result);
-  temp_str0 << "field.ppm";
-  write_image(temp_str0.str(), result, false);
-
-  ostringstream temp_str1 ( ostringstream::out ) ;
-  temp_str1 << "fieldl.ppm";
-  write_image(temp_str1.str(), result, true);
-
-
-  for(int i=0; i< nmodes*nmodes; i++){
-    ostringstream temp_str0 ( ostringstream::out ) ;
-    my_partial.get_mode(i).get_2d(REAL,result);
-    temp_str0 << "mode"<<i<<".ppm";
-    write_image(temp_str0.str(), result);
-  }
-
-
   //propagate to the detector plane
   my_partial.set_transmission(input);
 
   Double_2D intensity=my_partial.propagate_modes_to_detector();
-
-  //write the fourier transform to file.
-  //Double_2D intensity(n_x,n_y);
-  //intensity=my_partial.get_intensity();
 
   //apply a threshold to make the simulation a bit more realistic
   for(int i=0; i<n_x; i++){
@@ -153,73 +123,9 @@ int main(void){
 
 
   //write the output to file (use log scale)
-  write_ppm("part_sim_intensity.ppm",intensity,true);
+  write_ppm("log_part_sim_intensity.ppm",intensity,true);
   write_tiff("part_sim_intensity.tiff",intensity,false);
 
-  //Double_2D tmp(n_x, n_y);
-  //input.get_2d(PHASE, tmp);
-  //write_ppm("part_sim_intensity.ppm",tmp,true);
-
-  /******** get the support from file ****************************/
-
-/*  Double_2D support(n_x,n_y);
-  status = read_tiff(support_file_name, support);
-
-  /*************** do the reconstruction *******************/
-/*
-  //create a project object and set the options.
-  my_partial.set_support(support);
-  my_partial.set_intensity(intensity);
-  my_partial.set_algorithm(HIO);
-
-  //set the inital guess to be random inside the support
-  //and zero outside. Note that this must be called
-  //after "my_partial.set_support()"
-  //my_partial.initialise_estimate(0);
-
-  //make a temporary arrary
-  //Double_2D result(n_x,n_y);
-
-  //apply the projection operators
-  for(int i=0; i<hio_iterations; i++){
-
-    cout << "iteration " << i << endl;
-
-    my_partial.iterate();
-
-    if(i%output_iterations==0){
-
-      ostringstream temp_str ( ostringstream::out ) ;
-      pattern.get_2d(MAG,result);
-      temp_str << "part_sim_result_" << i << ".ppm";
-      write_ppm(temp_str.str(), result, true);
-
-      my_partial.apply_shrinkwrap();
-
-    }
-  }
-
-  my_partial.set_algorithm(ER);
-
-  for(int i=hio_iterations; i<(er_iterations+hio_iterations+1); i++){
-
-    cout << "iteration " << i << endl;
-
-    my_partial.iterate();
-
-    if(i%output_iterations==0){
-
-      ostringstream temp_str ( ostringstream::out ) ;
-      pattern.get_2d(MAG,result);
-      temp_str << "part_sim_result_" << i << ".ppm";
-      write_ppm(temp_str.str(), result, true);
-
-      my_partial.apply_shrinkwrap();
-
-    }
-  }
-
-*/
   return 0;
 }
 

@@ -176,7 +176,7 @@ class hdf_anonymous_array{
 };
 
 /***************************************************************/
-int read_hdf4(string file_name, Double_2D & data, char * data_name){
+int read_hdf4(string file_name, Double_2D & data, const char * data_name){
 
   //open the file
   int32 sd_id = SDstart(file_name.c_str(), DFACC_READ);

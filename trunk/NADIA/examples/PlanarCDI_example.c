@@ -4,6 +4,8 @@
 // This program is distributed under the GNU General Public License. 
 // We also ask that you cite this software in publications where you made 
 // use of it for any part of the data analysis.
+//
+// Last modified 22/07/2013 T'Mir Julius <tdjulius@unimelb.edu.au>
 
 /**
  * @file PlanarCDI_example.c
@@ -36,8 +38,7 @@ int main(void){
   //Define some constants which will be used in the code.
 
   //the data file name
-  //string data_file_name = "image_files/real_sim_intensity.tiff";
-  string data_file_name = "real_sim_intensity.tiff";
+  string data_file_name = "image_files/planar_data.tif";
 
   //the file which provides the support (pixels with the value 0
   //are considered as outside the object)
@@ -47,13 +48,13 @@ int main(void){
   const int cycles=2;
 
   //number of error reduction iterations to perform before the HIO.
-  const int er_iterations1 = 500;
+  const int er_iterations1 = 50;
 
   //number of hybrid input-out iterations to perform.
-  const int hio_iterations = 0;
+  const int hio_iterations = 100;
 
   //number of error reduction iterations to perform after the HIO.
-  const int er_iterations2 = 0;
+  const int er_iterations2 = 50;
 
   //output the current image every "output_iterations"
   int output_iterations = 10;
@@ -102,9 +103,6 @@ int main(void){
   //Initialise the current object ESW with a random numbers
   //"0" is the seed to the random number generator
   planar.initialise_estimate(0);
-
-  //planar.set_fftw_type(FFTW_ESTIMATE);
-  //read_cplx("Planar_trans.cplx", object_estimate);
 
   //make a 2D object. This will be used to output the 
   //image of the current estimate.
@@ -159,7 +157,7 @@ int main(void){
 
       }
       if(i%shrinkwrap_iterations==(shrinkwrap_iterations-1))
-	planar.apply_shrinkwrap(2.0,0.1);
+	planar.apply_shrinkwrap(1.5,0.1);
 
     }
 
@@ -195,7 +193,8 @@ int main(void){
 
     for(int i=er_iterations1+hio_iterations; i<(hio_iterations+er_iterations1+er_iterations2); i++){
 
-      cout << "iteration " << i+a*(hio_iterations+er_iterations1+er_iterations2) << endl;
+      cout << "iteration " << i+a*(hio_iterations+er_iterations1+er_iterations2)
+      << endl;
 
       planar.iterate();
 

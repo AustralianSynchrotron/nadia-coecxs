@@ -1,5 +1,5 @@
 //author:  Nadia Davidson <nadiamd@unimelb.edu.au>
-//date last modified: 17/01/2011
+//date last modified: 22/07/2013 T'Mir Julius <tdjulius@unimelb.edu.au>
 
 /**
  * @file FresnelCDI_example.c
@@ -30,7 +30,7 @@ int main(int argc, char * argv[]){
   int nx = 1024;
   int ny = 1024;
   int status;
-  Double_2D data;
+  Double_2D data(nx, ny);
 
   //read the diffraction data
   status = read_dbin("image_files/FCDI_data.dbin", nx, ny, data);
@@ -114,7 +114,7 @@ int main(int argc, char * argv[]){
       temp_str.clear();
     
       //apply the shrinkwrap algorithm
-      //proj.apply_shrinkwrap(2,0.1);
+      proj.apply_shrinkwrap(2,0.1);
     }
   }
 

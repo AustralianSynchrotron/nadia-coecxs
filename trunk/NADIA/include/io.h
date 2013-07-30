@@ -54,7 +54,7 @@ int read_tiff(string file_name, Double_2D & data);
  * By default it looks for the "data" block.
  */
 int read_hdf4(string file_name, Double_2D & data, 
-    char * data_name="data");
+    const char* data_name="data");
 
 
 
@@ -200,7 +200,7 @@ inline unsigned int io_scale_value(double min, double max,
  * file is to be read.
  */
 inline void read_image(string file_name, Double_2D & data,
-    int nx=0, int ny=0, char * data_name="data"){
+    int nx=0, int ny=0, const char * data_name="data"){
 
   int status = FAILURE;
 

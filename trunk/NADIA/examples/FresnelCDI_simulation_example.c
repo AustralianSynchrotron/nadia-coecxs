@@ -9,22 +9,21 @@
  * @author Michael Jones <michael.jones@latrobe.edu.au>,
  * Nadia Davidson <nadiamd@unimelb.edu.au> 
  *
- * Last modified on 18/3/2011
+ * Last modified on 22/07/2013 T'Mir Julius <tdjulius@unimelb.edu.au>
  *
  */
 
 #include <iostream>
 #include <sstream>
 #include <stdlib.h>
-#include "io.h"
-//#include "utils.h"
-#include "Complex_2D.h"
-#include "Double_2D.h"
-#include "FresnelCDI.h"
+#include <io.h>
+#include <utils.h>
+#include <Complex_2D.h>
+#include <Double_2D.h>
+#include <FresnelCDI.h>
 #include <cstdlib>
 #include <math.h>
 #include <string>
-#include "TransmissionConstraint.h"
 
 using namespace std;
 
@@ -186,77 +185,6 @@ int main(int argc, char * argv[]){
 	}
 	}**/
   
-  
-  /****************************************************/
-  /*******  set up the reconstuction ****************
-   **using the diffraction pattern produced by the previous 
-   **projection as the starting point***********************/
-  /******************************************************/
-  /*******************************************************/
-
-  FresnelCDI proj2(object_estimate, //estimate
-		   wf, //white field 
-		   wavelength, //wavelength
-		   fd, //focal-to-detector
-		   0.0025, //focal-to-sample
-		   ps, //pixel size
-		   1.0); //normalisation of white-field to sample data
-  
-
-
-  //set the support and intensity
-  proj2.set_support(support);  
-  proj2.set_intensity(result);
-  
-  //set the algorithm
-  proj2.set_algorithm(ER);
-  
-  //Initialise the current object ESW
-  proj2.initialise_estimate(0);
-  
-  //set a complex contraint for the transmission function
-  //proj2.set_complex_contraint_function(charge_flip);
-  
-  /*** run the reconstruction ************/
-
-  TransmissionConstraint tc1;
-  tc1.set_enforce_unity(true);
-  tc1.set_charge_flipping(false);
-
-  /*** run the reconstruction ************/
-  for(int i=0; i<  total_iterations+1; i++){
-
-    cout << "iteration " << i << endl;
-
-    //apply the iterations  
-    proj2.iterate(); 
-    cout << "Error: " << proj2.get_error() << endl;
-
-    if(i%output_iterations==0){
-
-      //output the current estimate of the object
-      object_estimate.get_2d(MAG,result);
-      ostringstream temp_str ( ostringstream::out ) ;
-      temp_str << "fcdi_example_iter_" << i << ".tiff";
-      write_tiff(temp_str.str(),result);
-    
-      //uncomment to apply the shrinkwrap algorithm
-      //      proj2.apply_shrinkwrap();
-    }
-  }
-
-  //get the reconstructed transmission function for 
-  //the final iteration
-  Complex_2D trans(nx,ny);
-  proj2.get_transmission_function(trans);
-
-  //and write the magnitude and phase of it to an image file
-  trans.get_2d(MAG,result);
-  write_tiff("trans_mag_recovered.tiff",result);
-
-  trans.get_2d(PHASE,result);
-  write_tiff("trans_phase_recovered.tiff",result);
-
   return 0;
   
 }

@@ -216,13 +216,16 @@ void PartialCharCDI::scale_intensity(Complex_2D & c){
   c.get_2d(MAG_SQ, estimate_intensity); // Get the intensity of the current estimate
   Double_2D optimally_convoluted_estimate;
   
-  if(iteration % minima_recalculation_interval == 0){ // Every few iterations:
+  if(iteration % minima_recalculation_interval == 0){ 
+    // Every few iterations:
     // Recalculate the optimal gaussian convolution of the estimated intensity to minimise the difference with the measured intensity:
     optimally_convoluted_estimate = get_convoluted_intensity_estimate(estimate_intensity, measured_intensity); // lx and ly attributes are updated in here
   } else{ // Use last lx and ly values:
     optimally_convoluted_estimate = gaussian_convolution(estimate_intensity, lx, ly);
   }
-  optimally_convoluted_estimate.sq_root(); // get sqrt
+//  optimally_convoluted_estimate.sq_root(); // get sqrt
+
+  std::cout<< "I am being called"<<endl;
 
   for(int i=0; i< nx; i++){
     for(int j=0; j< ny; j++){
@@ -230,8 +233,8 @@ void PartialCharCDI::scale_intensity(Complex_2D & c){
       if(beam_stop==0 || beam_stop->get(i,j)>0){
         current_mag = c.get_mag(i, j);
 
-        current_int_sqrt = current_mag * intensity_sqrt.get(i,j) / optimally_convoluted_estimate.get(i,j); // Softened intensity-constraint
-        c.set_mag(i,j,current_int_sqrt);
+        current_int_sqrt = current_mag * intensity_sqrt.get(i,j) / sqrt(optimally_convoluted_estimate.get(i,j)); // Softened intensity-constraint
+        c.set_mag(i,j,intensity_sqrt.get(i,j));//current_int_sqrt);
         
         //calculate the error
         norm2_mag += current_int_sqrt*current_int_sqrt;

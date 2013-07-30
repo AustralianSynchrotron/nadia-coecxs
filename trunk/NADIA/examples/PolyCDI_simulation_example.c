@@ -85,7 +85,8 @@ int main(void){
   Complex_2D first_guess(n_x,n_y);
   PolyCDI my_poly(first_guess, 0.9, 4, 0);
 
-  my_poly.set_spectrum(spectrum);
+  my_poly.set_spectrum(data_spectrum_name);
+  first_guess=input;
 
   //propagate to the detector plane
   my_poly.propagate_to_detector(input);
@@ -97,14 +98,14 @@ int main(void){
   intensity=my_poly.get_intensity(); 
 
   //apply a threshold to make the simulation a bit more realistic
-  for(int i=0; i<n_x; i++){
+/*  for(int i=0; i<n_x; i++){
     for(int j=0; j<n_y; j++){
       intensity.set(i,j,intensity.get(i,j)*intensity.get(i, j)-noise_level);
       if(intensity.get(i,j)<0)
 	intensity.set(i,j,0);
     }
   }
-
+*/
   //write the output to file (use log scale)
   write_tiff("poly_sim_intensity.tiff",intensity,false);
   write_ppm("poly_sim_intensity.ppm", intensity, true);

@@ -7,7 +7,7 @@
 #include <iostream>
 #include <fstream>
 #include <math.h>
-#include <cstring>
+#include <string>
 #include <stdlib.h>
 #include <cstdlib> 
 #include <Complex_2D.h>
@@ -27,15 +27,11 @@ PolyCDI::PolyCDI(Complex_2D & initial_guess,
     int n_best,
     bool parallel
     )
-:BaseCDI(initial_guess,n_best),
+  : BaseCDI(initial_guess,n_best),
   beta(beta), 
   parallel(parallel),
   intensity_sqrt_calc(nx, ny){
 
-  }
-
-//destructor for cleaning up
-PolyCDI::~PolyCDI(){
 }
 
 //Initialise the spectrum Double_2D from a file
@@ -61,6 +57,9 @@ void PolyCDI::set_spectrum(string file_name){
     spectrum.set(i, WEIGHT, spectrum.get(i, WEIGHT)/totweight);
   }
 
+  paddingx = (spectrum.get(0, WL)/lambdac -1.0)*nx/2;
+  paddingy = (spectrum.get(0, WL)/lambdac -1.0)*ny/2;
+
 }
 
 //Initialise the spectrum Double_2D from a Double_2D
@@ -84,9 +83,16 @@ void PolyCDI::set_spectrum(Double_2D spectrum_in){
   for(int i=0; i<nlambda; i++){
     spectrum.set(i, WEIGHT, spectrum.get(i, WEIGHT)/totweight);
   }
+  paddingx = (spectrum.get(0, WL)/lambdac -1.0)*nx/2;
+  paddingy = (spectrum.get(0, WL)/lambdac -1.0)*ny/2;
 
 }
 
+
+//destructor for cleaning up
+PolyCDI::~PolyCDI(){
+
+}
 
 //set the initial guess.
 //fills the transmission function with a random 
@@ -100,8 +106,8 @@ void PolyCDI::initialise_estimate(int seed){
 
   int max_value = intensity_sqrt.get_max();
 
-  for(int i=0; i<nx; i++){
-    for(int j=0; j<ny; j++){
+  for(int i=0; i<complex.get_size_x(); i++){
+    for(int j=0; j<complex.get_size_y(); j++){
 
       if(!support.get(i,j)){ 
 
@@ -117,7 +123,6 @@ void PolyCDI::initialise_estimate(int seed){
       }
     }
   }
-  //  complex=transmission;
 }
 
 //this iterate function overrides that of BaseCDI, 
@@ -128,21 +133,21 @@ int PolyCDI::iterate(){
   //this is faster than using the generic algorithm code
   //further down in this function.
 
-  Complex_2D temp_complex_PFS(nx, ny);
-  Complex_2D temp_complex_PF(nx, ny);
-  Complex_2D temp_complex_PS(nx, ny);
-  Complex_2D temp_complex_PSF(nx, ny);
+  Complex_2D temp_complex_PFS(nx+2*paddingx, ny+2*paddingy);
+  Complex_2D temp_complex_PF(nx+2*paddingx, ny+2*paddingy);
+  Complex_2D temp_complex_PS(nx+2*paddingx, ny+2*paddingy);
+  Complex_2D temp_complex_PSF(nx+2*paddingx, ny+2*paddingy);
 
   singleCDI.clear();
 
-
   if(algorithm==ER){
-
+    complex=complex.get_padded(paddingx, paddingy);
     propagate_to_detector(complex);
 
     scale_intensity(complex);
-
     propagate_from_detector(complex);
+
+    complex=complex.get_unpadded(paddingx, paddingy);
     apply_support(complex);
     update_n_best();
 
@@ -156,17 +161,23 @@ int PolyCDI::iterate(){
   if(algorithm_structure[PFS]!=0){
     temp_complex_PFS=complex;
     apply_support(temp_complex_PFS);
+    temp_complex_PFS=temp_complex_PFS.get_padded(paddingx, paddingy);
     propagate_to_detector(temp_complex_PFS);
     scale_intensity(temp_complex_PFS);
     propagate_from_detector(temp_complex_PFS);
+    temp_complex_PFS=temp_complex_PFS.get_unpadded(paddingx, paddingy);
+
   }
 
   //F
   if(algorithm_structure[PF]!=0){
     temp_complex_PF=complex;
+    temp_complex_PF=temp_complex_PF.get_padded(paddingx, paddingy);
     propagate_to_detector(temp_complex_PF);
     scale_intensity(temp_complex_PF);
     propagate_from_detector(temp_complex_PF);
+    temp_complex_PF=temp_complex_PF.get_unpadded(paddingx, paddingy);
+
   }
 
   //S
@@ -182,9 +193,11 @@ int PolyCDI::iterate(){
       apply_support(temp_complex_PSF);
     }else{
       temp_complex_PSF=complex;
+      temp_complex_PSF=temp_complex_PSF.get_padded(paddingx, paddingy);
       propagate_to_detector(temp_complex_PSF);
       scale_intensity(temp_complex_PSF);
       propagate_from_detector(temp_complex_PSF);
+      temp_complex_PSF=temp_complex_PSF.get_unpadded(paddingx, paddingy);
       apply_support(temp_complex_PSF);
     }
   }
@@ -261,9 +274,9 @@ void PolyCDI::scale_intensity(Complex_2D & c){
 	if(calc_int==0.0){
 	  scaled_mag=0.0;
 	}else{
-	  scaled_mag=c.get_mag(i,j)*measured_int/calc_int;
+	  scaled_mag=c.get_mag(i+paddingx,j+paddingy)*measured_int/calc_int;
 	}
-	c.set_mag(i,j,scaled_mag);
+	c.set_mag(i+paddingx,j+paddingy,scaled_mag);
 
 	//calculate the error
 	norm2_mag += measured_int*measured_int;
@@ -280,47 +293,111 @@ void PolyCDI::scale_intensity(Complex_2D & c){
 //diffraction pattern 
 void PolyCDI::expand_wl(Complex_2D & c){
 
-  Double_2D intensity(nx, ny);
+  Double_2D intensity_pad(nx+2*paddingx, ny+2*paddingy);
 
-  /*  for(int i=0; i<nx; i++){
-      for(int j=0; j<ny; j++){
+  for(int i=0; i<nx+2*paddingx; i++){
+    for(int j=0; j<ny+2*paddingy; j++){
 
-      intensity.set(i, j, 0.0);
-      }
-      }
-   */
+      intensity_pad.set(i, j, 0.0);
+    }
+  }
+
   for(int sn=0; sn<nlambda; sn++){
 
     double lambda=spectrum.get(sn, WL);
     double weightl=spectrum.get(sn, WEIGHT);
 
-    double lf=/*(2*lambdac-lambda)*/lambda/lambdac;
+    double lf=lambda/lambdac;
 
-    for(int i=0; i<nx; i++){
-      for(int j=0; j<ny; j++){
+    for(int i=0; i<nx+2*paddingx; i++){
+      for(int j=0; j<ny+2*paddingy; j++){
 
 	double xval = lf*(i-nx/2.0)+nx/2.0;
 	double yval = lf*(j-ny/2.0)+ny/2.0;
 
-	if(((xval>=0) && (xval<(nx)))&&((yval>=0)&&(yval<(ny)))){
+	if(((xval>=0) && (xval<(c.get_size_x())))&&((yval>=0)&&(yval<(c.get_size_y())))){
 
-	  intensity.set(i, j, intensity.get(i, j) + weightl*pow(c.get_mag(xval, yval), 2));
+	  intensity_pad.set(i, j, intensity_pad.get(i, j) + weightl*pow(c.get_mag(xval, yval), 2));
 
 	}
       }
     }
   }
-  for(int i=0; i < nx; i++){
-    for(int j=0; j < ny; j++){
-      intensity.set(i, j, sqrt(intensity.get(i, j)));
+
+  for(int i=0; i<nx; i++){
+    for(int j=0; j<ny; j++){
+      intensity_sqrt_calc.set(i, j, sqrt(intensity_pad.get(i+paddingx, j+paddingy)));
+    }
+  }
+}
+
+void PolyCDI::pad_support(){
+
+  Double_2D padded_support(nx+2*paddingx, ny+2*paddingy);
+
+  for(int i=0; i<paddingx; i++){
+    for(int j=0; j<ny+2*paddingy; j++){
+      padded_support.set(i, j, 0);
     }
   }
 
-  intensity_sqrt_calc=intensity;
+  for(int i=nx+paddingx; i<nx+2*paddingx; i++){
+    for(int j=0; j<ny+2*paddingy; j++){
+      padded_support.set(i, j, 0);
+    }
+  }
+
+  for(int i=paddingx; i<nx; i++){
+    for(int j=0; j<paddingy; j++){
+      padded_support.set(i, j, 0);
+    }                         
+  }               
+
+  for(int i=paddingx; i<nx; i++){
+    for(int j=ny+paddingy; j<ny+2*paddingy; j++){
+      padded_support.set(i, j, 0);
+    }                  
+  }
+
+  for(int i=0; i<nx; i++){
+    for(int j=0; j<ny; j++){
+      padded_support.set(i+paddingx, j+paddingy, support.get(i, j));
+    }
+  }
+
+  support = padded_support;
+
 }
 
+void PolyCDI::unpad_support(){
 
+  Double_2D unpadded_support(nx, ny);
 
+  for(int i=0; i<nx; i++){ 
+    for(int j=0; j<ny; j++){
+      unpadded_support.set(i, j, support.get(i+paddingx, j+paddingy));
+    }
+  }
+
+  support=unpadded_support;
+
+}
+
+//Propagate from the object plane to the detector
+void PolyCDI::propagate_to_detector(Complex_2D & c){
+
+  c.perform_forward_fft();
+  c.invert(true);
+
+}
+
+//Propagate form the detector plane to the object
+void PolyCDI::propagate_from_detector(Complex_2D & c){
+
+  c.invert(true);
+  c.perform_backward_fft();
+
+}
 
 //add the intensities across all modes scaled by the eigenvalues
 Double_2D PolyCDI::sum_intensity(vector<Complex_2D> & c){
@@ -351,19 +428,3 @@ Double_2D PolyCDI::sum_intensity(vector<Complex_2D> & c){
   return(magnitude);
 };
 
-
-//Propagate from the object plane to the detector
-void PolyCDI::propagate_to_detector(Complex_2D & c){
-
-  c.perform_forward_fft();
-  c.invert(true);
-
-}
-
-//Propagate form the detector plane to the object
-void PolyCDI::propagate_from_detector(Complex_2D & c){
-
-  c.invert(true);
-  c.perform_backward_fft();
-
-}

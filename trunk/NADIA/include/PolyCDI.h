@@ -17,10 +17,10 @@
  * polynomials used is defined by the user. The number of Legendre polynomial * must exceed the number of modes.
  */
 
-#ifndef POLYCDI_H
-#define POLYCDI_H
+#ifndef PCDI_H
+#define PCDI_H
 
-#include <BaseCDI.h>
+#include "BaseCDI.h"
 #include <vector>
 #include <cstring>
 
@@ -34,22 +34,22 @@ class PolyCDI:public BaseCDI {
 protected:
 
 
-  /** A vector holding a pointer to each of the FresnelCDI/PlanarCDI objects */
+  /* A vector holding a pointer to each of the FresnelCDI/PlanarCDI objects */
   std::vector<Complex_2D> singleCDI;
 
-  /** A vector holding the initial wave described as a series of modes.*/
+  /*A vector holding the initial wave described as a series of modes.*/
   std::vector<Complex_2D> singlemode;
 
   /** A vector holding the weighting function for each frame */  
   std::vector<Double_2D * > weights; 
 
-  /** A vector of the transverse positions in x */
+  /* A vector of the transverse positions in x */
   std::vector<double> x_position;
 
-  /** A vector of the transverse positions in y */
+  /* A vector of the transverse positions in y */
   std::vector<double> y_position;
 
-  /** parameters controlling the feedback */
+  //parameters controlling the feedback
   double beta;
 
   /** An array of the eigenvectors for the system of JC=nSC */
@@ -73,7 +73,7 @@ protected:
   int paddingy;
 
   /** Some features of the spectrum */
-  Double_2D  spectrum;
+  Double_2D spectrum;
 
   /** The calculated intensity at the detector */
   Double_2D intensity_sqrt_calc;
@@ -95,10 +95,8 @@ public:
       );
 
 
-  enum {CROSS_CORRELATION,MINIMUM_ERROR};
-
   /** 
-   * Destructor for PhaseDiverseCDI
+   * Destructor for PolyCDI
    */
   ~PolyCDI();
 
@@ -114,15 +112,23 @@ public:
 
   void initialise_estimate(int seed);
 
-  /** scale the highest occupancy mode 
+  /** Initialise the wave matrices */
+  void initialise_matrices(int leg, int modes);
+
+  /**
+   *uses the complex_2d multiply function to apply 
+   *the transmission function
+   */
+  void apply_transmission(Complex_2D & c);
+
+  /* scale the highest occupancy mode 
    * this overwrites the function of the same
    * name in BaseCDI
    */
   void scale_intensity(Complex_2D & c);
 
-  /**
-    expand wavelengths from central wavelength 
-   */
+  /* expand wavelengths from central wavelength 
+     */
   void expand_wl(Complex_2D & c);
 
 
@@ -150,6 +156,36 @@ public:
    * highest occupancy mode at the detector
    */
   void update_transmission();
+
+  /*
+   * generate the S and J matrices for the decomposition 
+   * of the partially coherent wave where JC=nSC where
+   * H = integral(P*l(r1)J(r1, r2)Pm(r2)) dr1 dr2 and 
+   * S=integral(P*l(r)pm(r))dr where Pl is an orhtonormal
+   * basis set, in this case, the Legendre polynomials
+   */
+  void initialse_matrices(int leg, int modes);
+
+  /**
+   * the J matrix where J = integral(P*l(r1)J(r1, r2)Pm(r2))dr1dr2 
+   * the x and y are computed seperately, then multiplied together.
+   * The result is a matrix of xn+y by in+j where 
+   */
+  void fill_jmatrix(Double_2D legmatrix, Double_2D roots);
+
+  /**
+   * the S matrix = integral(P*l(r)pm(r))dr = 2/(2n+1)
+   * from the orthogonality requirments of Legendre 
+   * Polynomials. We then turn it in to a 2D matrix
+   * for the x and y dimensions
+   */
+  void fill_smatrix(Double_2D legmatrix, Double_2D roots);
+
+  /**
+   * fill a vector of Complex_2D for single modes. These 
+   * modes do not evolve over time, and so are not BaseCDI's
+   */
+  void fill_modes(Complex_2D & c);
 
   /////////////////////////////////
   // Get and setter methods
@@ -201,10 +237,9 @@ public:
    */
   void set_spectrum(std::string file_name);
 
-
   /**
    * calculate and return the current intensity of the modes multiplied
-   * by the transmissoion fnction
+   * by the transmission fnction
    */
   Double_2D get_intensity(){
     return(intensity_sqrt_calc);

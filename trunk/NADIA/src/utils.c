@@ -15,7 +15,6 @@
 #include <cstdlib>
 #include <cmath>
 #include <limits>
-//#include <math.h>
 #include <string>
 #include <iomanip>
 

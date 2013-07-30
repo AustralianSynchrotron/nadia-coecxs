@@ -20,11 +20,11 @@
 #include <iostream>
 #include <sstream>
 #include <stdlib.h>
-#include <io.h>
-#include <TransmissionConstraint.h>
-#include <Complex_2D.h>
-#include <Double_2D.h>
-#include <FresnelCDI.h>
+#include "io.h"
+#include "TransmissionConstraint.h"
+#include "Complex_2D.h"
+#include "Double_2D.h"
+#include "FresnelCDI.h"
 #include <cstdlib>
 #include <math.h>
 #include <string>
@@ -37,7 +37,7 @@ void my_charge_flipping(Complex_2D & transmission){
 
   double max_thickness = 150e-9;
   double delta =  6.45e-4;
-  double wavelength = 4.892e-10; 
+  double wavelength = 4.892e-10;
   double k = (2.0 * M_PI)/wavelength;
 
   double min_phase = -delta*k*max_thickness;
@@ -57,6 +57,7 @@ void my_charge_flipping(Complex_2D & transmission){
 
 }
 
+
 /**********************************/
 
 int main(int argc, char * argv[]){
@@ -65,7 +66,7 @@ int main(int argc, char * argv[]){
 
   //number of output iterations
   int output_iterations = 10;
-  int total_iterations = 30;
+  int total_iterations = 90;
 
   //load the diffraction image of the sample 
   //(made from the simulation example)
@@ -73,8 +74,8 @@ int main(int argc, char * argv[]){
   int status = read_tiff("forward_projection.tiff", diffraction);
   if(!status){ //give an error if we couldn't open the file.
     cout  << "Maybe you need to run "
-	  << "./FresnelCDI_simulation_example.exe "
-	  << "first... exiting"  << endl;
+      << "./FresnelCDI_simulation_example.exe "
+      << "first... exiting"  << endl;
     return(1);
   }
 
@@ -89,10 +90,10 @@ int main(int argc, char * argv[]){
   status = read_cplx("wf_recovered.cplx", wf);
   if(!status){ //give an error if we couldn't open the file.
     cout  << "Maybe you need to run ./FresnelCDI_WF_example.exe "
-	  << "first... exiting"  << endl;
+      << "first... exiting"  << endl;
     return(1);
   }
-  
+
   //load the support to use in the reconstruction
   Double_2D support;
   read_image("image_files/FCDI_support.tiff", support);
@@ -107,7 +108,7 @@ int main(int argc, char * argv[]){
   //This will be used to output the image of the 
   //current exit-surface-wave estimate.
   Double_2D result(nx,ny);
-  
+
   //set the experimental parameters (all are in meters)
   double wavelength = 4.892e-10; //wavelength
   double fd = 0.8932; //focal to detector
@@ -124,12 +125,12 @@ int main(int argc, char * argv[]){
    * - this part is the same as all the other examples
    */
   FresnelCDI proj(object_estimate, //estimate
-		  wf, //white field 
-		  wavelength, //wavelength
-		  fd, //focal-to-detector
-		  fs, //focal-to-sample
-		  ps //pixel size
-		  ); //normalisation of white-field to sample data
+      wf, //white field 
+      wavelength, //wavelength
+      fd, //focal-to-detector
+      fs, //focal-to-sample
+      ps //pixel size
+      ); //normalisation of white-field to sample data
 
   //set the support and intensity
   proj.set_support(support);  
@@ -137,10 +138,10 @@ int main(int argc, char * argv[]){
   proj.auto_set_norm();
 
   proj.initialise_estimate();
-  
+
   //set the algorithm
   proj.set_algorithm(ER);
-  
+
 
   /******************************************************************
    **          now set setup the complex contraint!                **
@@ -169,9 +170,10 @@ int main(int argc, char * argv[]){
   //in this case we just used the original object since the image
   //file is available.
   Double_2D area;
-  read_image("image_files/FCDI_simulation_object.tiff",area);  
+  read_image("image_files/FCDI_support.tiff", area);
+  //image_files/FCDI_simulation_object.tiff",area);  
   //read_image("blah.tiff",area);  
-  
+
   //create a ComplexConstraint using the constraint region we just
   //loaded from fial. All pixel values > 0 will be interpreted as part
   //of the constraint region. alpha1 = 1.0 and alpha2 = 0.0 
@@ -190,14 +192,14 @@ int main(int argc, char * argv[]){
   //The same as Example 2, but this time we enforce a particular value
   //of c = beta/delta
   TransmissionConstraint tc3;
-  
+
   ComplexConstraint c2(area,1.0,0.0);  
   double delta = 6.45e-4;
   double beta = 1.43e-4;
 
   tc3.add_complex_constraint(c2);    
   c2.set_fixed_c(beta/delta);
-  
+
   //Example 4:
   //-----------
   //Setting a custom contraint on the transmission function.
@@ -218,14 +220,14 @@ int main(int argc, char * argv[]){
 
   //Now set the contraint to use (here we use Example 2), but
   //you can change to another to see what happens.
-  proj.set_complex_constraint(tc2);
+  proj.set_complex_constraint(tc4);
   //just change tc2 in the line above.
 
   //------------------------------------------------
 
 
   /*** run the reconstruction ************/
-  
+
   for(int i=0; i<  total_iterations+1; i++){
 
     cout << "iteration " << i << endl;
@@ -241,7 +243,7 @@ int main(int argc, char * argv[]){
       ostringstream temp_str ( ostringstream::out ) ;
       temp_str << "fcdi_example_iter_" << i << ".tiff";
       write_tiff(temp_str.str(),result);
-    
+
     }
   }
 
@@ -264,5 +266,6 @@ int main(int argc, char * argv[]){
 
 
   return 0;
-  
+
 }
+

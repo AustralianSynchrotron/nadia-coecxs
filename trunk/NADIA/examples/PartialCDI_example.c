@@ -1,4 +1,4 @@
-// Copyright 2011 Nadia Davidson 
+// Copyright 2012 T'Mir Julius <tdjulius@unimelb.edu.au> 
 // for The ARC Centre of Excellence in Coherent X-ray Science. 
 //
 // This program is distributed under the GNU General Public License. 
@@ -33,8 +33,6 @@
 
 int main(void){
 
- // ProfilerStart("partoutput.pprof");
-
   //Define some constants which will be used in the code.
 
   //the data file name
@@ -64,7 +62,7 @@ int main(void){
   //The number of legendre polynomials and the square root of the modes
   //The number of legendre polynomials must be greater than or equal to the 
   //number of modes
-  int nleg = 7;
+  int nleg = 32;
   int nmodes = 6;
 
   /**** get the diffraction data from file and read into an array *****/
@@ -127,6 +125,8 @@ int main(void){
   ostringstream temp_strsupp ( ostringstream::out ) ;
   temp_strsupp << "support_tmp.ppm";
   write_image(temp_strsupp.str(), data);
+
+  //Uncomment out this part to print images of the modes
   /*
      for(int i=0; i< nmodes*nmodes; i++){
      ostringstream temp_str0 ( ostringstream::out ) ;
@@ -191,7 +191,7 @@ int main(void){
 
       }
       if(i%shrinkwrap_iterations==(shrinkwrap_iterations-1))
-	partial.apply_shrinkwrap(5.0,0.1);
+	partial.apply_shrinkwrap(1.5,0.1);
 
     }
 
@@ -243,7 +243,7 @@ int main(void){
 	//partial.apply_shrinkwrap(1.5,0.1);
       }
       if(i%shrinkwrap_iterations==(shrinkwrap_iterations-1))
-	partial.apply_shrinkwrap(5.0,0.1);
+	partial.apply_shrinkwrap(1.5,0.1);
 
     }
   }
