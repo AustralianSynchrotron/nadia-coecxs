@@ -17,8 +17,8 @@
  * polynomials used is defined by the user. The number of Legendre polynomial * must exceed the number of modes.
  */
 
-#ifndef PCDI_H
-#define PCDI_H
+#ifndef POLYCDI_H
+#define POLYCDI_H
 
 #include "BaseCDI.h"
 #include <vector>
@@ -89,7 +89,7 @@ protected:
 public:
 
   PolyCDI(Complex_2D & initial_guess,
-      double beta=1.0,
+      double beta=0.9,
       int n_best=1,
       bool parallel=0
       );
