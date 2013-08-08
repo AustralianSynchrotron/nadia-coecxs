@@ -16,6 +16,7 @@
 \usepackage{import}
 \usepackage{listings}
 \usepackage{tikz}
+\usetikzlibrary{shapes, fit, arrows, positioning, shadows}
 \usepackage{html}
 
 
@@ -169,7 +170,7 @@ Ubuntu operating systems. It is issued under the GNU public license.
 It is assumed that readers of this manual are familiar with the
 relevant literature describing the CDI algorithms implemented in \name
 and we will therefore not repeat this information here. Please refer
-to any of the reviews~\cite{} for more information on CDI. We intend
+to any of the reviews, such as ~\cite{quiney2010coherent} for more information on CDI. We intend
 that this manual is used in the following ways:
 \begin{itemize}
 \item New users should follow the instructions provided for
@@ -210,17 +211,17 @@ all other users, we recommend downloading the source code package.
 Currently the code depends on several other libraries which will need to
 be installed prior to installing this package:
 \begin{itemize}
-\item g++\cite{} - for compilation of C++ source code (we have tested against version 4.4.3)
-\item fftw\cite{} - for fast Fourier transforms.
-\item libtiff\cite{} - for reading and writing to tiff files.
-\item HDF libraries\cite{} - for reading (and not yet writing to) hdf4
-  files. Note that the hdf library depends on a few other libraries,
+\item g++\cite{g++} - for compilation of C++ source code (we have tested against version 4.4.3)
+\item FFTW\cite{FFTW05} - for fast Fourier transforms.
+\item libtiff\cite{libtiff} - for reading and writing to tiff files.
+\item HDF libraries\cite{hdf} - for reading (and not yet writing to) HDF4
+  files. Note that the HDF library depends on a few other libraries,
   which must also be installed.
-\item LAPACK\cite{} - for expanding paritally coherent data.
+\item LAPACK\cite{lapack} - for expanding partially coherent data.
 \end{itemize}
 
 Ubuntu users can easily install the external packages using the
-synaptic package manager~\cite{}. The packages are named libfftw3-dev,
+Synaptic package manager~\cite{synaptic}. The packages are named libfftw3-dev,
 libtiff4-dev, liblapack, and libhdf4-dev.
 
 Next, download our source code from the website and put it into an
@@ -253,13 +254,13 @@ compiled and the \name libraries linked.
 \subsubsection{Mac}
 
 \begin{enumerate}
-\item Install Xcode\cite{}. This is a big download and you first have
+\item Install Xcode. This is a big download and you first have
   to register as a developer. Once installed, this is a nice text
   editor too.
-\item Install fink\cite{} but following their instructions exactly.
-  You can use fink like {\tt apt get} on Linux to install the fftw and
-  hdf packages. Make sure you select the correct releases of these.
-\item Get and build the fftw, libtiff and hdf packages using fink
+\item Install Fink\cite{fink} but following their instructions exactly.
+  You can use Fink like {\tt apt get} on Linux to install the FFTW and
+  HDF packages. Make sure you select the correct releases of these.
+\item Get and build the FFTW, libtiff and HDF packages using fink
 \item Download the \name source code from the website
 \item Follow the install instruction for Linux, except, replace ./configure with 
 \begin{myverbatim}
@@ -270,31 +271,32 @@ external packages.  The CXX="g++ -arch i386" relates to your
 computer's architecture. This is for a late 2010 Macbook pro running
 10.6, try this, if it doesn't work, try looking up the relevant
 information for your computer. %--enable-checking is just in case.
-\item Type make, as in the Linux instructions.
+\item Type make, as per the Linux instructions.
 \end{enumerate}
 
 \subsubsection{Windows with Cygwin}
 
-Cygwin\cite{} provides a Linux/Unix type environment for Windows (the
-interface is basically a Unix style terminal). Installing the NADIA
+Cygwin\cite{cygwin} provides a Linux/UNIX type environment for Windows (the
+interface is basically a UNIX style terminal). Installing the NADIA
 source code in this environment is very similar to installing it in
-Linux/Unix and (in my opinion) makes modifying and recompiling the
+Linux/UNIX and (in my opinion) makes modifying and recompiling the
 code a bit easier than it would be in Windows otherwise. First you
 will need to install Cygwin. You can do this by going to
 http://www.cygwin.com/, scrolling to the bottom of the page and
-clicking on "Install or update now\ (using setup.exe)". Open setup.exe
+clicking on "Install or update now (using the executable named something like setup.exe)". Open setup.exe
 and follow the installation instructions. Apart from the "Package
 Selection" screen, used the default options. When you get to the
 "Package Selection" screen leave "All" on "Default" and add the
 additional packages by searching for them and then clicking on them:
 \begin{itemize}
-\item libhdf5-devel - These are libraries for reading hdf files.
-\item gcc4-g++ - This is the c/c++ compiler I like to use.
+\item libhdf5-devel - These are libraries for reading HDF files.
+\item gcc-g++ - This is the c/c++ compiler I like to use.
 \item make - This is used to automatically compile the package.
-\item xemacs or emacs - This is a text/code editor
+\item xemacs or emacs - This is a text/code editor. If you have a diffrent preferred editor (VIM, etc.) install that instead
 \item libfftw3-devel - This is a fast Fourier transform library.
 \item libtiff-devel - This is a library for reading/writing tiff image files.
 \item sunrpc
+\item liblapack-devel - This is the matrix package
 \item libjpeg-devel
 \item zlib-devel
 \end{itemize}
@@ -320,8 +322,6 @@ ln -sf mfhdfdll.dll libmfhdf.dll
 ln -sf hdfdll.dll libdf.dll
 ln -sf szip.dll libsz.dll
 
- 
-
 Next, download NADIA here and put it into your home
 directory on Cygwin \\
 (C:\textbackslash{}cygwin\textbackslash{}home\textbackslash{}your\_user\_name). Open Cygwin and
@@ -336,7 +336,7 @@ few others. Change into the NADIA directory:
 \begin{myverbatim}
 $ cd NADIA 
 \end{myverbatim}
-Tell the package where your hdf and szip libraries files are located
+Tell the package where your HDF and szip libraries files are located
 (replace the "user\_name" with your cygwin user name):
 \begin{myverbatim}
 $ ./configure --with-mfhdf_lib=c:/HDF_Group/HDF/4.2.8/bin --with-mfhdf_inc=c:/HDF_Group/HDF/4.2.8/include --with-sz_lib=c:/HDF_Group/HDF/4.2.8/bin --with-df_lib=c:/HDF_Group/HDF/4.2.8/bin
@@ -394,7 +394,7 @@ your own machine you probably won't have permission to install into
 command line executable files. Look at the README file which comes
 with the distribution to find out more. 
 
-To uninstall, go to "Control Panel", go to "Add/Remove program", find
+To uninstall, go to "Control Panel", go to "Programs and Features" (or Add/Remove programs for pre-Windows 7), find
 NADIA and remove it.
 
 
@@ -405,67 +405,67 @@ NADIA and remove it.
 
 \subsection{For Users on Osiris}
 
-Note: this section is only applicable to users who are members of
-the ARC Centre of Excellence in Coherent X-ray Science (CXS).
+\bf{Note: this section is only applicable to users who are members of
+the ARC Centre of Excellence in Coherent X-ray Science (CXS).}
 
-If you want to quickly use the software without the hassle of
-installing many packages, the simplest way is by logging into Osiris
+If you want to get the software up and running quickly without the hassle of
+installing many packages, the simplest way is to log in to Osiris
 and using it there. This will also be useful to know how to do in the
 long run because the computing power available there is more than your
 laptop/desktop. The first step is to ask for an account on OSIRIS if
-you don't already have one (and are a member of CXS). Then follow the
+you don't already have one (and are a member of CXS). Follow the
 steps below for logging in, and for setting up and running the
 software.
 
-\subsubsection{Logging into Osiris from a Linux/Unix/Mac Machine}
+\subsubsection{Logging into Osiris from a Linux/UNIX/Mac Machine}
 
 Open a terminal and type: 
 \begin{myverbatim}
   ssh -X11 -2 osiris.ph.unimelb.edu.au 
 \end{myverbatim}
-The "-X11 -2" enables you to view graphics on osiris.
+The "-X11 -2" enables you to view graphics on Osiris.
 
 \subsubsection{Logging into Osiris from Windows}
 
 On Windows, you will need to install an ssh client. Many people
-(including me) recommend the program putty~\cite{} for this.  After
-you install it, test it works by logging into osiris:
+(including me) recommend the program putty~\cite{putty} for this.  After
+you install it, test it works by logging into Osiris:
 \begin{enumerate}
 \item Open putty 
 \item In the host name field type "@osiris.ph.unimelb.edu.au" 
 \item Make sure the connection type is set to "ssh" 
 \item Save these setting by typing in a saved session name. e.g
-  "osiris", and clicking on "Save". Next time you open putty you can load
-  these setting by clicking on "osiris" and then "Load".
+  "Osiris", and clicking on "Save". Next time you open putty you can load
+  these setting by clicking on "Osiris" and then "Load".
 \item Now click on "Open". A terminal should open with a prompt asking
   for you password. After you enter it correctly you are logged into
-  osiris.
+  Osiris.
 \item End your session by typing "exit"
 \end{enumerate}
 
 You are now half way there. You can log in, but you won't be able to
-view any images which are stored on osiris yet. To be able to do this,
+view any images which are stored on Osiris yet. To be able to do this,
 you need to install an X-windows server (graphical information can be
 passed back to your computer once you have this). I found
-Xming~\cite{} to be good. I installed it with the default options
+Xming~\cite{xming} to be good. I installed it with the default options
 ("normal Putty").
 
 I also found that I need to install Xming-fonts in order for the
 "emacs" text editor to display fonts correctly. During the set-up I
 ticked all the boxes so that all the fonts were installed.
 
-Now, each time you want to log into osiris you will need to run Xming
+Now, each time you want to log into Osiris you will need to run Xming
 first. It will run in the background, so all you'll see when it's
 running is a small icon on the tool bar. You can close it once you've
 finished with your putty session.
 
-Finally go into putty again, and load your "osiris" session. 
+Finally go into putty again, and load your "Osiris" session. 
 \begin{enumerate}
 \item Configure it for X windows by clicking on "SSH" under "Connection" in the tree on the left hand side of the screen. 
 \item Click on "X11" 
 \item On the right hand side of the screen click on "Enable X11 forwarding". 
 \item Click on "session" in the left-hand tree. 
-\item And save these settings. 
+\item Save these settings. 
 \item You are now ready to test it. Click on "Open" and log in. Type
   "emacs test" and a window should pop up. Don't worry too much about
   what this is for now. Close the window and you are ready to start.
@@ -477,11 +477,11 @@ Once you have successfully logged in, append your PATH variable to the
 directory where the NADIA programs are located. This can be done by
 typing:
 \begin{myverbatim}
-  export PATH=$PATH:/data/DIXE/dixe/tags/rel_0.5/NADIA/bin 
+  export PATH=$PATH:/data/DIXE/dixe/tags/rel_0.5/cxs_software/bin 
 \end{myverbatim}
 
 You now have available all of the command line tools listed here. Note
-that this will only work for your current session on osiris. To make
+that this will only work for your current session on Osiris. To make
 it permanent, open the file ".bash\_profile" in your home area:
 \begin{myverbatim}
   emacs .bash_profile 
@@ -493,11 +493,11 @@ key).
 If you plan to work with IDL you will also need to update your
 LD\_LIBRARY\_PATH with the wrapper library path:
 \begin{myverbatim}
-  export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/data/DIXE/dixe/tags/rel_0.5/NADIA/interfaces/idl/ 
+  export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/data/DIXE/dixe/tags/rel_0.5/cxs_software/interfaces/idl/ 
 \end{myverbatim}
 and update the IDL\_PATH with the IDL module location:
 \begin{myverbatim}
-  export IDL_PATH="${IDL_PATH}:\:/data/DIXE/dixe/tags/rel_0.5/NADIA/interfaces/idl/"
+  export IDL_PATH="${IDL_PATH}:\:/data/DIXE/dixe/tags/rel_0.5/cxs_software/interfaces/idl/"
 \end{myverbatim}
 
 \subsubsection{Running the Commandline Tool}
@@ -507,7 +507,7 @@ CDI\_reconstruction.exe command line tool. It takes three arguements as
 input:
 \begin{itemize}
 \item a configuration file, 
-\item the reconstruction type: planar, fresnel\_wf or fresnel and
+\item the reconstruction type: planar, fresnel\_wf, fresnel, partial, partialchar, or poly and
 \item a seed for the initial random estimate. 
 \end{itemize}
 If you don't give the seed value, "0" is used as the default, and if
@@ -518,10 +518,10 @@ configuration files:
 \begin{myverbatim}
    ./CDI_reconstruction.exe planar_example.config
 \end{myverbatim}
+
 You should see output telling you the iteration number and the
 error. The error is a measure of the difference between the
-diffraction data and the reconstructed diffraction (the usual chi
-squared given in the literature). You can kill the process at any time
+diffraction data and the reconstructed diffraction (the usual chi-squared given in the literature). You can kill the process at any time
 by typing Ctrl-C or you can wait for it to finish if you prefer.
 
 Now look into the configuration file by typing: 
@@ -530,21 +530,21 @@ Now look into the configuration file by typing:
 \end{myverbatim}
 You can see that the data and support file names are given. Type: 
 \begin{myverbatim}
-   gthumb image_files/planar_support.tiff 
+   eog image_files/planar_support.tiff 
 \end{myverbatim}
-to view the support. The data file can't be viewed with gthumb because
+to view the support. The data file can't be viewed with eog because
 it's in binary format, however you can convert it to a .ppm file using
 one of the other command line tools and then view it: 
 \begin{myverbatim}
    dbin2ppm.exe image_files/planar_data.dbin planar_data.ppm 1024 1024 
-   gthumb planar_data.ppm
+   eog planar_data.ppm
 \end{myverbatim}
 
 The CDI\_reconstruction.exe program outputs a .ppm file of the current
 magnitude of the estimated exit surface wave every 40 iterations. Type
 ``ls'' again to see a list of these files (they should look something like
 planar\_x.ppm, where x is the iteration number). View them using
-gthumb. The reconstruction is slowly converging. Note that it may not
+eog. The reconstruction is slowly converging. Note that it may not
 completely converge as the number of iterations performed in this
 example is a lot less than usually used. The exit surface wave of the
 final iteration is saved as a complex binary file (with the file
@@ -579,17 +579,16 @@ of "c" and examples are provided for this as well. The same
 reconstruction as planar.config performs can be done using
 PlanarCDI\_example.c. Compile this code using the Makefile: 
 \begin{myverbatim}
-   make 
+$  make 
 \end{myverbatim}
-Now when you type ls you should see a filenamed PlanarCDI\_example.exe. Run this.
+Now when you type ls you should see a file named PlanarCDI\_example.exe. Run this.
 \begin{myverbatim}
-   ./PlanarCDI_example.exe 
+$  ./PlanarCDI_example.exe 
 \end{myverbatim}
 You should find it gives almost exactly the same output as the
 CDI\_reconstuction program did. Have a look at the source code: emacs
 PlanarCDI\_example.c edit it and recompile using make to see what
-happens. Similarly, have a look at and Fresnel example:
-FresnelCDI\_WF\_example.c and FresnelCDI\_example.c, and a simulation of
+happens. Similarly, have a look at the other examples. Also, try out the simulation of
 the object from the planar example: PlanarCDI\_simulation\_example.c.
 
 Later, if you write your own "c" code, it's easy to compile and link
@@ -608,7 +607,7 @@ doesn't allow you to use all the features of the C++ library.
 
 Begin by copying the IDL examples to your working directory, 
 \begin{myverbatim}
-   cp /data/DIXE/dixe/tags/rel_0.5/NADIA/interfaces/idl/*_example.pro ./ 
+   cp /data/DIXE/dixe/tags/rel_0.5/cxs_software/interfaces/idl/*_example.pro ./ 
 \end{myverbatim}
 and run them: 
 \begin{myverbatim}
@@ -622,7 +621,7 @@ Look at the .pro files to see what they do.
 
 Open a terminal and follow the instruction given for ``Users on
 Osiris'', from Section \ref{osiris-setup} onwards. Replace the path to
-the software on osiris,
+the software on Osiris,
 ``/data/DIXE/dixe/tags/rel\_0.5/NADIA/'' in the instructions,
 with the path where you installed the software.
 
@@ -660,7 +659,7 @@ To run the IDL examples:
      to work out what it's doing. Later you can write a single file to
      execute. I got errors when I tried to execute the whole file at
      once using the IDL workbench, although it's possible under
-     linux. If you work out how to, please let us know.
+     Linux. If you work out how to, please let us know.
 \end{itemize}
 
 
@@ -713,25 +712,24 @@ it's not advised that a beginner attempts to run the C++ examples
 under Windows (unless in Cygwin). However, the benefit of using C/C++
 is that it is more powerful and you will have greater flexibility with
 the software library.  If your reconstruction requires a lot of
-computing power (for example you plan on run on osiris or similar,
-rather than a desktop), this is the best option in our opinion.
+computing power (for example you plan on run on Osiris or some other sever rather than a desktop), this is the best option in our opinion.
 
-Five examples showing how to write c code using the NADIA software for
+Five examples showing how to write c code using the \name software for
 CDI reconstruction and simulation are given in the ``examples''
-directory.  The header files for the NADIA software project can be found
+directory.  The header files for the \name software project can be found
 in the "include" directory and the libraries in the "bin" (libraries
-which the NADIA software depends on are also provided in this directory.
+which the \name software depends on are also provided in this directory.
 
 We will leave the details of how to compile in Windows to the users,
 as this will be compiler and system dependant. However, we do
-recommend compiling under mingw~\cite{} with msys~\cite{} because it
+recommend compiling under mingw~\cite{mingw} with msys~\cite{msys} because it
 is free; the code provided here was compiled with it, so I know it
-works; and because compilation is similar to linux/unix meaning you
-will be better trained for compiling on osiris or similar if the need
+works; and because compilation is similar to Linux/UNIX meaning you
+will be better trained for compiling on Osiris or similar if the need
 arises.
 
 
-%Assuming you have mingw and mssys intalled you can compile and run the
+%Assuming you have mingw and msys intalled you can compile and run the
 %examples in the following way:
 
 %\begin{itemize}
@@ -743,7 +741,7 @@ arises.
 %  command, for example: "cd <directory name>\\NADIA\\examples"
 %  where <directory name> is the directory where you copied the package
 %\item open "Makefile" in a text editor. Note that you might need a
-%  text editor for linux/unix style files, otherwise the new lines
+%  text editor for Linux/UNIX style files, otherwise the new lines
 %  symbols will be missing. Change the directory path to you place the
 %  package is installed.
 %\item on the command line, type "make". You should see the five
@@ -761,21 +759,21 @@ arises.
 
 \section{Examples and Demos}
 
-The package consits of a set of examples which demonstrate how to use
+The package consists of a set of examples which demonstrate how to use
 the library and tools of the software package for various
 reconstructions and simulations. Most are located in the {\tt examples}
 subdirectory of the package.
 
 The examples should be compiled automatically after installation
 (Section \ref{installation}). To recompile (e.g.  after making
-modifications to the examples), you may type "make" in the {\tt
+modifications to the examples), you may type {\tt make} in the {\tt
   examples} directory.  To force a recompilation type "make clobber"
 followed by "make".
 
 \begin{description}
 
 \item[{\tt PlanarCDI\_example.c}] - \\ Reconstruction of plane-wave diffraction
-  data (data from L. Whitehead \cite{}). The shrinkwrap algorithm is
+  data (data from L. Whitehead \cite{Whitehead:08}). The shrinkwrap algorithm is
   used to improve the reconstruction. A combination of the hybrid
   input-out (HIO) and the error-reduction (ER) algorithms are used.
 
@@ -815,7 +813,7 @@ followed by "make".
 
 \item[{\tt PhaseDiverse\_example.c }]- \\ This example shows how
   phase-diverse/ptychographic reconstruction can be performed. The
-  example uses data from C. Putkunz which can be found on osiris at
+  example uses data from C. Putkunz which can be found on Osiris at
   /data/cputkunz/phase\_diverse\_cdi/example\_data.tar.gz It consists
   of 7 Fresnel diffraction images of the same object.  For each image,
   the sample position is altered with respect to the focal point
@@ -898,7 +896,7 @@ detail.
                       \begin{minipage}{6cm}
                         
                         \only<2>{
-                          Functions are provided for reading hdf, tiff and ppm image
+                          Functions are provided for reading HDF, tiff and ppm image
                           files. \\
                           
                           {\bf In C++} 
@@ -953,13 +951,13 @@ detail.
 
 \label{subsec:read_images}
 
-The software is capable of accepting data in hdf, tiff or ppm image
+The software is capable of accepting data in HDF, tiff or ppm image
 format. It can output as a grey scale tiff or ppm image with X bytes
 per pixel. In addition data can be read and stored as a binary file of
 doubles. This may be useful in situations where high prescision is
 required. Similarly, two dimensional arrays of complex numbers, such
 as those produced in the reconstruction, may be stored as a binary
-file of fftw~\cite{} complex number types.
+file of FFTW~\cite{fftw} complex number types.
 
 {\bf In C++} 
 \begin{myverbatim}[language=C++]
@@ -1328,14 +1326,232 @@ provided in BaseCDI. The reconstruction type PhaseDiverseCDI, which is
 capable of performing phase-diverse and ptycographic reconstruction
 accepts multiple objects of type BaseCDI.
 
+\tikzstyle{decision} = [diamond, draw, fill=blue!20,
+text width=4.5em, text badly , node distance=2.5cm, inner sep=0pt]
+\tikzstyle{block}=[rectangle, draw, fill=blue!20, text width=5em, text centered, rounded corners, minimum height=4em]
+\tikzstyle{line} = [draw, very thick, color=black!50, -latex']
+\tikzstyle{cloud} = [draw, ellipse,fill=red!20, node distance=2.5cm,
+minimum height=2em]
+\tikzstyle{comment}=[rectangle, draw=black, fill=black!60, rounded corners,
+anchor=west, text=white, text width=4.2cm, font=\tiny]
+\tikzstyle{abstract}=[rectangle, draw=black, rounded corners, fill=blue!40, drop shadow,
+text centered, anchor=north, text=white, text width=3cm]
+\tikzstyle{myarrow}=[->, >=open triangle 90, thick, font = \tiny]
+\tikzstyle{myarrowd}=[->, >=open triangle 90, dotted, thick, font=\tiny]
+\tikzstyle{line}=[-, thick]
 
+\begin{center}
+  \begin{figure}
+    \begin{tikzpicture}[node distance = 0.2cm, scale=0.1]
+				       %%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Place nodes
+      \node[comment, rectangle split, anchor=north, rectangle split parts=2] (planar){
+	\textbf{PlanarCDI}
+	\nodepart{second}
+	\hspace{5pt} PlanarCDI\\ %(Complex{\_}2D \&complex, unsigned int n{\_}best=0)\\	    
+				      \hspace{5pt} get\_intensity\_autocorrelation\\ %(Double\_2D \&autoc)\\
+	\hspace{5pt} initialise\_estimate\\ %(int seed=0)\\
+	\hspace{5pt} propagate\_to\_detector\\ %(Complex\_2D \&c)\\
+							      \hspace{5pt} propagate\_from\_detector\\ %(Complex\_2D \&c)\\
+	\hspace{5pt} iterate\\ %()
+      };
+										%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+      \node[comment, rectangle split, below=of planar, rectangle split parts=2](fresnel){
+	\textbf{FresnelCDI}
+	\nodepart{second}
+	\hspace{5pt} FresnelCDI\\ %(Complex\_2D \&initial\_guess, Complex\_2D \&white\_field, double beam\_wavelength, double focal\_detector\_length, double focal\_sample\_length, double pixel\_size, double normalisation=1.0, int n\_best=0)\\
+	\hspace{5pt} {\textasciitilde}FresnelCDI\\ %()\\
+	\hspace{5pt} initialise\_estimate\\ %(int seed=0)\\
+	\hspace{5pt} auto\_set\_norm\\ %()\\
+	\hspace{5pt} get\_transmission\_function\\ %(Complex\_2D \&result, Complex\_2D *esw=0)\\
+															      \hspace{5pt} apply\_support\\ %(Complex\_2D \&complex)\\
+															\hspace{5pt} set\_transmission\_function\\ %(Complex\_2D \&transmission, Complex\_2D *esw=0)\\
+																	  \hspace{5pt} scale\_intensity\\ %(Complex\_2D \&c)\\
+															  \hspace{5pt} propagate\_from\_detector\\ %(Complex\_2D \&c)\\
+																   \hspace{5pt} propagate\_to\_detector\\ %(Complex\_2D \&c)\\
+	\hspace{5pt} set\_normalisation\\ %(double normalisation)\\
+	\hspace{5pt} set\_experimental\_parameters\\ %(double beam\_wavelength, double focal\_detector\_length, double focal\_sample\_length, double pixel\_size)\\
+	\hspace{5pt} set\_norm\\ %(double new\_normalisation)\\
+	\hspace{5pt} get\_illumination\_at\_sample\\ %()\\
+      };
+																			%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+      \node[comment, rectangle split, below=of fresnel, rectangle split parts=2] (fresnelwf){
+	\textbf{FresnelCDI\_WF}
+	\nodepart{second} 
+	\hspace{5pt} FresnelCDI\_WF\\ %(Complex\_2D \&initial\_guess, double beam\_wavelength, double zone\_focal\_length, double focal\_detector\_length, double pixel\_size, int n\_best=1)\\
+	\hspace{5pt} {\textasciitilde}FresnelCDI\_WF\\ %()\\
+	\hspace{5pt} iterate\\ %()\\
+	\hspace{5pt} propagate\_from\_detector\\ %(Complex\_2D \&c)\\
+																					   \hspace{5pt} propagate\_to\_detector\\ %(Complex\_2D \&c)\\
+	\hspace{5pt} initialise\_estimate\\ %int seed=0)\\
+	\hspace{5pt} set\_support\\ %(double z\_diameter, double size=1.01)\\
+	\hspace{5pt} set\_algorithm\\ %(int alg)\\
+	\hspace{5pt} print\_algorithm\\ %()\\
+	\hspace{5pt} set\_relaxation\_parameter\\ %(double relaxation\_parameter)\\
+	\hspace{5pt} set\_custom\_algorithm\\ %(double m1, double m2, double m3, double m4, double m5, double m6, double m7, double m8, double m9, double m10)\\
+	\hspace{5pt} multiply\_factors\\ %(Complex\_2D \&c, int direction)\\
+      };
+																												      %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+      \node [comment, rectangle split, below= of fresnelwf, rectangle split parts=2](partial) {
+	\textbf{PartialCDI}
+	\nodepart{second} 
+	\hspace{5pt} PartialCDI\\ %(Complex\_2D \&initial\_guess, double lcx=1.0, double lcy=1.0, double pxsize=1.0, double pysize=1.0, double energy=1.0, double zsd=1.0, int nleg=2, int nmode=2, unsigned int n\_best=0)\\
+	\hspace{5pt} {\textasciitilde}PartialCDI\\ %()\\
+	\hspace{5pt} initialise\_estimate\\ %()\\
+	\hspace{5pt} initialise\_estimate\\ %(int seed)\\
+	\hspace{5pt} iterate\\ %()\\
+	\hspace{5pt} initialise\_matrices\\ %(int leg, int modes)\\
+	\hspace{5pt} get\_transmission\\ %()\\
+	\hspace{5pt} set\_transmission\\ %(Complex\_2D \&new\_transmission)\\
+	\hspace{5pt} propagate\_modes\_to\_detector\\ %()\\
+	\hspace{5pt} set\_threshold\\ %(double d)\\
+      };
+																																						  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+      \node [comment, rectangle split, below = of partial, rectangle split parts=2](partialchar) {
+	\textbf{PartialCharCDI}
+	\nodepart{second} 
+	\hspace{5pt} PartialCharCDI\\ %(Complex\_2D \&initial\_guess, double z\_dist=2, double beam\_energy=1.239841e-6, double pixel\_x\_size=1, double pixel\_y\_size=1, unsigned int n\_best=0)\\
+	\hspace{5pt} set\_initial\_coherence\_guess\\ %(double lx\_, double ly\_)\\
+	\hspace{5pt} set\_initial\_coherence\_guess\_in\_m\\ %(double lx\_, double ly\_)\\
+	\hspace{5pt} initialise\_estimate\\ %(int seed=0)\\
+	\hspace{5pt} set\_intensity\\ %(const Double\_2D \&detector\_intensity)\\
+	\hspace{5pt} set\_minima\_search\_bounds\_coefficient\\ %(double coef)\\
+	\hspace{5pt} set\_minima\_search\_tolerance\\ %(double tol)\\
+	\hspace{5pt} set\_minima\_search\_tolerance\_in\_m\\ %(double tol)\\
+	\hspace{5pt} set\_minima\_moving\_average\_weight\\ %(double w)\\
+	\hspace{5pt} set\_minima\_recalculation\_interval\\ %(unsigned int ival)\\
+	\hspace{5pt} get\_x\_coherence\_length\\ %()\\
+	\hspace{5pt} get\_y\_coherence\_length\\ %()\\
+	\hspace{5pt} get\_x\_coherence\_length\_in\_pixels\\ %()\\
+	\hspace{5pt} get\_y\_coherence\_length\_in\_pixels\\ %()\\
+	\hspace{5pt} propagate\_to\_detector\\ %(Complex\_2D \&c)\\
+																																												    \hspace{5pt} propagate\_from\_detector\\ %(Complex\_2D \&c)\\
+																																																			      \hspace{5pt} scale\_intensity\\ %(Complex\_2D \&c)\\
+	\hspace{5pt} iterate\\ %()\\
+      };
 
-\begin{figure}[htbp]
-\centering \includegraphics*[scale=0.32,viewport = 0 0 1500
-  1200]{nadia_class_diagram.eps}
-\caption[]{The relationship between classes of the \name package.
-\label{fig:class_diagram}}
-\end{figure}
+																																																				   %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+      \node [comment, rectangle split, below right =0.0 and 1.8 of planar.north east, rectangle split parts=2](poly) {
+	\textbf{PolyCDI}
+	\nodepart{second} 
+	\hspace{5pt}  PolyCDI\\ %(Complex\_2D \&initial\_guess, double beta=1.0, int n\_best=1, bool parallel=0)
+	\hspace{5pt} {\textasciitilde}PolyCDI\\ %()\\
+	\hspace{5pt} initialise\_estimate\\ %()\\
+	\hspace{5pt} initialise\_estimate\\ %(int seed)\\
+	\hspace{5pt} initialise\_matrices\\ %(int leg, int modes)\\
+	\hspace{5pt} apply\_transmission\\ %(Complex\_2D \&c)\\
+	\hspace{5pt} scale\_intensity\\ %(Complex\_2D \&c)\\
+	\hspace{5pt} expand\_wl\\ %(Complex\_2D \&c)\\
+	\hspace{5pt} sum\_intensity\\ %(std::vector< Complex\_2D > \&c)\\
+	\hspace{5pt} iterate\\ %()\\
+	\hspace{5pt} update\_transmission\\ %()\\
+	\hspace{5pt} set\_iterations\_per\_cycle\\ %(int iterations)\\
+	\hspace{5pt} set\_spectrum\\ %(Double\_2D spectrum\_in)\\
+	\hspace{5pt} set\_spectrum\\ %(std::string file\_name)\\
+	\hspace{5pt} get\_intensity\\ %()\\
+	\hspace{5pt} propagate\_modes\_to\_detector\\ %()\\
+	\hspace{5pt} get\_mode\\ %(int mode)\\
+	\hspace{5pt} propagate\_from\_detector\\ %(Complex\_2D \&c)\\
+	\hspace{5pt} propagate\_to\_detector\\ %(Complex\_2D \&c)\\
+      };
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+      \node [comment, rectangle split, below = 1.2 of poly, rectangle split parts=2](base) {
+	\textbf{BaseCDI}
+	\nodepart{second} 
+	\hspace{5pt} BaseCDI \\
+	\hspace{5pt} {\textasciitilde}BaseCDI \\
+	\hspace{5pt} iterate \\
+	\hspace{5pt} initialise\_estimate \\
+	\hspace{5pt} get\_best\_result \\
+	\hspace{5pt} set\_support \\
+	\hspace{5pt} set\_intensity \\
+	\hspace{5pt} set\_beam\_stop \\
+	\hspace{5pt} set\_relaxation\_parameter \\
+	\hspace{5pt} get\_exit\_surface\_wave \\
+	\hspace{5pt} set\_algorithm \\
+	\hspace{5pt} set\_custom\_algorithm \\
+	\hspace{5pt} print\_algorithm \\
+	\hspace{5pt} get\_error \\
+	\hspace{5pt} apply\_shrinkwrap \\
+	\hspace{5pt} get\_support \\
+	\hspace{5pt} apply\_support \\
+	\hspace{5pt} project\_intensity \\
+	\hspace{5pt} scale\_intensity \\
+	\hspace{5pt} propagate\_to\_detector \\
+	\hspace{5pt} propagate\_from\_detector \\
+	\hspace{5pt} set\_fftw\_type \\
+	\hspace{5pt} set\_complex\_constraint \\
+	\hspace{5pt} reset\_best \\
+      };
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+      \node [comment, rectangle split, right = 1.8cm of base, rectangle split parts=2](transmission) {
+	\textbf{TransmissionConstraint}
+	\nodepart{second} 
+	\hspace{5pt} TransmissionConstraint \\
+	\hspace{5pt} {\textasciitilde}TransmissionConstraint \\
+	\hspace{5pt} delete\_complex\_constraint\_regions \\
+	\hspace{5pt} add\_complex\_constraint \\
+	\hspace{5pt} set\_charge\_flipping \\
+	\hspace{5pt} set\_enforce\_unity \\
+	\hspace{5pt} set\_custom\_constraint \\
+	\hspace{5pt} apply\_constraint \\
+      };
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+      \node [comment, rectangle split, below= 1.8 of transmission, rectangle split parts=2](complex) {
+	\textbf{ComplexConstraint}
+	\nodepart{second} 
+	\hspace{5pt} ComplexConstraint \\
+	\hspace{5pt} set\_fixed\_c \\
+	\hspace{5pt} set\_c\_mean \\
+	\hspace{5pt} get\_c\_mean \\
+	\hspace{5pt} set\_alpha1 \\
+	\hspace{5pt} set\_alpha2 \\
+	\hspace{5pt} get\_new\_mag \\
+	\hspace{5pt} get\_new\_phase \\
+	\hspace{5pt} get\_region \\
+      };
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+      \node [comment, rectangle split, below= 1.0 of base, rectangle split parts=2](phase) {
+	\textbf{PhaseDiverseCDI}
+	\nodepart{second} 
+	\hspace{5pt} PhaseDiverseCDI \\
+	\hspace{5pt} {\textasciitilde}PhaseDiverseCDI \\
+	\hspace{5pt} add\_new\_position \\
+	\hspace{5pt} initialise\_estimate \\
+	\hspace{5pt} iterate \\
+	\hspace{5pt} set\_iterations\_per\_cycle \\
+	\hspace{5pt} set\_feedback\_parameter \\
+	\hspace{5pt} set\_amplification\_factor \\
+	\hspace{5pt} set\_probe\_scaling \\
+	\hspace{5pt} get\_transmission \\
+	\hspace{5pt} set\_transmission \\
+	\hspace{5pt} adjust\_positions \\
+	\hspace{5pt} get\_final\_x\_position \\
+	\hspace{5pt} get\_final\_y\_position \\
+      };
+
+      \draw[line] (planar.east) -- ++(5,0) coordinate (top);
+      \draw[line] (fresnel.east) -- ++(5,0) coordinate;
+      \draw[myarrow] (fresnelwf.east) -- ++(18, 0) coordinate node[midway, above] {\hspace{3pt} contains};
+      \draw[line] (partial.east) -- ++(5,0) coordinate;
+      \draw[line] (partialchar.east) -- ++(5,0) coordinate (bottom);
+      \draw[line] (poly.south) -- ++(0,-5) coordinate (right);
+      \draw[line] (top) -- (bottom);
+      \draw[line] (right) -- ++(-35, 0);
+      \draw[myarrowd] (base.east) -- (transmission.west) node[midway, above] {may contain};
+      \draw[myarrow] (transmission.south) -- (complex.north) node[midway, right]{contains};
+      \draw[myarrow] (phase.north) -- (base.south) node[midway, right]{contains many};
+
+    \end{tikzpicture}
+    \caption[]{A class diagram showing the relationship between key classes in the software. The public methods are shown with the  classes. The shaded region indicates the classes which are responsible for implementing various types of reconstructions. The non-shaded region shows classes which support these, and are generic to the reconstruction type. Note that some periphery classes are excluded from this diagram.\label{fig:class_diagram}}
+  \end{figure}
+\end{center}
+
+%\begin{figure}[htbp]
+%\centering \includegraphics*[scale=0.32,viewport = 0 0 1500
+%  1200]{nadia_class_diagram.eps}
+%\caption[]{The relationship between classes of the \name package.
+%\label{fig:class_diagram}}
+%\end{figure}
 
 \subsection{BaseCDI}
 The fundamental class used for performing CDI reconstruction; an
@@ -1345,44 +1561,44 @@ The reconstruction can be performed in the following way:
 
 \begin{itemize}
 
-\item The user should create an object to store the result (the exit
-  surface wave of type Complex\_2D). For example using: Complex\_2D
-  esw\_estimate(nx,ny) This can be initialise to a best guess, or can
-  be left for the BaseCDI object to initialise.
+  \item The user should create an object to store the result (the exit
+    surface wave of type Complex\_2D). For example using: Complex\_2D
+    esw\_estimate(nx,ny) This can be initialise to a best guess, or can
+    be left for the BaseCDI object to initialise.
 
-\item The BaseCDI object should be created and the Complex\_2D
-  previously created should be passed as input. For example: BaseCDI
-  my\_planar\_recon(esw\_estimate)
+  \item The BaseCDI object should be created and the Complex\_2D
+    previously created should be passed as input. For example: BaseCDI
+    my\_planar\_recon(esw\_estimate)
 
-\item The support and intensity data should be set, and the exit
-  surface wave initialised to a first guess (if not already done):
-  \begin{myverbatim}
-my_planar_recon.set_support(support) 
-my_planar_recon.set_intensity(data) 
-my_planar_recon.initialise_estimate()
-\end{myverbatim}
+  \item The support and intensity data should be set, and the exit
+    surface wave initialised to a first guess (if not already done):
+    \begin{myverbatim}
+    my_planar_recon.set_support(support) 
+    my_planar_recon.set_intensity(data) 
+    my_planar_recon.initialise_estimate()
+    \end{myverbatim}
 
-\item The reconstruction can be configured before, or at anytime
-  during the reconstruction using setter methods. For example the
-  algorithm choice and relaxation parameters:
-\begin{myverbatim}
-my_planar_recon.set_algorithm(HIO) 
-my_planar_recon.set_relaxation_parameter(0.95) 
-\end{myverbatim}
-The algorithm is fully customisable through the
-BaseCDI::set\_custom\_algorithm method. See page 22 of the H.M. Quiney
-review: TUTORIAL REVIEW, Coherent diffractive imaging using short
-wavelength light sources, Journal of Modern Optics, 2010, DOI:
-10.1080/09500340.2010.495459 for the formalism.
+  \item The reconstruction can be configured before, or at anytime
+    during the reconstruction using setter methods. For example the
+    algorithm choice and relaxation parameters:
+    \begin{myverbatim}
+    my_planar_recon.set_algorithm(HIO) 
+    my_planar_recon.set_relaxation_parameter(0.95) 
+    \end{myverbatim}
+    The algorithm is fully customisable through the
+    BaseCDI::set\_custom\_algorithm method. See page 22 of the H.M. Quiney
+    review: TUTORIAL REVIEW, Coherent diffractive imaging using short
+    wavelength light sources, Journal of Modern Optics, 2010, DOI:
+    10.1080/09500340.2010.495459 for the formalism.
 
-\item The reconstruction is then performed with multiple calls to the
-  BaseCDI::iterate() method:
-\begin{myverbatim}
-my_planar_recon.iterate() 
-\end{myverbatim}
-This will automatically update the values in the Complex\_2D estimate
-and the current error. The error can be retrieved using
-BaseCDI::get\_current\_error().
+  \item The reconstruction is then performed with multiple calls to the
+    BaseCDI::iterate() method:
+    \begin{myverbatim}
+    my_planar_recon.iterate() 
+    \end{myverbatim}
+    This will automatically update the values in the Complex\_2D estimate
+    and the current error. The error can be retrieved using
+    BaseCDI::get\_current\_error().
 \end{itemize}
 
 For cases where the beam-stop region must be excluded during
@@ -1443,47 +1659,47 @@ which is done:
 
 \begin{itemize}
 
-\item The reconstruction can be performed in series or parallel.
-  \begin{itemize}
+  \item The reconstruction can be performed in series or parallel.
+    \begin{itemize}
 
-    \item In the case of series (see for example the paper....), a
-      'local' frame will undergo one or more iterations, the result
-      will be updated to a 'global' estimate of the sample, and this
-      estimate will form the starting point for the next frame. For
-      each call to the method "iterate()" this process is repeated
-      until each local frame is used once. The algorithm can be
-      described by:
-      \[ T_{k+1} = (1-\beta w^n)T_k + \beta w^n T^n_k \] 
-      where $T_{k+1}$ is the updated global function, $T^n$ is the
-      updated local function for the nth local frame. $\beta$ is the
-      relaxation parameter and the weight is $ w^n(\rho) = \alpha^n
-      (\frac{|T^n(\rho)|}{max|T^n(\rho)|} )^\gamma $ for Fresnel CDI
-      or $w^n = \alpha^n$ for Plane-wave CDI. The weight is zero
-      outside of the support.
+      \item In the case of series (see for example the paper....), a
+	'local' frame will undergo one or more iterations, the result
+	will be updated to a 'global' estimate of the sample, and this
+	estimate will form the starting point for the next frame. For
+	each call to the method "iterate()" this process is repeated
+	until each local frame is used once. The algorithm can be
+	described by:
+	\[ T_{k+1} = (1-\beta w^n)T_k + \beta w^n T^n_k \] 
+	where $T_{k+1}$ is the updated global function, $T^n$ is the
+	updated local function for the nth local frame. $\beta$ is the
+	relaxation parameter and the weight is $ w^n(\rho) = \alpha^n
+	(\frac{|T^n(\rho)|}{max|T^n(\rho)|} )^\gamma $ for Fresnel CDI
+	or $w^n = \alpha^n$ for Plane-wave CDI. The weight is zero
+	outside of the support.
 
-   \item For a parallel reconstruction (see .....), each frame with
-     independently undergo one of more iteration, the result from all
-     frames will be merged to form a new estimate of the sample, this
-     estimate then becomes the starting point for the next iteration
-     of all frames. The algorithm can be described by:
-     \[T_{k+1} = (1-\beta)T_k + \beta \sum_n(w^n T^n_k)\]
-     where $T_{k+1}$, $T^n$, and $\beta$ were defined
-    earlier. The weight, w, is similar to that used for series
-    reconstruction, but the weight it normalised such that 
-    $ \sum_n w^n = 1 $.  i.e. $ w^n_{parallel}= w^n_{series} / \sum_n w^n_{series} $
+      \item For a parallel reconstruction (see .....), each frame with
+	independently undergo one of more iteration, the result from all
+	frames will be merged to form a new estimate of the sample, this
+	estimate then becomes the starting point for the next iteration
+	of all frames. The algorithm can be described by:
+	\[T_{k+1} = (1-\beta)T_k + \beta \sum_n(w^n T^n_k)\]
+	where $T_{k+1}$, $T^n$, and $\beta$ were defined
+	earlier. The weight, w, is similar to that used for series
+	reconstruction, but the weight it normalised such that 
+	$ \sum_n w^n = 1 $.  i.e. $ w^n_{parallel}= w^n_{series} / \sum_n w^n_{series} $
 
-\end{itemize}
+    \end{itemize}
 
-\item The number of local iterations to perform before updating the
-  result to the 'global' function can be set.
+  \item The number of local iterations to perform before updating the
+    result to the 'global' function can be set.
 
-\item The feedback parameter, beta, may be set. This quantity is used
-  to set how much of the previous 'global' sample function will be
-  left after the next 'global' iteration.
+  \item The feedback parameter, beta, may be set. This quantity is used
+    to set how much of the previous 'global' sample function will be
+    left after the next 'global' iteration.
 
-\item The amplification factor, gamma, and the probe scaling, alpha,
-  may also be see. These parameters control the weighting of one frame
-  (and pixels within a frame) with respect to each other.
+  \item The amplification factor, gamma, and the probe scaling, alpha,
+    may also be see. These parameters control the weighting of one frame
+    (and pixels within a frame) with respect to each other.
 
 \end{itemize}
 
@@ -1582,3 +1798,4 @@ We also ask that you cite this software in publications where you made
 use of it for any part of the data analysis.
 
 \end{document}
+
