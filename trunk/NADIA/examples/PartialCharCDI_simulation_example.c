@@ -57,8 +57,8 @@ int main(void){
   const int output_iterations = 10;
 
   //Coherence lengths of simulated beam (in meters)
-  double lx = 2.0e-5;
-  double ly = 2.0e-5;
+  double lx = 20.0e-6;
+  double ly = 20.0e-6;
   
   //Pixel size detector in m
   double psize_x=13.5e-6;

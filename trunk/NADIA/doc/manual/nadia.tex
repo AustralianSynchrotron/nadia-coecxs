@@ -2,6 +2,15 @@
 % for The ARC Centre of Excellence in Coherent X-ray Science. 
 
 \documentclass[]{nadia}
+\def\ver{0.5}
+\def\name{NADIA}
+\def\ubuntuv{12.10}
+\def\cygwinv{1.7.17}
+\def\fftwv{3.3.3}
+\def\tiffv{3.9.2}
+\def\hdfv{2.6-1}
+\def\g++v{4.4.4.3-1}
+\def\idlv{8.1}
 \usepackage{graphicx}
 \usepackage{hyperref}
 \usepackage{eurosym}
@@ -292,7 +301,7 @@ additional packages by searching for them and then clicking on them:
 \item libhdf5-devel - These are libraries for reading HDF files.
 \item gcc-g++ - This is the c/c++ compiler I like to use.
 \item make - This is used to automatically compile the package.
-\item xemacs or emacs - This is a text/code editor. If you have a diffrent preferred editor (VIM, etc.) install that instead
+\item xemacs or emacs - This is a text/code editor. If you have a different preferred editor (VIM, etc.) install that instead
 \item libfftw3-devel - This is a fast Fourier transform library.
 \item libtiff-devel - This is a library for reading/writing tiff image files.
 \item sunrpc
@@ -375,7 +384,7 @@ Have a look at the code in more detail to see what's going on:
 \begin{myverbatim}
 $ xemacs PlanarCDI_example.c 
 \end{myverbatim}
-and edit some variables to see what happens (eg. change the reconstruction algorithm). 
+and edit some variables to see what happens (e.g.. change the reconstruction algorithm). 
 Then recompile and rerun the example: 
 \begin{myverbatim}
 $ make 
@@ -412,7 +421,7 @@ If you want to get the software up and running quickly without the hassle of
 installing many packages, the simplest way is to log in to Osiris
 and using it there. This will also be useful to know how to do in the
 long run because the computing power available there is more than your
-laptop/desktop. The first step is to ask for an account on OSIRIS if
+laptop/desktop. The first step is to ask for an account on Osiris if
 you don't already have one (and are a member of CXS). Follow the
 steps below for logging in, and for setting up and running the
 software.
@@ -477,7 +486,7 @@ Once you have successfully logged in, append your PATH variable to the
 directory where the NADIA programs are located. This can be done by
 typing:
 \begin{myverbatim}
-  export PATH=$PATH:/data/DIXE/dixe/tags/rel_0.5/cxs_software/bin 
+  export PATH=\$PATH:/data/DIXE/dixe/tags/rel_0.5/cxs_software/bin 
 \end{myverbatim}
 
 You now have available all of the command line tools listed here. Note
@@ -500,10 +509,10 @@ and update the IDL\_PATH with the IDL module location:
   export IDL_PATH="${IDL_PATH}:\:/data/DIXE/dixe/tags/rel_0.5/cxs_software/interfaces/idl/"
 \end{myverbatim}
 
-\subsubsection{Running the Commandline Tool}
+\subsubsection{Running the Command line Tool}
 
 The simplest way to run reconstruction is to use the
-CDI\_reconstruction.exe command line tool. It takes three arguements as
+CDI\_reconstruction.exe command line tool. It takes three arguments as
 input:
 \begin{itemize}
 \item a configuration file, 
@@ -511,7 +520,7 @@ input:
 \item a seed for the initial random estimate. 
 \end{itemize}
 If you don't give the seed value, "0" is used as the default, and if
-you don't give the reconstuction type, "planar" is assumed.
+you don't give the reconstruction type, "planar" is assumed.
 
 Test out the program by running it with one of the example
 configuration files: 
@@ -549,7 +558,7 @@ completely converge as the number of iterations performed in this
 example is a lot less than usually used. The exit surface wave of the
 final iteration is saved as a complex binary file (with the file
 extension .cplx). You can view the magnitude and phase of the wave, by
-using the cplx2ppm.exe command, followed by the gthumb command. You
+using the cplx2ppm.exe command, followed by the eog command. You
 can also use this file as the starting point for another
 reconstruction (see planar\_example.config for instructions).
 
@@ -557,12 +566,12 @@ Now, try editing the configuration file:
 \begin{myverbatim}
    emacs planar_example.config 
 \end{myverbatim}
-e.g. with a different combination of reconstuction algorithms, a
+e.g. with a different combination of reconstruction algorithms, a
 different output rate, support file or shrink-wrap parameters etc. and
-see what happends.
+see what happens.
 
 A similar example exists for the Fresnel case. This can be run by
-first reconstructing the white field using 3-plane propogation:
+first reconstructing the white field using 3-plane propagation:
 \begin{myverbatim}
    ./CDI_reconstruction.exe fresnel_example.config fresnel_wf 
 \end{myverbatim}
@@ -677,7 +686,7 @@ users.
 
 To use:
 \begin{itemize}
-\item copy the examples directory from the package to somehwere in
+\item copy the examples directory from the package to somewhere in
   your home area. This will be the copy you work on.
 \item open a command line terminal: Click on "Start", click on "run",
   type "cmd" in the open field and click on okay
@@ -802,7 +811,7 @@ followed by "make".
 \item[{\tt FresnelCDI\_simulation\_example.c }]- \\ This examples
   demonstrates how a Fresnel experiment can be simulated. It makes use
   of the object from the planar example and the white-field from the
-  fresnel example. Because it uses the fresnel white-field
+  Fresnel example. Because it uses the Fresnel white-field
   reconstructed from data, you will need to run
   FresnelCDI\_WF\_example.exe first.
 
@@ -821,7 +830,7 @@ followed by "make".
 
 \item[{\tt IDL examples}] - \\ Examples for performing planar, Fresnel
   and phase-diverse/ptychographic reconstruction in IDL can be found
-  in the directory NADIA/interfaces/idl, with the filenames
+  in the directory NADIA/interfaces/idl, with the file names
   planar\_example.pro, fresnel\_example.pro and
   phase\_diverse\_example.pro.
 
@@ -836,7 +845,7 @@ followed by "make".
 
 In this section, we describe how a number of common tasks can be
 achieved using the software. More detail of the functionality
-available can be found in the doxygen documentation () and IDL routine
+available can be found in the Doxygen documentation () and IDL routine
 documentation (). 
 
 \begin{comment}
@@ -954,7 +963,7 @@ detail.
 The software is capable of accepting data in HDF, tiff or ppm image
 format. It can output as a grey scale tiff or ppm image with X bytes
 per pixel. In addition data can be read and stored as a binary file of
-doubles. This may be useful in situations where high prescision is
+doubles. This may be useful in situations where high precision is
 required. Similarly, two dimensional arrays of complex numbers, such
 as those produced in the reconstruction, may be stored as a binary
 file of FFTW~\cite{fftw} complex number types.
@@ -1008,23 +1017,40 @@ routines.
 %\subsubsection{Run correlations on data and white-fields}
 %\subsubsection{Convert HDF files and extract header info}
 \subsubsection{Convert between different file formats}
+\name provides tools to convert between .cplx, .dbin, .ppm, .hdf, and .tiff file formats.
 
+These are located in the {\tt tools} directory, but can also be used once the \name folder has been included in the system path. The following tools are available:
 
+\begin{itemize}
+\item cplx2dbin.c
+\item cplx2ppm.c
+\item cplx2tiff.c
+\item dbin2ppm.c
+\item dbin2tiff.c
+\item hdf2dbin.c
+\item hdf2ppm.c
+\item hdf2tiff.c
+\item tiff2ppm.c
+\end{itemize}
 
-\subsubsection{Output Data on a Log Scale}
+Tools only exist to convert a file to a type that contains less information to avoid confusion about the amount of precision that has been retained in an analysis.
 
-\subsubsection{Subtract the darkfield}
+The scripts that transform a cplx to another type of file are called as {\tt cplx2TYPE.exe <input cplx file> <output TYPE file> <component type> <dim x> <dim y>} where component type is one of, 0 - REAL, 1 - IMAG, 2 - MAG, 3 - PHASE, 4 - MAG{\_}SQ, and TYPE is one of dbin, ppm, or tiff.
+
+To change a dbin to another type of file, call {\tt dbin2TYPE.exe <input dbin file> <output TYPE file> <dim x> <dim y>} where type is one of ppm or tiff.
+
+To change a tiff to a ppm or an hdf to either a dbin, ppm or tiff, the command is {\tt tiff2ppm.exe <input tiff file> <output ppm file>} or {\tt hdf2TYPE <input hdf file> <output TYPE file>} where type is one of ppm, dbin or tiff. The dimensions are not required for these file types because the dimensions are easy to work out from the file.
+
+%\subsubsection{Subtract the darkfield}
 %\subsubsection{Check the beam stability in data over time}
 %\subsubsection{Check correlations after dark-field subtraction}
 
-\subsubsection{Merge (add or average) data files together}
+%\subsubsection{Merge (add or average) data files together}
 
-\subsubsection{Determine the normalisation of the white-field to data}
+%\subsubsection{Determine the normalisation of the white-field to data}
 
-\subsubsection{Get the autocorrelation function}
+%\subsubsection{Get the autocorrelation function}
 
-
-\subsection{Perform Reconstruction}
 
 \subsubsection{Perform Plane-wave, Frensel and Fresnel White-Field Reconstruction}
 \label{subsubsec:rec}
@@ -1047,8 +1073,7 @@ steps:
   Sections \ref{subsubsec:rec_planar,subsubsec:rec_fresnel,subsubsec:rec_phase_div}
   for specific instructions.
       
-\item {\it Iterate} - At this stage the iterative algorithms developed by
-  \cite[] are run. In the software library, an iteration can be
+\item {\it Iterate} - At this stage the iterative algorithms are run. In the software library, an iteration can be
   performed simply by calling one function:
       
       {\bf In C++}
@@ -1114,7 +1139,7 @@ In addition to this extensive list, custom algorithms can be
 used. Iterative reconstruction algorithms can be expressed as a
 combination of the following 5 operators: , , , and Where is the
 support projection and is the intensity projection. These can be
-combined to form a basis of 10 vectors (see Harray's review). The
+combined to form a basis of 10 vectors (see Harry's review). The
 parameters to this method set the coefficient for each of these
 vectors. Note: the vector set is linearly dependant.
 
@@ -1156,11 +1181,77 @@ In IDL, the routine ... can be called to select the algorithm.
 
 \subsubsection{Update the support or use the shrink-wrap algorithm}
 
-\subsubsection{Stop a reconstuction, save the result and restart at the same place}
+The shrinkwrap algorithm convolves the reconstructed image with a user-defined Gaussian, and then finds a new support by applying a threshold to the resulting convolution \cite{marchesini:03}. The shrinkwrap algorithm is applied by  calling
+
+\begin{verbatim}
+myobject.apply_shrinkwrap(sigma, threshold);
+\end{verbatim}
+
+where \tt{my\_object} is a CDI object, {\tt sigma} is a float $>1.0$ representing the standard deviation of the Gaussian in pixels, and {\tt threshold} is a float $0.0<threshold<1.0$ denoting the minimum value a pixel must have as a proportion of the value of the maximum pixel to be included in the new support. In the example folder I use values of $sigma = 2.0$ and $threshold = 0.1$. 
+
+\subsubsection{Stop a reconstruction, save the result and restart at the same place}
+
+To write the current object estimate to a file use the {\tt write{\_}cplx}:
+
+\begin{verbatim}
+write_cplx("result.cplx", object_estimate);
+\end{verbatim}
+writes the current object estimate phase and intensity to the file {\tt result.cplx}.
+
+To initialise an object estimate with a random intensity and phase use: 
+\begin{verbatim}
+my_object.initialise_estimate(seed);
+\end{verbatim}
+where {\tt seed} is the initial seed for the random number generator. If you want to read in the result of a previous reconstruction, replace this line with 
+\begin{verbatim}
+read_cplx("result.cplx", object_estimate);
+\end{verbatim}
+
 
 \subsubsection{Modify the reconstruction algorithm by adding a new constraint}
 
-\subsubsection{Refine the experimental parameters during reconstuction}
+The application of a support constraint and the scaling of the estimate at the detector plane are both a form of constraint on the magnitude of the estimate, and are a standard part of the iterative procedure. Sometimes, however, it is possible to apply a phase constraint on the object estimate as well. {\tt TransmissionConstraint} is a class that can be utilised by creating an instance of this class and passing it to a CDI object. The complex constraints will be applied to the object estimate at the same point as the support constraint. The default complex constraints applied will be \emph{charge flipping} in which non-physical phases are flipped to the negative phase, and \emph{unity enforcing} in which any non-physical magnitudes are scaled to unity.\\
+
+To include a complex constraint, include the {\tt TransmissionConstraint} class by including\\ {\tt {\#}include <TransmissionConstraint.h>} at the beginning of the file. Initialise a {\tt TransmissionConstraint} with {\tt TransmissionConstraint tc1;}.
+
+In some cases you may find that you want to include a custom constraint specific to your analysis. It would be too time consuming to write the complex constraint code to account for all possible constraints, so instead you can pass your own function of the form {\tt void function\_name(Complex\_2D {\&} array)} to \\
+{\tt TransmssionConstraint.set\_custom\_algorithm()}.
+
+Write a function that accepts {\tt complex\_2D} and a returns void. Include it before the main function of the file. Include this function through:\\
+
+\begin{verbatim}
+ tc1.set_custom_constraint(my_charge_flipping);
+ tc1.set_enforce_unity(false);
+ tc1.set_charge_flipping(false);
+\end{verbatim}
+This will turn off the default complex constraints and also include the custom one.
+
+\subsubsection{Refine the experimental parameters during reconstruction}
+
+You can change the reconstruction algorithm by using
+\begin{verbatim}
+planar.set_algorithm(algorithm);
+\end{verbatim}
+
+Where \emph{algorithm} can be replaced with any of 
+\begin{itemize}
+\item ER - error reduction
+\item BIO - basic input-output
+\item BOO - basic output-output
+\item HIO - hybrid input-output
+\item DM - difference map
+\item SF - solvent-flipping,
+\item ASR - averaged successive reflections
+\item HPR - hybrid projection reflection
+\item RAAR - relaxed averaged alternating reflectors
+\end{itemize}
+Or you can set a custom algorithm using 
+
+\begin{verbatim}
+planar.set_custom_algorithm(0.5, 0, -1 ,0, -1,0,0,0,0,0);
+\end{verbatim}
+
+following the numbering convention in \cite{quiney2010coherent}.\\
 
 \subsubsection{Nominate a beam-stop area in plane-wave reconstruction}
 
@@ -1168,8 +1259,70 @@ In IDL, the routine ... can be called to select the algorithm.
 
 \subsection{Perform a Simulation}
 
+The NADIA simulates in the following way:
+\tikzstyle{decision} = [rectangle, text width=22em, inner sep=0pt, font = \small]
+\tikzstyle{block}=[rectangle, draw, fill=blue!20, text width=5em, text centered, rounded corners, minimum height=4em]
+\tikzstyle{line} = [draw, very thick, color=black!50, -latex']
+\tikzstyle{cloud} = [draw, ellipse,fill=red!20, node distance=2.5cm,
+    minimum height=2em]
+\tikzstyle{comment}=[rectangle, draw=black, fill=black!60, rounded corners,
+        anchor=west, text=white, text width=8.5cm]
+ \tikzstyle{abstract}=[rectangle, draw=black, rounded corners, fill=blue!40, drop shadow,
+        text centered, anchor=north, text=white, text width=3cm]
+\tikzstyle{myarrow}=[->, >=open triangle 90, thick]
+\tikzstyle{line}=[-, thick]
+\begin{center}
+\begin{tikzpicture}[ node distance = 0.40cm, scale=0.5]
+    % Place nodes
+		\node [comment, rectangle split, rectangle split parts=2] (readin){
+        \textbf{Read in the data}
+        \nodepart{second} 
+        	\hspace{5pt} Double\_2D object; \\
+			\hspace{5pt} read\_image(``object\_file\_name.tif", object);\\
+   		};
+   		\node[decision, right = of readin](readindesc){
+   			A 2D array is created to hold the object data. The array is then filled.
+   		};
+   		\node [comment, rectangle split, below=of readin, rectangle split parts=2](initialise){
+   		\textbf{Initialise the CDI Object}
+        \nodepart{second} 
+        	\hspace{5pt} Complex\_2D object\_estimate(n\_x, n\_y);\\
+        	\hspace{5pt} Complex\_2D input(n\_x,n\_y);\\
+  			\hspace{5pt} for(int i=0; i \textless n\_x; i++)\{\\
+    		\hspace{10pt} for(int j=0; j \textless n\_y; j++)\{\\
+      		\hspace{15pt} input.set\_value(i, j, REAL,\\ \hspace{20pt} 1.0/sqrt(2.0)*object.get(i,j));\\
+      		\hspace{15pt} input.set\_value(i, j, IMAG,\\ \hspace{20pt} 1.0/sqrt(2.0)*object.get(i,j));\\
+    		\hspace{10pt} \}\\
+  			\hspace{5pt} \}\\
+        	\hspace{5pt} ObjectCDI my\_object(object\_estimate);\\
+ 	  	};
+ 	  	\node[decision, right = of initialise](initialisedesc){
+   			A Complex 2D object is created to hold the evolving result from the simulation and is filled with the object data. A CDI object is created. 
+   		};
+   		\node [comment, rectangle split, below=of initialise, rectangle split parts=2] (propagate){
+   		\textbf{Propagate the Image to the Detector Plane}
+        \nodepart{second} 
+       	\hspace{5pt} my\_object.propagate\_to\_detector(input);
+   		};
+   		\node[decision, right = of propagate](propagatedesc){
+   			The object data is propagated to the detector plane.
+   		};
+  		\node [comment, rectangle split, below = of propagate, rectangle split parts=2](output) {
+	  		\textbf{Output the Result}
+        \nodepart{second} 
+        	\hspace{5pt} Double\_2D object\_mag;	\\
+			\hspace{5pt} input.get\_2d(MAG\_SQ, object\_mag);\\
+			\hspace{5pt} write\_image(``magnitude\_file\_name.tif", object\_mag );
+		};
+		\node[decision, right = of output](outputdesc){
+   			The magnitude of the propagated object is output in to a Double\_2D, and then written to file. In this case it is written as a tif.
+   		};		
+   \draw[myarrow] (readin) -- (initialise);
+   \draw[myarrow] (initialise) -- (propagate);
+   \draw[myarrow] (propagate) -- (output);
 
-
+\end{tikzpicture}
+   \end{center}
 
 
 \subsection{Installation Options}
@@ -1185,10 +1338,10 @@ In IDL, the routine ... can be called to select the algorithm.
 
 In designing the code we have tried to find a good balance between
 optimising the speed, reducing the memory used, and keeping the code
-modulare and simple to read. There is always room to improve the
+modular and simple to read. There is always room to improve the
 performance and we provide the figures below as a benchmark of the
 current state of the software in version \ver. These values are
-independante of whether C/C++, IDL or the command-line tools are used.
+independent of whether C/C++, IDL or the command-line tools are used.
 
 \subsection{Speed}
 
@@ -1221,13 +1374,13 @@ Phase-Diverse/Ptychography & (X-0.6)/N  & (X-2)/N  \\
 
 \subsection{Memory}
 
-By default the fast fourier transform library used with \name is
-single precision. We found no noticible lose in performance or
+By default the fast Fourier transform library used with \name is
+single precision. We found no noticeable lose in performance or
 correctness by using single precision, however users may choose to use
-double precision fast fourier transforms by adding the flag
+double precision fast Fourier transforms by adding the flag
 ``--enable-double-precision'' to ``./configure'' during installation.
 The class Double\_2D, despite its name, will also use the same
-precision as the fourier transform library and is single precision by
+precision as the Fourier transform library and is single precision by
 default.
 
 \begin{table}[h!]
@@ -1248,7 +1401,7 @@ Phase-Diverse/Ptychography & I(1+X) + 2R & 30,000 (I=400,M = 1100$^2$, \\
 
 \caption{\label{table:memory}The memory used. 
 In total the memory used will be the factor given in the second
-coloumn of Figure \ref{table:memory} multiplied by pN$^2$.
+column of Figure \ref{table:memory} multiplied by pN$^2$.
 (N - image side length in pixels, p - precision in bytes, 
 c - number of complex constraint regions, I - number of images, 
 R - ratio of the total phase-diverse image size to a single N$\times$N image,
@@ -1266,7 +1419,7 @@ X - number of arrays needed for a single reconstruction).
    \item[] {\tt NADIA/} ...... base directory, where ./configure and make should be executed from.
    \begin{itemize}
       \item[] {\tt bin/} ...... contains the command-line tool executable files after compilation.
-      \item[] {\tt doc/} ...... contains configuration files for doxygen.
+      \item[] {\tt doc/} ...... contains configuration files for Doxygen.
       \begin{itemize}
          \item[] {\tt manual/} ...... contains the latex source for the software manual (this file).
       \end{itemize}
@@ -1578,7 +1731,7 @@ The reconstruction can be performed in the following way:
     my_planar_recon.initialise_estimate()
     \end{myverbatim}
 
-  \item The reconstruction can be configured before, or at anytime
+  \item The reconstruction can be configured before, or at any time
     during the reconstruction using setter methods. For example the
     algorithm choice and relaxation parameters:
     \begin{myverbatim}
@@ -1607,6 +1760,7 @@ the beam-stop region before running iterate().
 
 
 \subsection{PlanarCDI}
+This is the class used for performing a standard Planar CDI reconstruction. It inherits almost all of it's methods from BaseCDI.
 
 \subsection{FresnelCDI}
 The class used for performing Fresnel CDI reconstruction (for
@@ -1628,8 +1782,25 @@ unchanged. Therefore users should refer to the instructions for
 BaseCDI to understand how to use a FresnelCDI\_WF object in their own
 code. Only the differences relevant to users will be documented here.
 
-\subsection{PhaseDiverseCDI}
+\subsection{PartialCDI and PartialCharCDI}
+Two different Partial Spatial classes are provided. In the first case, the reconstruction is performed as described in \cite{Whitehead:09}. The data published in that paper is reconstructed using the modal expansion described in the paper. Normalised Legendre polynomials are used as the orthornormal, mutually incoherent modes. The simulation example takes the same sample image as the Planar simulation example, expands the modes in the Legendre space, and propagates the modes to the detector to find the diffraction pattern of each mode. The modes are added together and a threshold applied to the diffraction pattern to create a realistic detector image.\\
 
+An alternative, non-modal, approach to partial spatial coherence is described in \cite{gaussianCharacterisation} for the case of a Gaussian mutual optical intensity (MOI) function. This method has the advantage that relatively little needs to be known about the beam's characteristics if it can be assumed to have a Gaussian coherence function. This algorithm finds lateral coherence lengths $l_x$ and $l_y$ that minimise error in the reconstruction, thus enabling the beam's coherence to be characterised as reconstruction is performed. {\em coherence length} is defined, in the context of this algorithm, as the standard deviation of the Gaussian MOI function.
+
+In \name, this algorithm is implemented in the {\tt PartialCharCDI } class. The operation of this class is very similar to { \tt PlanarCDI } with a few additional parameters. At initialisation, the sample-detector distance, beam energy, and the size of the detector pixels must be specified\footnote{These parameters are not strictly necessary if you don't want to set any other options in meters (ie. if you are using the default initial estimates and search parameters) and if you don't want to get optimal coherence values in meters (just in pixels).} - these values allow conversion between coherence length in detector-plane-pixels and object-plane-meters.
+
+Optionally, additional parameters may be set, with the methods described below, to control the initial-guess, and search parameters for the optimising coherence lengths.
+
+Unlike with the modal approach implemented in {\tt PartialCDI}, this approach requires very little knowledge about the beam's characteristics. It's validity is limited, however, to the case of a Gaussian spatial-coherence function.\\
+
+\subsection{PolyCDI}
+
+
+The polychromatic or partial temporally coherent reconstruction  class uses the method described in \cite{6198103420110701}. The simulated beam was generated using SPECTRA \cite{spectra} using parameters
+representative of the beamline at the Australian Synchrotron. The beam profile was output as a text file that 
+can be read in by \name. The same image as the planar simulation was propagated to the detector and the image was rescaled according to the sampled wavelengths. The user can also define their own beam profile in the form of a 2 dimensional array.\\
+
+\subsection{PhaseDiverseCDI}
 This class can be used to perform phase diverse or ptychographic
 reconstruction of either Fresnel or plane-wave CDI data. Any number of
 frames (also called local/single frames or probes in this
@@ -1762,18 +1933,42 @@ to FAILURE and the method returns either 0, an empty string or list.
 
 \section{IDL Routine Descriptions}
 \label{sec:idl_routines}
-The complete list of IDL routines provided with release 0.5 of the
-DIXE software is described below. This documentation can also be found
-on the project website and will be updated with new releases of the
-software.
+The following example IDL routines are provided with release \ver of the
+\name software is described below, and can be found in the {\tt \name\\interfaces\\idl} directory. 
 
+\begin{itemize}
+\item fresnel\_example.pro
+\item partial\_char\_example.pro
+\item partial\_example.pro
+\item phase\_diverse\_example.pro
+\item planar\_example.pro
+\item poly\_example.pro
+\end{itemize}
 
 \include{IDL_interface}
+The IDL interface is a series of wrapper functions designed to call the C libraries from within IDL. The interface includes the public functions from each of the \name classes. After setting the IDL path to include the {\tt \name\\interfaces\\idl} directory and {\tt .Compile NADIA\_interface.pro} it is possible to use NADIA in IDL in an interactive mode. Take a look at one of the provided IDL routines in \ref{sec:idl_routines} to get started. The 32-bit version of IDL should be used with the \name library. Note the if you have the 64-bit versions of IDL installed, you can still select to run the 32-bit version.
+
 
 \section{Command-Line Tools}
-
 \label{sec:command_tools}
+A reconstruction can be run from the command line using CDI\_reconstruction.exe command line tool. It takes three arguments as input:
+\begin{itemize}
+\item A configuration file
+\item The reconstruction type: "planar", "fresnel\_wf", "fresnel", "partial","partchar" or "poly"
+\item A seed for the initial random estimate
+\end{itemize}
 
+If a seed value is not provided a default of "0" is used, and if a reconstruction type is not provided "planar" is assumed.
+A test program is provided and can be run with one of the example configuration files using {\tt CDI\_reconstruction.exe planar\_example.config} in the {\tt examples} folder.
+
+The CDI\_reconstruction.exe program outputs a .ppm file of the current magnitude of the estimated exit surface wave every 40 iterations. 
+
+You can also use this file as the starting point for another reconstruction (see planar\_example.config for instructions).
+
+A similar example exists for the Fresnel case. This can be run by first reconstructing the white field using 3-plane propagation: 
+{\tt CDI\_reconstruction.exe fresnel\_example.config fresnel\_wf}
+Then reconstruct the sample: 
+{\tt CDI\_reconstruction.exe fresnel\_example.config fresnel}
 
 \section{License}
 
@@ -1796,6 +1991,183 @@ along with this program (see COPYING).  If not, see
 
 We also ask that you cite this software in publications where you made
 use of it for any part of the data analysis.
+
+\begin{thebibliography}{50}
+\bibitem{g++} http://gcc.gnu.org/
+
+\bibitem{synaptic} http://www.nongnu.org/synaptic/
+
+\bibitem{fink} http://fink.thetis.ig42.org/
+
+\bibitem{xming} - http://sourceforge.net/projects/xming/
+
+\bibitem{mingw} - http://www.mingw.org/
+
+\bibitem{fftw} - http://www.fftw.org/
+
+\bibitem{msys} - http://www.mingw.org/wiki/MSYS
+
+\bibitem{cygwin} - http://www.cygwin.com/
+
+\bibitem{review} Coherent diffractive imaging using short wavelength light sources, Quiney, H., Journal of Modern Optics, 2010
+
+\bibitem{putty} http://www.putty.org/
+
+\bibitem{6198103420110701}
+Brian Abbey, Lachlan~W. Whitehead, Harry~M. Quiney, David~J. Vine, Guido~A.
+  Cadenazzi, Clare~A. Henderson, Keith~A. Nugent, Eugeniu Balaur, Corey~T.
+  Putkunz, Andrew~G. Peele, G.~J. Williams, and I.~McNulty.
+\newblock Lensless Imaging Using Broadband X-Ray Sources.
+\newblock {\em Nature Photonics}, 5(7):420 -- 424, 2011.
+
+\bibitem{lapack}
+E.~Anderson, Z.~Bai, J.~Dongarra, A.~Greenbaum, A.~McKenney, J.~Du~Croz,
+  S.~Hammerling, J.~Demmel, C.~Bischof, and D.~Sorensen.
+\newblock Lapack: A Portable Linear Algebra Library for High-Performance
+  Computers.
+\newblock In {\em Proceedings of the 1990 ACM/IEEE conference on
+  Supercomputing}, Supercomputing '90, pages 2--11, Los Alamitos, CA, USA,
+  1990. IEEE Computer Society Press.
+
+\bibitem{libtiff} Adobe~Developers Association. \newblock {\em TIFF Revision 6.0}. \newblock Adobe Systems Incorporated, 1585 Charleston Road, P.O. Box 7900, Mountain View CA 94039-7900, June 1992.
+
+\bibitem{Bauschke:02}
+Heinz~H Bauschke, Patrick~L Combettes, and D~Russell Luke.
+\newblock Phase Retrieval, Error Reduction Algorithm, and Fienup Variants: a
+  View From Convex Optimization.
+\newblock {\em JOSA A}, 19(7):1334--1345, 2002.
+
+\bibitem{Bauschke:03}
+Heinz~H Bauschke, Patrick~L Combettes, and D~Russell Luke.
+\newblock Hybrid Projection--Reflection Method for Phase Retrieval.
+\newblock {\em JOSA A}, 20(6):1025--1034, 2003.
+
+\bibitem{hdf}
+Copyright 1988-2006 by~the Board of Trustees of the University~of Illinois.
+\newblock NCSA Hierarchical Data Format (HDF) Software Library and Utilities.
+
+\bibitem{gaussianCharacterisation}
+Jesse~N. Clark and Andrew~G. Peele.
+\newblock Simultaneous Sample and Spatial Coherence Characterisation Using
+  Diffractive Imaging.
+\newblock {\em Applied Physics Letters}, 99:3, 2011.
+
+\bibitem{Elser:03}
+Veit Elser.
+\newblock Phase Retrieval by Iterated Projections.
+\newblock {\em JOSA A}, 20(1):40--55, 2003.
+
+\bibitem{Elser:07}
+Veit Elser, I~Rankenburg, and P~Thibault.
+\newblock Searching with Iterated Maps.
+\newblock {\em Proceedings of the National Academy of Sciences},
+104(2):418--423, 2007.
+
+\bibitem{Fienup:78}
+James~R Fienup.
+\newblock Reconstruction of an Object From the Modulus of its Fourier
+  Transform.
+\newblock {\em Optics Letters}, 3(1):27--29, 1978.
+
+\bibitem{Fienup:82}
+James~R Fienup et~al.
+\newblock Phase Retrieval Algorithms: A Comparison.
+\newblock {\em Applied Optics}, 21(15):2758--2769, 1982.
+
+\bibitem{FFTW05}
+Matteo Frigo and Steven~G. Johnson.
+\newblock The Design and Implementation of {FFTW3}.
+\newblock {\em Proceedings of the IEEE}, 93(2):216--231, 2005.
+\newblock Special issue on ``Program Generation, Optimization, and Platform
+  Adaptation''.
+
+\bibitem{Gerchberg:72}
+RW~Gerchberg.
+\newblock A practical Algorithm for the Determination of Phase From Image and
+  Diffraction Plane Pictures.
+\newblock {\em Optik}, 35:237, 1972.
+
+\bibitem{Keller:68}
+HB~Keller.
+\newblock Numerical methods for two-point boundary-value problems, blaisdell
+  publ.
+\newblock {\em Co., Waltham, Massachusetts}, 1968.
+
+\bibitem{Isaacson:66}
+Herbert~Bishop Keller and Eugene Isaacson.
+\newblock Analysis of numerical methods.
+\newblock {\em J. Wiley \& Sons, New York}, 1966.
+
+\bibitem{Marchesini:07b}
+Stefano Marchesini.
+\newblock Invited Article: A Unified Evaluation of Iterative Projection
+  Algorithms for Phase Retrieval.
+\newblock {\em Review of Scientific Instruments}, 78(1):011301--011301, 2007.
+
+\bibitem{Marchesini:07a}
+Stefano Marchesini.
+\newblock Phase retrieval and saddle-point optimization.
+\newblock {\em JOSA A}, 24(10):3289--3296, 2007.
+
+\bibitem{nadiaweb}
+ARC~Centre of~Excellence~for Coherent X-Ray~Science.
+\newblock Nadia Web Page.
+\newblock http://www.coecxs.org/joomla/index.php/research-and-projects/nadia-software-project.html
+
+
+\bibitem{putkunz:11}
+Corey~T. Putkunz, Jesse~N. Clark, David~J. Vine, Garth~J. Williams, Mark~A.
+  Pfeifer, Eugeniu Balaur, Ian McNulty, Keith~A. Nugent, and Andrew~G. Peele.
+\newblock Phase-diverse coherent diffractive imaging: High sensitivity with low
+  dose.
+\newblock {\em Phys. Rev. Lett.}, 106:013903, Jan 2011.
+
+\bibitem{putkunz:12}
+Corey~T. Putkunz, Adrian~J. D'Alfonso, Andrew~J. Morgan, Matthew Weyland,
+  Christian Dwyer, Laure Bourgeois, Joanne Etheridge, Ann Roberts, Robert~E.
+  Scholten, Keith~A. Nugent, and Leslie~J. Allen.
+\newblock Atom-scale ptychographic electron diffractive imaging of boron
+  nitride cones.
+\newblock {\em Phys. Rev. Lett.}, 108:073901, Feb 2012.
+
+\bibitem{spectra}
+T.~Tanaka and H.~Kitamura.
+\newblock Spectra: A Synchrotron Radiation Calculation Code.
+\newblock {\em Journal of Synchrotron Radiation}, 8:1121-1228, 2001
+
+
+\bibitem{marchesini:03}
+Stefano , H~He, Henry~N Chapman, Stefan~P Hau-Riege, A~Noy, Malcolm~R
+  Howells, U~Weierstall, and John~CH Spence.
+\newblock X-Ray Image Reconstruction from a Diffraction Pattern Alone.
+\newblock {\em Physical Review B}, 68(14):140101, 2003.
+
+\bibitem{idl}
+Exelis Visual Information Solutions
+\newblock IDL (Interactive Data Language).
+
+\bibitem{Whitehead:09}
+L.~W. Whitehead, G.~J. Williams, H.~M. Quiney, D.~J. Vine, R.~A. Dilanian,
+  S.~Flewett, K.~A. Nugent, A.~G. Peele, E.~Balaur, and I.~McNulty.
+\newblock Diffractive Imaging Using Partially Coherent X Rays.
+\newblock {\em Phys. Rev. Lett.}, 103:243902, Dec 2009.
+
+\bibitem{Whitehead:08}
+L.~W Whitehead, G.~J. Williams, H.~M. Quiney, K.~A. Nugent, A.~G. Peele, D. Paterson, M.~D Jonge,  and I.~McNulty.
+\newblock Fresnel diffractive imaging: Experimental study of coherence and curvature
+\newblock {\em Physical Review B}, 77:104112, 2008.
+
+
+
+\bibitem{quiney2010coherent} Coherent diffractive imaging using short wavelength light sources, Quiney, H., Journal of Modern Optics, 2010
+
+\bibitem{whitehead2009diffractive}
+LW~Whitehead, GJ~Williams, HM~Quiney, DJ~Vine, RA~Dilanian, S~Flewett,
+  KA~Nugent, AG~Peele, E~Balaur, and I~McNulty.
+\newblock Diffractive Imaging Using Partially Coherent X Rays.
+\newblock {\em Physical Review Letters}, 103(24):243902, 2009.
+
+\end{thebibliography}
 
 \end{document}
 

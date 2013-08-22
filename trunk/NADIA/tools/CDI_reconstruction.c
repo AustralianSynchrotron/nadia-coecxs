@@ -23,6 +23,7 @@
  * - "fresnel" - fresnel object reconstruction. with the white-field 
  *               previously reconstructed.
  * - "partial" - partial spatial reconstruction.
+ * - "partchar" - partial spatial by Gaussian characterisation reconstruction.
  * - "poly" - polychromatic or partially temporally coherent reconstruction.
  *
  * The seed should be an integer. If the seed is excluded from the
@@ -53,6 +54,7 @@
 #include <FresnelCDI.h>
 #include <FresnelCDI_WF.h>
 #include <PartialCDI.h>
+#include <PartialCharCDI.h>
 #include <PolyCDI.h>
 #include <Config.h>
 
@@ -66,6 +68,7 @@ static const string planar_string="planar";
 static const string fresnel_string="fresnel";
 static const string fresnel_wf_string="fresnel_wf";
 static const string partial_string="partial";
+static const string partchar_string="partchar";
 static const string poly_string="poly";
 
 
@@ -79,6 +82,7 @@ void print_usage(){
        << ", " << fresnel_string
        << ", " << fresnel_wf_string 
        << ", " << partial_string
+       << ", " << partchar_string
        << " or " << poly_string << endl
        << "<seed> should be an integer" << endl <<endl
        << "If <reco_type> and <seed> do not need to be specified."
@@ -289,6 +293,22 @@ int main(int argc, char * argv[]){
 	  nmode);
 
     }
+    else if(reco_type.compare(partchar_string)==0){
+
+      double pixel_size_x = c.getDouble("pixel_size_x");
+      double pixel_size_y = c.getDouble("pixel_size_y");
+      double beam_energy = c.getDouble("beam_energy");
+      double sample_to_detector = c.getDouble("sample_to_detector");
+
+
+      proj = new PartialCDI(object_estimate,
+	  pixel_size_x,
+	  pixel_size_y,
+	  beam_energy,
+	  sample_to_detector);
+
+    }
+
     else if(reco_type.compare(poly_string)==0){
 
       string spectrum_file_name = c.getString("spectrum_file_name");
@@ -306,7 +326,8 @@ int main(int argc, char * argv[]){
 	<< planar_string << ", "
 	<< fresnel_string << ", "
 	<< fresnel_wf_string << ", "
-	<< partial_string << " or "
+	<< partial_string << ", "
+	<< partchar_string <<", or "
 	<< poly_string << endl;
       exit(1);
     }
@@ -422,10 +443,18 @@ int main(int argc, char * argv[]){
 
   //if it's fresnel reconstruction also output the
   //transmission function
-  if((reco_type.compare(fresnel_string)==0)||(reco_type.compare(partial_string)==0)){
+  if((reco_type.compare(fresnel_string)==0)){
     ((FresnelCDI*) proj)->get_transmission_function(object_estimate);
     write_cplx("transmission_function.cplx", object_estimate);
   }
+/*  if((reco_type.compare(partial_string)==0)){*/
+/*    ((PartialCDI*) proj)->get_transmission_function(object_estimate);*/
+/*    write_cplx("transmission_function.cplx", object_estimate);*/
+/*  }*/
+/*  if((reco_type.compare(partchar_string)==0)){*/
+/*    ((PartialCharCDI*) proj)->get_transmission_function(object_estimate);*/
+/*    write_cplx("transmission_function.cplx", object_estimate);*/
+/*  }*/
 
 
   //clean up

@@ -18,8 +18,10 @@ simple: $(FILENAME).dvi
 $(FILENAME).dvi: $(FILENAME).tex #$(FILENAME).bib
 	pdflatex $(FILENAME).tex
 	pdflatex $(FILENAME).tex
-#	latex $(FILENAME).tex
-#	bibtex $(FILENAME)
+	#	latex $(FILENAME).tex
+	#bibtex $(FILENAME)
+	#pdflatex $(FILENAME).tex
+
 
 
 

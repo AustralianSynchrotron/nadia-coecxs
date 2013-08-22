@@ -225,8 +225,6 @@ void PartialCharCDI::scale_intensity(Complex_2D & c){
   }
 //  optimally_convoluted_estimate.sq_root(); // get sqrt
 
-  std::cout<< "I am being called"<<endl;
-
   for(int i=0; i< nx; i++){
     for(int j=0; j< ny; j++){
       // Reset the magnitude to match de-convoluted measurement intensities:
@@ -234,7 +232,7 @@ void PartialCharCDI::scale_intensity(Complex_2D & c){
         current_mag = c.get_mag(i, j);
 
         current_int_sqrt = current_mag * intensity_sqrt.get(i,j) / sqrt(optimally_convoluted_estimate.get(i,j)); // Softened intensity-constraint
-        c.set_mag(i,j,intensity_sqrt.get(i,j));//current_int_sqrt);
+        c.set_mag(i,j,current_int_sqrt);
         
         //calculate the error
         norm2_mag += current_int_sqrt*current_int_sqrt;

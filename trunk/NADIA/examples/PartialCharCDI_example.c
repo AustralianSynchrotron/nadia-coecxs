@@ -41,28 +41,31 @@ int main(void){
 
   //the data file name
   //string data_file_name = "image_files/part_data.dbin";
-  string data_file_name = "image_files/part_data.dbin";
+  string data_file_name = "image_files/part_char_sim.dbin";
+    //"image_files/part_data.dbin";
 
-  string support_file_name = "image_files/part_support.tiff";
+  string support_file_name = "image_files/planar_support.tiff";
+   // "image_files/part_support.tiff";
 
-  const int cycles = 2;
+  const int cycles = 5;
   //number of cycles of ER, HIO,ER to perform.
 
   const int er_iterations = 50;
   //number of hybrid input-out iterations to perform.
   const int hio_iterations = 50;
   //number of error reduction iterations to perform after the HIO.
-  const int dm_iterations = 50;
+  const int dm_iterations = 0;
 
   //output the current image ever "output_iterations"
   int output_iterations = 10;
 
   //apply the shrinkwrap algorithm every "shrinkwrap iterations"
-  int shrinkwrap_iterations = 150;
+  int shrinkwrap_iterations = 100;
 
   //the number of pixels in x and y
-  int nx = 2048;
-  int ny = 2048;
+  int nx = 1024;
+    //2048;
+  int ny = 1024;
   
   //Pixel size detector in m
   double psize_x=13.5e-6;
@@ -104,6 +107,7 @@ int main(void){
   //read_image(initial_guess_name, object_estimate, nx, ny);
 
   PartialCharCDI partial(object_estimate, psize_x, psize_y, e_beam, z_sd, 4);
+  partial.set_initial_coherence_guess_in_m(20.0e-6, 20.0e-6);
 
   //set the support and intensity
   partial.set_support(support,false);
@@ -143,9 +147,13 @@ int main(void){
       if(i%output_iterations==0){
 
 	ostringstream temp_str ( ostringstream::out ) ;
+	ostringstream temp_stra ( ostringstream::out ) ;
+
 	object_estimate.get_2d(MAG,result);
 	temp_str << "part_char_example_iteration_" << i+a*(hio_iterations+er_iterations+dm_iterations) << ".ppm";
+	temp_stra << "part_char_log_example_iteration_" << i+a*(hio_iterations+er_iterations+dm_iterations) << ".ppm";
 	write_image(temp_str.str(), result);
+	write_image(temp_stra.str(), result, true);
 
 	temp_str.clear();
 
@@ -169,20 +177,21 @@ int main(void){
       if(i%output_iterations==0){
 	//output the current estimate of the object
 	ostringstream temp_str ( ostringstream::out ) ;
+	ostringstream temp_stra ( ostringstream::out ) ;
+
 	object_estimate.get_2d(MAG,result);
 	temp_str << "part_char_example_iteration_" << i+a*(hio_iterations+er_iterations+dm_iterations) << ".ppm";
+	temp_stra << "part_char_log_example_iteration_" << i+a*(hio_iterations+er_iterations+dm_iterations) << ".ppm";
 	write_image(temp_str.str(), result);
+	write_image(temp_stra.str(), result, true);
 	temp_str.clear();
-
-	//apply the shrinkwrap algorithm
-	//partial.apply_shrinkwrap(1.5,0.1);
       }
       if(i%shrinkwrap_iterations==(shrinkwrap_iterations-1))
 	partial.apply_shrinkwrap(5.0,0.1);
 
     }
 
-    partial.set_algorithm(ER);
+    partial.set_algorithm(HIO);
     for(int i=er_iterations+hio_iterations; i<(hio_iterations+er_iterations+dm_iterations); i++){
 
       cout << "iteration " << i+a*(hio_iterations+er_iterations+dm_iterations) << endl;
@@ -194,13 +203,15 @@ int main(void){
       if(i%output_iterations==0){
 	//output the current estimate of the object
 	ostringstream temp_str ( ostringstream::out ) ;
+	ostringstream temp_stra ( ostringstream::out ) ;
+
 	object_estimate.get_2d(MAG,result);
 	temp_str << "part_char_example_iteration_" << i+a*(hio_iterations+er_iterations+dm_iterations) << ".ppm";
+	temp_stra << "part_char_log_example_iteration_" << i+a*(hio_iterations+er_iterations+dm_iterations) << ".ppm";
 	write_image(temp_str.str(), result);
+	write_image(temp_stra.str(), result, true);
 	temp_str.clear();
 
-	//apply the shrinkwrap algorithm
-	//partial.apply_shrinkwrap(1.5,0.1);
       }
       if(i%shrinkwrap_iterations==(shrinkwrap_iterations-1))
 	partial.apply_shrinkwrap(1.5,0.1);

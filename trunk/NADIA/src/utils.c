@@ -1994,11 +1994,11 @@ Double_2D gaussian_convolution(Double_2D const & m, double lx, double ly, double
   ly = fabs(ly);
 
   // Calculate gaussian vector sizes based on std_deviation to give fixed accuracy:
-  unsigned int x_gaussian_length = (unsigned int) ceil(lx * kernel_x_size_in_std_dev);
+  unsigned int x_gaussian_length = 1024;//(unsigned int) ceil(lx * kernel_x_size_in_std_dev);
   if (x_gaussian_length%2 == 0){ // Enforce that length is odd to simplify computation
     x_gaussian_length += 1;
   }
-  unsigned int y_gaussian_length = (unsigned int) ceil(ly * kernel_y_size_in_std_dev);
+  unsigned int y_gaussian_length = 1024;//(unsigned int) ceil(ly * kernel_y_size_in_std_dev);
   if (y_gaussian_length%2 == 0){ // Enforce that length is odd to simplify computation
     y_gaussian_length += 1;
   }
