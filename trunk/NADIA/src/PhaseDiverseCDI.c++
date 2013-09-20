@@ -45,21 +45,26 @@ PhaseDiverseCDI::PhaseDiverseCDI(
 
 //destructor for cleaning up
 PhaseDiverseCDI::~PhaseDiverseCDI(){
-
   while(single_result.size()!=0){
     Complex_2D * temp = single_result.back();
     single_result.pop_back();
-    delete temp;
+
     
     Double_2D * temp_d = weights.back();
     weights.pop_back();
-    delete temp_d;
   }
   
   if(object)
     delete object;
   
 }
+
+void PhaseDiverseCDI::remove_positions(){
+  if ( !singleCDI.empty() ) {
+      singleCDI.clear();
+  }
+}
+
 
 //change the size of the global transmission function 
 //this function is used for dynamically determining the size
@@ -80,6 +85,7 @@ void PhaseDiverseCDI::reallocate_object_memory(int new_nx,int new_ny){
 Complex_2D * PhaseDiverseCDI::get_transmission(){
   return object;
 }
+
 
 
 //set the global transmission function (note that
@@ -104,6 +110,8 @@ void PhaseDiverseCDI::set_transmission(Complex_2D & new_transmission){
   object->copy(new_transmission);
   
 }
+
+
 
 //add a new frame to the reconstruction
 //the size of the global sample will be adjusted automatically.
@@ -353,6 +361,7 @@ void PhaseDiverseCDI::adjust_positions(int type, bool forward,
       }**/
 
   //make a copy of the tranmission function
+
   Complex_2D * pointer_to_object = object;
   int nx_c = nx;
   int ny_c = ny;
@@ -392,7 +401,7 @@ void PhaseDiverseCDI::adjust_positions(int type, bool forward,
   singleCDI.at(n_first_frame)->iterate();
   get_result(singleCDI.at(n_first_frame),*(single_result.at(n_first_frame)));
   add_to_object(n_first_frame);
-  
+
   while(n!=limit){
 
     //store some information for later use
@@ -433,7 +442,6 @@ void PhaseDiverseCDI::adjust_positions(int type, bool forward,
 	}
       }
       
-
       /**      char name[80];
       Double_2D pic(nx,ny);
       object->get_2d(MAG,pic);
@@ -473,7 +481,7 @@ void PhaseDiverseCDI::adjust_positions(int type, bool forward,
 	    min_y, max_y,
 	    weight_single_int,
 	    &temp_others);
-      
+
       x_position.at(n) = before_x + new_x/((double)scale);
       y_position.at(n) = before_y + new_y/((double)scale);
 

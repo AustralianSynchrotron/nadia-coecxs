@@ -2,10 +2,11 @@
 #include <string>
 #include <cstdlib> 
 #include <cmath>
-#include "Complex_2D.h"
+#include <Complex_2D.h>
 #include "BaseCDI.h"
 #include "TransmissionConstraint.h"
 #include "io.h" 
+#include "types.h"
 
 using namespace std;
 
@@ -38,7 +39,6 @@ BaseCDI::BaseCDI(Complex_2D & initial_guess, unsigned int n_best)
     support(nx,ny),
     intensity_sqrt(nx,ny),
     n_best(n_best){
-  
   //initialize the best estimates
   if(n_best>0){
     best_array = new Complex_2D*[n_best];
@@ -93,6 +93,7 @@ Complex_2D * BaseCDI::get_best_result(double & error, int index){
 
 
 void BaseCDI::set_support(const Double_2D & object_support, bool soften){
+
   double max = object_support.get_max();
   for(int i=0; i< nx; i++){
     for(int j=0; j< ny; j++){
@@ -105,6 +106,8 @@ void BaseCDI::set_support(const Double_2D & object_support, bool soften){
     convolve(support,3,5);
 
 }
+
+
 
 void BaseCDI::set_beam_stop(const Double_2D & beam_stop_region){
   if(beam_stop==0)

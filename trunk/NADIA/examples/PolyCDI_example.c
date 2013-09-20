@@ -43,15 +43,15 @@ int main(void){
 
   string data_spectrum_name = "image_files/spectrum.txt";
 
-  const int cycles=5;
+  const int cycles=1;
   //number of error reduction iterations to perform before the HIO.
-  const int er_iterations1 = 50;
+  const int er_iterations1 = 1;
 
   //number of hybrid input-out iterations to perform.
-  const int hio_iterations = 100;
+  const int hio_iterations = 0;
 
   //number of error reduction iterations to perform after the HIO.
-  const int er_iterations2 = 50;
+  const int er_iterations2 = 0;
 
   //output the current image every "output_iterations"
   int output_iterations = 10;

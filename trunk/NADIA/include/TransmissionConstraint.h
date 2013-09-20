@@ -16,9 +16,9 @@
 #include <vector>
 #include <iostream>
 #include "Double_2D.h"
-
+#include "Complex_2D.h"
 //class Double_2D;
-class Complex_2D;
+//class Complex_2D;
 
 
 /**
@@ -66,6 +66,7 @@ class ComplexConstraint{
 
   /** flag as to whether c is fixed or allowed to be updated */
   bool fixed_c;
+
 
  public:
 
@@ -252,7 +253,7 @@ class TransmissionConstraint{
   TransmissionConstraint();
 
   /** The destructor */
-  ~TransmissionConstraint();
+  virtual ~TransmissionConstraint();
   
 
  /** 

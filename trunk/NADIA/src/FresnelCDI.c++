@@ -326,7 +326,6 @@ void FresnelCDI::get_transmission_function(Complex_2D & result,
       ill_r = illumination_at_sample->get_real(i,j);
       ill_i = illumination_at_sample->get_imag(i,j);
       denom = ill_r*ill_r + ill_i*ill_i;
-      
       if(denom!=0){
   
 	esw_r = esw->get_real(i,j);

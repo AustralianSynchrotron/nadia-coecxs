@@ -11,26 +11,26 @@ from utils import Algorithms, MAG
 # write out the result
 os.environ["LD_RUN_PATH"]='../../lib'
 try:
-    data_file_name = "planar_data.tif"
+    data_file_name = "../../examples/image_files/planar_data.tif"
 
   #the file which provides the support (pixels with the value 0
   #are considered as outside the object)
-    support_file_name = "planar_support.tiff"
+    support_file_name = "../../examples/image_files/planar_support.tiff"
 
   #number of cycles of ER and HIO to repeat
     cycles=2
 
   #number of error reduction iterations to perform before the HIO.
-    er_iterations1 = 50
+    er_iterations1 = 5
 
   #number of hybrid input-out iterations to perform.
-    hio_iterations = 100
+    hio_iterations = 0
 
   #number of error reduction iterations to perform after the HIO.
-    er_iterations2 = 50
+    er_iterations2 = 0
 
   #output the current image every "output_iterations"
-    output_iterations = 10
+    output_iterations = 1
 
   #apply the shrinkwrap algorithm every "shrinkwrap iterations"
     shrinkwrap_iterations = 50

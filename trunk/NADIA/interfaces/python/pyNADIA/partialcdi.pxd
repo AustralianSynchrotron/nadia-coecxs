@@ -21,8 +21,10 @@ cdef extern from "PartialCDI.h":
           void set_threshold(double new_threshold)
           Double_2D propagate_modes_to_detector()
           Complex_2D get_mode(int mode)
-
+          void set_support(const Double_2D & object_support)
+          void set_support(const Double_2D & object_support, bool soften)
         
 cdef class PyPartialCDI:
      cdef PartialCDI *thisptr
-     cdef int nx,ny
+     cdef int nx
+     cdef int ny

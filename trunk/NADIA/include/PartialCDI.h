@@ -24,7 +24,7 @@
 #include <vector>
 
 //forward declarations
-class Complex_2D;
+//class Complex_2D;
 class PartialCDI:public BaseCDI {
 
 protected:

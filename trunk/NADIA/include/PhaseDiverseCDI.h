@@ -86,11 +86,12 @@
 #ifndef PHASED_H
 #define PHASED_H
 
+
 #include <BaseCDI.h>
 #include <vector>
 
 //forward declarations
-class Complex_2D;
+//class Complex_2D;
 class PhaseDiverseCDI{
 
  protected:
@@ -179,6 +180,12 @@ class PhaseDiverseCDI{
 			double x=0, double y=0, 
 			double alpha=1);
 
+
+  /**
+   * A dangerous method
+   */
+  void remove_positions();
+
   /**
    * Initialise the estimate of the 'global' object function. The
    * initialisation is performed using the current estimate for each
@@ -248,6 +255,8 @@ class PhaseDiverseCDI{
    */
   Complex_2D * get_transmission();
   
+
+
   /**
    * Set the 'global' sample function. This method could be used, for
    * example, instead of 'initialise_estimate' to initialise the

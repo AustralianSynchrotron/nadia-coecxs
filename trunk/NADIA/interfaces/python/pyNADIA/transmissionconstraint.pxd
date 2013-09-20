@@ -17,8 +17,9 @@ cdef extern from "TransmissionConstraint.h":
         TransmissionConstraint()
         void delete_complex_constraint_regions()
         void add_complex_constraint(ComplexConstraint & new_constraint)
-        void set_charge_flipping(bool enable, int flip_sign=1)
-        void set_enform_unity(bool enable)
+        void set_charge_flipping(bool enable)
+        void set_charge_flipping(bool enable, int flip_sign)
+        void set_enforce_unity(bool enable)
         void set_custom_constraint(void (*custom_constraint)(Complex_2D & transmission))
         void apply_constraint(Complex_2D & transmission)
 

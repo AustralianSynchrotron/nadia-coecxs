@@ -10,16 +10,25 @@
 #include <cstring>
 #include <cmath>
 #include <Double_2D.h>
+#include <Complex_2D.h>
 #include <sstream>
 #include <vector>
 //#include <cstdlib>
 
-class Complex_2D;
+
 //class Double_2D;
 
 #define FAILURE 0
 
 using namespace std;
+
+/**
+ * Read a file. Determines type from file name and calls appropriate method. Returns a 2D of the data.
+ *
+ * @param file_name The name of the file to read from
+ * @param data The array to be filled with data
+ */
+int read(string file_name, Double_2D & data);
 
 /**
  * Read a ppm file. Returns a 2D of the data. 
@@ -74,7 +83,7 @@ int read_cplx(string file_name, Complex_2D & complex);
  *
  * @param file_name The name of the file to write to
  * @param data The array to be written to file
- * @param log_scale Output on log scale? true/false. Default is false.
+ * @param log_scale Output on log scale true/false. Default is false.
  */ 
 int write_ppm(string file_name, const Double_2D & data, 
     bool log_scale=false,
@@ -91,11 +100,13 @@ int write_spec(string file_name, const Double_2D & data);
 
 
 /**
- *Write a 2D array to a spec file. The data will be saved as a text
+ * Write a 2D array to a spec file. The data will be saved as a text
  * file. This is intended for SPECTRA output for polychromatic CDI
  *
  * @param file_name The name of the file to write to
  * @param data The array to be written to file
+ * @param nx
+ * @param ny
  */
 int write_spec(string file_name, const Double_2D & data, int nx, int ny);
 
@@ -135,7 +146,7 @@ int write_cplx(string file_name, const Complex_2D & complex);
  *
  * @param file_name The name of the file to write to
  * @param data The array to be written to file
- * @param log_scale Output on log scale? true/false. Default is false.
+ * @param log_scale Output on log scale true/false. Default is false.
  */ 
 int write_tiff(string file_name, const Double_2D & data, 
     bool log_scale=false,

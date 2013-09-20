@@ -9,12 +9,13 @@
 
 #include <vector>
 #include <Double_2D.h>
+#include <Complex_2D.h>
 
 #define DEFAULT_GAUSSIAN_KERNEL_SIZE_IN_STD_DEVIATIONS 3 // Use a matrix that is (at least) this many std deviations wide/high to discretly represent gaussians
 
 
 //class Double_2D;
-class Complex_2D;
+//class Complex_2D;
 
 void crop(Double_2D & image, Double_2D & new_image, int x_start, int y_start);
 void rescale(Double_2D & image, double scale);
@@ -22,7 +23,7 @@ void slow_align(Double_2D & image1, Double_2D & image2, int & offset_x, int & of
 
 void align(Double_2D & first_image, Double_2D & second_image,
 	int & offset_x, int & offset_y,
-  int min_x=0, int max_x=0,
+        int min_x=0, int max_x=0,
 	int min_y=0, int max_y=0,
 	Double_2D * first_image_weights = 0,
 	Double_2D * second_image_weights = 0,

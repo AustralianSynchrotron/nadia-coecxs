@@ -7,8 +7,8 @@ SOURCE_TOOLS=hdf2ppm.c hdf2dbin.c hdf2tiff.c tiff2ppm.c \
 
 EXEC_TOOLS=$(SOURCE_TOOLS:.c=.exe)
 
-LIB_SO=../lib/@LIBNADIAA@
-LIB_A=../lib/@LIBNADIASO@
+LIB_SO=@BASE@/lib/@LIBNADIAA@
+LIB_A=@BASE@/lib/@LIBNADIASO@
 
 all: $(LIB_A) $(LIB_SO) $(EXEC_TOOLS)
 
@@ -20,7 +20,7 @@ $(LIB_SO): ../src/*.c++ ../src/*.c
 
 %.exe: %.c ../src/*.c++ ../src/*.c
 	@CXX@ @CXXFLAGS@ -I@BASE@/include $< -o $@ \
-	-L@BASE@/lib -lNADIA \
+	-L@BASE@/lib -l@NADIA@ \
 	@LDFLAGS@ @LIBS@
 	cp $@ @BASE@/bin/$@
 

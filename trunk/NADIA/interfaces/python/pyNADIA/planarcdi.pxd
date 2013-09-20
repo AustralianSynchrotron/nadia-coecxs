@@ -4,6 +4,7 @@ from double2d cimport Double_2D
 from complex2d cimport Complex_2D
 from basecdi cimport BaseCDI
 from libcpp.string cimport string
+from libcpp cimport bool
 
 cdef extern from "PlanarCDI.h":
      cdef cppclass PlanarCDI(BaseCDI):
@@ -14,6 +15,9 @@ cdef extern from "PlanarCDI.h":
           void propagate_from_detector(Complex_2D & c)
           void scale_intensity(Complex_2D & c)
           int iterate()
+          void apply_support(Complex_2D & c)
+          void set_support(const Double_2D & object_support)
+          void set_support(const Double_2D & object_support, bool soften)
 cdef class PyPlanarCDI:
      cdef PlanarCDI *thisptr
      cdef int nx,ny

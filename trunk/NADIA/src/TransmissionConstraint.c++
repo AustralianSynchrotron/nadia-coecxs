@@ -36,7 +36,9 @@ TransmissionConstraint::~TransmissionConstraint(){
     delete region_map;
   }
 }
-  
+
+
+
 void TransmissionConstraint::add_complex_constraint(ComplexConstraint & new_constraint){
 
   //  cout << "Adding ComplexConstraint region"<<endl;

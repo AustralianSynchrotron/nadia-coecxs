@@ -8,9 +8,9 @@ from Cython.Build.Dependencies import create_extension_list
 libNADIAIncludeDir=os.path.join('..','..','include')
 libNADIALibDir=os.path.join('..','..','lib')
 
-os.environ["LD_RUN_PATH"]=os.path.join('..','..','lib')
+DoublePrecision='0'
 
-print libNADIALibDir
+os.environ["LD_RUN_PATH"]=os.path.join('..','..','lib')
 
 modules = create_extension_list([os.path.join('pyNADIA','*.pyx')])
 
@@ -30,7 +30,7 @@ setup(
   author_email='Lenneke.Jong@synchrotron.org.au',
   #packages=["pyNADIA"],
   packages=["pyNADIA"],
-  ext_modules=cythonize(modules),
+  ext_modules=cythonize(modules,compile_time_env={'DOUBLE_PRECISION':DoublePrecision}),
   #ext_modules=cythonize("pyNADIA.pyx"),
   cmdclass = {'build_ext': build_ext},
 )

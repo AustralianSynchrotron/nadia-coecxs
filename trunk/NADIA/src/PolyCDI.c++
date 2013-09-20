@@ -141,7 +141,9 @@ int PolyCDI::iterate(){
   singleCDI.clear();
 
   if(algorithm==ER){
+    cout<<"before get padded"<<endl;
     complex=complex.get_padded(paddingx, paddingy);
+    cout<<"after get padded"<<endl;
     propagate_to_detector(complex);
 
     scale_intensity(complex);

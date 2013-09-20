@@ -29,7 +29,7 @@
 #include <BaseCDI.h>
 
 //forward declarations
-class Complex_2D;
+//class Complex_2D;
 class FresnelCDI: public BaseCDI{
 
  protected:

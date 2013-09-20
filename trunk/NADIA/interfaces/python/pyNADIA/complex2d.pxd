@@ -1,3 +1,4 @@
+cimport cython
 from double2d cimport Double_2D
 from libcpp cimport bool 
 
@@ -9,29 +10,30 @@ cdef extern from "Complex_2D.h":
     cdef int REAL "REAL"
     cdef int IMAG "IMAG"
     cdef int MAG_SQ "MAG_SQ"
-    cdef cppclass Complex_2D:
+    cdef cppclass ComplexR_2D[T]:
         #Complex_2D() except+
-        Complex_2D(int,int) except+
-        Complex_2D(const Complex_2D& )
+        ComplexR_2D(int,int) except+
+        ComplexR_2D(const ComplexR_2D[T]& )
         #Complex_2D& operator=(const Complex_2D& rhs)
-        void set_value(int x, int y, int type, double value)
-        void set_real(int x, int y, double value)
-        void set_imag(int x, int y, double value)
-        double get_imag(int x, int y)
-        double get_mag(int x, int y)
-        double get_phase(int x, int y)
-        double get_value(int x, int y, int type)
+        void set_value(int x, int y, int type, T value)
+        void set_real(int x, int y, T value)
+        void set_imag(int x, int y, T value)
+        T get_real(int x,int y)
+        T get_imag(int x, int y)
+        T get_mag(int x, int y)
+        T get_phase(int x, int y)
+        T get_value(int x, int y, int type)
         int get_size_x()
         int get_size_y()
         void get_2d(int type, Double_2D & result)
-        void scale(double scale_factor)
-        void add(Complex_2D & c2)
-        void add(Complex_2D & c2, double scale)
-        void multiply(Complex_2D & c2)
-        void multiply(Complex_2D & c2, double scale)
-        double get_norm()
-        Complex_2D * clone()
-        void copy(const Complex_2D & c)
+        void scale(T scale_factor)
+        void add(ComplexR_2D[T] & c2)
+        void add(ComplexR_2D[T] & c2, T scale)
+        void multiply(ComplexR_2D[T] & c2)
+        void multiply(ComplexR_2D[T] & c2, T scale)
+        T get_norm()
+        ComplexR_2D * clone()
+        void copy(const ComplexR_2D[T] & c)
         void invert()
         void invert(bool scale)
         void conjugate()
@@ -40,10 +42,14 @@ cdef extern from "Complex_2D.h":
         void perform_backward_fft_real(Double_2D & result)
         void perform_forward_fft_real(Double_2D & input)
         void set_fftw_type(int type)
-        Complex_2D get_padded(int x_add, int y_add)
-        Complex_2D get_unpadded(int x_add, int y_add)
-    
-    
+        ComplexR_2D get_padded(int x_add, int y_add)
+        ComplexR_2D get_unpadded(int x_add, int y_add)
+IF DOUBLE_PRECISION !='1':
+    ctypedef ComplexR_2D[float] Complex_2D
+ELSE:
+    ctypedef ComplexR_2D[double] Complex_2D
+        
 cdef class PyComplex2D:
     cdef Complex_2D *thisptr
+    cdef object __weakref__
     

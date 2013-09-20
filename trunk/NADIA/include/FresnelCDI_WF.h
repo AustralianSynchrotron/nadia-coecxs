@@ -23,10 +23,10 @@
 #define FCDI_WF_H
 
 #include "BaseCDI.h"
-
+//#include <Complex_2D.h>
 
 //forward declarations
-class Complex_2D;
+//class Complex_2D;
 
 class FresnelCDI_WF: public BaseCDI{
 

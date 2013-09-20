@@ -30,7 +30,7 @@ int write_ppm(string file_name, const Double_2D & data, bool log_scale,
 
   const int largest_pixel_value = pow(2.0,16.0)-1; //16 bit
   
-  /**  double scale_factor=1;
+  /*  double scale_factor=1;
    int pixel_maximum=array_maximum;
    //   if(array_maximum > largest_pixel_value){
      scale_factor = ((double) largest_pixel_value)/array_maximum;
@@ -39,7 +39,7 @@ int write_ppm(string file_name, const Double_2D & data, bool log_scale,
    if(log_scale){
      scale_factor = ((double) largest_pixel_value)/log10(array_maximum*10);
      pixel_maximum= largest_pixel_value;
-     }**/
+     }*/
 
    //cout << "array_maximum="<<array_maximum<<endl;
    //cout << "scale="<<scale_factor<<endl;

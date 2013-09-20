@@ -28,7 +28,7 @@
 #define WEIGHT 1
 
 //forward declarations
-class Complex_2D;
+//class Complex_2D;
 class PolyCDI:public BaseCDI {
 
 protected:

@@ -1,5 +1,6 @@
 #include make.inc
 @do_idl@
+@do_python@
 
 all: 
 	make -C src
@@ -8,10 +9,13 @@ all:
 	@echo "done making the tools"
 	make -C examples
 	@echo "done making the examples"
-
 ifeq ($(DO_IDL), TRUE)
 	make -C interfaces/idl
 	@echo "done making the IDL interface"
+endif
+ifeq ($(DO_PYTHON), TRUE)
+	make -C interfaces/python
+	@echo "done making the python wrappers"
 endif
 	@echo ""
 	@echo "\"make\" completed successfully."
@@ -38,6 +42,9 @@ clean:
 ifeq ($(DO_IDL), TRUE)
 	make clean -C interfaces/idl
 endif
+ifeq ($(DO_PYTHON), TRUE)
+	make clean -C interfaces/python
+endif
 
 clobber:
 	make clean
@@ -45,7 +52,9 @@ clobber:
 ifeq ($(DO_IDL), TRUE)
 	make clobber -C interfaces/idl
 endif
-
+ifeq ($(DO_PYTHON), TRUE)
+	make clobber -C interfaces/python
+endif
 #use with caution
 bare:
 	make clean
@@ -57,3 +66,7 @@ bare:
 ifeq ($(DO_IDL), TRUE)
 	rm -f interfaces/idl/Makefile 
 endif
+ifeq ($(DO_PYTHON), TRUE)
+	rm -f interfaces/python/Makefile
+endif
+

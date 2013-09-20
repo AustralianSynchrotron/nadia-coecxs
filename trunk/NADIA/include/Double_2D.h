@@ -29,6 +29,7 @@
 #include <cstring>
 #include <iostream>
 
+
 template <class T>
 class Real_2D{
 
@@ -43,9 +44,10 @@ class Real_2D{
   /** the size in y */
   int ny;
 
+
  public:
 
-  friend class Complex_2D ; 
+  template <class TT>friend class ComplexR_2D;
 
   /**
    * A constructor which creates an empty array (of no size).  Note
@@ -222,6 +224,13 @@ class Real_2D{
     
   };
   
+  /**
+   *  Get the pointer to the array, used for mpi routines
+   */
+  inline T* c_array(){
+              return array;
+          }
+
   void add(const Real_2D<T> & other_array, double norm=1.0){
     for(int i=0; i< nx; i++)
       for(int j=0; j< ny; j++)

@@ -17,7 +17,6 @@ cdef extern from "PolyCDI.h":
           void expand_wl(Complex_2D & c)
           Double_2D sum_intensity(vector[Complex_2D] & c)
           int iterate()
-          void update_transmission()
           void set_iterations_per_cycle(int iterations)
           Complex_2D get_transmission()
           void set_transmission(Complex_2D & new_transmission)
@@ -28,7 +27,8 @@ cdef extern from "PolyCDI.h":
           Complex_2D get_mode(int mode)
           void propagate_to_detector(Complex_2D & c)
           void propagate_from_detector(Complex_2D & c)
-        
+          void set_support(const Double_2D & object_support)
+          void set_support(const Double_2D & object_support, bool soften)
 cdef class PyPolyCDI:
      cdef PolyCDI *thisptr
      cdef int nx,ny

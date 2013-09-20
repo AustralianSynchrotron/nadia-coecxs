@@ -60,6 +60,8 @@
 #include <map>
 #include <string>
 #include "Double_2D.h"
+#include <Complex_2D.h>
+#include "types.h"
 
 /** The number of reconstruction algorithms */
 #define NALGORITHMS 9 
@@ -78,7 +80,7 @@ enum { ER, BIO, BOO, HIO, DM, SF, ASR, HPR, RAAR, CUSTOM};
 
 
 //forward declarations
-class Complex_2D;
+
 //class Double_2D;
 class TransmissionConstraint;
 
@@ -147,6 +149,7 @@ class BaseCDI{
   /** a mapping between the algorithm name (string) and identification
       number */
   static std::map<std::string,int> * algNameMap;
+
 
  public:
   
