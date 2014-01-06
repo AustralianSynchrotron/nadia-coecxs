@@ -77,7 +77,7 @@ class FresnelCDI_WF: public BaseCDI{
 		double zone_focal_length,
 		double focal_detector_length,
 		double pixel_size,
-		int n_best=1);
+		int n_best=0);
   
   
   /**

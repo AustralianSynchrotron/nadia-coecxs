@@ -186,11 +186,11 @@ that this manual is used in the following ways:
   installation, Section \ref{installation}, followed by ``Getting
   Started'', Section \ref{getting started}.
 \item The remainder of the manual is provided as a reference for users
-  who are already familiar with the code. Section \ref{how to}, ``How
+  who are already familiar with the code. Section \ref{how_to}, ``How
   to'', gives instructions on how to complete specific tasks and
   control the CDI reconstruction. The appendices document the
   important routines, functions and classes provided by the \name
-  library.
+  library. Additionally, there is a separate  document on the \name site, the \name workbook. This document has examples and can be used with the downloadable code to perform some worked examples.
 \end{itemize}
 This version of the software is a development (beta) version and we
 welcome feedback on any aspect of the software package: functionality,
@@ -841,7 +841,7 @@ followed by "make".
 \newpage
 
 \section{How Tos}
-\label{how to}
+\label{sec:how_to}
 
 In this section, we describe how a number of common tasks can be
 achieved using the software. More detail of the functionality
@@ -1070,8 +1070,7 @@ steps:
   reconstruction, you must initialise the library with a number of
   input: the diffraction and support data, initial estimate, and
   parameters which describe the experimental set-up. Please refer to
-  Sections \ref{subsubsec:rec_planar,subsubsec:rec_fresnel,subsubsec:rec_phase_div}
-  for specific instructions.
+  Sections \ref{sec:c++} for specific instructions.
       
 \item {\it Iterate} - At this stage the iterative algorithms are run. In the software library, an iteration can be
   performed simply by calling one function:
@@ -1097,7 +1096,7 @@ steps:
       is described in this section. 
 
 
-    \item {\it Save the result} - Refer to Section \ref{subsubsec:write_images}.
+    \item {\it Save the result} - Refer to Section \ref{subsubsec:read_images}.
 
 \end{enumerate}
 
@@ -1189,7 +1188,7 @@ myobject.apply_shrinkwrap(sigma, threshold);
 
 where \tt{my\_object} is a CDI object, {\tt sigma} is a float $>1.0$ representing the standard deviation of the Gaussian in pixels, and {\tt threshold} is a float $0.0<threshold<1.0$ denoting the minimum value a pixel must have as a proportion of the value of the maximum pixel to be included in the new support. In the example folder I use values of $sigma = 2.0$ and $threshold = 0.1$. 
 
-\subsubsection{Stop a reconstruction, save the result and restart at the same place}
+\subsubsection{Stop a reconstruction, save the result and restart at the same place}\label{subsubsec:read_images}
 
 To write the current object estimate to a file use the {\tt write{\_}cplx}:
 
@@ -1253,7 +1252,7 @@ planar.set_custom_algorithm(0.5, 0, -1 ,0, -1,0,0,0,0,0);
 
 following the numbering convention in \cite{quiney2010coherent}.\\
 
-\subsubsection{Nominate a beam-stop area in plane-wave reconstruction}
+%\subsubsection{Nominate a beam-stop area in plane-wave reconstruction}
 
 
 
@@ -1464,7 +1463,8 @@ X - number of arrays needed for a single reconstruction).
 
 \appendix
 
-\section{C++ Class Description} 
+\section{C++ Class Description}
+\label{sec:c++}
 
 For the sake of advanced users we provide a description of the
 software library structure in this section. Figure
@@ -1709,7 +1709,7 @@ text centered, anchor=north, text=white, text width=3cm]
 \subsection{BaseCDI}
 The fundamental class used for performing CDI reconstruction; an
 object of type "BaseCDI" allows planar CDI to be performed, and it is
-also used by the Fresnel reconstruction code (through inheritance).
+also used by the other CDI reconstruction classes (through inheritance).
 The reconstruction can be performed in the following way:
 
 \begin{itemize}
@@ -1756,11 +1756,14 @@ The reconstruction can be performed in the following way:
 
 For cases where the beam-stop region must be excluded during
 reconstruction, you should call the set\_beam\_stop() method, to define
-the beam-stop region before running iterate().
+the beam-stop region before running iterate(). The code documentation and detailed information about what methods are available for each class in available in the Doxygen documentation on the \name website.
 
 
 \subsection{PlanarCDI}
-This is the class used for performing a standard Planar CDI reconstruction. It inherits almost all of it's methods from BaseCDI.
+This is the class used for performing a standard Planar CDI reconstruction. It inherits almost all of it's methods from BaseCDI. A PlanarCDI requires a Complex\_2D as an argument. This Complex\_2D is the working array where the evolving object estimate is stored. Additionally, as with all BaseCDI objects, an int can be provided to describe how many best object estimates to keep. By default this number is 0. A 
+\begin{verbatim}
+PlanarCDI planar(object\_estimate, 4);
+\end{verbatim}
 
 \subsection{FresnelCDI}
 The class used for performing Fresnel CDI reconstruction (for
@@ -1770,7 +1773,24 @@ class also. Although there are some differences in the underlying code
 between this class and the planar case, the interface is generally
 unchanged. Therefore users should refer to the instructions for
 BaseCDI to understand how to use a FresnelCDI object in their own
-code. Only the differences relevant to users will be documented here.
+code. 
+
+A Fresnel\_CDI object takes a working Complex\_2D as well as a Complex\_2D containing 
+the a reconstructed Fresnel white field as well as a number of doubles related to the 
+experimental setup. These are:
+\begin{itemize}
+\item wavelength in metres
+\item focal to detector length in metres
+\item focal to sample length in metres
+\item pixel size in metres
+\item normalisation between the white field and the image
+\end{itemize}
+
+\begin{verbatim}
+FresnelCDI proj(object\_estimate, white\_field, wavelength, focal-to-detector, focal-to-sample, pixel size, normalisation);
+
+\end{verbatim}
+
 
 \subsection{FresnelCDI\_WF}
 This is the class used for reconstructing white-field data prior to
@@ -1780,16 +1800,38 @@ class also. Although there are some differences in the underlying code
 between this class and the planar case, the interface is generally
 unchanged. Therefore users should refer to the instructions for
 BaseCDI to understand how to use a FresnelCDI\_WF object in their own
-code. Only the differences relevant to users will be documented here.
+code. The Fresnel white field reconstruction does not allow for the changing of 
+algorithms as the Fresnel white field reconstruction has a specific special 
+reconstruction algorithm. Like the Fresnel class, the Fresnel white field takes the 
+working array as well as the doubles that describe the experimental parameters.
 
+\begin{verbatim}
+ FresnelCDI_WF(object\_estimate, beam\_wavelength, zone\_focal\_length, focal\_detector\_length, pixel\_size);
+\end{verbatim}
+ 
 \subsection{PartialCDI and PartialCharCDI}
-Two different Partial Spatial classes are provided. In the first case, the reconstruction is performed as described in \cite{Whitehead:09}. The data published in that paper is reconstructed using the modal expansion described in the paper. Normalised Legendre polynomials are used as the orthornormal, mutually incoherent modes. The simulation example takes the same sample image as the Planar simulation example, expands the modes in the Legendre space, and propagates the modes to the detector to find the diffraction pattern of each mode. The modes are added together and a threshold applied to the diffraction pattern to create a realistic detector image.\\
+Two different Partial Spatial classes are provided. In the first case, the reconstruction is performed as described in \cite{Whitehead:09}. The data published in that paper is reconstructed using the modal expansion described in the paper. Normalised Legendre polynomials are used as the orthornormal, mutually incoherent modes. This class requires a number of experimental  in the form of doubles, as well as two ints to describe the number of Legendre polynomials used as the orthonormal basis and the number of modes to be used in the expansion. the experimental parameters are:\\
 
+\begin{itemize}
+\item the coherence length in the x and y directions in metres (lcx and lcy)
+\item the pixel size in the x and y direction in metres (pxsize and pysize)
+\item energy in eV
+\item the distance between the sample and detector
+\end{itemize}
+\begin{verbatim}
+PartialCDI(object\estimate, lcx, lcy, pxsize, pysize, energy, sample-to-detector, nleg, nmode);
+\end{verbatim}
+ 
+      
 An alternative, non-modal, approach to partial spatial coherence is described in \cite{gaussianCharacterisation} for the case of a Gaussian mutual optical intensity (MOI) function. This method has the advantage that relatively little needs to be known about the beam's characteristics if it can be assumed to have a Gaussian coherence function. This algorithm finds lateral coherence lengths $l_x$ and $l_y$ that minimise error in the reconstruction, thus enabling the beam's coherence to be characterised as reconstruction is performed. {\em coherence length} is defined, in the context of this algorithm, as the standard deviation of the Gaussian MOI function.
 
 In \name, this algorithm is implemented in the {\tt PartialCharCDI } class. The operation of this class is very similar to { \tt PlanarCDI } with a few additional parameters. At initialisation, the sample-detector distance, beam energy, and the size of the detector pixels must be specified\footnote{These parameters are not strictly necessary if you don't want to set any other options in meters (ie. if you are using the default initial estimates and search parameters) and if you don't want to get optimal coherence values in meters (just in pixels).} - these values allow conversion between coherence length in detector-plane-pixels and object-plane-meters.
 
-Optionally, additional parameters may be set, with the methods described below, to control the initial-guess, and search parameters for the optimising coherence lengths.
+\begin{verbatim}
+PartialCharCDI(object_estimate, sample-to-detector, beam_energy, pxsize, pysize);
+\end{verbatim}
+
+Optionally, additional parameters may be set to control the initial-guess, and search parameters for the optimising coherence lengths. These methods are described in the Doxygen documentation.
 
 Unlike with the modal approach implemented in {\tt PartialCDI}, this approach requires very little knowledge about the beam's characteristics. It's validity is limited, however, to the case of a Gaussian spatial-coherence function.\\
 
@@ -1799,6 +1841,17 @@ Unlike with the modal approach implemented in {\tt PartialCDI}, this approach re
 The polychromatic or partial temporally coherent reconstruction  class uses the method described in \cite{6198103420110701}. The simulated beam was generated using SPECTRA \cite{spectra} using parameters
 representative of the beamline at the Australian Synchrotron. The beam profile was output as a text file that 
 can be read in by \name. The same image as the planar simulation was propagated to the detector and the image was rescaled according to the sampled wavelengths. The user can also define their own beam profile in the form of a 2 dimensional array.\\
+
+The PolyCDI is initialised through:
+
+\begin{verbatim}
+PolyCDI poly(object\_estimate);
+\end{verbatim}
+
+A polychromatic reconstruction needs the spectrum as well as the support and intensity set using 
+\begin{verbatim}
+poly.set_spectrum(data\_spectrum\_name);
+\end{verbatim}
 
 \subsection{PhaseDiverseCDI}
 This class can be used to perform phase diverse or ptychographic
@@ -1813,7 +1866,7 @@ frame) is performed using the code in FresnelCDI/PlanarCDI, all the
 functionality available in these classes is also available here. For
 example complex constraint can be set, shrink-wrap can be used, the
 estimate can be initialised using the results from a previous
-reconstruction etc. An example can be found in the /examples
+reconstruction etc. An example can be found in the examples
 directory, demonstrating how to use PhaseDiverseCDI.
 
 The displacement in position between 'local' frames may be either
@@ -1833,7 +1886,7 @@ which is done:
   \item The reconstruction can be performed in series or parallel.
     \begin{itemize}
 
-      \item In the case of series (see for example the paper....), a
+      \item In the case of series, a
 	'local' frame will undergo one or more iterations, the result
 	will be updated to a 'global' estimate of the sample, and this
 	estimate will form the starting point for the next frame. For
@@ -1848,7 +1901,7 @@ which is done:
 	or $w^n = \alpha^n$ for Plane-wave CDI. The weight is zero
 	outside of the support.
 
-      \item For a parallel reconstruction (see .....), each frame with
+      \item For a parallel reconstruction, each frame with
 	independently undergo one of more iteration, the result from all
 	frames will be merged to form a new estimate of the sample, this
 	estimate then becomes the starting point for the next iteration
@@ -1873,6 +1926,8 @@ which is done:
     (and pixels within a frame) with respect to each other.
 
 \end{itemize}
+
+In this case a series of CDI objects is initialised as per the above examples, and each of these is added to the PhaseDiverseCDI object. 
 
 \subsection{TransmissionConstraint}
 This class allows constraints on the transmission function

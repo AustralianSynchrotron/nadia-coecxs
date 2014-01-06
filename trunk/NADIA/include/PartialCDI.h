@@ -65,20 +65,20 @@ protected:
     be bigger than nmode*/
   int nmode;
 
-  /** Coherence length x*/
+  /** Coherence length x in m*/
   double lcy;
-  /** Coherence length y*/
+  /** Coherence length y in m*/
   double lcx;
 
-  /** The size of a pixel x */
+  /** The size of a pixel x in m*/
   double pxsize;
-  /** The size of a pixel y */
+  /** The size of a pixel y in m*/
   double pysize;
 
-  /** The distance between the sample and detector */
+  /** The distance between the sample and detector in m*/
   double zsd;
 
-  /** The energy of the beam */
+  /** The energy of the beam in eV*/
   double energy;
 
   /** The minimum value of the contribution of a mode 
