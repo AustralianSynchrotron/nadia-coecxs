@@ -211,9 +211,10 @@ fi
 
 if test "$enable_python" != "no"
 then 
-    AM_PATH_PYTHON([2.7])
-    PYTHON_FLAG="DO_PYTHON=TRUE"
-    AC_SUBST(do_python,$PYTHON_FLAG)
+        AC_CHECK_PROG(PYTHON, python, python)
+    #AM_PATH_PYTHON([2.7])
+        PYTHON_FLAG="DO_PYTHON=TRUE"
+        AC_SUBST(do_python,$PYTHON_FLAG)
 fi
 
 ### Finished setting up the variables. Now check the libraries and headers.

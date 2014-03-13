@@ -8,24 +8,21 @@
 #include <Complex_2D.h>
 #include <stdlib.h>
 #include <cstring>
+#include <fftw3.h>
+#include <types.h>
 
 using namespace std;
 
-Complex_2D::Complex_2D(int x_size, int y_size){
+template<class T>
+ComplexR_2D<T>::ComplexR_2D(int x_size, int y_size){
 
   //set the array size
   nx = x_size;
   ny = y_size;
-
+  malloc_size=sizeof(FFTW_COMPLEX)*nx*ny;
+  array = (FFTW_COMPLEX*) FFTW_MALLOC(malloc_size);
   //allocate memory for the array
-#ifndef DOUBLE_PRECISION
-  array = (fftwf_complex*) fftwf_malloc(sizeof(fftwf_complex)*nx*ny);
-  memset(array, 0, sizeof(fftwf_complex)*nx*ny);
-#else
-  array = (fftw_complex*) fftw_malloc(sizeof(fftw_complex)*nx*ny);
-  memset(array, 0, sizeof(fftw_complex)*nx*ny);
-#endif
-  
+
 
   //initalise the fftw plans to null (not created yet. We will
   //create them when needed to avoid unnecessary time overhead).
@@ -35,21 +32,15 @@ Complex_2D::Complex_2D(int x_size, int y_size){
 }
 
 /*Copy Constructor*/
-
-Complex_2D::Complex_2D(const Complex_2D& object){
+template<class T>
+ComplexR_2D<T>::ComplexR_2D(const ComplexR_2D & object){
 
   //set the array size
   nx = object.get_size_x();
   ny = object.get_size_y();
 
-
-#ifndef DOUBLE_PRECISION
-  array = (fftwf_complex*) fftwf_malloc(sizeof(fftwf_complex)*nx*ny);
-  memcpy(array, object.array, sizeof(fftwf_complex)*nx*ny);
-#else
-  array = (fftw_complex*) fftw_malloc(sizeof(fftw_complex)*nx*ny);
-  memcpy(array, object.array, sizeof(fftw_complex)*nx*ny);
-#endif
+  array = (FFTW_COMPLEX*) FFTW_MALLOC(sizeof(FFTW_COMPLEX)*nx*ny);
+  memcpy(array, object.array, sizeof(FFTW_COMPLEX)*nx*ny);
 
   //initalise the fftw plans to null (not created yet. We will
   //create them when needed to avoid unnecessary time overhead).
@@ -69,19 +60,15 @@ Complex_2D::Complex_2D(const Complex_2D& object){
 }
 
 /*Copy Constructor from a Double_2D*/
-
-Complex_2D::Complex_2D(const Double_2D& object){
+template<class T>
+ComplexR_2D<T>::ComplexR_2D(const Double_2D& object){
 
   //set the array size
   nx = object.get_size_x();
   ny = object.get_size_y();
+  
+  array=(FFTW_COMPLEX*) FFTW_MALLOC(sizeof(FFTW_COMPLEX)*nx*ny);
 
-
-#ifndef DOUBLE_PRECISION
-  array = (fftwf_complex*) fftwf_malloc(sizeof(fftwf_complex)*nx*ny);
-#else
-  array = (fftw_complex*) fftw_malloc(sizeof(fftw_complex)*nx*ny);
-#endif
 
   //initalise the fftw plans to null (not created yet. We will
   //create them when needed to avoid unnecessary time overhead).
@@ -99,36 +86,21 @@ Complex_2D::Complex_2D(const Double_2D& object){
 }
 
 /*Destructor*/
-Complex_2D::~Complex_2D(){
+template<class T>
+ComplexR_2D<T>::~ComplexR_2D(){
 
+FFTW_FREE(array);
+if(f_forward)
+  FFTW_DESTROY_PLAN(f_forward);
+if(f_backward)
+  FFTW_DESTROY_PLAN(f_backward);
 
-#ifndef DOUBLE_PRECISION
-  //free the memory of the array.
-  fftwf_free(array);
-
-  //free the memory of the fftw plans (but
-  //only if it was actually allocated).
-  if(f_forward)
-    fftwf_destroy_plan(f_forward);
-  if(f_backward)
-    fftwf_destroy_plan(f_backward);
-
-#else
-  //free the memory of the array.
-  fftw_free(array);
-
-  //free the memory of the fftw plans (but
-  //only if it was actually allocated).
-  if(f_forward)
-    fftw_destroy_plan(f_forward);
-  if(f_backward)
-    fftw_destroy_plan(f_backward);
-
-#endif
 }
 
+
 //set the value at positions x,y. See Complex_2D.h for more info.
-void Complex_2D::set_value(int x, int y, int component, double value){
+template<class T>
+void ComplexR_2D<T>::set_value(int x, int y, int component, T value){
 
   if(check_bounds(x,y)==FAILURE){
     cout << "can not set value out of array bounds" << endl;
@@ -157,13 +129,14 @@ void Complex_2D::set_value(int x, int y, int component, double value){
 }
 
 //get the value at positions x,y. See Complex_2D.h for more info.
-double Complex_2D::get_value(int x, int y, int type) const {
+template<class T>
+T ComplexR_2D<T>::get_value(int x, int y, int type) const {
   //by default we check that the value is within the bounds of the
   //array, but this can be turned off for optimisation.
-  if(check_bounds(x,y)==FAILURE){
-    cout << "can not get value out of array bounds" << endl;
-    exit(1);
-  }
+ // if(check_bounds(x,y)==FAILURE){
+ //   cout << "can not get value out of array bounds" << endl;
+ //   exit(1);
+  //}
   switch(type){
   case MAG:
     return get_mag(x,y);
@@ -182,7 +155,8 @@ double Complex_2D::get_value(int x, int y, int type) const {
 }
 
 //like get() but we do it for the entire array not just a single value.
-void Complex_2D::get_2d(int type, Double_2D & result) const {
+template<class T>
+void ComplexR_2D<T>::get_2d(int type, Double_2D & result) const {
 
   for(int i=0; i < nx; i++)
     for(int j=0; j < ny; j++){
@@ -192,7 +166,8 @@ void Complex_2D::get_2d(int type, Double_2D & result) const {
 
 
 //scale all the values in the array by the given factor.
-void Complex_2D::scale(double scale_factor){
+template<class T>
+void ComplexR_2D<T>::scale(T scale_factor){
 
   for(int i=0; i < nx; ++i){
     for(int j=0; j < ny; ++j){ 
@@ -205,7 +180,8 @@ void Complex_2D::scale(double scale_factor){
 }
 
 //add another Complex_2D to this one.
-void Complex_2D::add(Complex_2D & c2, double scale){
+template<class T>
+void ComplexR_2D<T>::add(ComplexR_2D<T> & c2, T scale){
 
   if(nx!=c2.get_size_x() || ny!=c2.get_size_y()){
     cout << "in Complex_2D::add, the dimensions of the "
@@ -223,7 +199,8 @@ void Complex_2D::add(Complex_2D & c2, double scale){
 }
 
 //multiply another Complex_2D with this one.
-void Complex_2D::multiply(Complex_2D & c2, double scale){
+template<class T>
+void ComplexR_2D<T>::multiply(ComplexR_2D<T> & c2, T scale){
 
   if(nx!=c2.get_size_x() || ny!=c2.get_size_y()){
     cout << "in Complex_2D::multiply, the dimensions of the "
@@ -238,9 +215,9 @@ void Complex_2D::multiply(Complex_2D & c2, double scale){
       // if c1 = a + ib and c2 = d + ie
       // then the new c1 is:
       // c1 = (a*d - b*e) + i(a*e + b*d)
-      double new_real = c2.get_real(i,j)*this->get_real(i,j)
+      T new_real = c2.get_real(i,j)*this->get_real(i,j)
 	- c2.get_imag(i,j)*this->get_imag(i,j);
-      double new_imag = c2.get_real(i,j)*this->get_imag(i,j)
+      T new_imag = c2.get_real(i,j)*this->get_imag(i,j)
 	+ c2.get_imag(i,j)*this->get_real(i,j);
 
       //and set the values
@@ -251,7 +228,8 @@ void Complex_2D::multiply(Complex_2D & c2, double scale){
 }
 
 //multiply another Complex_2D with this one.
-void Complex_2D::multiply(Double_2D & c2, double scale){
+template<class T>
+void ComplexR_2D<T>::multiply(Double_2D & c2, T scale){
 
   if(nx!=c2.get_size_x() || ny!=c2.get_size_y()){
     cout << "in Complex_2D::multiply, the dimensions of the "
@@ -266,9 +244,9 @@ void Complex_2D::multiply(Double_2D & c2, double scale){
       // if c1 = a + ib and c2 = d + ie
       // then the new c1 is:
       // c1 = (a*d - b*e) + i(a*e + b*d)
-      double new_real = c2.get(i,j)*this->get_real(i,j);
+      T new_real = c2.get(i,j)*this->get_real(i,j);
       //- c2.get_imag(i,j)*this->get_imag(i,j);
-      double new_imag = c2.get(i,j)*this->get_imag(i,j);
+      T new_imag = c2.get(i,j)*this->get_imag(i,j);
       //+ c2.get_imag(i,j)*this->get_real(i,j);
 
       //and set the values
@@ -278,9 +256,10 @@ void Complex_2D::multiply(Double_2D & c2, double scale){
   }
 }
 
-double Complex_2D::get_norm() const {
+template<class T>
+T ComplexR_2D<T>::get_norm() const {
 
-  double norm_squared=0;
+  T norm_squared=0;
 
   for(int i=0; i < nx; ++i){
     for(int j=0; j < ny; ++j){
@@ -290,7 +269,8 @@ double Complex_2D::get_norm() const {
   return sqrt(norm_squared);
 }
 
-void Complex_2D::conjugate() {
+template<class T>
+void ComplexR_2D<T>::conjugate() {
 
   for(int i=0; i < nx; ++i){
     for(int j=0; j < ny; ++j){
@@ -301,9 +281,10 @@ void Complex_2D::conjugate() {
 }
 
 //make a new complex 2d that has idential values to this one
-Complex_2D * Complex_2D::clone() const {
+template<class T>
+ComplexR_2D<T> * ComplexR_2D<T>::clone() const {
 
-  Complex_2D * new_complex = new Complex_2D(nx,ny);
+  ComplexR_2D<T>  * new_complex = new ComplexR_2D<T>(nx,ny);
   for(int i=0; i < nx; ++i){
     for(int j=0; j < ny; ++j){
       new_complex->set_real(i,j, get_real(i,j));
@@ -316,7 +297,8 @@ Complex_2D * Complex_2D::clone() const {
 
 
 //copy another array
-void Complex_2D::copy(const Complex_2D & c){
+template<class T>
+void ComplexR_2D<T>::copy(const ComplexR_2D<T> & c){
 
   //check the bounds
   if(c.get_size_x()!=get_size_x()||
@@ -325,24 +307,20 @@ void Complex_2D::copy(const Complex_2D & c){
       << "exiting"<<endl;
     exit(1);
   }
-
   //copy
+ std::memcpy(array,c.array,sizeof(FFTW_COMPLEX)*nx*ny);
 
-#ifndef DOUBLE_PRECISION
-  std::memcpy(array,c.array,sizeof(fftwf_complex)*nx*ny);
-#else
-  std::memcpy(array,c.array,sizeof(fftw_complex)*nx*ny);
-#endif
 }
 
 
 //invert (and scale if we want to).
-void Complex_2D::invert(bool scale){
+template<class T>
+void ComplexR_2D<T>::invert(bool scale){
 
   int middle_x = nx/2;
   int middle_y = ny/2;
 
-  double scale_factor = 1;
+  T scale_factor = 1;
   if(scale)
     scale_factor = 1.0/(sqrt(nx*ny));
 
@@ -361,8 +339,8 @@ void Complex_2D::invert(bool scale){
       if(i >=  middle_x)
 	i_new = i_new - 2*middle_x;
 
-      double temp_rl = get_real(i_new,j_new);
-      double temp_im = get_imag(i_new,j_new);
+      T temp_rl = get_real(i_new,j_new);
+      T temp_im = get_imag(i_new,j_new);
 
       set_real(i_new,j_new,get_real(i,j)*scale_factor);
       set_imag(i_new,j_new,get_imag(i,j)*scale_factor);
@@ -374,7 +352,8 @@ void Complex_2D::invert(bool scale){
 
 }
 
-void Complex_2D::mirror(){
+template<class T>
+void ComplexR_2D<T>::mirror(){
 
   int middle_x = nx/2;
   int middle_y = ny/2;
@@ -398,8 +377,8 @@ void Complex_2D::mirror(){
       //if(i >=  middle_x)
       //i_new = i_new - 2*middle_x;
 
-      double temp_rl = get_real(i,j_new);
-      double temp_im = get_imag(i,j_new);
+      T temp_rl = get_real(i,j_new);
+      T temp_im = get_imag(i,j_new);
 
       set_real(i,j_new,get_real(i,j));
       set_imag(i,j_new,get_imag(i,j));
@@ -411,8 +390,8 @@ void Complex_2D::mirror(){
 }
 
 
-
-int Complex_2D::check_bounds(int x, int y) const{
+template<class T>
+int ComplexR_2D<T>::check_bounds(int x, int y) const{
 
   if(x < 0 || x >= nx || y < 0 || y >=ny )
     return FAILURE;
@@ -420,9 +399,10 @@ int Complex_2D::check_bounds(int x, int y) const{
   return SUCCESS;
 }
 
-Complex_2D Complex_2D::get_padded(int x_add, int y_add){
+template<class T>
+ComplexR_2D<T> ComplexR_2D<T>::get_padded(int x_add, int y_add){
 
-  Complex_2D padded(nx+2*x_add, ny+2*y_add);
+  ComplexR_2D<T> padded(nx+2*x_add, ny+2*y_add);
 
   for(int i=0; i<x_add; i++){
     for(int j=0; j<ny+2*y_add; j++){
@@ -463,9 +443,10 @@ Complex_2D Complex_2D::get_padded(int x_add, int y_add){
   return padded;
 }
 
-Complex_2D Complex_2D::get_unpadded(int x_add, int y_add){
+template<class T>
+ComplexR_2D<T> ComplexR_2D<T>::get_unpadded(int x_add, int y_add){
 
-  Complex_2D unpadded(nx-2*x_add, ny-2*y_add);
+  ComplexR_2D<T> unpadded(nx-2*x_add, ny-2*y_add);
 
   for(int i=0; i<nx-2*x_add; i++){
     for(int j=0; j<ny-2*y_add; j++){
@@ -478,117 +459,74 @@ Complex_2D Complex_2D::get_unpadded(int x_add, int y_add){
   return unpadded;
 }
 
+template<class T>
+void ComplexR_2D<T>::initialise_fft(){
 
-void Complex_2D::initialise_fft(){
-
-
+#if defined(MULTI_THREADED) 		
+  int numthreads=FFTW_INIT_THREADS(); 		
+  FFTW_PLAN_WITH_NTHREADS(NUM_THREADS); 		
+#endif
   //creating the plan will erase the content of the array
   //so we need to be a bit tricky here.
-
-#ifndef DOUBLE_PRECISION
-  //make a new array 
-
-#if defined(MULTI_THREADED)
-  int numthreads=fftwf_init_threads();
-  fftwf_plan_with_nthreads(NUM_THREADS);;
-#endif
-  fftwf_complex * tmp_array;
-  tmp_array = (fftwf_complex*) fftwf_malloc(sizeof(fftwf_complex)*nx*ny);
-
+  FFTW_COMPLEX *tmp_array;
+  tmp_array = (FFTW_COMPLEX*) FFTW_MALLOC(sizeof(FFTW_COMPLEX)*nx*ny);
   //make the plans
-  f_backward = fftwf_plan_dft_2d(nx, ny, tmp_array, tmp_array, 
-      FFTW_BACKWARD, fftw_type);
-  f_forward = fftwf_plan_dft_2d(nx, ny,tmp_array,tmp_array, 
-      FFTW_FORWARD, fftw_type);
+  f_backward = FFTW_PLAN_DFT_2D(nx, ny, tmp_array, tmp_array,
+				FFTW_BACKWARD, fftw_type);
+  f_forward = FFTW_PLAN_DFT_2D(nx, ny,tmp_array,tmp_array,
+			       FFTW_FORWARD, fftw_type);
+  std::memcpy(tmp_array,array,sizeof(FFTW_COMPLEX)*nx*ny);
+  FFTW_FREE(array);
 
-  //now copy the array contents into the tmp_array,
-  //free the old memory and update the pointer.
-  std::memcpy(tmp_array,array,sizeof(fftwf_complex)*nx*ny);
-  fftwf_free(array);
-
-#else
-#if defined(MULTI_THREADED)
-  int numthreads=fftw_init_threads();
-  fftw_plan_with_nthreads(NUM_THREADS);;
-#endif
-
-  fftw_complex * tmp_array;
-  tmp_array = (fftw_complex*) fftw_malloc(sizeof(fftw_complex)*nx*ny);
-
-  //make the plans
-  f_backward = fftw_plan_dft_2d(nx, ny, tmp_array, tmp_array, 
-      FFTW_BACKWARD, fftw_type);
-  f_forward = fftw_plan_dft_2d(nx, ny,tmp_array,tmp_array, 
-      FFTW_FORWARD, fftw_type);
-
-  //now copy the array contents into the tmp_array,
-  //free the old memory and update the pointer.
-  std::memcpy(tmp_array,array,sizeof(fftw_complex)*nx*ny);
-  fftw_free(array);
-
-#endif
 
   array = tmp_array;
 
 }
 
-void Complex_2D::perform_forward_fft(){
+template<class T>
+void ComplexR_2D<T>::perform_forward_fft(){
 
   //make a new forward fft plan if we haven't made one already.
   if(f_forward==0 )
     initialise_fft();  
+  FFTW_EXECUTE(f_forward);
 
-#ifndef DOUBLE_PRECISION
-  fftwf_execute(f_forward);
-#else
-  fftw_execute(f_forward);
-#endif
 }
 
-
-void Complex_2D::perform_backward_fft(){
+template<class T>
+void ComplexR_2D<T>::perform_backward_fft(){
 
   //make a new backward fft plan if we haven't made one already.
   if(f_backward==0)
     initialise_fft();
-#ifndef DOUBLE_PRECISION
-  fftwf_execute(f_backward);
-#else
-  fftw_execute(f_backward);
-#endif
+  FFTW_EXECUTE(f_backward);
 }
 
 
 //this object is fourier transformed and the result placed in 'result'
-void Complex_2D::perform_backward_fft_real(Double_2D & result){
-
-#ifndef DOUBLE_PRECISION
-  fftwf_plan fftw;
-  fftw = fftwf_plan_dft_c2r_2d(nx,ny,array,result.array,FFTW_ESTIMATE); 
-  fftwf_execute(fftw);
-  fftwf_destroy_plan(fftw);
-#else
-  fftw_plan fftw;
-  fftw = fftw_plan_dft_c2r_2d(nx,ny,array,result.array,FFTW_ESTIMATE); 
-  fftw_execute(fftw);
-  fftw_destroy_plan(fftw);  
-#endif
+template<class T>
+void ComplexR_2D<T>::perform_backward_fft_real(Double_2D & result){
+ 
+  FFTW_PLAN fftw;
+  fftw=FFTW_PLAN_DFT_C2R_2D(nx,ny,array,result.array,FFTW_ESTIMATE);
+  FFTW_EXECUTE(fftw);
+  FFTW_DESTROY_PLAN(fftw);
 }
 
 //'result' is fourier transformed and the result placed in this object
-void  Complex_2D::perform_forward_fft_real(Double_2D & input){
-#ifndef DOUBLE_PRECISION
-  fftwf_plan fftw;
-  fftw = fftwf_plan_dft_r2c_2d(nx,ny,input.array,array,FFTW_ESTIMATE); 
-  fftwf_execute(fftw);
-  fftwf_destroy_plan(fftw);
-#else
-  fftw_plan fftw;
-  fftw = fftw_plan_dft_r2c_2d(nx,ny,input.array,array,FFTW_ESTIMATE); 
-  fftw_execute(fftw);
-  fftw_destroy_plan(fftw);
-#endif    
+template<class T>
+void  ComplexR_2D<T>::perform_forward_fft_real(Double_2D & input){
+  FFTW_PLAN fftw;
+  fftw=FFTW_PLAN_DFT_R2C_2D(nx,ny,input.array,array,FFTW_ESTIMATE);
+  FFTW_EXECUTE(fftw);
+  FFTW_DESTROY_PLAN(fftw);
 }
+
+#ifdef DOUBLE_PRECISION
+template class ComplexR_2D<double>;
+#else
+template class ComplexR_2D<float>;
+#endif
 
 
 

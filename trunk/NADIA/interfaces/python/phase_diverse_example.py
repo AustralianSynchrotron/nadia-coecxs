@@ -124,6 +124,8 @@ try:
 
     object = PyComplex2D(nx,ny)
     object=pd.getTransmission()
+    x,y=pd.getFinalXPosition(1), pd.getFinalYPosition(1)
+    print x,y
     
     result=object.get2dMAG()
     

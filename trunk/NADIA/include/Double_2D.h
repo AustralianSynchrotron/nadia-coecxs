@@ -45,8 +45,7 @@ class Real_2D{
 
  public:
 
-  friend class Complex_2D ; 
-
+  template <class TT>friend class ComplexR_2D;
   /**
    * A constructor which creates an empty array (of no size).  Note
    * that memory has not been allocated if this method is used.

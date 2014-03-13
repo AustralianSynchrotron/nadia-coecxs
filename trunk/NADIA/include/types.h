@@ -1,12 +1,13 @@
 #ifndef _TYPES_H_
 #define _TYPES_H_
 #include <fftw3.h>
-#include <Complex_2D.h>
 /////////////////////////////////////////////////////
 #ifndef DOUBLE_PRECISION
 #define FFTW_PLAN fftwf_plan
 #define FFTW_COMPLEX fftwf_complex
 #define FFTW_EXECUTE fftwf_execute
+#define FFTW_PLAN_WITH_NTHREADS fftwf_plan_with_nthreads
+#define FFTW_INIT_THREADS fftwf_init_threads
 #define FFTW_PLAN_DFT_2D fftwf_plan_dft_2d
 #define FFTW_PLAN_DFT_R2C_2D fftwf_plan_dft_r2c_2d
 #define FFTW_PLAN_DFT_C2R_2D fftwf_plan_dft_c2r_2d
@@ -22,6 +23,8 @@
 #define FFTW_PLAN fftw_plan
 #define FFTW_COMPLEX fftw_complex
 #define FFTW_EXECUTE fftw_execute
+#define FFTW_PLAN_WITH_NTHREADs fftw_plan_with_nthreads
+#define FFTW_INIT_THREADS fftw_init_threads
 #define FFTW_PLAN_DFT_2D fftw_plan_dft_2d
 #define FFTW_PLAN_DFT_R2C_2D fftw_plan_dft_r2c_2d
 #define FFTW_PLAN_DFT_C2R_2D fftw_plan_dft_c2r_2d

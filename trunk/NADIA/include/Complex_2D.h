@@ -25,39 +25,15 @@
 #include <math.h>
 #include <fftw3.h>
 #include <Double_2D.h>
-
+#include <types.h>
 
 #ifndef NUM_THREADS
 #define NUM_THREADS 1
 #endif
 
 
-//class Double_2D;
-
-/** the function failed */
-#define FAILURE 0
-
-/** the function finished successfully */
-#define SUCCESS 1
-
-/** real component */
-#define REAL 0
-
-/** imaginary component */
-#define IMAG 1
-
-/** magnitude */
-#define MAG 2
-
-/** phase */
-#define PHASE 3
-
-/** magnitudes squared */
-#define MAG_SQ 4
-
-//class Double_2D;
-
-class Complex_2D{
+template<class T>
+class ComplexR_2D{
 
   /** nx/ny are number of samplings in x/y */
   int nx, ny;
@@ -65,31 +41,14 @@ class Complex_2D{
   /* A flag which is passed to fftw when plans are created */
   int fftw_type;
 
-
-#ifndef DOUBLE_PRECISION
-
   /** "array" holds the data */
-  fftwf_complex *array;
-
+  FFTW_COMPLEX *array;
   /* A fftw plan for forward fourier transforms */
-  fftwf_plan f_forward;
-
+  FFTW_PLAN f_forward;
   /* A fftw plan for backward fourier transforms */
-  fftwf_plan f_backward;
+  FFTW_PLAN f_backward;
 
-
-#else //If we are using double precision
-
-  /** "array" holds the data */
-  fftw_complex *array;
-
-  /* A fftw plan for forward fourier transforms */
-  fftw_plan f_forward;
-
-  /* A fftw plan for backward fourier transforms */
-  fftw_plan f_backward;
-
-#endif
+  int malloc_size;
 
   
  public:
@@ -101,65 +60,46 @@ class Complex_2D{
    * @param y_size The number of samplings in the vertical direction
    *
    */
-  Complex_2D(int x_size, int y_size);
+  ComplexR_2D(int x_size, int y_size);
 
   /**
    * Destructor
    *
    */
-  ~Complex_2D();
+  ~ComplexR_2D();
 
   /**
    *Copy Constructor
    */
-  Complex_2D(const Complex_2D& object);
+  ComplexR_2D(const ComplexR_2D& object);
 
   /**
    *Copy Constructor from a Double_2D
    */
-  Complex_2D(const Double_2D& object);
+  ComplexR_2D(const Double_2D& object);
 
 
   /**
    *Assignment Operator
    */
 
-  Complex_2D& operator=(const Complex_2D& rhs){
+  ComplexR_2D& operator=(const ComplexR_2D& rhs){
 
     nx = rhs.get_size_x();
     ny = rhs.get_size_y();
 
-#ifndef DOUBLE_PRECISION
-    //free the memory of the array.
-    fftwf_free(array);
+    malloc_size=sizeof(FFTW_COMPLEX)*rhs.get_size_x()*rhs.get_size_y();
 
-    //free the memory of the fftw plans (but
-    //only if it was actually allocated).
+    FFTW_FREE(array);
     if(f_forward)
-      fftwf_destroy_plan(f_forward);
+          FFTW_DESTROY_PLAN(f_forward);
     if(f_backward)
-      fftwf_destroy_plan(f_backward);
+          FFTW_DESTROY_PLAN(f_backward);
 
-#else
-    //free the memory of the array.
-    fftw_free(array);
+    array = (FFTW_COMPLEX*) FFTW_MALLOC(malloc_size);
 
-    //free the memory of the fftw plans (but
-    //only if it was actually allocated).
-    if(f_forward)
-      fftw_destroy_plan(f_forward);
-    if(f_backward)
-      fftw_destroy_plan(f_backward);
+    memcpy(array, rhs.array, malloc_size);
 
-#endif
-
-#ifndef DOUBLE_PRECISION
-    array = (fftwf_complex*) fftwf_malloc(sizeof(fftwf_complex)*rhs.get_size_x()*rhs.get_size_y());
-    memcpy(array, rhs.array, sizeof(fftwf_complex)*nx*ny);
-#else
-    array = (fftw_complex*) fftw_malloc(sizeof(fftw_complex)*rhs.get_size_x()*rhs.get_size_y());
-    memcpy(array, rhs.array, sizeof(fftw_complex)*nx*ny);
-#endif
 
     //initalise the fftw plans to null (not created yet. We will
     //create them when needed to avoid unnecessary time overhead).
@@ -181,40 +121,19 @@ class Complex_2D{
    *component from a Double_2D
    */
 
-  Complex_2D& operator=(const Double_2D& rhs){
+  ComplexR_2D& operator=(const Double_2D& rhs){
 
     nx = rhs.get_size_x();
     ny = rhs.get_size_y();
 
-#ifndef DOUBLE_PRECISION
-    //free the memory of the array.
-    fftwf_free(array);
-
-    //free the memory of the fftw plans (but
-    //only if it was actually allocated).
+    FFTW_FREE(array);
     if(f_forward)
-      fftwf_destroy_plan(f_forward);
+      FFTW_DESTROY_PLAN(f_forward);
     if(f_backward)
-      fftwf_destroy_plan(f_backward);
-
-#else
-    //free the memory of the array.
-    fftw_free(array);
-
-    //free the memory of the fftw plans (but
-    //only if it was actually allocated).
-    if(f_forward)
-      fftw_destroy_plan(f_forward);
-    if(f_backward)
-      fftw_destroy_plan(f_backward);
-
-#endif
-
-#ifndef DOUBLE_PRECISION
-    array = (fftwf_complex*) fftwf_malloc(sizeof(fftwf_complex)*rhs.get_size_x()*rhs.get_size_y());
-#else
-    array = (fftw_complex*) fftw_malloc(sizeof(fftw_complex)*rhs.get_size_x()*rhs.get_size_y());
-#endif
+      FFTW_DESTROY_PLAN(f_backward);
+ 
+    malloc_size=sizeof(FFTW_COMPLEX)*rhs.get_size_x()*rhs.get_size_y();
+    array=(FFTW_COMPLEX*) FFTW_MALLOC(malloc_size);
 
     //initalise the fftw plans to null (not created yet. We will
     //create them when needed to avoid unnecessary time overhead).
@@ -245,7 +164,7 @@ class Complex_2D{
    * @param value The value which it will be set to
    *  
    */
-  void set_value(int x, int y, int type, double value);
+  void set_value(int x, int y, int type, T value);
 
 
   /**
@@ -257,7 +176,7 @@ class Complex_2D{
    * @param value The value which it will be set to
    *  
    */
-  inline void set_real(int x, int y, double value){
+  inline void set_real(int x, int y, T value){
     array[x*ny+y][REAL] = value;
   };
 
@@ -270,7 +189,7 @@ class Complex_2D{
    * @param value The value which it will be set to
    *  
    */
-  inline void set_imag(int x, int y, double value){
+  inline void set_imag(int x, int y, T value){
     array[x*ny+y][IMAG] = value;
   };
 
@@ -283,7 +202,7 @@ class Complex_2D{
    * @param value The value which it will be set to
    *  
    */
-  inline void set_mag(int x, int y, double value){
+  inline void set_mag(int x, int y, T value){
     double mag = get_mag(x,y);
     if(mag==0){
       set_real(x,y,value);
@@ -304,7 +223,7 @@ class Complex_2D{
    * @param value The value which it will be set to
    *  
    */
-  inline void set_phase(int x, int y, double value){
+  inline void set_phase(int x, int y, T value){
     double mag = get_mag(x,y);
     set_real(x,y,mag*cos(value));
     set_imag(x,y,mag*sin(value));
@@ -319,7 +238,7 @@ class Complex_2D{
    * @param y The vertical position
    * @return The value at (x,y)  
    */
-  inline double get_real(int x, int y) const{
+  inline T get_real(int x, int y) const{
     return array[x*ny+y][REAL];
   };
 
@@ -331,7 +250,7 @@ class Complex_2D{
    * @param y The vertical position
    * @return The value at (x,y)  
    */
-  inline double get_imag(int x, int y) const{
+  inline T get_imag(int x, int y) const{
     return array[x*ny+y][IMAG];
   };
 
@@ -343,7 +262,7 @@ class Complex_2D{
    * @param y The vertical position
    * @return The value at (x,y)  
    */
-  inline double get_mag(int x, int y) const{
+  inline T get_mag(int x, int y) const{
     return sqrt(array[x*ny+y][REAL]*array[x*ny+y][REAL]+
 	array[x*ny+y][IMAG]*array[x*ny+y][IMAG]);
   };
@@ -359,8 +278,9 @@ class Complex_2D{
    * @param y The vertical position
    * @return The value at (x,y)  
    */
-  inline double get_phase(int x, int y) const{
-    double phase = atan2(get_imag(x,y),get_real(x,y));
+
+  inline T get_phase(int x, int y) const{
+    T phase = atan2(get_imag(x,y),get_real(x,y));
 
     if( phase > M_PI )
       return phase - 2*M_PI;
@@ -382,7 +302,7 @@ class Complex_2D{
    * @return The value
    *  
    */
-  double get_value(int x, int y, int type) const; 
+  T get_value(int x, int y, int type) const; 
 
 
   /**
@@ -422,7 +342,7 @@ class Complex_2D{
    * @param scale_factor Number which is multiplied by all components
    * of the field.
    */
-  void scale(double scale_factor);
+  void scale(T scale_factor);
 
   /**
    * Add another Complex_2D to this Complex_2D. The values in this object
@@ -437,7 +357,7 @@ class Complex_2D{
    * calling Complex_2D::scale() followed by Complex_2D:add()
    * separately.
    */
-  void add(Complex_2D & c2, double scale=1);
+  void add(ComplexR_2D & c2, T scale=1);
 
 
   /**
@@ -454,7 +374,7 @@ class Complex_2D{
    * separately.
    */
 
-  void multiply(Complex_2D & c2, double scale=1);
+  void multiply(ComplexR_2D & c2, T scale=1);
 
   /**
    * Multiple a Double_2D to this Complex_2D. The values in this object
@@ -469,7 +389,7 @@ class Complex_2D{
    * calling Complex_2D::scale() followed by Complex_2D:multiply()
    * separately.
    */
-  void multiply(Double_2D & d2, double scale=1);
+  void multiply(Double_2D & d2, T scale=1);
 
 
 
@@ -479,21 +399,21 @@ class Complex_2D{
    * 
    * @return @f $ \sqrt{ \sum_{x,y}{ \mathrm{|C(x,y)|^2} }  } $ @f.
    */
-  double get_norm() const;
+  T get_norm() const;
 
   /**
    * Create a new Complex_2D with the same values as this one.
    * 
    * @return The new Complex_2D
    */
-  Complex_2D * clone() const;
+  ComplexR_2D * clone() const;
 
   /**
    * Copy the values from another Complex_2D to this one.
    * 
    * @param c The Complex_2D which will be copied from.
    */
-  void copy(const Complex_2D & c);
+  void copy(const ComplexR_2D & c);
 
 
   /**
@@ -560,12 +480,12 @@ class Complex_2D{
    * Create the same complex with some padding. The padding is filled with 0s
    **/
 
-  Complex_2D get_padded(int x_add, int y_add);
+  ComplexR_2D get_padded(int x_add, int y_add);
 
   /**
    * Create the same complex without the some padding. 
    */
-  Complex_2D get_unpadded(int x_add, int y_add);
+  ComplexR_2D get_unpadded(int x_add, int y_add);
 
 
 
@@ -587,5 +507,12 @@ class Complex_2D{
 
 
 };
+//////////////////////////////////////////
+#ifndef DOUBLE_PRECISION
+typedef ComplexR_2D<float> Complex_2D;
+#else
+typedef ComplexR_2D<double> Complex_2D;
+#endif //DOUBLE_PRECISION
+//////////////////////////////////////////
 
 #endif

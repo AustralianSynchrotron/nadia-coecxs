@@ -94,7 +94,7 @@ cdef class PyPhaseDiverseCDI:
         """! get the final y position of the nth probe 
         @param n_probe The probe number
         """
-        return self.thispr.get_final_y_position(n_probe)
+        return self.thisptr.get_final_y_position(n_probe)
     def getTransmission(self):
         """! 
         gets the transmission function

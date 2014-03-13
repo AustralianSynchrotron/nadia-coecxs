@@ -33,6 +33,7 @@
 #include <cmath>
 #include <cstring>
 #include <utils.h>
+#include <google/profiler.h>
 
 using namespace std;
 
@@ -40,6 +41,7 @@ using namespace std;
 
 int main(int argc, char * argv[]){
 
+  ProfilerStart("phase_div");
   ////////////////////////
   int nx = 1024;
   int ny = 1024;
@@ -192,7 +194,7 @@ int main(int argc, char * argv[]){
   //save the transmission function in case we want to use it later.
   write_cplx("trans.cplx",*object);
 
-
+  ProfilerStop();
   return 0;
   
 }

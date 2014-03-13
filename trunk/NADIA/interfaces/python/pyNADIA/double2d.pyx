@@ -6,6 +6,7 @@ from double2d cimport Double_2D
 from cython.operator cimport dereference as deref
 from libcpp.string cimport string
 from libcpp cimport bool
+import numpy as np
 
 
 cdef class PyDouble2D:
@@ -226,3 +227,17 @@ cdef class PyDouble2D:
         @return The number of positions in the vertical direction
         """
         return self.thisptr.get_size_y()
+    
+    def read_from_numpy(self,nparr):
+        """! Create and return a PyDouble2D array from a 2D numpy array
+        @param nparr A 2D numpy array
+        """
+        if len(nparr.shape)!=2:
+            return "some error"
+        
+        newarr = PyDouble2D(nparr.shape[0],nparr.shape[1])
+        cdef Double_2D newdouble = deref(newarr.thisptr)
+        for i in newarr.shape[0]:
+            for j in newarr.shape[1]:
+                newdouble.set(i,j,newarr[i,j]) #
+        return newarr
