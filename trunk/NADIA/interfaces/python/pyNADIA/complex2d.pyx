@@ -119,6 +119,24 @@ cdef class PyComplex2D:
         self.thisptr.get_2d(PHASE, (deref(result.thisptr)))
         return result
 
+    def get2dREAL(self):
+        """!Returns a PyDouble2D object containing the value of the real part at each location.
+        This method has no direct equivalent in Complex_2D
+        @return A PyDouble2D containing the real part of the complex value at each point.
+        """
+        result = PyDouble2D(self.getSizeX(), self.getSizeY()) 
+        self.thisptr.get_2d(REAL, (deref(result.thisptr)))
+        return result
+
+    def get2dIMAG(self):
+        """!Returns a PyDouble2D object containing the value of the imaginary part at each location.
+        This method has no direct equivalent in Complex_2D
+        @return A PyDouble2D containing the imaginary part of the complex value at each point.
+        """
+        result = PyDouble2D(self.getSizeX(), self.getSizeY()) 
+        self.thisptr.get_2d(IMAG, (deref(result.thisptr)))
+        return result
+
     def scale(self,scale_factor):
         self.thisptr.scale(scale_factor)
     def add(self, PyComplex2D c2, scale=1):

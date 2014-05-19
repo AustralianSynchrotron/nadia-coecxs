@@ -344,8 +344,8 @@ void __Pyx_call_destructor(T* x) {
 #define _USE_MATH_DEFINES
 #endif
 #include <math.h>
-#define __PYX_HAVE__pyNADIA__partialcdi
-#define __PYX_HAVE_API__pyNADIA__partialcdi
+#define __PYX_HAVE__pyNADIA__fresnelcdiwf
+#define __PYX_HAVE_API__pyNADIA__fresnelcdiwf
 #include "Double_2D.h"
 #include "ios"
 #include "new"
@@ -356,8 +356,7 @@ void __Pyx_call_destructor(T* x) {
 #include <string>
 #include "TransmissionConstraint.h"
 #include "BaseCDI.h"
-#include <vector>
-#include "PartialCDI.h"
+#include "FresnelCDI_WF.h"
 #ifdef _OPENMP
 #include <omp.h>
 #endif /* _OPENMP */
@@ -538,7 +537,7 @@ static const char *__pyx_filename;
 
 
 static const char *__pyx_f[] = {
-  "partialcdi.pyx",
+  "fresnelcdiwf.pyx",
   "double2d.pxd",
   "complex2d.pxd",
   "transmissionconstraint.pxd",
@@ -551,7 +550,7 @@ struct __pyx_obj_7pyNADIA_9complex2d_PyComplex2D;
 struct __pyx_obj_7pyNADIA_22transmissionconstraint_PyComplexConstraint;
 struct __pyx_obj_7pyNADIA_22transmissionconstraint_PyTransmissionConstraint;
 struct __pyx_obj_7pyNADIA_7basecdi_PyBaseCDI;
-struct __pyx_obj_7pyNADIA_10partialcdi_PyPartialCDI;
+struct __pyx_obj_7pyNADIA_12fresnelcdiwf_PyFresnelCDIWF;
 
 /* "double2d.pxd":25
  *         T * c_array()
@@ -636,16 +635,16 @@ struct __pyx_obj_7pyNADIA_7basecdi_PyBaseCDI {
 };
 
 
-/* "pyNADIA/partialcdi.pxd":27
- *           void set_support(const Double_2D & object_support, bool soften)
+/* "pyNADIA/fresnelcdiwf.pxd":25
+ *         void multiply_factors(Complex_2D & c, int direction)
  * 
- * cdef class PyPartialCDI:             # <<<<<<<<<<<<<<
- *      cdef PartialCDI *thisptr
- *      cdef int nx
+ * cdef class PyFresnelCDIWF:             # <<<<<<<<<<<<<<
+ *     cdef FresnelCDI_WF *thisptr
+ *     cdef int nx,ny
  */
-struct __pyx_obj_7pyNADIA_10partialcdi_PyPartialCDI {
+struct __pyx_obj_7pyNADIA_12fresnelcdiwf_PyFresnelCDIWF {
   PyObject_HEAD
-  PartialCDI *thisptr;
+  FresnelCDI_WF *thisptr;
   int nx;
   int ny;
 };
@@ -732,7 +731,44 @@ static CYTHON_INLINE PyObject* __Pyx_PyObject_Call(PyObject *func, PyObject *arg
 
 static CYTHON_INLINE int __Pyx_PyInt_As_int(PyObject *);
 
-static CYTHON_INLINE unsigned int __Pyx_PyInt_As_unsigned_int(PyObject *);
+#ifndef __Pyx_CppExn2PyErr
+#include <new>
+#include <typeinfo>
+#include <stdexcept>
+#include <ios>
+static void __Pyx_CppExn2PyErr() {
+  try {
+    if (PyErr_Occurred())
+      ; // let the latest Python exn pass through and ignore the current one
+    else
+      throw;
+  } catch (const std::bad_alloc& exn) {
+    PyErr_SetString(PyExc_MemoryError, exn.what());
+  } catch (const std::bad_cast& exn) {
+    PyErr_SetString(PyExc_TypeError, exn.what());
+  } catch (const std::domain_error& exn) {
+    PyErr_SetString(PyExc_ValueError, exn.what());
+  } catch (const std::invalid_argument& exn) {
+    PyErr_SetString(PyExc_ValueError, exn.what());
+  } catch (const std::ios_base::failure& exn) {
+    PyErr_SetString(PyExc_IOError, exn.what());
+  } catch (const std::out_of_range& exn) {
+    PyErr_SetString(PyExc_IndexError, exn.what());
+  } catch (const std::overflow_error& exn) {
+    PyErr_SetString(PyExc_OverflowError, exn.what());
+  } catch (const std::range_error& exn) {
+    PyErr_SetString(PyExc_ArithmeticError, exn.what());
+  } catch (const std::underflow_error& exn) {
+    PyErr_SetString(PyExc_ArithmeticError, exn.what());
+  } catch (const std::exception& exn) {
+    PyErr_SetString(PyExc_RuntimeError, exn.what());
+  }
+  catch (...)
+  {
+    PyErr_SetString(PyExc_RuntimeError, "Unknown exception");
+  }
+}
+#endif
 
 static CYTHON_INLINE PyObject* __Pyx_PyInt_From_int(int value);
 
@@ -795,90 +831,77 @@ static PyTypeObject *__pyx_ptype_7pyNADIA_22transmissionconstraint_PyTransmissio
 /* Module declarations from 'pyNADIA.basecdi' */
 static PyTypeObject *__pyx_ptype_7pyNADIA_7basecdi_PyBaseCDI = 0;
 
-/* Module declarations from 'libcpp.vector' */
+/* Module declarations from 'pyNADIA.fresnelcdiwf' */
+static PyTypeObject *__pyx_ptype_7pyNADIA_12fresnelcdiwf_PyFresnelCDIWF = 0;
+#define __Pyx_MODULE_NAME "pyNADIA.fresnelcdiwf"
+int __pyx_module_is_main_pyNADIA__fresnelcdiwf = 0;
 
-/* Module declarations from 'pyNADIA.partialcdi' */
-static PyTypeObject *__pyx_ptype_7pyNADIA_10partialcdi_PyPartialCDI = 0;
-#define __Pyx_MODULE_NAME "pyNADIA.partialcdi"
-int __pyx_module_is_main_pyNADIA__partialcdi = 0;
-
-/* Implementation of 'pyNADIA.partialcdi' */
-static int __pyx_pf_7pyNADIA_10partialcdi_12PyPartialCDI___cinit__(struct __pyx_obj_7pyNADIA_10partialcdi_PyPartialCDI *__pyx_v_self, struct __pyx_obj_7pyNADIA_9complex2d_PyComplex2D *__pyx_v_object_estimate, double __pyx_v_lcx, double __pyx_v_lcy, double __pyx_v_pxsize, double __pyx_v_pysize, double __pyx_v_energy, double __pyx_v_zsd, int __pyx_v_nleg, int __pyx_v_nmode, unsigned int __pyx_v_n_best); /* proto */
-static void __pyx_pf_7pyNADIA_10partialcdi_12PyPartialCDI_2__dealloc__(struct __pyx_obj_7pyNADIA_10partialcdi_PyPartialCDI *__pyx_v_self); /* proto */
-static PyObject *__pyx_pf_7pyNADIA_10partialcdi_12PyPartialCDI_4initialiseEstimate(struct __pyx_obj_7pyNADIA_10partialcdi_PyPartialCDI *__pyx_v_self, PyObject *__pyx_v_seed); /* proto */
-static PyObject *__pyx_pf_7pyNADIA_10partialcdi_12PyPartialCDI_6iterate(struct __pyx_obj_7pyNADIA_10partialcdi_PyPartialCDI *__pyx_v_self); /* proto */
-static PyObject *__pyx_pf_7pyNADIA_10partialcdi_12PyPartialCDI_8getTransmission(struct __pyx_obj_7pyNADIA_10partialcdi_PyPartialCDI *__pyx_v_self); /* proto */
-static PyObject *__pyx_pf_7pyNADIA_10partialcdi_12PyPartialCDI_10setTransmission(struct __pyx_obj_7pyNADIA_10partialcdi_PyPartialCDI *__pyx_v_self, struct __pyx_obj_7pyNADIA_9complex2d_PyComplex2D *__pyx_v_newTrans); /* proto */
-static PyObject *__pyx_pf_7pyNADIA_10partialcdi_12PyPartialCDI_12setThreshold(struct __pyx_obj_7pyNADIA_10partialcdi_PyPartialCDI *__pyx_v_self, double __pyx_v_new_threshold); /* proto */
-static PyObject *__pyx_pf_7pyNADIA_10partialcdi_12PyPartialCDI_14getMode(struct __pyx_obj_7pyNADIA_10partialcdi_PyPartialCDI *__pyx_v_self, int __pyx_v_modenum); /* proto */
-static PyObject *__pyx_pf_7pyNADIA_10partialcdi_12PyPartialCDI_16getBestResult(struct __pyx_obj_7pyNADIA_10partialcdi_PyPartialCDI *__pyx_v_self, double __pyx_v_error, int __pyx_v_index); /* proto */
-static PyObject *__pyx_pf_7pyNADIA_10partialcdi_12PyPartialCDI_18setSupport(struct __pyx_obj_7pyNADIA_10partialcdi_PyPartialCDI *__pyx_v_self, struct __pyx_obj_7pyNADIA_8double2d_PyDouble2D *__pyx_v_support, bool __pyx_v_soften); /* proto */
-static PyObject *__pyx_pf_7pyNADIA_10partialcdi_12PyPartialCDI_20setIntensity(struct __pyx_obj_7pyNADIA_10partialcdi_PyPartialCDI *__pyx_v_self, struct __pyx_obj_7pyNADIA_8double2d_PyDouble2D *__pyx_v_intensity); /* proto */
-static PyObject *__pyx_pf_7pyNADIA_10partialcdi_12PyPartialCDI_22setBeamStop(struct __pyx_obj_7pyNADIA_10partialcdi_PyPartialCDI *__pyx_v_self, struct __pyx_obj_7pyNADIA_8double2d_PyDouble2D *__pyx_v_beamstop); /* proto */
-static PyObject *__pyx_pf_7pyNADIA_10partialcdi_12PyPartialCDI_24getError(struct __pyx_obj_7pyNADIA_10partialcdi_PyPartialCDI *__pyx_v_self); /* proto */
-static PyObject *__pyx_pf_7pyNADIA_10partialcdi_12PyPartialCDI_26getSupport(CYTHON_UNUSED struct __pyx_obj_7pyNADIA_10partialcdi_PyPartialCDI *__pyx_v_self); /* proto */
-static PyObject *__pyx_pf_7pyNADIA_10partialcdi_12PyPartialCDI_28setAlgorithm(struct __pyx_obj_7pyNADIA_10partialcdi_PyPartialCDI *__pyx_v_self, int __pyx_v_alg); /* proto */
-static PyObject *__pyx_pf_7pyNADIA_10partialcdi_12PyPartialCDI_30resetBest(struct __pyx_obj_7pyNADIA_10partialcdi_PyPartialCDI *__pyx_v_self); /* proto */
-static PyObject *__pyx_pf_7pyNADIA_10partialcdi_12PyPartialCDI_32set_fftw_type(struct __pyx_obj_7pyNADIA_10partialcdi_PyPartialCDI *__pyx_v_self, int __pyx_v_type); /* proto */
-static PyObject *__pyx_tp_new_7pyNADIA_10partialcdi_PyPartialCDI(PyTypeObject *t, PyObject *a, PyObject *k); /*proto*/
-static char __pyx_k_lcx[] = "lcx";
-static char __pyx_k_lcy[] = "lcy";
-static char __pyx_k_zsd[] = "zsd";
+/* Implementation of 'pyNADIA.fresnelcdiwf' */
+static int __pyx_pf_7pyNADIA_12fresnelcdiwf_14PyFresnelCDIWF___cinit__(struct __pyx_obj_7pyNADIA_12fresnelcdiwf_PyFresnelCDIWF *__pyx_v_self, struct __pyx_obj_7pyNADIA_9complex2d_PyComplex2D *__pyx_v_object_estimate, double __pyx_v_beam_wavelength, double __pyx_v_zone_focal_length, double __pyx_v_focal_detector_length, double __pyx_v_pixel_size, int __pyx_v_n_best); /* proto */
+static void __pyx_pf_7pyNADIA_12fresnelcdiwf_14PyFresnelCDIWF_2__dealloc__(struct __pyx_obj_7pyNADIA_12fresnelcdiwf_PyFresnelCDIWF *__pyx_v_self); /* proto */
+static PyObject *__pyx_pf_7pyNADIA_12fresnelcdiwf_14PyFresnelCDIWF_4initialiseEstimate(struct __pyx_obj_7pyNADIA_12fresnelcdiwf_PyFresnelCDIWF *__pyx_v_self, PyObject *__pyx_v_seed); /* proto */
+static PyObject *__pyx_pf_7pyNADIA_12fresnelcdiwf_14PyFresnelCDIWF_6iterate(struct __pyx_obj_7pyNADIA_12fresnelcdiwf_PyFresnelCDIWF *__pyx_v_self); /* proto */
+static PyObject *__pyx_pf_7pyNADIA_12fresnelcdiwf_14PyFresnelCDIWF_8getBestResult(struct __pyx_obj_7pyNADIA_12fresnelcdiwf_PyFresnelCDIWF *__pyx_v_self, double __pyx_v_error, int __pyx_v_index); /* proto */
+static PyObject *__pyx_pf_7pyNADIA_12fresnelcdiwf_14PyFresnelCDIWF_10setSupport(struct __pyx_obj_7pyNADIA_12fresnelcdiwf_PyFresnelCDIWF *__pyx_v_self, PyObject *__pyx_v_z_factor, PyObject *__pyx_v_size); /* proto */
+static PyObject *__pyx_pf_7pyNADIA_12fresnelcdiwf_14PyFresnelCDIWF_12setIntensity(struct __pyx_obj_7pyNADIA_12fresnelcdiwf_PyFresnelCDIWF *__pyx_v_self, struct __pyx_obj_7pyNADIA_8double2d_PyDouble2D *__pyx_v_intensity); /* proto */
+static PyObject *__pyx_pf_7pyNADIA_12fresnelcdiwf_14PyFresnelCDIWF_14setBeamStop(struct __pyx_obj_7pyNADIA_12fresnelcdiwf_PyFresnelCDIWF *__pyx_v_self, struct __pyx_obj_7pyNADIA_8double2d_PyDouble2D *__pyx_v_beamstop); /* proto */
+static PyObject *__pyx_pf_7pyNADIA_12fresnelcdiwf_14PyFresnelCDIWF_16getError(struct __pyx_obj_7pyNADIA_12fresnelcdiwf_PyFresnelCDIWF *__pyx_v_self); /* proto */
+static PyObject *__pyx_pf_7pyNADIA_12fresnelcdiwf_14PyFresnelCDIWF_18getSupport(CYTHON_UNUSED struct __pyx_obj_7pyNADIA_12fresnelcdiwf_PyFresnelCDIWF *__pyx_v_self); /* proto */
+static PyObject *__pyx_pf_7pyNADIA_12fresnelcdiwf_14PyFresnelCDIWF_20resetBest(struct __pyx_obj_7pyNADIA_12fresnelcdiwf_PyFresnelCDIWF *__pyx_v_self); /* proto */
+static PyObject *__pyx_pf_7pyNADIA_12fresnelcdiwf_14PyFresnelCDIWF_22set_fftw_type(struct __pyx_obj_7pyNADIA_12fresnelcdiwf_PyFresnelCDIWF *__pyx_v_self, int __pyx_v_type); /* proto */
+static PyObject *__pyx_pf_7pyNADIA_12fresnelcdiwf_14PyFresnelCDIWF_24multiplyFactors(struct __pyx_obj_7pyNADIA_12fresnelcdiwf_PyFresnelCDIWF *__pyx_v_self, struct __pyx_obj_7pyNADIA_9complex2d_PyComplex2D *__pyx_v_c, PyObject *__pyx_v_direction); /* proto */
+static PyObject *__pyx_tp_new_7pyNADIA_12fresnelcdiwf_PyFresnelCDIWF(PyTypeObject *t, PyObject *a, PyObject *k); /*proto*/
+static char __pyx_k_c[] = "c";
 static char __pyx_k_main[] = "__main__";
-static char __pyx_k_nleg[] = "nleg";
 static char __pyx_k_seed[] = "seed";
+static char __pyx_k_size[] = "size";
 static char __pyx_k_test[] = "__test__";
 static char __pyx_k_error[] = "error";
 static char __pyx_k_index[] = "index";
-static char __pyx_k_nmode[] = "nmode";
-static char __pyx_k_energy[] = "energy";
 static char __pyx_k_n_best[] = "n_best";
-static char __pyx_k_pxsize[] = "pxsize";
-static char __pyx_k_pysize[] = "pysize";
-static char __pyx_k_soften[] = "soften";
-static char __pyx_k_support[] = "support";
+static char __pyx_k_z_factor[] = "z_factor";
+static char __pyx_k_direction[] = "direction";
+static char __pyx_k_pixel_size[] = "pixel_size";
+static char __pyx_k_beam_wavelength[] = "beam_wavelength";
 static char __pyx_k_object_estimate[] = "object_estimate";
-static char __pyx_k_Package_for_wrapping_the_Partia[] = "!\nPackage for wrapping the PartialCDI class.\n";
-static PyObject *__pyx_n_s_energy;
+static char __pyx_k_zone_focal_length[] = "zone_focal_length";
+static char __pyx_k_focal_detector_length[] = "focal_detector_length";
+static char __pyx_k_Package_for_wrapping_the_Fresne[] = "!\nPackage for wrapping the FresnelCDI_WF class.\n";
+static PyObject *__pyx_n_s_beam_wavelength;
+static PyObject *__pyx_n_s_c;
+static PyObject *__pyx_n_s_direction;
 static PyObject *__pyx_n_s_error;
+static PyObject *__pyx_n_s_focal_detector_length;
 static PyObject *__pyx_n_s_index;
-static PyObject *__pyx_n_s_lcx;
-static PyObject *__pyx_n_s_lcy;
 static PyObject *__pyx_n_s_main;
 static PyObject *__pyx_n_s_n_best;
-static PyObject *__pyx_n_s_nleg;
-static PyObject *__pyx_n_s_nmode;
 static PyObject *__pyx_n_s_object_estimate;
-static PyObject *__pyx_n_s_pxsize;
-static PyObject *__pyx_n_s_pysize;
+static PyObject *__pyx_n_s_pixel_size;
 static PyObject *__pyx_n_s_seed;
-static PyObject *__pyx_n_s_soften;
-static PyObject *__pyx_n_s_support;
+static PyObject *__pyx_n_s_size;
 static PyObject *__pyx_n_s_test;
-static PyObject *__pyx_n_s_zsd;
+static PyObject *__pyx_n_s_z_factor;
+static PyObject *__pyx_n_s_zone_focal_length;
+static PyObject *__pyx_float_1_01;
 static PyObject *__pyx_int_0;
 
-/* "pyNADIA/partialcdi.pyx":20
- *     For more details on the purpose of each function see the documentation in PartialCDI (or BaseCDI for inherited methods).
+/* "pyNADIA/fresnelcdiwf.pyx":20
+ *     For more details on the purpose of each function see the documentation in FresnelCDI_WF (or BaseCDI for inherited methods).
  *     """
- *     def __cinit__(self, PyComplex2D object_estimate, double lcx, double lcy, double pxsize, double pysize, double energy, double zsd, int nleg, int nmode, unsigned int n_best):             # <<<<<<<<<<<<<<
- *         self.thisptr = new PartialCDI(deref(object_estimate.thisptr), lcx, lcy, pxsize, pysize, energy, zsd, nleg, nmode, n_best)
- *         self.nx = object_estimate.thisptr.get_size_x()
+ *     def __cinit__(self, PyComplex2D object_estimate, double beam_wavelength, double zone_focal_length, double focal_detector_length, \             # <<<<<<<<<<<<<<
+ *                     double pixel_size,int n_best=1):
+ *         self.thisptr = new FresnelCDI_WF(deref(object_estimate.thisptr), beam_wavelength, zone_focal_length, focal_detector_length,\
  */
 
 /* Python wrapper */
-static int __pyx_pw_7pyNADIA_10partialcdi_12PyPartialCDI_1__cinit__(PyObject *__pyx_v_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
-static int __pyx_pw_7pyNADIA_10partialcdi_12PyPartialCDI_1__cinit__(PyObject *__pyx_v_self, PyObject *__pyx_args, PyObject *__pyx_kwds) {
+static int __pyx_pw_7pyNADIA_12fresnelcdiwf_14PyFresnelCDIWF_1__cinit__(PyObject *__pyx_v_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
+static int __pyx_pw_7pyNADIA_12fresnelcdiwf_14PyFresnelCDIWF_1__cinit__(PyObject *__pyx_v_self, PyObject *__pyx_args, PyObject *__pyx_kwds) {
   struct __pyx_obj_7pyNADIA_9complex2d_PyComplex2D *__pyx_v_object_estimate = 0;
-  double __pyx_v_lcx;
-  double __pyx_v_lcy;
-  double __pyx_v_pxsize;
-  double __pyx_v_pysize;
-  double __pyx_v_energy;
-  double __pyx_v_zsd;
-  int __pyx_v_nleg;
-  int __pyx_v_nmode;
-  unsigned int __pyx_v_n_best;
+  double __pyx_v_beam_wavelength;
+  double __pyx_v_zone_focal_length;
+  double __pyx_v_focal_detector_length;
+  double __pyx_v_pixel_size;
+  int __pyx_v_n_best;
   int __pyx_lineno = 0;
   const char *__pyx_filename = NULL;
   int __pyx_clineno = 0;
@@ -886,16 +909,12 @@ static int __pyx_pw_7pyNADIA_10partialcdi_12PyPartialCDI_1__cinit__(PyObject *__
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("__cinit__ (wrapper)", 0);
   {
-    static PyObject **__pyx_pyargnames[] = {&__pyx_n_s_object_estimate,&__pyx_n_s_lcx,&__pyx_n_s_lcy,&__pyx_n_s_pxsize,&__pyx_n_s_pysize,&__pyx_n_s_energy,&__pyx_n_s_zsd,&__pyx_n_s_nleg,&__pyx_n_s_nmode,&__pyx_n_s_n_best,0};
-    PyObject* values[10] = {0,0,0,0,0,0,0,0,0,0};
+    static PyObject **__pyx_pyargnames[] = {&__pyx_n_s_object_estimate,&__pyx_n_s_beam_wavelength,&__pyx_n_s_zone_focal_length,&__pyx_n_s_focal_detector_length,&__pyx_n_s_pixel_size,&__pyx_n_s_n_best,0};
+    PyObject* values[6] = {0,0,0,0,0,0};
     if (unlikely(__pyx_kwds)) {
       Py_ssize_t kw_args;
       const Py_ssize_t pos_args = PyTuple_GET_SIZE(__pyx_args);
       switch (pos_args) {
-        case 10: values[9] = PyTuple_GET_ITEM(__pyx_args, 9);
-        case  9: values[8] = PyTuple_GET_ITEM(__pyx_args, 8);
-        case  8: values[7] = PyTuple_GET_ITEM(__pyx_args, 7);
-        case  7: values[6] = PyTuple_GET_ITEM(__pyx_args, 6);
         case  6: values[5] = PyTuple_GET_ITEM(__pyx_args, 5);
         case  5: values[4] = PyTuple_GET_ITEM(__pyx_args, 4);
         case  4: values[3] = PyTuple_GET_ITEM(__pyx_args, 3);
@@ -911,89 +930,67 @@ static int __pyx_pw_7pyNADIA_10partialcdi_12PyPartialCDI_1__cinit__(PyObject *__
         if (likely((values[0] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_object_estimate)) != 0)) kw_args--;
         else goto __pyx_L5_argtuple_error;
         case  1:
-        if (likely((values[1] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_lcx)) != 0)) kw_args--;
+        if (likely((values[1] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_beam_wavelength)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("__cinit__", 1, 10, 10, 1); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 20; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+          __Pyx_RaiseArgtupleInvalid("__cinit__", 0, 5, 6, 1); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 20; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
         }
         case  2:
-        if (likely((values[2] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_lcy)) != 0)) kw_args--;
+        if (likely((values[2] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_zone_focal_length)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("__cinit__", 1, 10, 10, 2); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 20; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+          __Pyx_RaiseArgtupleInvalid("__cinit__", 0, 5, 6, 2); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 20; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
         }
         case  3:
-        if (likely((values[3] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_pxsize)) != 0)) kw_args--;
+        if (likely((values[3] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_focal_detector_length)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("__cinit__", 1, 10, 10, 3); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 20; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+          __Pyx_RaiseArgtupleInvalid("__cinit__", 0, 5, 6, 3); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 20; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
         }
         case  4:
-        if (likely((values[4] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_pysize)) != 0)) kw_args--;
+        if (likely((values[4] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_pixel_size)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("__cinit__", 1, 10, 10, 4); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 20; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+          __Pyx_RaiseArgtupleInvalid("__cinit__", 0, 5, 6, 4); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 20; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
         }
         case  5:
-        if (likely((values[5] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_energy)) != 0)) kw_args--;
-        else {
-          __Pyx_RaiseArgtupleInvalid("__cinit__", 1, 10, 10, 5); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 20; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
-        }
-        case  6:
-        if (likely((values[6] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_zsd)) != 0)) kw_args--;
-        else {
-          __Pyx_RaiseArgtupleInvalid("__cinit__", 1, 10, 10, 6); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 20; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
-        }
-        case  7:
-        if (likely((values[7] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_nleg)) != 0)) kw_args--;
-        else {
-          __Pyx_RaiseArgtupleInvalid("__cinit__", 1, 10, 10, 7); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 20; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
-        }
-        case  8:
-        if (likely((values[8] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_nmode)) != 0)) kw_args--;
-        else {
-          __Pyx_RaiseArgtupleInvalid("__cinit__", 1, 10, 10, 8); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 20; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
-        }
-        case  9:
-        if (likely((values[9] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_n_best)) != 0)) kw_args--;
-        else {
-          __Pyx_RaiseArgtupleInvalid("__cinit__", 1, 10, 10, 9); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 20; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+        if (kw_args > 0) {
+          PyObject* value = PyDict_GetItem(__pyx_kwds, __pyx_n_s_n_best);
+          if (value) { values[5] = value; kw_args--; }
         }
       }
       if (unlikely(kw_args > 0)) {
         if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "__cinit__") < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 20; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
       }
-    } else if (PyTuple_GET_SIZE(__pyx_args) != 10) {
-      goto __pyx_L5_argtuple_error;
     } else {
-      values[0] = PyTuple_GET_ITEM(__pyx_args, 0);
-      values[1] = PyTuple_GET_ITEM(__pyx_args, 1);
-      values[2] = PyTuple_GET_ITEM(__pyx_args, 2);
-      values[3] = PyTuple_GET_ITEM(__pyx_args, 3);
-      values[4] = PyTuple_GET_ITEM(__pyx_args, 4);
-      values[5] = PyTuple_GET_ITEM(__pyx_args, 5);
-      values[6] = PyTuple_GET_ITEM(__pyx_args, 6);
-      values[7] = PyTuple_GET_ITEM(__pyx_args, 7);
-      values[8] = PyTuple_GET_ITEM(__pyx_args, 8);
-      values[9] = PyTuple_GET_ITEM(__pyx_args, 9);
+      switch (PyTuple_GET_SIZE(__pyx_args)) {
+        case  6: values[5] = PyTuple_GET_ITEM(__pyx_args, 5);
+        case  5: values[4] = PyTuple_GET_ITEM(__pyx_args, 4);
+        values[3] = PyTuple_GET_ITEM(__pyx_args, 3);
+        values[2] = PyTuple_GET_ITEM(__pyx_args, 2);
+        values[1] = PyTuple_GET_ITEM(__pyx_args, 1);
+        values[0] = PyTuple_GET_ITEM(__pyx_args, 0);
+        break;
+        default: goto __pyx_L5_argtuple_error;
+      }
     }
     __pyx_v_object_estimate = ((struct __pyx_obj_7pyNADIA_9complex2d_PyComplex2D *)values[0]);
-    __pyx_v_lcx = __pyx_PyFloat_AsDouble(values[1]); if (unlikely((__pyx_v_lcx == (double)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 20; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
-    __pyx_v_lcy = __pyx_PyFloat_AsDouble(values[2]); if (unlikely((__pyx_v_lcy == (double)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 20; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
-    __pyx_v_pxsize = __pyx_PyFloat_AsDouble(values[3]); if (unlikely((__pyx_v_pxsize == (double)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 20; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
-    __pyx_v_pysize = __pyx_PyFloat_AsDouble(values[4]); if (unlikely((__pyx_v_pysize == (double)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 20; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
-    __pyx_v_energy = __pyx_PyFloat_AsDouble(values[5]); if (unlikely((__pyx_v_energy == (double)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 20; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
-    __pyx_v_zsd = __pyx_PyFloat_AsDouble(values[6]); if (unlikely((__pyx_v_zsd == (double)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 20; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
-    __pyx_v_nleg = __Pyx_PyInt_As_int(values[7]); if (unlikely((__pyx_v_nleg == (int)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 20; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
-    __pyx_v_nmode = __Pyx_PyInt_As_int(values[8]); if (unlikely((__pyx_v_nmode == (int)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 20; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
-    __pyx_v_n_best = __Pyx_PyInt_As_unsigned_int(values[9]); if (unlikely((__pyx_v_n_best == (unsigned int)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 20; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+    __pyx_v_beam_wavelength = __pyx_PyFloat_AsDouble(values[1]); if (unlikely((__pyx_v_beam_wavelength == (double)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 20; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+    __pyx_v_zone_focal_length = __pyx_PyFloat_AsDouble(values[2]); if (unlikely((__pyx_v_zone_focal_length == (double)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 20; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+    __pyx_v_focal_detector_length = __pyx_PyFloat_AsDouble(values[3]); if (unlikely((__pyx_v_focal_detector_length == (double)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 20; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+    __pyx_v_pixel_size = __pyx_PyFloat_AsDouble(values[4]); if (unlikely((__pyx_v_pixel_size == (double)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 21; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+    if (values[5]) {
+      __pyx_v_n_best = __Pyx_PyInt_As_int(values[5]); if (unlikely((__pyx_v_n_best == (int)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 21; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+    } else {
+      __pyx_v_n_best = ((int)1);
+    }
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("__cinit__", 1, 10, 10, PyTuple_GET_SIZE(__pyx_args)); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 20; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+  __Pyx_RaiseArgtupleInvalid("__cinit__", 0, 5, 6, PyTuple_GET_SIZE(__pyx_args)); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 20; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
   __pyx_L3_error:;
-  __Pyx_AddTraceback("pyNADIA.partialcdi.PyPartialCDI.__cinit__", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __Pyx_AddTraceback("pyNADIA.fresnelcdiwf.PyFresnelCDIWF.__cinit__", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
   return -1;
   __pyx_L4_argument_unpacking_done:;
   if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_object_estimate), __pyx_ptype_7pyNADIA_9complex2d_PyComplex2D, 1, "object_estimate", 0))) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 20; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __pyx_r = __pyx_pf_7pyNADIA_10partialcdi_12PyPartialCDI___cinit__(((struct __pyx_obj_7pyNADIA_10partialcdi_PyPartialCDI *)__pyx_v_self), __pyx_v_object_estimate, __pyx_v_lcx, __pyx_v_lcy, __pyx_v_pxsize, __pyx_v_pysize, __pyx_v_energy, __pyx_v_zsd, __pyx_v_nleg, __pyx_v_nmode, __pyx_v_n_best);
+  __pyx_r = __pyx_pf_7pyNADIA_12fresnelcdiwf_14PyFresnelCDIWF___cinit__(((struct __pyx_obj_7pyNADIA_12fresnelcdiwf_PyFresnelCDIWF *)__pyx_v_self), __pyx_v_object_estimate, __pyx_v_beam_wavelength, __pyx_v_zone_focal_length, __pyx_v_focal_detector_length, __pyx_v_pixel_size, __pyx_v_n_best);
 
   /* function exit code */
   goto __pyx_L0;
@@ -1004,31 +1001,41 @@ static int __pyx_pw_7pyNADIA_10partialcdi_12PyPartialCDI_1__cinit__(PyObject *__
   return __pyx_r;
 }
 
-static int __pyx_pf_7pyNADIA_10partialcdi_12PyPartialCDI___cinit__(struct __pyx_obj_7pyNADIA_10partialcdi_PyPartialCDI *__pyx_v_self, struct __pyx_obj_7pyNADIA_9complex2d_PyComplex2D *__pyx_v_object_estimate, double __pyx_v_lcx, double __pyx_v_lcy, double __pyx_v_pxsize, double __pyx_v_pysize, double __pyx_v_energy, double __pyx_v_zsd, int __pyx_v_nleg, int __pyx_v_nmode, unsigned int __pyx_v_n_best) {
+static int __pyx_pf_7pyNADIA_12fresnelcdiwf_14PyFresnelCDIWF___cinit__(struct __pyx_obj_7pyNADIA_12fresnelcdiwf_PyFresnelCDIWF *__pyx_v_self, struct __pyx_obj_7pyNADIA_9complex2d_PyComplex2D *__pyx_v_object_estimate, double __pyx_v_beam_wavelength, double __pyx_v_zone_focal_length, double __pyx_v_focal_detector_length, double __pyx_v_pixel_size, int __pyx_v_n_best) {
   int __pyx_r;
   __Pyx_RefNannyDeclarations
+  FresnelCDI_WF *__pyx_t_1;
+  int __pyx_lineno = 0;
+  const char *__pyx_filename = NULL;
+  int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("__cinit__", 0);
 
-  /* "pyNADIA/partialcdi.pyx":21
- *     """
- *     def __cinit__(self, PyComplex2D object_estimate, double lcx, double lcy, double pxsize, double pysize, double energy, double zsd, int nleg, int nmode, unsigned int n_best):
- *         self.thisptr = new PartialCDI(deref(object_estimate.thisptr), lcx, lcy, pxsize, pysize, energy, zsd, nleg, nmode, n_best)             # <<<<<<<<<<<<<<
+  /* "pyNADIA/fresnelcdiwf.pyx":22
+ *     def __cinit__(self, PyComplex2D object_estimate, double beam_wavelength, double zone_focal_length, double focal_detector_length, \
+ *                     double pixel_size,int n_best=1):
+ *         self.thisptr = new FresnelCDI_WF(deref(object_estimate.thisptr), beam_wavelength, zone_focal_length, focal_detector_length,\             # <<<<<<<<<<<<<<
+ *                                          pixel_size, n_best)
  *         self.nx = object_estimate.thisptr.get_size_x()
- *         self.ny = object_estimate.thisptr.get_size_y()
  */
-  __pyx_v_self->thisptr = new PartialCDI((*__pyx_v_object_estimate->thisptr), __pyx_v_lcx, __pyx_v_lcy, __pyx_v_pxsize, __pyx_v_pysize, __pyx_v_energy, __pyx_v_zsd, __pyx_v_nleg, __pyx_v_nmode, __pyx_v_n_best);
+  try {
+    __pyx_t_1 = new FresnelCDI_WF((*__pyx_v_object_estimate->thisptr), __pyx_v_beam_wavelength, __pyx_v_zone_focal_length, __pyx_v_focal_detector_length, __pyx_v_pixel_size, __pyx_v_n_best);
+  } catch(...) {
+    __Pyx_CppExn2PyErr();
+    {__pyx_filename = __pyx_f[0]; __pyx_lineno = 22; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  }
+  __pyx_v_self->thisptr = __pyx_t_1;
 
-  /* "pyNADIA/partialcdi.pyx":22
- *     def __cinit__(self, PyComplex2D object_estimate, double lcx, double lcy, double pxsize, double pysize, double energy, double zsd, int nleg, int nmode, unsigned int n_best):
- *         self.thisptr = new PartialCDI(deref(object_estimate.thisptr), lcx, lcy, pxsize, pysize, energy, zsd, nleg, nmode, n_best)
+  /* "pyNADIA/fresnelcdiwf.pyx":24
+ *         self.thisptr = new FresnelCDI_WF(deref(object_estimate.thisptr), beam_wavelength, zone_focal_length, focal_detector_length,\
+ *                                          pixel_size, n_best)
  *         self.nx = object_estimate.thisptr.get_size_x()             # <<<<<<<<<<<<<<
  *         self.ny = object_estimate.thisptr.get_size_y()
  *     def __dealloc__(self):
  */
   __pyx_v_self->nx = __pyx_v_object_estimate->thisptr->get_size_x();
 
-  /* "pyNADIA/partialcdi.pyx":23
- *         self.thisptr = new PartialCDI(deref(object_estimate.thisptr), lcx, lcy, pxsize, pysize, energy, zsd, nleg, nmode, n_best)
+  /* "pyNADIA/fresnelcdiwf.pyx":25
+ *                                          pixel_size, n_best)
  *         self.nx = object_estimate.thisptr.get_size_x()
  *         self.ny = object_estimate.thisptr.get_size_y()             # <<<<<<<<<<<<<<
  *     def __dealloc__(self):
@@ -1036,21 +1043,26 @@ static int __pyx_pf_7pyNADIA_10partialcdi_12PyPartialCDI___cinit__(struct __pyx_
  */
   __pyx_v_self->ny = __pyx_v_object_estimate->thisptr->get_size_y();
 
-  /* "pyNADIA/partialcdi.pyx":20
- *     For more details on the purpose of each function see the documentation in PartialCDI (or BaseCDI for inherited methods).
+  /* "pyNADIA/fresnelcdiwf.pyx":20
+ *     For more details on the purpose of each function see the documentation in FresnelCDI_WF (or BaseCDI for inherited methods).
  *     """
- *     def __cinit__(self, PyComplex2D object_estimate, double lcx, double lcy, double pxsize, double pysize, double energy, double zsd, int nleg, int nmode, unsigned int n_best):             # <<<<<<<<<<<<<<
- *         self.thisptr = new PartialCDI(deref(object_estimate.thisptr), lcx, lcy, pxsize, pysize, energy, zsd, nleg, nmode, n_best)
- *         self.nx = object_estimate.thisptr.get_size_x()
+ *     def __cinit__(self, PyComplex2D object_estimate, double beam_wavelength, double zone_focal_length, double focal_detector_length, \             # <<<<<<<<<<<<<<
+ *                     double pixel_size,int n_best=1):
+ *         self.thisptr = new FresnelCDI_WF(deref(object_estimate.thisptr), beam_wavelength, zone_focal_length, focal_detector_length,\
  */
 
   /* function exit code */
   __pyx_r = 0;
+  goto __pyx_L0;
+  __pyx_L1_error:;
+  __Pyx_AddTraceback("pyNADIA.fresnelcdiwf.PyFresnelCDIWF.__cinit__", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __pyx_r = -1;
+  __pyx_L0:;
   __Pyx_RefNannyFinishContext();
   return __pyx_r;
 }
 
-/* "pyNADIA/partialcdi.pyx":24
+/* "pyNADIA/fresnelcdiwf.pyx":26
  *         self.nx = object_estimate.thisptr.get_size_x()
  *         self.ny = object_estimate.thisptr.get_size_y()
  *     def __dealloc__(self):             # <<<<<<<<<<<<<<
@@ -1059,21 +1071,21 @@ static int __pyx_pf_7pyNADIA_10partialcdi_12PyPartialCDI___cinit__(struct __pyx_
  */
 
 /* Python wrapper */
-static void __pyx_pw_7pyNADIA_10partialcdi_12PyPartialCDI_3__dealloc__(PyObject *__pyx_v_self); /*proto*/
-static void __pyx_pw_7pyNADIA_10partialcdi_12PyPartialCDI_3__dealloc__(PyObject *__pyx_v_self) {
+static void __pyx_pw_7pyNADIA_12fresnelcdiwf_14PyFresnelCDIWF_3__dealloc__(PyObject *__pyx_v_self); /*proto*/
+static void __pyx_pw_7pyNADIA_12fresnelcdiwf_14PyFresnelCDIWF_3__dealloc__(PyObject *__pyx_v_self) {
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("__dealloc__ (wrapper)", 0);
-  __pyx_pf_7pyNADIA_10partialcdi_12PyPartialCDI_2__dealloc__(((struct __pyx_obj_7pyNADIA_10partialcdi_PyPartialCDI *)__pyx_v_self));
+  __pyx_pf_7pyNADIA_12fresnelcdiwf_14PyFresnelCDIWF_2__dealloc__(((struct __pyx_obj_7pyNADIA_12fresnelcdiwf_PyFresnelCDIWF *)__pyx_v_self));
 
   /* function exit code */
   __Pyx_RefNannyFinishContext();
 }
 
-static void __pyx_pf_7pyNADIA_10partialcdi_12PyPartialCDI_2__dealloc__(struct __pyx_obj_7pyNADIA_10partialcdi_PyPartialCDI *__pyx_v_self) {
+static void __pyx_pf_7pyNADIA_12fresnelcdiwf_14PyFresnelCDIWF_2__dealloc__(struct __pyx_obj_7pyNADIA_12fresnelcdiwf_PyFresnelCDIWF *__pyx_v_self) {
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("__dealloc__", 0);
 
-  /* "pyNADIA/partialcdi.pyx":25
+  /* "pyNADIA/fresnelcdiwf.pyx":27
  *         self.ny = object_estimate.thisptr.get_size_y()
  *     def __dealloc__(self):
  *         del self.thisptr             # <<<<<<<<<<<<<<
@@ -1082,7 +1094,7 @@ static void __pyx_pf_7pyNADIA_10partialcdi_12PyPartialCDI_2__dealloc__(struct __
  */
   delete __pyx_v_self->thisptr;
 
-  /* "pyNADIA/partialcdi.pyx":24
+  /* "pyNADIA/fresnelcdiwf.pyx":26
  *         self.nx = object_estimate.thisptr.get_size_x()
  *         self.ny = object_estimate.thisptr.get_size_y()
  *     def __dealloc__(self):             # <<<<<<<<<<<<<<
@@ -1094,18 +1106,18 @@ static void __pyx_pf_7pyNADIA_10partialcdi_12PyPartialCDI_2__dealloc__(struct __
   __Pyx_RefNannyFinishContext();
 }
 
-/* "pyNADIA/partialcdi.pyx":27
+/* "pyNADIA/fresnelcdiwf.pyx":29
  *         del self.thisptr
  * 
  *     def initialiseEstimate(self, seed=0):             # <<<<<<<<<<<<<<
  *         """!Initialise the estimated diffraction pattern.
- *         Calls PartialCDI.initialise_estimate()
+ *         Calls FresnelCDI_WF.initialise_estimate()
  */
 
 /* Python wrapper */
-static PyObject *__pyx_pw_7pyNADIA_10partialcdi_12PyPartialCDI_5initialiseEstimate(PyObject *__pyx_v_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
-static char __pyx_doc_7pyNADIA_10partialcdi_12PyPartialCDI_4initialiseEstimate[] = "!Initialise the estimated diffraction pattern.\n        Calls PartialCDI.initialise_estimate()\n        @param seed (int) An optional seed parameter, default=0\n        ";
-static PyObject *__pyx_pw_7pyNADIA_10partialcdi_12PyPartialCDI_5initialiseEstimate(PyObject *__pyx_v_self, PyObject *__pyx_args, PyObject *__pyx_kwds) {
+static PyObject *__pyx_pw_7pyNADIA_12fresnelcdiwf_14PyFresnelCDIWF_5initialiseEstimate(PyObject *__pyx_v_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
+static char __pyx_doc_7pyNADIA_12fresnelcdiwf_14PyFresnelCDIWF_4initialiseEstimate[] = "!Initialise the estimated diffraction pattern.\n        Calls FresnelCDI_WF.initialise_estimate()\n        @param seed (int) An optional seed parameter, default=0\n        ";
+static PyObject *__pyx_pw_7pyNADIA_12fresnelcdiwf_14PyFresnelCDIWF_5initialiseEstimate(PyObject *__pyx_v_self, PyObject *__pyx_args, PyObject *__pyx_kwds) {
   PyObject *__pyx_v_seed = 0;
   int __pyx_lineno = 0;
   const char *__pyx_filename = NULL;
@@ -1134,7 +1146,7 @@ static PyObject *__pyx_pw_7pyNADIA_10partialcdi_12PyPartialCDI_5initialiseEstima
         }
       }
       if (unlikely(kw_args > 0)) {
-        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "initialiseEstimate") < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 27; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "initialiseEstimate") < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 29; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
       }
     } else {
       switch (PyTuple_GET_SIZE(__pyx_args)) {
@@ -1147,20 +1159,20 @@ static PyObject *__pyx_pw_7pyNADIA_10partialcdi_12PyPartialCDI_5initialiseEstima
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("initialiseEstimate", 0, 0, 1, PyTuple_GET_SIZE(__pyx_args)); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 27; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+  __Pyx_RaiseArgtupleInvalid("initialiseEstimate", 0, 0, 1, PyTuple_GET_SIZE(__pyx_args)); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 29; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
   __pyx_L3_error:;
-  __Pyx_AddTraceback("pyNADIA.partialcdi.PyPartialCDI.initialiseEstimate", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __Pyx_AddTraceback("pyNADIA.fresnelcdiwf.PyFresnelCDIWF.initialiseEstimate", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
   return NULL;
   __pyx_L4_argument_unpacking_done:;
-  __pyx_r = __pyx_pf_7pyNADIA_10partialcdi_12PyPartialCDI_4initialiseEstimate(((struct __pyx_obj_7pyNADIA_10partialcdi_PyPartialCDI *)__pyx_v_self), __pyx_v_seed);
+  __pyx_r = __pyx_pf_7pyNADIA_12fresnelcdiwf_14PyFresnelCDIWF_4initialiseEstimate(((struct __pyx_obj_7pyNADIA_12fresnelcdiwf_PyFresnelCDIWF *)__pyx_v_self), __pyx_v_seed);
 
   /* function exit code */
   __Pyx_RefNannyFinishContext();
   return __pyx_r;
 }
 
-static PyObject *__pyx_pf_7pyNADIA_10partialcdi_12PyPartialCDI_4initialiseEstimate(struct __pyx_obj_7pyNADIA_10partialcdi_PyPartialCDI *__pyx_v_self, PyObject *__pyx_v_seed) {
+static PyObject *__pyx_pf_7pyNADIA_12fresnelcdiwf_14PyFresnelCDIWF_4initialiseEstimate(struct __pyx_obj_7pyNADIA_12fresnelcdiwf_PyFresnelCDIWF *__pyx_v_self, PyObject *__pyx_v_seed) {
   PyObject *__pyx_r = NULL;
   __Pyx_RefNannyDeclarations
   int __pyx_t_1;
@@ -1169,29 +1181,29 @@ static PyObject *__pyx_pf_7pyNADIA_10partialcdi_12PyPartialCDI_4initialiseEstima
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("initialiseEstimate", 0);
 
-  /* "pyNADIA/partialcdi.pyx":32
+  /* "pyNADIA/fresnelcdiwf.pyx":34
  *         @param seed (int) An optional seed parameter, default=0
  *         """
  *         self.thisptr.initialise_estimate(seed)             # <<<<<<<<<<<<<<
  *     def iterate(self):
  *         """!Perform one iteration, as implemented in PartialCDI.iterate()
  */
-  __pyx_t_1 = __Pyx_PyInt_As_int(__pyx_v_seed); if (unlikely((__pyx_t_1 == (int)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 32; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_1 = __Pyx_PyInt_As_int(__pyx_v_seed); if (unlikely((__pyx_t_1 == (int)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 34; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __pyx_v_self->thisptr->initialise_estimate(__pyx_t_1);
 
-  /* "pyNADIA/partialcdi.pyx":27
+  /* "pyNADIA/fresnelcdiwf.pyx":29
  *         del self.thisptr
  * 
  *     def initialiseEstimate(self, seed=0):             # <<<<<<<<<<<<<<
  *         """!Initialise the estimated diffraction pattern.
- *         Calls PartialCDI.initialise_estimate()
+ *         Calls FresnelCDI_WF.initialise_estimate()
  */
 
   /* function exit code */
   __pyx_r = Py_None; __Pyx_INCREF(Py_None);
   goto __pyx_L0;
   __pyx_L1_error:;
-  __Pyx_AddTraceback("pyNADIA.partialcdi.PyPartialCDI.initialiseEstimate", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __Pyx_AddTraceback("pyNADIA.fresnelcdiwf.PyFresnelCDIWF.initialiseEstimate", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __pyx_r = NULL;
   __pyx_L0:;
   __Pyx_XGIVEREF(__pyx_r);
@@ -1199,7 +1211,7 @@ static PyObject *__pyx_pf_7pyNADIA_10partialcdi_12PyPartialCDI_4initialiseEstima
   return __pyx_r;
 }
 
-/* "pyNADIA/partialcdi.pyx":33
+/* "pyNADIA/fresnelcdiwf.pyx":35
  *         """
  *         self.thisptr.initialise_estimate(seed)
  *     def iterate(self):             # <<<<<<<<<<<<<<
@@ -1208,20 +1220,20 @@ static PyObject *__pyx_pf_7pyNADIA_10partialcdi_12PyPartialCDI_4initialiseEstima
  */
 
 /* Python wrapper */
-static PyObject *__pyx_pw_7pyNADIA_10partialcdi_12PyPartialCDI_7iterate(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused); /*proto*/
-static char __pyx_doc_7pyNADIA_10partialcdi_12PyPartialCDI_6iterate[] = "!Perform one iteration, as implemented in PartialCDI.iterate()\n\n        ";
-static PyObject *__pyx_pw_7pyNADIA_10partialcdi_12PyPartialCDI_7iterate(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused) {
+static PyObject *__pyx_pw_7pyNADIA_12fresnelcdiwf_14PyFresnelCDIWF_7iterate(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused); /*proto*/
+static char __pyx_doc_7pyNADIA_12fresnelcdiwf_14PyFresnelCDIWF_6iterate[] = "!Perform one iteration, as implemented in PartialCDI.iterate()\n\n        ";
+static PyObject *__pyx_pw_7pyNADIA_12fresnelcdiwf_14PyFresnelCDIWF_7iterate(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused) {
   PyObject *__pyx_r = 0;
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("iterate (wrapper)", 0);
-  __pyx_r = __pyx_pf_7pyNADIA_10partialcdi_12PyPartialCDI_6iterate(((struct __pyx_obj_7pyNADIA_10partialcdi_PyPartialCDI *)__pyx_v_self));
+  __pyx_r = __pyx_pf_7pyNADIA_12fresnelcdiwf_14PyFresnelCDIWF_6iterate(((struct __pyx_obj_7pyNADIA_12fresnelcdiwf_PyFresnelCDIWF *)__pyx_v_self));
 
   /* function exit code */
   __Pyx_RefNannyFinishContext();
   return __pyx_r;
 }
 
-static PyObject *__pyx_pf_7pyNADIA_10partialcdi_12PyPartialCDI_6iterate(struct __pyx_obj_7pyNADIA_10partialcdi_PyPartialCDI *__pyx_v_self) {
+static PyObject *__pyx_pf_7pyNADIA_12fresnelcdiwf_14PyFresnelCDIWF_6iterate(struct __pyx_obj_7pyNADIA_12fresnelcdiwf_PyFresnelCDIWF *__pyx_v_self) {
   PyObject *__pyx_r = NULL;
   __Pyx_RefNannyDeclarations
   PyObject *__pyx_t_1 = NULL;
@@ -1230,21 +1242,21 @@ static PyObject *__pyx_pf_7pyNADIA_10partialcdi_12PyPartialCDI_6iterate(struct _
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("iterate", 0);
 
-  /* "pyNADIA/partialcdi.pyx":37
+  /* "pyNADIA/fresnelcdiwf.pyx":39
  * 
  *         """
  *         return self.thisptr.iterate()             # <<<<<<<<<<<<<<
- *     def getTransmission(self):
- *         """! Get the 'global' sample function.
+ *     def getBestResult(self, double & error, int index=0):
+ *         """! Get the current best result of the reconstruction.
  */
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_1 = __Pyx_PyInt_From_int(__pyx_v_self->thisptr->iterate()); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 37; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_1 = __Pyx_PyInt_From_int(__pyx_v_self->thisptr->iterate()); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 39; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_r = __pyx_t_1;
   __pyx_t_1 = 0;
   goto __pyx_L0;
 
-  /* "pyNADIA/partialcdi.pyx":33
+  /* "pyNADIA/fresnelcdiwf.pyx":35
  *         """
  *         self.thisptr.initialise_estimate(seed)
  *     def iterate(self):             # <<<<<<<<<<<<<<
@@ -1255,7 +1267,7 @@ static PyObject *__pyx_pf_7pyNADIA_10partialcdi_12PyPartialCDI_6iterate(struct _
   /* function exit code */
   __pyx_L1_error:;
   __Pyx_XDECREF(__pyx_t_1);
-  __Pyx_AddTraceback("pyNADIA.partialcdi.PyPartialCDI.iterate", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __Pyx_AddTraceback("pyNADIA.fresnelcdiwf.PyFresnelCDIWF.iterate", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __pyx_r = NULL;
   __pyx_L0:;
   __Pyx_XGIVEREF(__pyx_r);
@@ -1263,378 +1275,18 @@ static PyObject *__pyx_pf_7pyNADIA_10partialcdi_12PyPartialCDI_6iterate(struct _
   return __pyx_r;
 }
 
-/* "pyNADIA/partialcdi.pyx":38
+/* "pyNADIA/fresnelcdiwf.pyx":40
  *         """
  *         return self.thisptr.iterate()
- *     def getTransmission(self):             # <<<<<<<<<<<<<<
- *         """! Get the 'global' sample function.
- *         Corresponds to PartialCDI.get_transmission()
- */
-
-/* Python wrapper */
-static PyObject *__pyx_pw_7pyNADIA_10partialcdi_12PyPartialCDI_9getTransmission(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused); /*proto*/
-static char __pyx_doc_7pyNADIA_10partialcdi_12PyPartialCDI_8getTransmission[] = "! Get the 'global' sample function.\n        Corresponds to PartialCDI.get_transmission()\n        @return A PyComplex2D the 'global' sample function.\n        ";
-static PyObject *__pyx_pw_7pyNADIA_10partialcdi_12PyPartialCDI_9getTransmission(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused) {
-  PyObject *__pyx_r = 0;
-  __Pyx_RefNannyDeclarations
-  __Pyx_RefNannySetupContext("getTransmission (wrapper)", 0);
-  __pyx_r = __pyx_pf_7pyNADIA_10partialcdi_12PyPartialCDI_8getTransmission(((struct __pyx_obj_7pyNADIA_10partialcdi_PyPartialCDI *)__pyx_v_self));
-
-  /* function exit code */
-  __Pyx_RefNannyFinishContext();
-  return __pyx_r;
-}
-
-static PyObject *__pyx_pf_7pyNADIA_10partialcdi_12PyPartialCDI_8getTransmission(struct __pyx_obj_7pyNADIA_10partialcdi_PyPartialCDI *__pyx_v_self) {
-  struct __pyx_obj_7pyNADIA_9complex2d_PyComplex2D *__pyx_v_trans = NULL;
-  __pyx_t_7pyNADIA_9complex2d_Complex_2D *__pyx_v_tmp;
-  PyObject *__pyx_r = NULL;
-  __Pyx_RefNannyDeclarations
-  PyObject *__pyx_t_1 = NULL;
-  PyObject *__pyx_t_2 = NULL;
-  PyObject *__pyx_t_3 = NULL;
-  int __pyx_lineno = 0;
-  const char *__pyx_filename = NULL;
-  int __pyx_clineno = 0;
-  __Pyx_RefNannySetupContext("getTransmission", 0);
-
-  /* "pyNADIA/partialcdi.pyx":43
- *         @return A PyComplex2D the 'global' sample function.
- *         """
- *         trans = PyComplex2D(self.nx, self.ny)             # <<<<<<<<<<<<<<
- *         cdef Complex_2D * tmp = new Complex_2D(self.thisptr.get_transmission())
- *         trans.thisptr = tmp
- */
-  __pyx_t_1 = __Pyx_PyInt_From_int(__pyx_v_self->nx); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 43; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_2 = __Pyx_PyInt_From_int(__pyx_v_self->ny); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 43; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_3 = PyTuple_New(2); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 43; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_GOTREF(__pyx_t_3);
-  PyTuple_SET_ITEM(__pyx_t_3, 0, __pyx_t_1);
-  __Pyx_GIVEREF(__pyx_t_1);
-  PyTuple_SET_ITEM(__pyx_t_3, 1, __pyx_t_2);
-  __Pyx_GIVEREF(__pyx_t_2);
-  __pyx_t_1 = 0;
-  __pyx_t_2 = 0;
-  __pyx_t_2 = __Pyx_PyObject_Call(((PyObject *)((PyObject*)__pyx_ptype_7pyNADIA_9complex2d_PyComplex2D)), __pyx_t_3, NULL); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 43; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_GOTREF(__pyx_t_2);
-  __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-  __pyx_v_trans = ((struct __pyx_obj_7pyNADIA_9complex2d_PyComplex2D *)__pyx_t_2);
-  __pyx_t_2 = 0;
-
-  /* "pyNADIA/partialcdi.pyx":44
- *         """
- *         trans = PyComplex2D(self.nx, self.ny)
- *         cdef Complex_2D * tmp = new Complex_2D(self.thisptr.get_transmission())             # <<<<<<<<<<<<<<
- *         trans.thisptr = tmp
- *         return trans
- */
-  __pyx_v_tmp = new __pyx_t_7pyNADIA_9complex2d_Complex_2D(__pyx_v_self->thisptr->get_transmission());
-
-  /* "pyNADIA/partialcdi.pyx":45
- *         trans = PyComplex2D(self.nx, self.ny)
- *         cdef Complex_2D * tmp = new Complex_2D(self.thisptr.get_transmission())
- *         trans.thisptr = tmp             # <<<<<<<<<<<<<<
- *         return trans
- *     def setTransmission(self, PyComplex2D newTrans):
- */
-  __pyx_v_trans->thisptr = __pyx_v_tmp;
-
-  /* "pyNADIA/partialcdi.pyx":46
- *         cdef Complex_2D * tmp = new Complex_2D(self.thisptr.get_transmission())
- *         trans.thisptr = tmp
- *         return trans             # <<<<<<<<<<<<<<
- *     def setTransmission(self, PyComplex2D newTrans):
- *         """! Set the 'global' sample function.
- */
-  __Pyx_XDECREF(__pyx_r);
-  __Pyx_INCREF(((PyObject *)__pyx_v_trans));
-  __pyx_r = ((PyObject *)__pyx_v_trans);
-  goto __pyx_L0;
-
-  /* "pyNADIA/partialcdi.pyx":38
- *         """
- *         return self.thisptr.iterate()
- *     def getTransmission(self):             # <<<<<<<<<<<<<<
- *         """! Get the 'global' sample function.
- *         Corresponds to PartialCDI.get_transmission()
- */
-
-  /* function exit code */
-  __pyx_L1_error:;
-  __Pyx_XDECREF(__pyx_t_1);
-  __Pyx_XDECREF(__pyx_t_2);
-  __Pyx_XDECREF(__pyx_t_3);
-  __Pyx_AddTraceback("pyNADIA.partialcdi.PyPartialCDI.getTransmission", __pyx_clineno, __pyx_lineno, __pyx_filename);
-  __pyx_r = NULL;
-  __pyx_L0:;
-  __Pyx_XDECREF((PyObject *)__pyx_v_trans);
-  __Pyx_XGIVEREF(__pyx_r);
-  __Pyx_RefNannyFinishContext();
-  return __pyx_r;
-}
-
-/* "pyNADIA/partialcdi.pyx":47
- *         trans.thisptr = tmp
- *         return trans
- *     def setTransmission(self, PyComplex2D newTrans):             # <<<<<<<<<<<<<<
- *         """! Set the 'global' sample function.
- * 
- */
-
-/* Python wrapper */
-static PyObject *__pyx_pw_7pyNADIA_10partialcdi_12PyPartialCDI_11setTransmission(PyObject *__pyx_v_self, PyObject *__pyx_v_newTrans); /*proto*/
-static char __pyx_doc_7pyNADIA_10partialcdi_12PyPartialCDI_10setTransmission[] = "! Set the 'global' sample function.\n        \n        Useful for starting a reconstruction using results of a previous one. Calls PartialCDI.set_transmission()\n        @param newTrans A PyComplex2D the new 'global' sample function.\n        ";
-static PyObject *__pyx_pw_7pyNADIA_10partialcdi_12PyPartialCDI_11setTransmission(PyObject *__pyx_v_self, PyObject *__pyx_v_newTrans) {
-  CYTHON_UNUSED int __pyx_lineno = 0;
-  CYTHON_UNUSED const char *__pyx_filename = NULL;
-  CYTHON_UNUSED int __pyx_clineno = 0;
-  PyObject *__pyx_r = 0;
-  __Pyx_RefNannyDeclarations
-  __Pyx_RefNannySetupContext("setTransmission (wrapper)", 0);
-  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_newTrans), __pyx_ptype_7pyNADIA_9complex2d_PyComplex2D, 1, "newTrans", 0))) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 47; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __pyx_r = __pyx_pf_7pyNADIA_10partialcdi_12PyPartialCDI_10setTransmission(((struct __pyx_obj_7pyNADIA_10partialcdi_PyPartialCDI *)__pyx_v_self), ((struct __pyx_obj_7pyNADIA_9complex2d_PyComplex2D *)__pyx_v_newTrans));
-
-  /* function exit code */
-  goto __pyx_L0;
-  __pyx_L1_error:;
-  __pyx_r = NULL;
-  __pyx_L0:;
-  __Pyx_RefNannyFinishContext();
-  return __pyx_r;
-}
-
-static PyObject *__pyx_pf_7pyNADIA_10partialcdi_12PyPartialCDI_10setTransmission(struct __pyx_obj_7pyNADIA_10partialcdi_PyPartialCDI *__pyx_v_self, struct __pyx_obj_7pyNADIA_9complex2d_PyComplex2D *__pyx_v_newTrans) {
-  PyObject *__pyx_r = NULL;
-  __Pyx_RefNannyDeclarations
-  __Pyx_RefNannySetupContext("setTransmission", 0);
-
-  /* "pyNADIA/partialcdi.pyx":53
- *         @param newTrans A PyComplex2D the new 'global' sample function.
- *         """
- *         self.thisptr.set_transmission(deref(newTrans.thisptr))             # <<<<<<<<<<<<<<
- *     def setThreshold(self, double new_threshold):
- *         """!Set the minimum contribution of a mode as a proportion of the dominant mode for it to be included in the reconstruction.
- */
-  __pyx_v_self->thisptr->set_transmission((*__pyx_v_newTrans->thisptr));
-
-  /* "pyNADIA/partialcdi.pyx":47
- *         trans.thisptr = tmp
- *         return trans
- *     def setTransmission(self, PyComplex2D newTrans):             # <<<<<<<<<<<<<<
- *         """! Set the 'global' sample function.
- * 
- */
-
-  /* function exit code */
-  __pyx_r = Py_None; __Pyx_INCREF(Py_None);
-  __Pyx_XGIVEREF(__pyx_r);
-  __Pyx_RefNannyFinishContext();
-  return __pyx_r;
-}
-
-/* "pyNADIA/partialcdi.pyx":54
- *         """
- *         self.thisptr.set_transmission(deref(newTrans.thisptr))
- *     def setThreshold(self, double new_threshold):             # <<<<<<<<<<<<<<
- *         """!Set the minimum contribution of a mode as a proportion of the dominant mode for it to be included in the reconstruction.
- * 
- */
-
-/* Python wrapper */
-static PyObject *__pyx_pw_7pyNADIA_10partialcdi_12PyPartialCDI_13setThreshold(PyObject *__pyx_v_self, PyObject *__pyx_arg_new_threshold); /*proto*/
-static char __pyx_doc_7pyNADIA_10partialcdi_12PyPartialCDI_12setThreshold[] = "!Set the minimum contribution of a mode as a proportion of the dominant mode for it to be included in the reconstruction.\n        \n        Corresponds to PartialCDI.set_threshold()\n        @param new_threshold (double)\n        ";
-static PyObject *__pyx_pw_7pyNADIA_10partialcdi_12PyPartialCDI_13setThreshold(PyObject *__pyx_v_self, PyObject *__pyx_arg_new_threshold) {
-  double __pyx_v_new_threshold;
-  int __pyx_lineno = 0;
-  const char *__pyx_filename = NULL;
-  int __pyx_clineno = 0;
-  PyObject *__pyx_r = 0;
-  __Pyx_RefNannyDeclarations
-  __Pyx_RefNannySetupContext("setThreshold (wrapper)", 0);
-  assert(__pyx_arg_new_threshold); {
-    __pyx_v_new_threshold = __pyx_PyFloat_AsDouble(__pyx_arg_new_threshold); if (unlikely((__pyx_v_new_threshold == (double)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 54; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
-  }
-  goto __pyx_L4_argument_unpacking_done;
-  __pyx_L3_error:;
-  __Pyx_AddTraceback("pyNADIA.partialcdi.PyPartialCDI.setThreshold", __pyx_clineno, __pyx_lineno, __pyx_filename);
-  __Pyx_RefNannyFinishContext();
-  return NULL;
-  __pyx_L4_argument_unpacking_done:;
-  __pyx_r = __pyx_pf_7pyNADIA_10partialcdi_12PyPartialCDI_12setThreshold(((struct __pyx_obj_7pyNADIA_10partialcdi_PyPartialCDI *)__pyx_v_self), ((double)__pyx_v_new_threshold));
-
-  /* function exit code */
-  __Pyx_RefNannyFinishContext();
-  return __pyx_r;
-}
-
-static PyObject *__pyx_pf_7pyNADIA_10partialcdi_12PyPartialCDI_12setThreshold(struct __pyx_obj_7pyNADIA_10partialcdi_PyPartialCDI *__pyx_v_self, double __pyx_v_new_threshold) {
-  PyObject *__pyx_r = NULL;
-  __Pyx_RefNannyDeclarations
-  __Pyx_RefNannySetupContext("setThreshold", 0);
-
-  /* "pyNADIA/partialcdi.pyx":60
- *         @param new_threshold (double)
- *         """
- *         self.thisptr.set_threshold(new_threshold)             # <<<<<<<<<<<<<<
- *     def getMode(self, int modenum):
- *         """! Returns a given mode.
- */
-  __pyx_v_self->thisptr->set_threshold(__pyx_v_new_threshold);
-
-  /* "pyNADIA/partialcdi.pyx":54
- *         """
- *         self.thisptr.set_transmission(deref(newTrans.thisptr))
- *     def setThreshold(self, double new_threshold):             # <<<<<<<<<<<<<<
- *         """!Set the minimum contribution of a mode as a proportion of the dominant mode for it to be included in the reconstruction.
- * 
- */
-
-  /* function exit code */
-  __pyx_r = Py_None; __Pyx_INCREF(Py_None);
-  __Pyx_XGIVEREF(__pyx_r);
-  __Pyx_RefNannyFinishContext();
-  return __pyx_r;
-}
-
-/* "pyNADIA/partialcdi.pyx":61
- *         """
- *         self.thisptr.set_threshold(new_threshold)
- *     def getMode(self, int modenum):             # <<<<<<<<<<<<<<
- *         """! Returns a given mode.
- *         @param modenum (int) The mode number.
- */
-
-/* Python wrapper */
-static PyObject *__pyx_pw_7pyNADIA_10partialcdi_12PyPartialCDI_15getMode(PyObject *__pyx_v_self, PyObject *__pyx_arg_modenum); /*proto*/
-static char __pyx_doc_7pyNADIA_10partialcdi_12PyPartialCDI_14getMode[] = "! Returns a given mode.\n        @param modenum (int) The mode number.\n        @return the mode (PyComplex2D)\n        ";
-static PyObject *__pyx_pw_7pyNADIA_10partialcdi_12PyPartialCDI_15getMode(PyObject *__pyx_v_self, PyObject *__pyx_arg_modenum) {
-  int __pyx_v_modenum;
-  int __pyx_lineno = 0;
-  const char *__pyx_filename = NULL;
-  int __pyx_clineno = 0;
-  PyObject *__pyx_r = 0;
-  __Pyx_RefNannyDeclarations
-  __Pyx_RefNannySetupContext("getMode (wrapper)", 0);
-  assert(__pyx_arg_modenum); {
-    __pyx_v_modenum = __Pyx_PyInt_As_int(__pyx_arg_modenum); if (unlikely((__pyx_v_modenum == (int)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 61; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
-  }
-  goto __pyx_L4_argument_unpacking_done;
-  __pyx_L3_error:;
-  __Pyx_AddTraceback("pyNADIA.partialcdi.PyPartialCDI.getMode", __pyx_clineno, __pyx_lineno, __pyx_filename);
-  __Pyx_RefNannyFinishContext();
-  return NULL;
-  __pyx_L4_argument_unpacking_done:;
-  __pyx_r = __pyx_pf_7pyNADIA_10partialcdi_12PyPartialCDI_14getMode(((struct __pyx_obj_7pyNADIA_10partialcdi_PyPartialCDI *)__pyx_v_self), ((int)__pyx_v_modenum));
-
-  /* function exit code */
-  __Pyx_RefNannyFinishContext();
-  return __pyx_r;
-}
-
-static PyObject *__pyx_pf_7pyNADIA_10partialcdi_12PyPartialCDI_14getMode(struct __pyx_obj_7pyNADIA_10partialcdi_PyPartialCDI *__pyx_v_self, int __pyx_v_modenum) {
-  struct __pyx_obj_7pyNADIA_9complex2d_PyComplex2D *__pyx_v_mode = NULL;
-  __pyx_t_7pyNADIA_9complex2d_Complex_2D *__pyx_v_tmp;
-  PyObject *__pyx_r = NULL;
-  __Pyx_RefNannyDeclarations
-  PyObject *__pyx_t_1 = NULL;
-  PyObject *__pyx_t_2 = NULL;
-  PyObject *__pyx_t_3 = NULL;
-  int __pyx_lineno = 0;
-  const char *__pyx_filename = NULL;
-  int __pyx_clineno = 0;
-  __Pyx_RefNannySetupContext("getMode", 0);
-
-  /* "pyNADIA/partialcdi.pyx":66
- *         @return the mode (PyComplex2D)
- *         """
- *         mode = PyComplex2D(self.nx, self.ny)             # <<<<<<<<<<<<<<
- *         cdef Complex_2D * tmp = new Complex_2D(self.thisptr.get_mode(modenum))
- *         mode.thisptr = tmp
- */
-  __pyx_t_1 = __Pyx_PyInt_From_int(__pyx_v_self->nx); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 66; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_2 = __Pyx_PyInt_From_int(__pyx_v_self->ny); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 66; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_3 = PyTuple_New(2); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 66; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_GOTREF(__pyx_t_3);
-  PyTuple_SET_ITEM(__pyx_t_3, 0, __pyx_t_1);
-  __Pyx_GIVEREF(__pyx_t_1);
-  PyTuple_SET_ITEM(__pyx_t_3, 1, __pyx_t_2);
-  __Pyx_GIVEREF(__pyx_t_2);
-  __pyx_t_1 = 0;
-  __pyx_t_2 = 0;
-  __pyx_t_2 = __Pyx_PyObject_Call(((PyObject *)((PyObject*)__pyx_ptype_7pyNADIA_9complex2d_PyComplex2D)), __pyx_t_3, NULL); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 66; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_GOTREF(__pyx_t_2);
-  __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-  __pyx_v_mode = ((struct __pyx_obj_7pyNADIA_9complex2d_PyComplex2D *)__pyx_t_2);
-  __pyx_t_2 = 0;
-
-  /* "pyNADIA/partialcdi.pyx":67
- *         """
- *         mode = PyComplex2D(self.nx, self.ny)
- *         cdef Complex_2D * tmp = new Complex_2D(self.thisptr.get_mode(modenum))             # <<<<<<<<<<<<<<
- *         mode.thisptr = tmp
- *         return mode
- */
-  __pyx_v_tmp = new __pyx_t_7pyNADIA_9complex2d_Complex_2D(__pyx_v_self->thisptr->get_mode(__pyx_v_modenum));
-
-  /* "pyNADIA/partialcdi.pyx":68
- *         mode = PyComplex2D(self.nx, self.ny)
- *         cdef Complex_2D * tmp = new Complex_2D(self.thisptr.get_mode(modenum))
- *         mode.thisptr = tmp             # <<<<<<<<<<<<<<
- *         return mode
- *     def getBestResult(self, double & error, int index=0):
- */
-  __pyx_v_mode->thisptr = __pyx_v_tmp;
-
-  /* "pyNADIA/partialcdi.pyx":69
- *         cdef Complex_2D * tmp = new Complex_2D(self.thisptr.get_mode(modenum))
- *         mode.thisptr = tmp
- *         return mode             # <<<<<<<<<<<<<<
- *     def getBestResult(self, double & error, int index=0):
- *         """! Get the current best result of the reconstruction.
- */
-  __Pyx_XDECREF(__pyx_r);
-  __Pyx_INCREF(((PyObject *)__pyx_v_mode));
-  __pyx_r = ((PyObject *)__pyx_v_mode);
-  goto __pyx_L0;
-
-  /* "pyNADIA/partialcdi.pyx":61
- *         """
- *         self.thisptr.set_threshold(new_threshold)
- *     def getMode(self, int modenum):             # <<<<<<<<<<<<<<
- *         """! Returns a given mode.
- *         @param modenum (int) The mode number.
- */
-
-  /* function exit code */
-  __pyx_L1_error:;
-  __Pyx_XDECREF(__pyx_t_1);
-  __Pyx_XDECREF(__pyx_t_2);
-  __Pyx_XDECREF(__pyx_t_3);
-  __Pyx_AddTraceback("pyNADIA.partialcdi.PyPartialCDI.getMode", __pyx_clineno, __pyx_lineno, __pyx_filename);
-  __pyx_r = NULL;
-  __pyx_L0:;
-  __Pyx_XDECREF((PyObject *)__pyx_v_mode);
-  __Pyx_XGIVEREF(__pyx_r);
-  __Pyx_RefNannyFinishContext();
-  return __pyx_r;
-}
-
-/* "pyNADIA/partialcdi.pyx":70
- *         mode.thisptr = tmp
- *         return mode
  *     def getBestResult(self, double & error, int index=0):             # <<<<<<<<<<<<<<
  *         """! Get the current best result of the reconstruction.
  *         @return the best result (PyComplex2D).
  */
 
 /* Python wrapper */
-static PyObject *__pyx_pw_7pyNADIA_10partialcdi_12PyPartialCDI_17getBestResult(PyObject *__pyx_v_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
-static char __pyx_doc_7pyNADIA_10partialcdi_12PyPartialCDI_16getBestResult[] = "! Get the current best result of the reconstruction.\n        @return the best result (PyComplex2D).\n        ";
-static PyObject *__pyx_pw_7pyNADIA_10partialcdi_12PyPartialCDI_17getBestResult(PyObject *__pyx_v_self, PyObject *__pyx_args, PyObject *__pyx_kwds) {
+static PyObject *__pyx_pw_7pyNADIA_12fresnelcdiwf_14PyFresnelCDIWF_9getBestResult(PyObject *__pyx_v_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
+static char __pyx_doc_7pyNADIA_12fresnelcdiwf_14PyFresnelCDIWF_8getBestResult[] = "! Get the current best result of the reconstruction.\n        @return the best result (PyComplex2D).\n        ";
+static PyObject *__pyx_pw_7pyNADIA_12fresnelcdiwf_14PyFresnelCDIWF_9getBestResult(PyObject *__pyx_v_self, PyObject *__pyx_args, PyObject *__pyx_kwds) {
   double __pyx_v_error;
   int __pyx_v_index;
   int __pyx_lineno = 0;
@@ -1667,7 +1319,7 @@ static PyObject *__pyx_pw_7pyNADIA_10partialcdi_12PyPartialCDI_17getBestResult(P
         }
       }
       if (unlikely(kw_args > 0)) {
-        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "getBestResult") < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 70; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "getBestResult") < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 40; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
       }
     } else {
       switch (PyTuple_GET_SIZE(__pyx_args)) {
@@ -1677,29 +1329,29 @@ static PyObject *__pyx_pw_7pyNADIA_10partialcdi_12PyPartialCDI_17getBestResult(P
         default: goto __pyx_L5_argtuple_error;
       }
     }
-    __pyx_v_error = __pyx_PyFloat_AsDouble(values[0]); if (unlikely((__pyx_v_error == (double)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 70; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+    __pyx_v_error = __pyx_PyFloat_AsDouble(values[0]); if (unlikely((__pyx_v_error == (double)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 40; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
     if (values[1]) {
-      __pyx_v_index = __Pyx_PyInt_As_int(values[1]); if (unlikely((__pyx_v_index == (int)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 70; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+      __pyx_v_index = __Pyx_PyInt_As_int(values[1]); if (unlikely((__pyx_v_index == (int)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 40; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
     } else {
       __pyx_v_index = ((int)0);
     }
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("getBestResult", 0, 1, 2, PyTuple_GET_SIZE(__pyx_args)); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 70; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+  __Pyx_RaiseArgtupleInvalid("getBestResult", 0, 1, 2, PyTuple_GET_SIZE(__pyx_args)); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 40; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
   __pyx_L3_error:;
-  __Pyx_AddTraceback("pyNADIA.partialcdi.PyPartialCDI.getBestResult", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __Pyx_AddTraceback("pyNADIA.fresnelcdiwf.PyFresnelCDIWF.getBestResult", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
   return NULL;
   __pyx_L4_argument_unpacking_done:;
-  __pyx_r = __pyx_pf_7pyNADIA_10partialcdi_12PyPartialCDI_16getBestResult(((struct __pyx_obj_7pyNADIA_10partialcdi_PyPartialCDI *)__pyx_v_self), __pyx_v_error, __pyx_v_index);
+  __pyx_r = __pyx_pf_7pyNADIA_12fresnelcdiwf_14PyFresnelCDIWF_8getBestResult(((struct __pyx_obj_7pyNADIA_12fresnelcdiwf_PyFresnelCDIWF *)__pyx_v_self), __pyx_v_error, __pyx_v_index);
 
   /* function exit code */
   __Pyx_RefNannyFinishContext();
   return __pyx_r;
 }
 
-static PyObject *__pyx_pf_7pyNADIA_10partialcdi_12PyPartialCDI_16getBestResult(struct __pyx_obj_7pyNADIA_10partialcdi_PyPartialCDI *__pyx_v_self, double __pyx_v_error, int __pyx_v_index) {
+static PyObject *__pyx_pf_7pyNADIA_12fresnelcdiwf_14PyFresnelCDIWF_8getBestResult(struct __pyx_obj_7pyNADIA_12fresnelcdiwf_PyFresnelCDIWF *__pyx_v_self, double __pyx_v_error, int __pyx_v_index) {
   struct __pyx_obj_7pyNADIA_9complex2d_PyComplex2D *__pyx_v_result = NULL;
   PyObject *__pyx_r = NULL;
   __Pyx_RefNannyDeclarations
@@ -1711,18 +1363,18 @@ static PyObject *__pyx_pf_7pyNADIA_10partialcdi_12PyPartialCDI_16getBestResult(s
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("getBestResult", 0);
 
-  /* "pyNADIA/partialcdi.pyx":74
+  /* "pyNADIA/fresnelcdiwf.pyx":44
  *         @return the best result (PyComplex2D).
  *         """
  *         result = PyComplex2D(self.nx,self.ny)             # <<<<<<<<<<<<<<
  *         result.thisptr=self.thisptr.get_best_result(error,index)
  *         return result
  */
-  __pyx_t_1 = __Pyx_PyInt_From_int(__pyx_v_self->nx); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 74; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_1 = __Pyx_PyInt_From_int(__pyx_v_self->nx); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 44; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_2 = __Pyx_PyInt_From_int(__pyx_v_self->ny); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 74; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_2 = __Pyx_PyInt_From_int(__pyx_v_self->ny); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 44; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_3 = PyTuple_New(2); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 74; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_3 = PyTuple_New(2); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 44; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_3);
   PyTuple_SET_ITEM(__pyx_t_3, 0, __pyx_t_1);
   __Pyx_GIVEREF(__pyx_t_1);
@@ -1730,26 +1382,26 @@ static PyObject *__pyx_pf_7pyNADIA_10partialcdi_12PyPartialCDI_16getBestResult(s
   __Pyx_GIVEREF(__pyx_t_2);
   __pyx_t_1 = 0;
   __pyx_t_2 = 0;
-  __pyx_t_2 = __Pyx_PyObject_Call(((PyObject *)((PyObject*)__pyx_ptype_7pyNADIA_9complex2d_PyComplex2D)), __pyx_t_3, NULL); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 74; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_2 = __Pyx_PyObject_Call(((PyObject *)((PyObject*)__pyx_ptype_7pyNADIA_9complex2d_PyComplex2D)), __pyx_t_3, NULL); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 44; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   __pyx_v_result = ((struct __pyx_obj_7pyNADIA_9complex2d_PyComplex2D *)__pyx_t_2);
   __pyx_t_2 = 0;
 
-  /* "pyNADIA/partialcdi.pyx":75
+  /* "pyNADIA/fresnelcdiwf.pyx":45
  *         """
  *         result = PyComplex2D(self.nx,self.ny)
  *         result.thisptr=self.thisptr.get_best_result(error,index)             # <<<<<<<<<<<<<<
  *         return result
- *     def setSupport(self, PyDouble2D support, bool soften=False):
+ *     def setSupport(self, z_factor,size=1.01):
  */
   __pyx_v_result->thisptr = __pyx_v_self->thisptr->get_best_result(__pyx_v_error, __pyx_v_index);
 
-  /* "pyNADIA/partialcdi.pyx":76
+  /* "pyNADIA/fresnelcdiwf.pyx":46
  *         result = PyComplex2D(self.nx,self.ny)
  *         result.thisptr=self.thisptr.get_best_result(error,index)
  *         return result             # <<<<<<<<<<<<<<
- *     def setSupport(self, PyDouble2D support, bool soften=False):
+ *     def setSupport(self, z_factor,size=1.01):
  *         """! Set the support
  */
   __Pyx_XDECREF(__pyx_r);
@@ -1757,9 +1409,9 @@ static PyObject *__pyx_pf_7pyNADIA_10partialcdi_12PyPartialCDI_16getBestResult(s
   __pyx_r = ((PyObject *)__pyx_v_result);
   goto __pyx_L0;
 
-  /* "pyNADIA/partialcdi.pyx":70
- *         mode.thisptr = tmp
- *         return mode
+  /* "pyNADIA/fresnelcdiwf.pyx":40
+ *         """
+ *         return self.thisptr.iterate()
  *     def getBestResult(self, double & error, int index=0):             # <<<<<<<<<<<<<<
  *         """! Get the current best result of the reconstruction.
  *         @return the best result (PyComplex2D).
@@ -1770,7 +1422,7 @@ static PyObject *__pyx_pf_7pyNADIA_10partialcdi_12PyPartialCDI_16getBestResult(s
   __Pyx_XDECREF(__pyx_t_1);
   __Pyx_XDECREF(__pyx_t_2);
   __Pyx_XDECREF(__pyx_t_3);
-  __Pyx_AddTraceback("pyNADIA.partialcdi.PyPartialCDI.getBestResult", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __Pyx_AddTraceback("pyNADIA.fresnelcdiwf.PyFresnelCDIWF.getBestResult", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __pyx_r = NULL;
   __pyx_L0:;
   __Pyx_XDECREF((PyObject *)__pyx_v_result);
@@ -1779,20 +1431,20 @@ static PyObject *__pyx_pf_7pyNADIA_10partialcdi_12PyPartialCDI_16getBestResult(s
   return __pyx_r;
 }
 
-/* "pyNADIA/partialcdi.pyx":77
+/* "pyNADIA/fresnelcdiwf.pyx":47
  *         result.thisptr=self.thisptr.get_best_result(error,index)
  *         return result
- *     def setSupport(self, PyDouble2D support, bool soften=False):             # <<<<<<<<<<<<<<
+ *     def setSupport(self, z_factor,size=1.01):             # <<<<<<<<<<<<<<
  *         """! Set the support
- *         @param support (PyDouble2D) The support function
+ *         @param z_factor (double)
  */
 
 /* Python wrapper */
-static PyObject *__pyx_pw_7pyNADIA_10partialcdi_12PyPartialCDI_19setSupport(PyObject *__pyx_v_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
-static char __pyx_doc_7pyNADIA_10partialcdi_12PyPartialCDI_18setSupport[] = "! Set the support\n        @param support (PyDouble2D) The support function\n        @param soften (bool) Convolve the edge of the support with a 3 pixel wide Gaussian. Default=False\n        ";
-static PyObject *__pyx_pw_7pyNADIA_10partialcdi_12PyPartialCDI_19setSupport(PyObject *__pyx_v_self, PyObject *__pyx_args, PyObject *__pyx_kwds) {
-  struct __pyx_obj_7pyNADIA_8double2d_PyDouble2D *__pyx_v_support = 0;
-  bool __pyx_v_soften;
+static PyObject *__pyx_pw_7pyNADIA_12fresnelcdiwf_14PyFresnelCDIWF_11setSupport(PyObject *__pyx_v_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
+static char __pyx_doc_7pyNADIA_12fresnelcdiwf_14PyFresnelCDIWF_10setSupport[] = "! Set the support\n        @param z_factor (double)\n        @param size (double) default=1.01\n        ";
+static PyObject *__pyx_pw_7pyNADIA_12fresnelcdiwf_14PyFresnelCDIWF_11setSupport(PyObject *__pyx_v_self, PyObject *__pyx_args, PyObject *__pyx_kwds) {
+  PyObject *__pyx_v_z_factor = 0;
+  PyObject *__pyx_v_size = 0;
   int __pyx_lineno = 0;
   const char *__pyx_filename = NULL;
   int __pyx_clineno = 0;
@@ -1800,7 +1452,481 @@ static PyObject *__pyx_pw_7pyNADIA_10partialcdi_12PyPartialCDI_19setSupport(PyOb
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("setSupport (wrapper)", 0);
   {
-    static PyObject **__pyx_pyargnames[] = {&__pyx_n_s_support,&__pyx_n_s_soften,0};
+    static PyObject **__pyx_pyargnames[] = {&__pyx_n_s_z_factor,&__pyx_n_s_size,0};
+    PyObject* values[2] = {0,0};
+    values[1] = ((PyObject *)__pyx_float_1_01);
+    if (unlikely(__pyx_kwds)) {
+      Py_ssize_t kw_args;
+      const Py_ssize_t pos_args = PyTuple_GET_SIZE(__pyx_args);
+      switch (pos_args) {
+        case  2: values[1] = PyTuple_GET_ITEM(__pyx_args, 1);
+        case  1: values[0] = PyTuple_GET_ITEM(__pyx_args, 0);
+        case  0: break;
+        default: goto __pyx_L5_argtuple_error;
+      }
+      kw_args = PyDict_Size(__pyx_kwds);
+      switch (pos_args) {
+        case  0:
+        if (likely((values[0] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_z_factor)) != 0)) kw_args--;
+        else goto __pyx_L5_argtuple_error;
+        case  1:
+        if (kw_args > 0) {
+          PyObject* value = PyDict_GetItem(__pyx_kwds, __pyx_n_s_size);
+          if (value) { values[1] = value; kw_args--; }
+        }
+      }
+      if (unlikely(kw_args > 0)) {
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "setSupport") < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 47; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+      }
+    } else {
+      switch (PyTuple_GET_SIZE(__pyx_args)) {
+        case  2: values[1] = PyTuple_GET_ITEM(__pyx_args, 1);
+        case  1: values[0] = PyTuple_GET_ITEM(__pyx_args, 0);
+        break;
+        default: goto __pyx_L5_argtuple_error;
+      }
+    }
+    __pyx_v_z_factor = values[0];
+    __pyx_v_size = values[1];
+  }
+  goto __pyx_L4_argument_unpacking_done;
+  __pyx_L5_argtuple_error:;
+  __Pyx_RaiseArgtupleInvalid("setSupport", 0, 1, 2, PyTuple_GET_SIZE(__pyx_args)); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 47; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+  __pyx_L3_error:;
+  __Pyx_AddTraceback("pyNADIA.fresnelcdiwf.PyFresnelCDIWF.setSupport", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __Pyx_RefNannyFinishContext();
+  return NULL;
+  __pyx_L4_argument_unpacking_done:;
+  __pyx_r = __pyx_pf_7pyNADIA_12fresnelcdiwf_14PyFresnelCDIWF_10setSupport(((struct __pyx_obj_7pyNADIA_12fresnelcdiwf_PyFresnelCDIWF *)__pyx_v_self), __pyx_v_z_factor, __pyx_v_size);
+
+  /* function exit code */
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+static PyObject *__pyx_pf_7pyNADIA_12fresnelcdiwf_14PyFresnelCDIWF_10setSupport(struct __pyx_obj_7pyNADIA_12fresnelcdiwf_PyFresnelCDIWF *__pyx_v_self, PyObject *__pyx_v_z_factor, PyObject *__pyx_v_size) {
+  PyObject *__pyx_r = NULL;
+  __Pyx_RefNannyDeclarations
+  double __pyx_t_1;
+  double __pyx_t_2;
+  int __pyx_lineno = 0;
+  const char *__pyx_filename = NULL;
+  int __pyx_clineno = 0;
+  __Pyx_RefNannySetupContext("setSupport", 0);
+
+  /* "pyNADIA/fresnelcdiwf.pyx":52
+ *         @param size (double) default=1.01
+ *         """
+ *         self.thisptr.set_support(z_factor,size)             # <<<<<<<<<<<<<<
+ *     def setIntensity(self, PyDouble2D intensity):
+ *         """! Set the detector diffraction image (the square of the amplitude of the wavefield at the detector).
+ */
+  __pyx_t_1 = __pyx_PyFloat_AsDouble(__pyx_v_z_factor); if (unlikely((__pyx_t_1 == (double)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 52; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_2 = __pyx_PyFloat_AsDouble(__pyx_v_size); if (unlikely((__pyx_t_2 == (double)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 52; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_v_self->thisptr->set_support(__pyx_t_1, __pyx_t_2);
+
+  /* "pyNADIA/fresnelcdiwf.pyx":47
+ *         result.thisptr=self.thisptr.get_best_result(error,index)
+ *         return result
+ *     def setSupport(self, z_factor,size=1.01):             # <<<<<<<<<<<<<<
+ *         """! Set the support
+ *         @param z_factor (double)
+ */
+
+  /* function exit code */
+  __pyx_r = Py_None; __Pyx_INCREF(Py_None);
+  goto __pyx_L0;
+  __pyx_L1_error:;
+  __Pyx_AddTraceback("pyNADIA.fresnelcdiwf.PyFresnelCDIWF.setSupport", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __pyx_r = NULL;
+  __pyx_L0:;
+  __Pyx_XGIVEREF(__pyx_r);
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+/* "pyNADIA/fresnelcdiwf.pyx":53
+ *         """
+ *         self.thisptr.set_support(z_factor,size)
+ *     def setIntensity(self, PyDouble2D intensity):             # <<<<<<<<<<<<<<
+ *         """! Set the detector diffraction image (the square of the amplitude of the wavefield at the detector).
+ *         @param intensity (PyDouble2D) The intensity at the detector
+ */
+
+/* Python wrapper */
+static PyObject *__pyx_pw_7pyNADIA_12fresnelcdiwf_14PyFresnelCDIWF_13setIntensity(PyObject *__pyx_v_self, PyObject *__pyx_v_intensity); /*proto*/
+static char __pyx_doc_7pyNADIA_12fresnelcdiwf_14PyFresnelCDIWF_12setIntensity[] = "! Set the detector diffraction image (the square of the amplitude of the wavefield at the detector).\n        @param intensity (PyDouble2D) The intensity at the detector\n        ";
+static PyObject *__pyx_pw_7pyNADIA_12fresnelcdiwf_14PyFresnelCDIWF_13setIntensity(PyObject *__pyx_v_self, PyObject *__pyx_v_intensity) {
+  CYTHON_UNUSED int __pyx_lineno = 0;
+  CYTHON_UNUSED const char *__pyx_filename = NULL;
+  CYTHON_UNUSED int __pyx_clineno = 0;
+  PyObject *__pyx_r = 0;
+  __Pyx_RefNannyDeclarations
+  __Pyx_RefNannySetupContext("setIntensity (wrapper)", 0);
+  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_intensity), __pyx_ptype_7pyNADIA_8double2d_PyDouble2D, 1, "intensity", 0))) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 53; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_r = __pyx_pf_7pyNADIA_12fresnelcdiwf_14PyFresnelCDIWF_12setIntensity(((struct __pyx_obj_7pyNADIA_12fresnelcdiwf_PyFresnelCDIWF *)__pyx_v_self), ((struct __pyx_obj_7pyNADIA_8double2d_PyDouble2D *)__pyx_v_intensity));
+
+  /* function exit code */
+  goto __pyx_L0;
+  __pyx_L1_error:;
+  __pyx_r = NULL;
+  __pyx_L0:;
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+static PyObject *__pyx_pf_7pyNADIA_12fresnelcdiwf_14PyFresnelCDIWF_12setIntensity(struct __pyx_obj_7pyNADIA_12fresnelcdiwf_PyFresnelCDIWF *__pyx_v_self, struct __pyx_obj_7pyNADIA_8double2d_PyDouble2D *__pyx_v_intensity) {
+  PyObject *__pyx_r = NULL;
+  __Pyx_RefNannyDeclarations
+  __Pyx_RefNannySetupContext("setIntensity", 0);
+
+  /* "pyNADIA/fresnelcdiwf.pyx":57
+ *         @param intensity (PyDouble2D) The intensity at the detector
+ *         """
+ *         self.thisptr.set_intensity(deref(intensity.thisptr))             # <<<<<<<<<<<<<<
+ *     def setBeamStop(self, PyDouble2D beamstop):
+ *         """!Set the beam-stop position in the detector plane.
+ */
+  __pyx_v_self->thisptr->set_intensity((*__pyx_v_intensity->thisptr));
+
+  /* "pyNADIA/fresnelcdiwf.pyx":53
+ *         """
+ *         self.thisptr.set_support(z_factor,size)
+ *     def setIntensity(self, PyDouble2D intensity):             # <<<<<<<<<<<<<<
+ *         """! Set the detector diffraction image (the square of the amplitude of the wavefield at the detector).
+ *         @param intensity (PyDouble2D) The intensity at the detector
+ */
+
+  /* function exit code */
+  __pyx_r = Py_None; __Pyx_INCREF(Py_None);
+  __Pyx_XGIVEREF(__pyx_r);
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+/* "pyNADIA/fresnelcdiwf.pyx":58
+ *         """
+ *         self.thisptr.set_intensity(deref(intensity.thisptr))
+ *     def setBeamStop(self, PyDouble2D beamstop):             # <<<<<<<<<<<<<<
+ *         """!Set the beam-stop position in the detector plane.
+ *         @param beamstop (PyDouble2D) The region of the beam stop in the detector plane.
+ */
+
+/* Python wrapper */
+static PyObject *__pyx_pw_7pyNADIA_12fresnelcdiwf_14PyFresnelCDIWF_15setBeamStop(PyObject *__pyx_v_self, PyObject *__pyx_v_beamstop); /*proto*/
+static char __pyx_doc_7pyNADIA_12fresnelcdiwf_14PyFresnelCDIWF_14setBeamStop[] = "!Set the beam-stop position in the detector plane.        \n        @param beamstop (PyDouble2D) The region of the beam stop in the detector plane.\n        ";
+static PyObject *__pyx_pw_7pyNADIA_12fresnelcdiwf_14PyFresnelCDIWF_15setBeamStop(PyObject *__pyx_v_self, PyObject *__pyx_v_beamstop) {
+  CYTHON_UNUSED int __pyx_lineno = 0;
+  CYTHON_UNUSED const char *__pyx_filename = NULL;
+  CYTHON_UNUSED int __pyx_clineno = 0;
+  PyObject *__pyx_r = 0;
+  __Pyx_RefNannyDeclarations
+  __Pyx_RefNannySetupContext("setBeamStop (wrapper)", 0);
+  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_beamstop), __pyx_ptype_7pyNADIA_8double2d_PyDouble2D, 1, "beamstop", 0))) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 58; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_r = __pyx_pf_7pyNADIA_12fresnelcdiwf_14PyFresnelCDIWF_14setBeamStop(((struct __pyx_obj_7pyNADIA_12fresnelcdiwf_PyFresnelCDIWF *)__pyx_v_self), ((struct __pyx_obj_7pyNADIA_8double2d_PyDouble2D *)__pyx_v_beamstop));
+
+  /* function exit code */
+  goto __pyx_L0;
+  __pyx_L1_error:;
+  __pyx_r = NULL;
+  __pyx_L0:;
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+static PyObject *__pyx_pf_7pyNADIA_12fresnelcdiwf_14PyFresnelCDIWF_14setBeamStop(struct __pyx_obj_7pyNADIA_12fresnelcdiwf_PyFresnelCDIWF *__pyx_v_self, struct __pyx_obj_7pyNADIA_8double2d_PyDouble2D *__pyx_v_beamstop) {
+  PyObject *__pyx_r = NULL;
+  __Pyx_RefNannyDeclarations
+  __Pyx_RefNannySetupContext("setBeamStop", 0);
+
+  /* "pyNADIA/fresnelcdiwf.pyx":62
+ *         @param beamstop (PyDouble2D) The region of the beam stop in the detector plane.
+ *         """
+ *         self.thisptr.set_beam_stop(deref(beamstop.thisptr))             # <<<<<<<<<<<<<<
+ *     def getError(self):
+ *         """!Get the error.
+ */
+  __pyx_v_self->thisptr->set_beam_stop((*__pyx_v_beamstop->thisptr));
+
+  /* "pyNADIA/fresnelcdiwf.pyx":58
+ *         """
+ *         self.thisptr.set_intensity(deref(intensity.thisptr))
+ *     def setBeamStop(self, PyDouble2D beamstop):             # <<<<<<<<<<<<<<
+ *         """!Set the beam-stop position in the detector plane.
+ *         @param beamstop (PyDouble2D) The region of the beam stop in the detector plane.
+ */
+
+  /* function exit code */
+  __pyx_r = Py_None; __Pyx_INCREF(Py_None);
+  __Pyx_XGIVEREF(__pyx_r);
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+/* "pyNADIA/fresnelcdiwf.pyx":63
+ *         """
+ *         self.thisptr.set_beam_stop(deref(beamstop.thisptr))
+ *     def getError(self):             # <<<<<<<<<<<<<<
+ *         """!Get the error.
+ *         Returns the difference between the estimated diffraction adn the actual diffraction pattern.
+ */
+
+/* Python wrapper */
+static PyObject *__pyx_pw_7pyNADIA_12fresnelcdiwf_14PyFresnelCDIWF_17getError(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused); /*proto*/
+static char __pyx_doc_7pyNADIA_12fresnelcdiwf_14PyFresnelCDIWF_16getError[] = "!Get the error.\n        Returns the difference between the estimated diffraction adn the actual diffraction pattern.\n        @return the error metric (double)\n        ";
+static PyObject *__pyx_pw_7pyNADIA_12fresnelcdiwf_14PyFresnelCDIWF_17getError(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused) {
+  PyObject *__pyx_r = 0;
+  __Pyx_RefNannyDeclarations
+  __Pyx_RefNannySetupContext("getError (wrapper)", 0);
+  __pyx_r = __pyx_pf_7pyNADIA_12fresnelcdiwf_14PyFresnelCDIWF_16getError(((struct __pyx_obj_7pyNADIA_12fresnelcdiwf_PyFresnelCDIWF *)__pyx_v_self));
+
+  /* function exit code */
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+static PyObject *__pyx_pf_7pyNADIA_12fresnelcdiwf_14PyFresnelCDIWF_16getError(struct __pyx_obj_7pyNADIA_12fresnelcdiwf_PyFresnelCDIWF *__pyx_v_self) {
+  PyObject *__pyx_r = NULL;
+  __Pyx_RefNannyDeclarations
+  PyObject *__pyx_t_1 = NULL;
+  int __pyx_lineno = 0;
+  const char *__pyx_filename = NULL;
+  int __pyx_clineno = 0;
+  __Pyx_RefNannySetupContext("getError", 0);
+
+  /* "pyNADIA/fresnelcdiwf.pyx":68
+ *         @return the error metric (double)
+ *         """
+ *         return self.thisptr.get_error()             # <<<<<<<<<<<<<<
+ *     def getSupport(self):
+ *         """! Get the support
+ */
+  __Pyx_XDECREF(__pyx_r);
+  __pyx_t_1 = PyFloat_FromDouble(__pyx_v_self->thisptr->get_error()); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 68; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_t_1);
+  __pyx_r = __pyx_t_1;
+  __pyx_t_1 = 0;
+  goto __pyx_L0;
+
+  /* "pyNADIA/fresnelcdiwf.pyx":63
+ *         """
+ *         self.thisptr.set_beam_stop(deref(beamstop.thisptr))
+ *     def getError(self):             # <<<<<<<<<<<<<<
+ *         """!Get the error.
+ *         Returns the difference between the estimated diffraction adn the actual diffraction pattern.
+ */
+
+  /* function exit code */
+  __pyx_L1_error:;
+  __Pyx_XDECREF(__pyx_t_1);
+  __Pyx_AddTraceback("pyNADIA.fresnelcdiwf.PyFresnelCDIWF.getError", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __pyx_r = NULL;
+  __pyx_L0:;
+  __Pyx_XGIVEREF(__pyx_r);
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+/* "pyNADIA/fresnelcdiwf.pyx":69
+ *         """
+ *         return self.thisptr.get_error()
+ *     def getSupport(self):             # <<<<<<<<<<<<<<
+ *         """! Get the support
+ *         @return The object support. (PyDouble2D)
+ */
+
+/* Python wrapper */
+static PyObject *__pyx_pw_7pyNADIA_12fresnelcdiwf_14PyFresnelCDIWF_19getSupport(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused); /*proto*/
+static char __pyx_doc_7pyNADIA_12fresnelcdiwf_14PyFresnelCDIWF_18getSupport[] = "! Get the support\n        @return The object support. (PyDouble2D)\n        ";
+static PyObject *__pyx_pw_7pyNADIA_12fresnelcdiwf_14PyFresnelCDIWF_19getSupport(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused) {
+  PyObject *__pyx_r = 0;
+  __Pyx_RefNannyDeclarations
+  __Pyx_RefNannySetupContext("getSupport (wrapper)", 0);
+  __pyx_r = __pyx_pf_7pyNADIA_12fresnelcdiwf_14PyFresnelCDIWF_18getSupport(((struct __pyx_obj_7pyNADIA_12fresnelcdiwf_PyFresnelCDIWF *)__pyx_v_self));
+
+  /* function exit code */
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+static PyObject *__pyx_pf_7pyNADIA_12fresnelcdiwf_14PyFresnelCDIWF_18getSupport(CYTHON_UNUSED struct __pyx_obj_7pyNADIA_12fresnelcdiwf_PyFresnelCDIWF *__pyx_v_self) {
+  CYTHON_UNUSED struct __pyx_obj_7pyNADIA_8double2d_PyDouble2D *__pyx_v_result = NULL;
+  PyObject *__pyx_r = NULL;
+  __Pyx_RefNannyDeclarations
+  PyObject *__pyx_t_1 = NULL;
+  int __pyx_lineno = 0;
+  const char *__pyx_filename = NULL;
+  int __pyx_clineno = 0;
+  __Pyx_RefNannySetupContext("getSupport", 0);
+
+  /* "pyNADIA/fresnelcdiwf.pyx":73
+ *         @return The object support. (PyDouble2D)
+ *         """
+ *         result = PyDouble2D()             # <<<<<<<<<<<<<<
+ *     def resetBest(self):
+ *         self.thisptr.reset_best()
+ */
+  __pyx_t_1 = __Pyx_PyObject_Call(((PyObject *)((PyObject*)__pyx_ptype_7pyNADIA_8double2d_PyDouble2D)), __pyx_empty_tuple, NULL); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 73; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_t_1);
+  __pyx_v_result = ((struct __pyx_obj_7pyNADIA_8double2d_PyDouble2D *)__pyx_t_1);
+  __pyx_t_1 = 0;
+
+  /* "pyNADIA/fresnelcdiwf.pyx":69
+ *         """
+ *         return self.thisptr.get_error()
+ *     def getSupport(self):             # <<<<<<<<<<<<<<
+ *         """! Get the support
+ *         @return The object support. (PyDouble2D)
+ */
+
+  /* function exit code */
+  __pyx_r = Py_None; __Pyx_INCREF(Py_None);
+  goto __pyx_L0;
+  __pyx_L1_error:;
+  __Pyx_XDECREF(__pyx_t_1);
+  __Pyx_AddTraceback("pyNADIA.fresnelcdiwf.PyFresnelCDIWF.getSupport", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __pyx_r = NULL;
+  __pyx_L0:;
+  __Pyx_XDECREF((PyObject *)__pyx_v_result);
+  __Pyx_XGIVEREF(__pyx_r);
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+/* "pyNADIA/fresnelcdiwf.pyx":74
+ *         """
+ *         result = PyDouble2D()
+ *     def resetBest(self):             # <<<<<<<<<<<<<<
+ *         self.thisptr.reset_best()
+ *     def set_fftw_type(self, int type):
+ */
+
+/* Python wrapper */
+static PyObject *__pyx_pw_7pyNADIA_12fresnelcdiwf_14PyFresnelCDIWF_21resetBest(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused); /*proto*/
+static PyObject *__pyx_pw_7pyNADIA_12fresnelcdiwf_14PyFresnelCDIWF_21resetBest(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused) {
+  PyObject *__pyx_r = 0;
+  __Pyx_RefNannyDeclarations
+  __Pyx_RefNannySetupContext("resetBest (wrapper)", 0);
+  __pyx_r = __pyx_pf_7pyNADIA_12fresnelcdiwf_14PyFresnelCDIWF_20resetBest(((struct __pyx_obj_7pyNADIA_12fresnelcdiwf_PyFresnelCDIWF *)__pyx_v_self));
+
+  /* function exit code */
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+static PyObject *__pyx_pf_7pyNADIA_12fresnelcdiwf_14PyFresnelCDIWF_20resetBest(struct __pyx_obj_7pyNADIA_12fresnelcdiwf_PyFresnelCDIWF *__pyx_v_self) {
+  PyObject *__pyx_r = NULL;
+  __Pyx_RefNannyDeclarations
+  __Pyx_RefNannySetupContext("resetBest", 0);
+
+  /* "pyNADIA/fresnelcdiwf.pyx":75
+ *         result = PyDouble2D()
+ *     def resetBest(self):
+ *         self.thisptr.reset_best()             # <<<<<<<<<<<<<<
+ *     def set_fftw_type(self, int type):
+ *         self.thisptr.set_fftw_type(type)
+ */
+  __pyx_v_self->thisptr->reset_best();
+
+  /* "pyNADIA/fresnelcdiwf.pyx":74
+ *         """
+ *         result = PyDouble2D()
+ *     def resetBest(self):             # <<<<<<<<<<<<<<
+ *         self.thisptr.reset_best()
+ *     def set_fftw_type(self, int type):
+ */
+
+  /* function exit code */
+  __pyx_r = Py_None; __Pyx_INCREF(Py_None);
+  __Pyx_XGIVEREF(__pyx_r);
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+/* "pyNADIA/fresnelcdiwf.pyx":76
+ *     def resetBest(self):
+ *         self.thisptr.reset_best()
+ *     def set_fftw_type(self, int type):             # <<<<<<<<<<<<<<
+ *         self.thisptr.set_fftw_type(type)
+ *     def multiplyFactors(self, PyComplex2D c, direction):
+ */
+
+/* Python wrapper */
+static PyObject *__pyx_pw_7pyNADIA_12fresnelcdiwf_14PyFresnelCDIWF_23set_fftw_type(PyObject *__pyx_v_self, PyObject *__pyx_arg_type); /*proto*/
+static PyObject *__pyx_pw_7pyNADIA_12fresnelcdiwf_14PyFresnelCDIWF_23set_fftw_type(PyObject *__pyx_v_self, PyObject *__pyx_arg_type) {
+  int __pyx_v_type;
+  int __pyx_lineno = 0;
+  const char *__pyx_filename = NULL;
+  int __pyx_clineno = 0;
+  PyObject *__pyx_r = 0;
+  __Pyx_RefNannyDeclarations
+  __Pyx_RefNannySetupContext("set_fftw_type (wrapper)", 0);
+  assert(__pyx_arg_type); {
+    __pyx_v_type = __Pyx_PyInt_As_int(__pyx_arg_type); if (unlikely((__pyx_v_type == (int)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 76; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+  }
+  goto __pyx_L4_argument_unpacking_done;
+  __pyx_L3_error:;
+  __Pyx_AddTraceback("pyNADIA.fresnelcdiwf.PyFresnelCDIWF.set_fftw_type", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __Pyx_RefNannyFinishContext();
+  return NULL;
+  __pyx_L4_argument_unpacking_done:;
+  __pyx_r = __pyx_pf_7pyNADIA_12fresnelcdiwf_14PyFresnelCDIWF_22set_fftw_type(((struct __pyx_obj_7pyNADIA_12fresnelcdiwf_PyFresnelCDIWF *)__pyx_v_self), ((int)__pyx_v_type));
+
+  /* function exit code */
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+static PyObject *__pyx_pf_7pyNADIA_12fresnelcdiwf_14PyFresnelCDIWF_22set_fftw_type(struct __pyx_obj_7pyNADIA_12fresnelcdiwf_PyFresnelCDIWF *__pyx_v_self, int __pyx_v_type) {
+  PyObject *__pyx_r = NULL;
+  __Pyx_RefNannyDeclarations
+  __Pyx_RefNannySetupContext("set_fftw_type", 0);
+
+  /* "pyNADIA/fresnelcdiwf.pyx":77
+ *         self.thisptr.reset_best()
+ *     def set_fftw_type(self, int type):
+ *         self.thisptr.set_fftw_type(type)             # <<<<<<<<<<<<<<
+ *     def multiplyFactors(self, PyComplex2D c, direction):
+ *         self.thisptr.multiply_factors(deref(c.thisptr), direction)
+ */
+  __pyx_v_self->thisptr->set_fftw_type(__pyx_v_type);
+
+  /* "pyNADIA/fresnelcdiwf.pyx":76
+ *     def resetBest(self):
+ *         self.thisptr.reset_best()
+ *     def set_fftw_type(self, int type):             # <<<<<<<<<<<<<<
+ *         self.thisptr.set_fftw_type(type)
+ *     def multiplyFactors(self, PyComplex2D c, direction):
+ */
+
+  /* function exit code */
+  __pyx_r = Py_None; __Pyx_INCREF(Py_None);
+  __Pyx_XGIVEREF(__pyx_r);
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+/* "pyNADIA/fresnelcdiwf.pyx":78
+ *     def set_fftw_type(self, int type):
+ *         self.thisptr.set_fftw_type(type)
+ *     def multiplyFactors(self, PyComplex2D c, direction):             # <<<<<<<<<<<<<<
+ *         self.thisptr.multiply_factors(deref(c.thisptr), direction)
+ * 
+ */
+
+/* Python wrapper */
+static PyObject *__pyx_pw_7pyNADIA_12fresnelcdiwf_14PyFresnelCDIWF_25multiplyFactors(PyObject *__pyx_v_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
+static PyObject *__pyx_pw_7pyNADIA_12fresnelcdiwf_14PyFresnelCDIWF_25multiplyFactors(PyObject *__pyx_v_self, PyObject *__pyx_args, PyObject *__pyx_kwds) {
+  struct __pyx_obj_7pyNADIA_9complex2d_PyComplex2D *__pyx_v_c = 0;
+  PyObject *__pyx_v_direction = 0;
+  int __pyx_lineno = 0;
+  const char *__pyx_filename = NULL;
+  int __pyx_clineno = 0;
+  PyObject *__pyx_r = 0;
+  __Pyx_RefNannyDeclarations
+  __Pyx_RefNannySetupContext("multiplyFactors (wrapper)", 0);
+  {
+    static PyObject **__pyx_pyargnames[] = {&__pyx_n_s_c,&__pyx_n_s_direction,0};
     PyObject* values[2] = {0,0};
     if (unlikely(__pyx_kwds)) {
       Py_ssize_t kw_args;
@@ -1814,42 +1940,36 @@ static PyObject *__pyx_pw_7pyNADIA_10partialcdi_12PyPartialCDI_19setSupport(PyOb
       kw_args = PyDict_Size(__pyx_kwds);
       switch (pos_args) {
         case  0:
-        if (likely((values[0] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_support)) != 0)) kw_args--;
+        if (likely((values[0] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_c)) != 0)) kw_args--;
         else goto __pyx_L5_argtuple_error;
         case  1:
-        if (kw_args > 0) {
-          PyObject* value = PyDict_GetItem(__pyx_kwds, __pyx_n_s_soften);
-          if (value) { values[1] = value; kw_args--; }
+        if (likely((values[1] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_direction)) != 0)) kw_args--;
+        else {
+          __Pyx_RaiseArgtupleInvalid("multiplyFactors", 1, 2, 2, 1); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 78; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
         }
       }
       if (unlikely(kw_args > 0)) {
-        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "setSupport") < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 77; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "multiplyFactors") < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 78; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
       }
+    } else if (PyTuple_GET_SIZE(__pyx_args) != 2) {
+      goto __pyx_L5_argtuple_error;
     } else {
-      switch (PyTuple_GET_SIZE(__pyx_args)) {
-        case  2: values[1] = PyTuple_GET_ITEM(__pyx_args, 1);
-        case  1: values[0] = PyTuple_GET_ITEM(__pyx_args, 0);
-        break;
-        default: goto __pyx_L5_argtuple_error;
-      }
+      values[0] = PyTuple_GET_ITEM(__pyx_args, 0);
+      values[1] = PyTuple_GET_ITEM(__pyx_args, 1);
     }
-    __pyx_v_support = ((struct __pyx_obj_7pyNADIA_8double2d_PyDouble2D *)values[0]);
-    if (values[1]) {
-      __pyx_v_soften = __Pyx_PyObject_IsTrue(values[1]); if (unlikely((__pyx_v_soften == (bool)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 77; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
-    } else {
-      __pyx_v_soften = ((bool)0);
-    }
+    __pyx_v_c = ((struct __pyx_obj_7pyNADIA_9complex2d_PyComplex2D *)values[0]);
+    __pyx_v_direction = values[1];
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("setSupport", 0, 1, 2, PyTuple_GET_SIZE(__pyx_args)); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 77; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+  __Pyx_RaiseArgtupleInvalid("multiplyFactors", 1, 2, 2, PyTuple_GET_SIZE(__pyx_args)); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 78; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
   __pyx_L3_error:;
-  __Pyx_AddTraceback("pyNADIA.partialcdi.PyPartialCDI.setSupport", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __Pyx_AddTraceback("pyNADIA.fresnelcdiwf.PyFresnelCDIWF.multiplyFactors", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
   return NULL;
   __pyx_L4_argument_unpacking_done:;
-  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_support), __pyx_ptype_7pyNADIA_8double2d_PyDouble2D, 1, "support", 0))) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 77; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __pyx_r = __pyx_pf_7pyNADIA_10partialcdi_12PyPartialCDI_18setSupport(((struct __pyx_obj_7pyNADIA_10partialcdi_PyPartialCDI *)__pyx_v_self), __pyx_v_support, __pyx_v_soften);
+  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_c), __pyx_ptype_7pyNADIA_9complex2d_PyComplex2D, 1, "c", 0))) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 78; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_r = __pyx_pf_7pyNADIA_12fresnelcdiwf_14PyFresnelCDIWF_24multiplyFactors(((struct __pyx_obj_7pyNADIA_12fresnelcdiwf_PyFresnelCDIWF *)__pyx_v_self), __pyx_v_c, __pyx_v_direction);
 
   /* function exit code */
   goto __pyx_L0;
@@ -1860,457 +1980,45 @@ static PyObject *__pyx_pw_7pyNADIA_10partialcdi_12PyPartialCDI_19setSupport(PyOb
   return __pyx_r;
 }
 
-static PyObject *__pyx_pf_7pyNADIA_10partialcdi_12PyPartialCDI_18setSupport(struct __pyx_obj_7pyNADIA_10partialcdi_PyPartialCDI *__pyx_v_self, struct __pyx_obj_7pyNADIA_8double2d_PyDouble2D *__pyx_v_support, bool __pyx_v_soften) {
+static PyObject *__pyx_pf_7pyNADIA_12fresnelcdiwf_14PyFresnelCDIWF_24multiplyFactors(struct __pyx_obj_7pyNADIA_12fresnelcdiwf_PyFresnelCDIWF *__pyx_v_self, struct __pyx_obj_7pyNADIA_9complex2d_PyComplex2D *__pyx_v_c, PyObject *__pyx_v_direction) {
   PyObject *__pyx_r = NULL;
   __Pyx_RefNannyDeclarations
-  __Pyx_RefNannySetupContext("setSupport", 0);
-
-  /* "pyNADIA/partialcdi.pyx":82
- *         @param soften (bool) Convolve the edge of the support with a 3 pixel wide Gaussian. Default=False
- *         """
- *         self.thisptr.set_support(deref(support.thisptr), soften)             # <<<<<<<<<<<<<<
- *     def setIntensity(self, PyDouble2D intensity):
- *         """! Set the detector diffraction image (the square of the amplitude of the wavefield at the detector).
- */
-  __pyx_v_self->thisptr->set_support((*__pyx_v_support->thisptr), __pyx_v_soften);
-
-  /* "pyNADIA/partialcdi.pyx":77
- *         result.thisptr=self.thisptr.get_best_result(error,index)
- *         return result
- *     def setSupport(self, PyDouble2D support, bool soften=False):             # <<<<<<<<<<<<<<
- *         """! Set the support
- *         @param support (PyDouble2D) The support function
- */
-
-  /* function exit code */
-  __pyx_r = Py_None; __Pyx_INCREF(Py_None);
-  __Pyx_XGIVEREF(__pyx_r);
-  __Pyx_RefNannyFinishContext();
-  return __pyx_r;
-}
-
-/* "pyNADIA/partialcdi.pyx":83
- *         """
- *         self.thisptr.set_support(deref(support.thisptr), soften)
- *     def setIntensity(self, PyDouble2D intensity):             # <<<<<<<<<<<<<<
- *         """! Set the detector diffraction image (the square of the amplitude of the wavefield at the detector).
- *         @param intensity (PyDouble2D) The intensity at the detector
- */
-
-/* Python wrapper */
-static PyObject *__pyx_pw_7pyNADIA_10partialcdi_12PyPartialCDI_21setIntensity(PyObject *__pyx_v_self, PyObject *__pyx_v_intensity); /*proto*/
-static char __pyx_doc_7pyNADIA_10partialcdi_12PyPartialCDI_20setIntensity[] = "! Set the detector diffraction image (the square of the amplitude of the wavefield at the detector).\n        @param intensity (PyDouble2D) The intensity at the detector\n        ";
-static PyObject *__pyx_pw_7pyNADIA_10partialcdi_12PyPartialCDI_21setIntensity(PyObject *__pyx_v_self, PyObject *__pyx_v_intensity) {
-  CYTHON_UNUSED int __pyx_lineno = 0;
-  CYTHON_UNUSED const char *__pyx_filename = NULL;
-  CYTHON_UNUSED int __pyx_clineno = 0;
-  PyObject *__pyx_r = 0;
-  __Pyx_RefNannyDeclarations
-  __Pyx_RefNannySetupContext("setIntensity (wrapper)", 0);
-  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_intensity), __pyx_ptype_7pyNADIA_8double2d_PyDouble2D, 1, "intensity", 0))) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 83; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __pyx_r = __pyx_pf_7pyNADIA_10partialcdi_12PyPartialCDI_20setIntensity(((struct __pyx_obj_7pyNADIA_10partialcdi_PyPartialCDI *)__pyx_v_self), ((struct __pyx_obj_7pyNADIA_8double2d_PyDouble2D *)__pyx_v_intensity));
-
-  /* function exit code */
-  goto __pyx_L0;
-  __pyx_L1_error:;
-  __pyx_r = NULL;
-  __pyx_L0:;
-  __Pyx_RefNannyFinishContext();
-  return __pyx_r;
-}
-
-static PyObject *__pyx_pf_7pyNADIA_10partialcdi_12PyPartialCDI_20setIntensity(struct __pyx_obj_7pyNADIA_10partialcdi_PyPartialCDI *__pyx_v_self, struct __pyx_obj_7pyNADIA_8double2d_PyDouble2D *__pyx_v_intensity) {
-  PyObject *__pyx_r = NULL;
-  __Pyx_RefNannyDeclarations
-  __Pyx_RefNannySetupContext("setIntensity", 0);
-
-  /* "pyNADIA/partialcdi.pyx":87
- *         @param intensity (PyDouble2D) The intensity at the detector
- *         """
- *         self.thisptr.set_intensity(deref(intensity.thisptr))             # <<<<<<<<<<<<<<
- *     def setBeamStop(self, PyDouble2D beamstop):
- *         """!Set the beam-stop position in the detector plane.
- */
-  __pyx_v_self->thisptr->set_intensity((*__pyx_v_intensity->thisptr));
-
-  /* "pyNADIA/partialcdi.pyx":83
- *         """
- *         self.thisptr.set_support(deref(support.thisptr), soften)
- *     def setIntensity(self, PyDouble2D intensity):             # <<<<<<<<<<<<<<
- *         """! Set the detector diffraction image (the square of the amplitude of the wavefield at the detector).
- *         @param intensity (PyDouble2D) The intensity at the detector
- */
-
-  /* function exit code */
-  __pyx_r = Py_None; __Pyx_INCREF(Py_None);
-  __Pyx_XGIVEREF(__pyx_r);
-  __Pyx_RefNannyFinishContext();
-  return __pyx_r;
-}
-
-/* "pyNADIA/partialcdi.pyx":88
- *         """
- *         self.thisptr.set_intensity(deref(intensity.thisptr))
- *     def setBeamStop(self, PyDouble2D beamstop):             # <<<<<<<<<<<<<<
- *         """!Set the beam-stop position in the detector plane.
- *         @param beamstop (PyDouble2D) The region of the beam stop in the detector plane.
- */
-
-/* Python wrapper */
-static PyObject *__pyx_pw_7pyNADIA_10partialcdi_12PyPartialCDI_23setBeamStop(PyObject *__pyx_v_self, PyObject *__pyx_v_beamstop); /*proto*/
-static char __pyx_doc_7pyNADIA_10partialcdi_12PyPartialCDI_22setBeamStop[] = "!Set the beam-stop position in the detector plane.        \n        @param beamstop (PyDouble2D) The region of the beam stop in the detector plane.\n        ";
-static PyObject *__pyx_pw_7pyNADIA_10partialcdi_12PyPartialCDI_23setBeamStop(PyObject *__pyx_v_self, PyObject *__pyx_v_beamstop) {
-  CYTHON_UNUSED int __pyx_lineno = 0;
-  CYTHON_UNUSED const char *__pyx_filename = NULL;
-  CYTHON_UNUSED int __pyx_clineno = 0;
-  PyObject *__pyx_r = 0;
-  __Pyx_RefNannyDeclarations
-  __Pyx_RefNannySetupContext("setBeamStop (wrapper)", 0);
-  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_beamstop), __pyx_ptype_7pyNADIA_8double2d_PyDouble2D, 1, "beamstop", 0))) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 88; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __pyx_r = __pyx_pf_7pyNADIA_10partialcdi_12PyPartialCDI_22setBeamStop(((struct __pyx_obj_7pyNADIA_10partialcdi_PyPartialCDI *)__pyx_v_self), ((struct __pyx_obj_7pyNADIA_8double2d_PyDouble2D *)__pyx_v_beamstop));
-
-  /* function exit code */
-  goto __pyx_L0;
-  __pyx_L1_error:;
-  __pyx_r = NULL;
-  __pyx_L0:;
-  __Pyx_RefNannyFinishContext();
-  return __pyx_r;
-}
-
-static PyObject *__pyx_pf_7pyNADIA_10partialcdi_12PyPartialCDI_22setBeamStop(struct __pyx_obj_7pyNADIA_10partialcdi_PyPartialCDI *__pyx_v_self, struct __pyx_obj_7pyNADIA_8double2d_PyDouble2D *__pyx_v_beamstop) {
-  PyObject *__pyx_r = NULL;
-  __Pyx_RefNannyDeclarations
-  __Pyx_RefNannySetupContext("setBeamStop", 0);
-
-  /* "pyNADIA/partialcdi.pyx":92
- *         @param beamstop (PyDouble2D) The region of the beam stop in the detector plane.
- *         """
- *         self.thisptr.set_beam_stop(deref(beamstop.thisptr))             # <<<<<<<<<<<<<<
- *     def getError(self):
- *         """!Get the error.
- */
-  __pyx_v_self->thisptr->set_beam_stop((*__pyx_v_beamstop->thisptr));
-
-  /* "pyNADIA/partialcdi.pyx":88
- *         """
- *         self.thisptr.set_intensity(deref(intensity.thisptr))
- *     def setBeamStop(self, PyDouble2D beamstop):             # <<<<<<<<<<<<<<
- *         """!Set the beam-stop position in the detector plane.
- *         @param beamstop (PyDouble2D) The region of the beam stop in the detector plane.
- */
-
-  /* function exit code */
-  __pyx_r = Py_None; __Pyx_INCREF(Py_None);
-  __Pyx_XGIVEREF(__pyx_r);
-  __Pyx_RefNannyFinishContext();
-  return __pyx_r;
-}
-
-/* "pyNADIA/partialcdi.pyx":93
- *         """
- *         self.thisptr.set_beam_stop(deref(beamstop.thisptr))
- *     def getError(self):             # <<<<<<<<<<<<<<
- *         """!Get the error.
- *         Returns the difference between the estimated diffraction adn the actual diffraction pattern.
- */
-
-/* Python wrapper */
-static PyObject *__pyx_pw_7pyNADIA_10partialcdi_12PyPartialCDI_25getError(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused); /*proto*/
-static char __pyx_doc_7pyNADIA_10partialcdi_12PyPartialCDI_24getError[] = "!Get the error.\n        Returns the difference between the estimated diffraction adn the actual diffraction pattern.\n        @return the error metric (double)\n        ";
-static PyObject *__pyx_pw_7pyNADIA_10partialcdi_12PyPartialCDI_25getError(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused) {
-  PyObject *__pyx_r = 0;
-  __Pyx_RefNannyDeclarations
-  __Pyx_RefNannySetupContext("getError (wrapper)", 0);
-  __pyx_r = __pyx_pf_7pyNADIA_10partialcdi_12PyPartialCDI_24getError(((struct __pyx_obj_7pyNADIA_10partialcdi_PyPartialCDI *)__pyx_v_self));
-
-  /* function exit code */
-  __Pyx_RefNannyFinishContext();
-  return __pyx_r;
-}
-
-static PyObject *__pyx_pf_7pyNADIA_10partialcdi_12PyPartialCDI_24getError(struct __pyx_obj_7pyNADIA_10partialcdi_PyPartialCDI *__pyx_v_self) {
-  PyObject *__pyx_r = NULL;
-  __Pyx_RefNannyDeclarations
-  PyObject *__pyx_t_1 = NULL;
+  int __pyx_t_1;
   int __pyx_lineno = 0;
   const char *__pyx_filename = NULL;
   int __pyx_clineno = 0;
-  __Pyx_RefNannySetupContext("getError", 0);
+  __Pyx_RefNannySetupContext("multiplyFactors", 0);
 
-  /* "pyNADIA/partialcdi.pyx":98
- *         @return the error metric (double)
- *         """
- *         return self.thisptr.get_error()             # <<<<<<<<<<<<<<
- *     def getSupport(self):
- *         """! Get the support
+  /* "pyNADIA/fresnelcdiwf.pyx":79
+ *         self.thisptr.set_fftw_type(type)
+ *     def multiplyFactors(self, PyComplex2D c, direction):
+ *         self.thisptr.multiply_factors(deref(c.thisptr), direction)             # <<<<<<<<<<<<<<
+ * 
  */
-  __Pyx_XDECREF(__pyx_r);
-  __pyx_t_1 = PyFloat_FromDouble(__pyx_v_self->thisptr->get_error()); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 98; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_GOTREF(__pyx_t_1);
-  __pyx_r = __pyx_t_1;
-  __pyx_t_1 = 0;
-  goto __pyx_L0;
+  __pyx_t_1 = __Pyx_PyInt_As_int(__pyx_v_direction); if (unlikely((__pyx_t_1 == (int)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 79; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_v_self->thisptr->multiply_factors((*__pyx_v_c->thisptr), __pyx_t_1);
 
-  /* "pyNADIA/partialcdi.pyx":93
- *         """
- *         self.thisptr.set_beam_stop(deref(beamstop.thisptr))
- *     def getError(self):             # <<<<<<<<<<<<<<
- *         """!Get the error.
- *         Returns the difference between the estimated diffraction adn the actual diffraction pattern.
- */
-
-  /* function exit code */
-  __pyx_L1_error:;
-  __Pyx_XDECREF(__pyx_t_1);
-  __Pyx_AddTraceback("pyNADIA.partialcdi.PyPartialCDI.getError", __pyx_clineno, __pyx_lineno, __pyx_filename);
-  __pyx_r = NULL;
-  __pyx_L0:;
-  __Pyx_XGIVEREF(__pyx_r);
-  __Pyx_RefNannyFinishContext();
-  return __pyx_r;
-}
-
-/* "pyNADIA/partialcdi.pyx":99
- *         """
- *         return self.thisptr.get_error()
- *     def getSupport(self):             # <<<<<<<<<<<<<<
- *         """! Get the support
- *         @return The object support. (PyDouble2D)
- */
-
-/* Python wrapper */
-static PyObject *__pyx_pw_7pyNADIA_10partialcdi_12PyPartialCDI_27getSupport(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused); /*proto*/
-static char __pyx_doc_7pyNADIA_10partialcdi_12PyPartialCDI_26getSupport[] = "! Get the support\n        @return The object support. (PyDouble2D)\n        ";
-static PyObject *__pyx_pw_7pyNADIA_10partialcdi_12PyPartialCDI_27getSupport(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused) {
-  PyObject *__pyx_r = 0;
-  __Pyx_RefNannyDeclarations
-  __Pyx_RefNannySetupContext("getSupport (wrapper)", 0);
-  __pyx_r = __pyx_pf_7pyNADIA_10partialcdi_12PyPartialCDI_26getSupport(((struct __pyx_obj_7pyNADIA_10partialcdi_PyPartialCDI *)__pyx_v_self));
-
-  /* function exit code */
-  __Pyx_RefNannyFinishContext();
-  return __pyx_r;
-}
-
-static PyObject *__pyx_pf_7pyNADIA_10partialcdi_12PyPartialCDI_26getSupport(CYTHON_UNUSED struct __pyx_obj_7pyNADIA_10partialcdi_PyPartialCDI *__pyx_v_self) {
-  CYTHON_UNUSED struct __pyx_obj_7pyNADIA_8double2d_PyDouble2D *__pyx_v_result = NULL;
-  PyObject *__pyx_r = NULL;
-  __Pyx_RefNannyDeclarations
-  PyObject *__pyx_t_1 = NULL;
-  int __pyx_lineno = 0;
-  const char *__pyx_filename = NULL;
-  int __pyx_clineno = 0;
-  __Pyx_RefNannySetupContext("getSupport", 0);
-
-  /* "pyNADIA/partialcdi.pyx":103
- *         @return The object support. (PyDouble2D)
- *         """
- *         result = PyDouble2D()             # <<<<<<<<<<<<<<
- *     def setAlgorithm(self, int alg):
- *         """!Set the algorithm.
- */
-  __pyx_t_1 = __Pyx_PyObject_Call(((PyObject *)((PyObject*)__pyx_ptype_7pyNADIA_8double2d_PyDouble2D)), __pyx_empty_tuple, NULL); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 103; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_GOTREF(__pyx_t_1);
-  __pyx_v_result = ((struct __pyx_obj_7pyNADIA_8double2d_PyDouble2D *)__pyx_t_1);
-  __pyx_t_1 = 0;
-
-  /* "pyNADIA/partialcdi.pyx":99
- *         """
- *         return self.thisptr.get_error()
- *     def getSupport(self):             # <<<<<<<<<<<<<<
- *         """! Get the support
- *         @return The object support. (PyDouble2D)
- */
-
-  /* function exit code */
-  __pyx_r = Py_None; __Pyx_INCREF(Py_None);
-  goto __pyx_L0;
-  __pyx_L1_error:;
-  __Pyx_XDECREF(__pyx_t_1);
-  __Pyx_AddTraceback("pyNADIA.partialcdi.PyPartialCDI.getSupport", __pyx_clineno, __pyx_lineno, __pyx_filename);
-  __pyx_r = NULL;
-  __pyx_L0:;
-  __Pyx_XDECREF((PyObject *)__pyx_v_result);
-  __Pyx_XGIVEREF(__pyx_r);
-  __Pyx_RefNannyFinishContext();
-  return __pyx_r;
-}
-
-/* "pyNADIA/partialcdi.pyx":104
- *         """
- *         result = PyDouble2D()
- *     def setAlgorithm(self, int alg):             # <<<<<<<<<<<<<<
- *         """!Set the algorithm.
- *         By default HIO is used. See pyNADIA.utils for the the constants used.
- */
-
-/* Python wrapper */
-static PyObject *__pyx_pw_7pyNADIA_10partialcdi_12PyPartialCDI_29setAlgorithm(PyObject *__pyx_v_self, PyObject *__pyx_arg_alg); /*proto*/
-static char __pyx_doc_7pyNADIA_10partialcdi_12PyPartialCDI_28setAlgorithm[] = "!Set the algorithm. \n        By default HIO is used. See pyNADIA.utils for the the constants used.\n        @param arg (int) The algorithm\n        ";
-static PyObject *__pyx_pw_7pyNADIA_10partialcdi_12PyPartialCDI_29setAlgorithm(PyObject *__pyx_v_self, PyObject *__pyx_arg_alg) {
-  int __pyx_v_alg;
-  int __pyx_lineno = 0;
-  const char *__pyx_filename = NULL;
-  int __pyx_clineno = 0;
-  PyObject *__pyx_r = 0;
-  __Pyx_RefNannyDeclarations
-  __Pyx_RefNannySetupContext("setAlgorithm (wrapper)", 0);
-  assert(__pyx_arg_alg); {
-    __pyx_v_alg = __Pyx_PyInt_As_int(__pyx_arg_alg); if (unlikely((__pyx_v_alg == (int)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 104; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
-  }
-  goto __pyx_L4_argument_unpacking_done;
-  __pyx_L3_error:;
-  __Pyx_AddTraceback("pyNADIA.partialcdi.PyPartialCDI.setAlgorithm", __pyx_clineno, __pyx_lineno, __pyx_filename);
-  __Pyx_RefNannyFinishContext();
-  return NULL;
-  __pyx_L4_argument_unpacking_done:;
-  __pyx_r = __pyx_pf_7pyNADIA_10partialcdi_12PyPartialCDI_28setAlgorithm(((struct __pyx_obj_7pyNADIA_10partialcdi_PyPartialCDI *)__pyx_v_self), ((int)__pyx_v_alg));
-
-  /* function exit code */
-  __Pyx_RefNannyFinishContext();
-  return __pyx_r;
-}
-
-static PyObject *__pyx_pf_7pyNADIA_10partialcdi_12PyPartialCDI_28setAlgorithm(struct __pyx_obj_7pyNADIA_10partialcdi_PyPartialCDI *__pyx_v_self, int __pyx_v_alg) {
-  PyObject *__pyx_r = NULL;
-  __Pyx_RefNannyDeclarations
-  __Pyx_RefNannySetupContext("setAlgorithm", 0);
-
-  /* "pyNADIA/partialcdi.pyx":109
- *         @param arg (int) The algorithm
- *         """
- *         self.thisptr.set_algorithm(alg)             # <<<<<<<<<<<<<<
- *     def resetBest(self):
- *         self.thisptr.reset_best()
- */
-  __pyx_v_self->thisptr->set_algorithm(__pyx_v_alg);
-
-  /* "pyNADIA/partialcdi.pyx":104
- *         """
- *         result = PyDouble2D()
- *     def setAlgorithm(self, int alg):             # <<<<<<<<<<<<<<
- *         """!Set the algorithm.
- *         By default HIO is used. See pyNADIA.utils for the the constants used.
- */
-
-  /* function exit code */
-  __pyx_r = Py_None; __Pyx_INCREF(Py_None);
-  __Pyx_XGIVEREF(__pyx_r);
-  __Pyx_RefNannyFinishContext();
-  return __pyx_r;
-}
-
-/* "pyNADIA/partialcdi.pyx":110
- *         """
- *         self.thisptr.set_algorithm(alg)
- *     def resetBest(self):             # <<<<<<<<<<<<<<
- *         self.thisptr.reset_best()
- *     def set_fftw_type(self, int type):
- */
-
-/* Python wrapper */
-static PyObject *__pyx_pw_7pyNADIA_10partialcdi_12PyPartialCDI_31resetBest(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused); /*proto*/
-static PyObject *__pyx_pw_7pyNADIA_10partialcdi_12PyPartialCDI_31resetBest(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused) {
-  PyObject *__pyx_r = 0;
-  __Pyx_RefNannyDeclarations
-  __Pyx_RefNannySetupContext("resetBest (wrapper)", 0);
-  __pyx_r = __pyx_pf_7pyNADIA_10partialcdi_12PyPartialCDI_30resetBest(((struct __pyx_obj_7pyNADIA_10partialcdi_PyPartialCDI *)__pyx_v_self));
-
-  /* function exit code */
-  __Pyx_RefNannyFinishContext();
-  return __pyx_r;
-}
-
-static PyObject *__pyx_pf_7pyNADIA_10partialcdi_12PyPartialCDI_30resetBest(struct __pyx_obj_7pyNADIA_10partialcdi_PyPartialCDI *__pyx_v_self) {
-  PyObject *__pyx_r = NULL;
-  __Pyx_RefNannyDeclarations
-  __Pyx_RefNannySetupContext("resetBest", 0);
-
-  /* "pyNADIA/partialcdi.pyx":111
- *         self.thisptr.set_algorithm(alg)
- *     def resetBest(self):
- *         self.thisptr.reset_best()             # <<<<<<<<<<<<<<
+  /* "pyNADIA/fresnelcdiwf.pyx":78
  *     def set_fftw_type(self, int type):
  *         self.thisptr.set_fftw_type(type)
- */
-  __pyx_v_self->thisptr->reset_best();
-
-  /* "pyNADIA/partialcdi.pyx":110
- *         """
- *         self.thisptr.set_algorithm(alg)
- *     def resetBest(self):             # <<<<<<<<<<<<<<
- *         self.thisptr.reset_best()
- *     def set_fftw_type(self, int type):
+ *     def multiplyFactors(self, PyComplex2D c, direction):             # <<<<<<<<<<<<<<
+ *         self.thisptr.multiply_factors(deref(c.thisptr), direction)
+ * 
  */
 
   /* function exit code */
   __pyx_r = Py_None; __Pyx_INCREF(Py_None);
+  goto __pyx_L0;
+  __pyx_L1_error:;
+  __Pyx_AddTraceback("pyNADIA.fresnelcdiwf.PyFresnelCDIWF.multiplyFactors", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __pyx_r = NULL;
+  __pyx_L0:;
   __Pyx_XGIVEREF(__pyx_r);
   __Pyx_RefNannyFinishContext();
   return __pyx_r;
 }
 
-/* "pyNADIA/partialcdi.pyx":112
- *     def resetBest(self):
- *         self.thisptr.reset_best()
- *     def set_fftw_type(self, int type):             # <<<<<<<<<<<<<<
- *         self.thisptr.set_fftw_type(type)
- */
-
-/* Python wrapper */
-static PyObject *__pyx_pw_7pyNADIA_10partialcdi_12PyPartialCDI_33set_fftw_type(PyObject *__pyx_v_self, PyObject *__pyx_arg_type); /*proto*/
-static PyObject *__pyx_pw_7pyNADIA_10partialcdi_12PyPartialCDI_33set_fftw_type(PyObject *__pyx_v_self, PyObject *__pyx_arg_type) {
-  int __pyx_v_type;
-  int __pyx_lineno = 0;
-  const char *__pyx_filename = NULL;
-  int __pyx_clineno = 0;
-  PyObject *__pyx_r = 0;
-  __Pyx_RefNannyDeclarations
-  __Pyx_RefNannySetupContext("set_fftw_type (wrapper)", 0);
-  assert(__pyx_arg_type); {
-    __pyx_v_type = __Pyx_PyInt_As_int(__pyx_arg_type); if (unlikely((__pyx_v_type == (int)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 112; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
-  }
-  goto __pyx_L4_argument_unpacking_done;
-  __pyx_L3_error:;
-  __Pyx_AddTraceback("pyNADIA.partialcdi.PyPartialCDI.set_fftw_type", __pyx_clineno, __pyx_lineno, __pyx_filename);
-  __Pyx_RefNannyFinishContext();
-  return NULL;
-  __pyx_L4_argument_unpacking_done:;
-  __pyx_r = __pyx_pf_7pyNADIA_10partialcdi_12PyPartialCDI_32set_fftw_type(((struct __pyx_obj_7pyNADIA_10partialcdi_PyPartialCDI *)__pyx_v_self), ((int)__pyx_v_type));
-
-  /* function exit code */
-  __Pyx_RefNannyFinishContext();
-  return __pyx_r;
-}
-
-static PyObject *__pyx_pf_7pyNADIA_10partialcdi_12PyPartialCDI_32set_fftw_type(struct __pyx_obj_7pyNADIA_10partialcdi_PyPartialCDI *__pyx_v_self, int __pyx_v_type) {
-  PyObject *__pyx_r = NULL;
-  __Pyx_RefNannyDeclarations
-  __Pyx_RefNannySetupContext("set_fftw_type", 0);
-
-  /* "pyNADIA/partialcdi.pyx":113
- *         self.thisptr.reset_best()
- *     def set_fftw_type(self, int type):
- *         self.thisptr.set_fftw_type(type)             # <<<<<<<<<<<<<<
- */
-  __pyx_v_self->thisptr->set_fftw_type(__pyx_v_type);
-
-  /* "pyNADIA/partialcdi.pyx":112
- *     def resetBest(self):
- *         self.thisptr.reset_best()
- *     def set_fftw_type(self, int type):             # <<<<<<<<<<<<<<
- *         self.thisptr.set_fftw_type(type)
- */
-
-  /* function exit code */
-  __pyx_r = Py_None; __Pyx_INCREF(Py_None);
-  __Pyx_XGIVEREF(__pyx_r);
-  __Pyx_RefNannyFinishContext();
-  return __pyx_r;
-}
-
-static PyObject *__pyx_tp_new_7pyNADIA_10partialcdi_PyPartialCDI(PyTypeObject *t, PyObject *a, PyObject *k) {
+static PyObject *__pyx_tp_new_7pyNADIA_12fresnelcdiwf_PyFresnelCDIWF(PyTypeObject *t, PyObject *a, PyObject *k) {
   PyObject *o;
   if (likely((t->tp_flags & Py_TPFLAGS_IS_ABSTRACT) == 0)) {
     o = (*t->tp_alloc)(t, 0);
@@ -2318,13 +2026,13 @@ static PyObject *__pyx_tp_new_7pyNADIA_10partialcdi_PyPartialCDI(PyTypeObject *t
     o = (PyObject *) PyBaseObject_Type.tp_new(t, __pyx_empty_tuple, 0);
   }
   if (unlikely(!o)) return 0;
-  if (unlikely(__pyx_pw_7pyNADIA_10partialcdi_12PyPartialCDI_1__cinit__(o, a, k) < 0)) {
+  if (unlikely(__pyx_pw_7pyNADIA_12fresnelcdiwf_14PyFresnelCDIWF_1__cinit__(o, a, k) < 0)) {
     Py_DECREF(o); o = 0;
   }
   return o;
 }
 
-static void __pyx_tp_dealloc_7pyNADIA_10partialcdi_PyPartialCDI(PyObject *o) {
+static void __pyx_tp_dealloc_7pyNADIA_12fresnelcdiwf_PyFresnelCDIWF(PyObject *o) {
   #if PY_VERSION_HEX >= 0x030400a1
   if (unlikely(Py_TYPE(o)->tp_finalize) && (!PyType_IS_GC(Py_TYPE(o)) || !_PyGC_FINALIZED(o))) {
     if (PyObject_CallFinalizerFromDealloc(o)) return;
@@ -2334,38 +2042,34 @@ static void __pyx_tp_dealloc_7pyNADIA_10partialcdi_PyPartialCDI(PyObject *o) {
     PyObject *etype, *eval, *etb;
     PyErr_Fetch(&etype, &eval, &etb);
     ++Py_REFCNT(o);
-    __pyx_pw_7pyNADIA_10partialcdi_12PyPartialCDI_3__dealloc__(o);
+    __pyx_pw_7pyNADIA_12fresnelcdiwf_14PyFresnelCDIWF_3__dealloc__(o);
     --Py_REFCNT(o);
     PyErr_Restore(etype, eval, etb);
   }
   (*Py_TYPE(o)->tp_free)(o);
 }
 
-static PyMethodDef __pyx_methods_7pyNADIA_10partialcdi_PyPartialCDI[] = {
-  {__Pyx_NAMESTR("initialiseEstimate"), (PyCFunction)__pyx_pw_7pyNADIA_10partialcdi_12PyPartialCDI_5initialiseEstimate, METH_VARARGS|METH_KEYWORDS, __Pyx_DOCSTR(__pyx_doc_7pyNADIA_10partialcdi_12PyPartialCDI_4initialiseEstimate)},
-  {__Pyx_NAMESTR("iterate"), (PyCFunction)__pyx_pw_7pyNADIA_10partialcdi_12PyPartialCDI_7iterate, METH_NOARGS, __Pyx_DOCSTR(__pyx_doc_7pyNADIA_10partialcdi_12PyPartialCDI_6iterate)},
-  {__Pyx_NAMESTR("getTransmission"), (PyCFunction)__pyx_pw_7pyNADIA_10partialcdi_12PyPartialCDI_9getTransmission, METH_NOARGS, __Pyx_DOCSTR(__pyx_doc_7pyNADIA_10partialcdi_12PyPartialCDI_8getTransmission)},
-  {__Pyx_NAMESTR("setTransmission"), (PyCFunction)__pyx_pw_7pyNADIA_10partialcdi_12PyPartialCDI_11setTransmission, METH_O, __Pyx_DOCSTR(__pyx_doc_7pyNADIA_10partialcdi_12PyPartialCDI_10setTransmission)},
-  {__Pyx_NAMESTR("setThreshold"), (PyCFunction)__pyx_pw_7pyNADIA_10partialcdi_12PyPartialCDI_13setThreshold, METH_O, __Pyx_DOCSTR(__pyx_doc_7pyNADIA_10partialcdi_12PyPartialCDI_12setThreshold)},
-  {__Pyx_NAMESTR("getMode"), (PyCFunction)__pyx_pw_7pyNADIA_10partialcdi_12PyPartialCDI_15getMode, METH_O, __Pyx_DOCSTR(__pyx_doc_7pyNADIA_10partialcdi_12PyPartialCDI_14getMode)},
-  {__Pyx_NAMESTR("getBestResult"), (PyCFunction)__pyx_pw_7pyNADIA_10partialcdi_12PyPartialCDI_17getBestResult, METH_VARARGS|METH_KEYWORDS, __Pyx_DOCSTR(__pyx_doc_7pyNADIA_10partialcdi_12PyPartialCDI_16getBestResult)},
-  {__Pyx_NAMESTR("setSupport"), (PyCFunction)__pyx_pw_7pyNADIA_10partialcdi_12PyPartialCDI_19setSupport, METH_VARARGS|METH_KEYWORDS, __Pyx_DOCSTR(__pyx_doc_7pyNADIA_10partialcdi_12PyPartialCDI_18setSupport)},
-  {__Pyx_NAMESTR("setIntensity"), (PyCFunction)__pyx_pw_7pyNADIA_10partialcdi_12PyPartialCDI_21setIntensity, METH_O, __Pyx_DOCSTR(__pyx_doc_7pyNADIA_10partialcdi_12PyPartialCDI_20setIntensity)},
-  {__Pyx_NAMESTR("setBeamStop"), (PyCFunction)__pyx_pw_7pyNADIA_10partialcdi_12PyPartialCDI_23setBeamStop, METH_O, __Pyx_DOCSTR(__pyx_doc_7pyNADIA_10partialcdi_12PyPartialCDI_22setBeamStop)},
-  {__Pyx_NAMESTR("getError"), (PyCFunction)__pyx_pw_7pyNADIA_10partialcdi_12PyPartialCDI_25getError, METH_NOARGS, __Pyx_DOCSTR(__pyx_doc_7pyNADIA_10partialcdi_12PyPartialCDI_24getError)},
-  {__Pyx_NAMESTR("getSupport"), (PyCFunction)__pyx_pw_7pyNADIA_10partialcdi_12PyPartialCDI_27getSupport, METH_NOARGS, __Pyx_DOCSTR(__pyx_doc_7pyNADIA_10partialcdi_12PyPartialCDI_26getSupport)},
-  {__Pyx_NAMESTR("setAlgorithm"), (PyCFunction)__pyx_pw_7pyNADIA_10partialcdi_12PyPartialCDI_29setAlgorithm, METH_O, __Pyx_DOCSTR(__pyx_doc_7pyNADIA_10partialcdi_12PyPartialCDI_28setAlgorithm)},
-  {__Pyx_NAMESTR("resetBest"), (PyCFunction)__pyx_pw_7pyNADIA_10partialcdi_12PyPartialCDI_31resetBest, METH_NOARGS, __Pyx_DOCSTR(0)},
-  {__Pyx_NAMESTR("set_fftw_type"), (PyCFunction)__pyx_pw_7pyNADIA_10partialcdi_12PyPartialCDI_33set_fftw_type, METH_O, __Pyx_DOCSTR(0)},
+static PyMethodDef __pyx_methods_7pyNADIA_12fresnelcdiwf_PyFresnelCDIWF[] = {
+  {__Pyx_NAMESTR("initialiseEstimate"), (PyCFunction)__pyx_pw_7pyNADIA_12fresnelcdiwf_14PyFresnelCDIWF_5initialiseEstimate, METH_VARARGS|METH_KEYWORDS, __Pyx_DOCSTR(__pyx_doc_7pyNADIA_12fresnelcdiwf_14PyFresnelCDIWF_4initialiseEstimate)},
+  {__Pyx_NAMESTR("iterate"), (PyCFunction)__pyx_pw_7pyNADIA_12fresnelcdiwf_14PyFresnelCDIWF_7iterate, METH_NOARGS, __Pyx_DOCSTR(__pyx_doc_7pyNADIA_12fresnelcdiwf_14PyFresnelCDIWF_6iterate)},
+  {__Pyx_NAMESTR("getBestResult"), (PyCFunction)__pyx_pw_7pyNADIA_12fresnelcdiwf_14PyFresnelCDIWF_9getBestResult, METH_VARARGS|METH_KEYWORDS, __Pyx_DOCSTR(__pyx_doc_7pyNADIA_12fresnelcdiwf_14PyFresnelCDIWF_8getBestResult)},
+  {__Pyx_NAMESTR("setSupport"), (PyCFunction)__pyx_pw_7pyNADIA_12fresnelcdiwf_14PyFresnelCDIWF_11setSupport, METH_VARARGS|METH_KEYWORDS, __Pyx_DOCSTR(__pyx_doc_7pyNADIA_12fresnelcdiwf_14PyFresnelCDIWF_10setSupport)},
+  {__Pyx_NAMESTR("setIntensity"), (PyCFunction)__pyx_pw_7pyNADIA_12fresnelcdiwf_14PyFresnelCDIWF_13setIntensity, METH_O, __Pyx_DOCSTR(__pyx_doc_7pyNADIA_12fresnelcdiwf_14PyFresnelCDIWF_12setIntensity)},
+  {__Pyx_NAMESTR("setBeamStop"), (PyCFunction)__pyx_pw_7pyNADIA_12fresnelcdiwf_14PyFresnelCDIWF_15setBeamStop, METH_O, __Pyx_DOCSTR(__pyx_doc_7pyNADIA_12fresnelcdiwf_14PyFresnelCDIWF_14setBeamStop)},
+  {__Pyx_NAMESTR("getError"), (PyCFunction)__pyx_pw_7pyNADIA_12fresnelcdiwf_14PyFresnelCDIWF_17getError, METH_NOARGS, __Pyx_DOCSTR(__pyx_doc_7pyNADIA_12fresnelcdiwf_14PyFresnelCDIWF_16getError)},
+  {__Pyx_NAMESTR("getSupport"), (PyCFunction)__pyx_pw_7pyNADIA_12fresnelcdiwf_14PyFresnelCDIWF_19getSupport, METH_NOARGS, __Pyx_DOCSTR(__pyx_doc_7pyNADIA_12fresnelcdiwf_14PyFresnelCDIWF_18getSupport)},
+  {__Pyx_NAMESTR("resetBest"), (PyCFunction)__pyx_pw_7pyNADIA_12fresnelcdiwf_14PyFresnelCDIWF_21resetBest, METH_NOARGS, __Pyx_DOCSTR(0)},
+  {__Pyx_NAMESTR("set_fftw_type"), (PyCFunction)__pyx_pw_7pyNADIA_12fresnelcdiwf_14PyFresnelCDIWF_23set_fftw_type, METH_O, __Pyx_DOCSTR(0)},
+  {__Pyx_NAMESTR("multiplyFactors"), (PyCFunction)__pyx_pw_7pyNADIA_12fresnelcdiwf_14PyFresnelCDIWF_25multiplyFactors, METH_VARARGS|METH_KEYWORDS, __Pyx_DOCSTR(0)},
   {0, 0, 0, 0}
 };
 
-static PyTypeObject __pyx_type_7pyNADIA_10partialcdi_PyPartialCDI = {
+static PyTypeObject __pyx_type_7pyNADIA_12fresnelcdiwf_PyFresnelCDIWF = {
   PyVarObject_HEAD_INIT(0, 0)
-  __Pyx_NAMESTR("pyNADIA.partialcdi.PyPartialCDI"), /*tp_name*/
-  sizeof(struct __pyx_obj_7pyNADIA_10partialcdi_PyPartialCDI), /*tp_basicsize*/
+  __Pyx_NAMESTR("pyNADIA.fresnelcdiwf.PyFresnelCDIWF"), /*tp_name*/
+  sizeof(struct __pyx_obj_7pyNADIA_12fresnelcdiwf_PyFresnelCDIWF), /*tp_basicsize*/
   0, /*tp_itemsize*/
-  __pyx_tp_dealloc_7pyNADIA_10partialcdi_PyPartialCDI, /*tp_dealloc*/
+  __pyx_tp_dealloc_7pyNADIA_12fresnelcdiwf_PyFresnelCDIWF, /*tp_dealloc*/
   0, /*tp_print*/
   0, /*tp_getattr*/
   0, /*tp_setattr*/
@@ -2385,14 +2089,14 @@ static PyTypeObject __pyx_type_7pyNADIA_10partialcdi_PyPartialCDI = {
   0, /*tp_setattro*/
   0, /*tp_as_buffer*/
   Py_TPFLAGS_DEFAULT|Py_TPFLAGS_HAVE_VERSION_TAG|Py_TPFLAGS_CHECKTYPES|Py_TPFLAGS_HAVE_NEWBUFFER|Py_TPFLAGS_BASETYPE, /*tp_flags*/
-  __Pyx_DOCSTR("! PyPartialCDI class.\n    PyPartialCDI is the python wrapper for the PartialCDI class. In general there is a Python method corresponding to each public method\n    in the C++ class. This documentation should detail the parameters and return values for the python methods. \n    For more details on the purpose of each function see the documentation in PartialCDI (or BaseCDI for inherited methods).\n    "), /*tp_doc*/
+  __Pyx_DOCSTR("! PyFresnelCDIWF class.\n    PyFresnelCDIWF is the python wrapper for the FresenelCDI_WF class. In general there is a Python method corresponding to each public method\n    in the C++ class. This documentation should detail the parameters and return values for the python methods. \n    For more details on the purpose of each function see the documentation in FresnelCDI_WF (or BaseCDI for inherited methods).\n    "), /*tp_doc*/
   0, /*tp_traverse*/
   0, /*tp_clear*/
   0, /*tp_richcompare*/
   0, /*tp_weaklistoffset*/
   0, /*tp_iter*/
   0, /*tp_iternext*/
-  __pyx_methods_7pyNADIA_10partialcdi_PyPartialCDI, /*tp_methods*/
+  __pyx_methods_7pyNADIA_12fresnelcdiwf_PyFresnelCDIWF, /*tp_methods*/
   0, /*tp_members*/
   0, /*tp_getset*/
   0, /*tp_base*/
@@ -2402,7 +2106,7 @@ static PyTypeObject __pyx_type_7pyNADIA_10partialcdi_PyPartialCDI = {
   0, /*tp_dictoffset*/
   0, /*tp_init*/
   0, /*tp_alloc*/
-  __pyx_tp_new_7pyNADIA_10partialcdi_PyPartialCDI, /*tp_new*/
+  __pyx_tp_new_7pyNADIA_12fresnelcdiwf_PyFresnelCDIWF, /*tp_new*/
   0, /*tp_free*/
   0, /*tp_is_gc*/
   0, /*tp_bases*/
@@ -2430,8 +2134,8 @@ static struct PyModuleDef __pyx_moduledef = {
   #else
     PyModuleDef_HEAD_INIT,
   #endif
-    __Pyx_NAMESTR("partialcdi"),
-    __Pyx_DOCSTR(__pyx_k_Package_for_wrapping_the_Partia), /* m_doc */
+    __Pyx_NAMESTR("fresnelcdiwf"),
+    __Pyx_DOCSTR(__pyx_k_Package_for_wrapping_the_Fresne), /* m_doc */
     -1, /* m_size */
     __pyx_methods /* m_methods */,
     NULL, /* m_reload */
@@ -2442,23 +2146,21 @@ static struct PyModuleDef __pyx_moduledef = {
 #endif
 
 static __Pyx_StringTabEntry __pyx_string_tab[] = {
-  {&__pyx_n_s_energy, __pyx_k_energy, sizeof(__pyx_k_energy), 0, 0, 1, 1},
+  {&__pyx_n_s_beam_wavelength, __pyx_k_beam_wavelength, sizeof(__pyx_k_beam_wavelength), 0, 0, 1, 1},
+  {&__pyx_n_s_c, __pyx_k_c, sizeof(__pyx_k_c), 0, 0, 1, 1},
+  {&__pyx_n_s_direction, __pyx_k_direction, sizeof(__pyx_k_direction), 0, 0, 1, 1},
   {&__pyx_n_s_error, __pyx_k_error, sizeof(__pyx_k_error), 0, 0, 1, 1},
+  {&__pyx_n_s_focal_detector_length, __pyx_k_focal_detector_length, sizeof(__pyx_k_focal_detector_length), 0, 0, 1, 1},
   {&__pyx_n_s_index, __pyx_k_index, sizeof(__pyx_k_index), 0, 0, 1, 1},
-  {&__pyx_n_s_lcx, __pyx_k_lcx, sizeof(__pyx_k_lcx), 0, 0, 1, 1},
-  {&__pyx_n_s_lcy, __pyx_k_lcy, sizeof(__pyx_k_lcy), 0, 0, 1, 1},
   {&__pyx_n_s_main, __pyx_k_main, sizeof(__pyx_k_main), 0, 0, 1, 1},
   {&__pyx_n_s_n_best, __pyx_k_n_best, sizeof(__pyx_k_n_best), 0, 0, 1, 1},
-  {&__pyx_n_s_nleg, __pyx_k_nleg, sizeof(__pyx_k_nleg), 0, 0, 1, 1},
-  {&__pyx_n_s_nmode, __pyx_k_nmode, sizeof(__pyx_k_nmode), 0, 0, 1, 1},
   {&__pyx_n_s_object_estimate, __pyx_k_object_estimate, sizeof(__pyx_k_object_estimate), 0, 0, 1, 1},
-  {&__pyx_n_s_pxsize, __pyx_k_pxsize, sizeof(__pyx_k_pxsize), 0, 0, 1, 1},
-  {&__pyx_n_s_pysize, __pyx_k_pysize, sizeof(__pyx_k_pysize), 0, 0, 1, 1},
+  {&__pyx_n_s_pixel_size, __pyx_k_pixel_size, sizeof(__pyx_k_pixel_size), 0, 0, 1, 1},
   {&__pyx_n_s_seed, __pyx_k_seed, sizeof(__pyx_k_seed), 0, 0, 1, 1},
-  {&__pyx_n_s_soften, __pyx_k_soften, sizeof(__pyx_k_soften), 0, 0, 1, 1},
-  {&__pyx_n_s_support, __pyx_k_support, sizeof(__pyx_k_support), 0, 0, 1, 1},
+  {&__pyx_n_s_size, __pyx_k_size, sizeof(__pyx_k_size), 0, 0, 1, 1},
   {&__pyx_n_s_test, __pyx_k_test, sizeof(__pyx_k_test), 0, 0, 1, 1},
-  {&__pyx_n_s_zsd, __pyx_k_zsd, sizeof(__pyx_k_zsd), 0, 0, 1, 1},
+  {&__pyx_n_s_z_factor, __pyx_k_z_factor, sizeof(__pyx_k_z_factor), 0, 0, 1, 1},
+  {&__pyx_n_s_zone_focal_length, __pyx_k_zone_focal_length, sizeof(__pyx_k_zone_focal_length), 0, 0, 1, 1},
   {0, 0, 0, 0, 0, 0, 0}
 };
 static int __Pyx_InitCachedBuiltins(void) {
@@ -2474,6 +2176,7 @@ static int __Pyx_InitCachedConstants(void) {
 
 static int __Pyx_InitGlobals(void) {
   if (__Pyx_InitStrings(__pyx_string_tab) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 1; __pyx_clineno = __LINE__; goto __pyx_L1_error;};
+  __pyx_float_1_01 = PyFloat_FromDouble(1.01); if (unlikely(!__pyx_float_1_01)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 1; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __pyx_int_0 = PyInt_FromLong(0); if (unlikely(!__pyx_int_0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 1; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   return 0;
   __pyx_L1_error:;
@@ -2481,11 +2184,11 @@ static int __Pyx_InitGlobals(void) {
 }
 
 #if PY_MAJOR_VERSION < 3
-PyMODINIT_FUNC initpartialcdi(void); /*proto*/
-PyMODINIT_FUNC initpartialcdi(void)
+PyMODINIT_FUNC initfresnelcdiwf(void); /*proto*/
+PyMODINIT_FUNC initfresnelcdiwf(void)
 #else
-PyMODINIT_FUNC PyInit_partialcdi(void); /*proto*/
-PyMODINIT_FUNC PyInit_partialcdi(void)
+PyMODINIT_FUNC PyInit_fresnelcdiwf(void); /*proto*/
+PyMODINIT_FUNC PyInit_fresnelcdiwf(void)
 #endif
 {
   PyObject *__pyx_t_1 = NULL;
@@ -2502,7 +2205,7 @@ PyMODINIT_FUNC PyInit_partialcdi(void)
           Py_FatalError("failed to import 'refnanny' module");
   }
   #endif
-  __Pyx_RefNannySetupContext("PyMODINIT_FUNC PyInit_partialcdi(void)", 0);
+  __Pyx_RefNannySetupContext("PyMODINIT_FUNC PyInit_fresnelcdiwf(void)", 0);
   if ( __Pyx_check_binary_version() < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 1; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __pyx_empty_tuple = PyTuple_New(0); if (unlikely(!__pyx_empty_tuple)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 1; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __pyx_empty_bytes = PyBytes_FromStringAndSize("", 0); if (unlikely(!__pyx_empty_bytes)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 1; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
@@ -2524,7 +2227,7 @@ PyMODINIT_FUNC PyInit_partialcdi(void)
   #endif
   /*--- Module creation code ---*/
   #if PY_MAJOR_VERSION < 3
-  __pyx_m = Py_InitModule4(__Pyx_NAMESTR("partialcdi"), __pyx_methods, __Pyx_DOCSTR(__pyx_k_Package_for_wrapping_the_Partia), 0, PYTHON_API_VERSION); Py_XINCREF(__pyx_m);
+  __pyx_m = Py_InitModule4(__Pyx_NAMESTR("fresnelcdiwf"), __pyx_methods, __Pyx_DOCSTR(__pyx_k_Package_for_wrapping_the_Fresne), 0, PYTHON_API_VERSION); Py_XINCREF(__pyx_m);
   #else
   __pyx_m = PyModule_Create(&__pyx_moduledef);
   #endif
@@ -2541,14 +2244,14 @@ PyMODINIT_FUNC PyInit_partialcdi(void)
   #if PY_MAJOR_VERSION < 3 && (__PYX_DEFAULT_STRING_ENCODING_IS_ASCII || __PYX_DEFAULT_STRING_ENCODING_IS_DEFAULT)
   if (__Pyx_init_sys_getdefaultencoding_params() < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 1; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   #endif
-  if (__pyx_module_is_main_pyNADIA__partialcdi) {
+  if (__pyx_module_is_main_pyNADIA__fresnelcdiwf) {
     if (__Pyx_SetAttrString(__pyx_m, "__name__", __pyx_n_s_main) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 1; __pyx_clineno = __LINE__; goto __pyx_L1_error;};
   }
   #if PY_MAJOR_VERSION >= 3
   {
     PyObject *modules = PyImport_GetModuleDict(); if (unlikely(!modules)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 1; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-    if (!PyDict_GetItemString(modules, "pyNADIA.partialcdi")) {
-      if (unlikely(PyDict_SetItemString(modules, "pyNADIA.partialcdi", __pyx_m) < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 1; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    if (!PyDict_GetItemString(modules, "pyNADIA.fresnelcdiwf")) {
+      if (unlikely(PyDict_SetItemString(modules, "pyNADIA.fresnelcdiwf", __pyx_m) < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 1; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     }
   }
   #endif
@@ -2560,10 +2263,10 @@ PyMODINIT_FUNC PyInit_partialcdi(void)
   /*--- Variable export code ---*/
   /*--- Function export code ---*/
   /*--- Type init code ---*/
-  if (PyType_Ready(&__pyx_type_7pyNADIA_10partialcdi_PyPartialCDI) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 14; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __pyx_type_7pyNADIA_10partialcdi_PyPartialCDI.tp_print = 0;
-  if (__Pyx_SetAttrString(__pyx_m, "PyPartialCDI", (PyObject *)&__pyx_type_7pyNADIA_10partialcdi_PyPartialCDI) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 14; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __pyx_ptype_7pyNADIA_10partialcdi_PyPartialCDI = &__pyx_type_7pyNADIA_10partialcdi_PyPartialCDI;
+  if (PyType_Ready(&__pyx_type_7pyNADIA_12fresnelcdiwf_PyFresnelCDIWF) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 14; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_type_7pyNADIA_12fresnelcdiwf_PyFresnelCDIWF.tp_print = 0;
+  if (__Pyx_SetAttrString(__pyx_m, "PyFresnelCDIWF", (PyObject *)&__pyx_type_7pyNADIA_12fresnelcdiwf_PyFresnelCDIWF) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 14; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_ptype_7pyNADIA_12fresnelcdiwf_PyFresnelCDIWF = &__pyx_type_7pyNADIA_12fresnelcdiwf_PyFresnelCDIWF;
   /*--- Type import code ---*/
   __pyx_ptype_7pyNADIA_8double2d_PyDouble2D = __Pyx_ImportType("pyNADIA.double2d", "PyDouble2D", sizeof(struct __pyx_obj_7pyNADIA_8double2d_PyDouble2D), 1); if (unlikely(!__pyx_ptype_7pyNADIA_8double2d_PyDouble2D)) {__pyx_filename = __pyx_f[1]; __pyx_lineno = 29; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __pyx_ptype_7pyNADIA_9complex2d_PyComplex2D = __Pyx_ImportType("pyNADIA.complex2d", "PyComplex2D", sizeof(struct __pyx_obj_7pyNADIA_9complex2d_PyComplex2D), 1); if (unlikely(!__pyx_ptype_7pyNADIA_9complex2d_PyComplex2D)) {__pyx_filename = __pyx_f[2]; __pyx_lineno = 52; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
@@ -2574,9 +2277,9 @@ PyMODINIT_FUNC PyInit_partialcdi(void)
   /*--- Function import code ---*/
   /*--- Execution code ---*/
 
-  /* "pyNADIA/partialcdi.pyx":1
+  /* "pyNADIA/fresnelcdiwf.pyx":1
  * """!             # <<<<<<<<<<<<<<
- * Package for wrapping the PartialCDI class.
+ * Package for wrapping the FresnelCDI_WF class.
  * """
  */
   __pyx_t_1 = PyDict_New(); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 1; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
@@ -2587,10 +2290,10 @@ PyMODINIT_FUNC PyInit_partialcdi(void)
   __pyx_L1_error:;
   __Pyx_XDECREF(__pyx_t_1);
   if (__pyx_m) {
-    __Pyx_AddTraceback("init pyNADIA.partialcdi", __pyx_clineno, __pyx_lineno, __pyx_filename);
+    __Pyx_AddTraceback("init pyNADIA.fresnelcdiwf", __pyx_clineno, __pyx_lineno, __pyx_filename);
     Py_DECREF(__pyx_m); __pyx_m = 0;
   } else if (!PyErr_Occurred()) {
-    PyErr_SetString(PyExc_ImportError, "init pyNADIA.partialcdi");
+    PyErr_SetString(PyExc_ImportError, "init pyNADIA.fresnelcdiwf");
   }
   __pyx_L0:;
   __Pyx_RefNannyFinishContext();
@@ -2917,106 +2620,6 @@ static CYTHON_INLINE int __Pyx_PyInt_As_int(PyObject *x) {
         PyObject *tmp = __Pyx_PyNumber_Int(x);
         if (!tmp) return (int) -1;
         val = __Pyx_PyInt_As_int(tmp);
-        Py_DECREF(tmp);
-        return val;
-    }
-}
-
-#if CYTHON_COMPILING_IN_CPYTHON && PY_MAJOR_VERSION >= 3
- #if CYTHON_USE_PYLONG_INTERNALS
-  #include "longintrepr.h"
- #endif
-#endif
-static CYTHON_INLINE unsigned int __Pyx_PyInt_As_unsigned_int(PyObject *x) {
-    const unsigned int neg_one = (unsigned int) -1, const_zero = 0;
-    const int is_unsigned = neg_one > const_zero;
-#if PY_MAJOR_VERSION < 3
-    if (likely(PyInt_Check(x))) {
-        if (sizeof(unsigned int) < sizeof(long)) {
-            __PYX_VERIFY_RETURN_INT(unsigned int, long, PyInt_AS_LONG)
-        } else {
-            long val = PyInt_AS_LONG(x);
-            if (is_unsigned && unlikely(val < 0)) {
-                PyErr_SetString(PyExc_OverflowError,
-                                "can't convert negative value to unsigned int");
-                return (unsigned int) -1;
-            }
-            return (unsigned int) val;
-        }
-    } else
-#endif
-    if (likely(PyLong_Check(x))) {
-        if (is_unsigned) {
-#if CYTHON_COMPILING_IN_CPYTHON && PY_MAJOR_VERSION >= 3
- #if CYTHON_USE_PYLONG_INTERNALS
-            if (sizeof(digit) <= sizeof(unsigned int)) {
-                switch (Py_SIZE(x)) {
-                    case  0: return 0;
-                    case  1: return (unsigned int) ((PyLongObject*)x)->ob_digit[0];
-                }
-            }
- #endif
-#endif
-            if (unlikely(Py_SIZE(x) < 0)) {
-                PyErr_SetString(PyExc_OverflowError,
-                                "can't convert negative value to unsigned int");
-                return (unsigned int) -1;
-            }
-            if (sizeof(unsigned int) <= sizeof(unsigned long)) {
-                __PYX_VERIFY_RETURN_INT(unsigned int, unsigned long, PyLong_AsUnsignedLong)
-            } else if (sizeof(unsigned int) <= sizeof(unsigned long long)) {
-                __PYX_VERIFY_RETURN_INT(unsigned int, unsigned long long, PyLong_AsUnsignedLongLong)
-            }
-        } else {
-#if CYTHON_COMPILING_IN_CPYTHON && PY_MAJOR_VERSION >= 3
- #if CYTHON_USE_PYLONG_INTERNALS
-            if (sizeof(digit) <= sizeof(unsigned int)) {
-                switch (Py_SIZE(x)) {
-                    case  0: return 0;
-                    case  1: return +(unsigned int) ((PyLongObject*)x)->ob_digit[0];
-                    case -1: return -(unsigned int) ((PyLongObject*)x)->ob_digit[0];
-                }
-            }
- #endif
-#endif
-            if (sizeof(unsigned int) <= sizeof(long)) {
-                __PYX_VERIFY_RETURN_INT(unsigned int, long, PyLong_AsLong)
-            } else if (sizeof(unsigned int) <= sizeof(long long)) {
-                __PYX_VERIFY_RETURN_INT(unsigned int, long long, PyLong_AsLongLong)
-            }
-        }
-        {
-#if CYTHON_COMPILING_IN_PYPY && !defined(_PyLong_AsByteArray)
-            PyErr_SetString(PyExc_RuntimeError,
-                            "_PyLong_AsByteArray() not available in PyPy, cannot convert large numbers");
-#else
-            unsigned int val;
-            PyObject *v = __Pyx_PyNumber_Int(x);
- #if PY_MAJOR_VERSION < 3
-            if (likely(v) && !PyLong_Check(v)) {
-                PyObject *tmp = v;
-                v = PyNumber_Long(tmp);
-                Py_DECREF(tmp);
-            }
- #endif
-            if (likely(v)) {
-                int one = 1; int is_little = (int)*(unsigned char *)&one;
-                unsigned char *bytes = (unsigned char *)&val;
-                int ret = _PyLong_AsByteArray((PyLongObject *)v,
-                                              bytes, sizeof(val),
-                                              is_little, !is_unsigned);
-                Py_DECREF(v);
-                if (likely(!ret))
-                    return val;
-            }
-#endif
-            return (unsigned int) -1;
-        }
-    } else {
-        unsigned int val;
-        PyObject *tmp = __Pyx_PyNumber_Int(x);
-        if (!tmp) return (unsigned int) -1;
-        val = __Pyx_PyInt_As_unsigned_int(tmp);
         Py_DECREF(tmp);
         return val;
     }
