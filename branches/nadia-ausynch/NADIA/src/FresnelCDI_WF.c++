@@ -3,10 +3,10 @@
 #include <math.h>
 #include <string>
 #include <stdlib.h>
-#include <cstdlib> 
+#include <cstdlib>
 #include <Complex_2D.h>
 #include <FresnelCDI_WF.h>
-#include <io.h> 
+#include <io.h>
 #include <sstream>
 
 using namespace std;
@@ -59,7 +59,7 @@ FresnelCDI_WF::FresnelCDI_WF(Complex_2D & initial_guess,
 
     }
   }
-  
+
   /**  Double_2D result(nx,ny);
   forward_coefficients_const->get_2d(PHASE,result);
   write_ppm("forward_coefficients_phase.ppm",result);**/
@@ -68,7 +68,7 @@ FresnelCDI_WF::FresnelCDI_WF(Complex_2D & initial_guess,
 
 
 void FresnelCDI_WF::multiply_factors(Complex_2D & c, int direction){
-  
+
   double x_mid = (nx-1)/2.0;
   double y_mid = (ny-1)/2.0;
 
@@ -87,10 +87,10 @@ void FresnelCDI_WF::multiply_factors(Complex_2D & c, int direction){
 
       coef_real = coefficient.get_real(i_,j_);
       coef_imag = direction*coefficient.get_imag(i_,j_);
-      
+
       c.set_real(i,j,old_real*coef_real - old_imag*coef_imag);
       c.set_imag(i,j,old_imag*coef_real + old_real*coef_imag);
-     
+
     }
   }
 }
@@ -103,13 +103,13 @@ void FresnelCDI_WF::initialise_estimate(int seed){
   for(int i=0; i<nx; i++){
     for(int j=0; j<ny; j++){
       if(!support.get(i,j)){ //enforce the support condition on the inital guess
-	complex.set_value(i,j,REAL,0); 
+	complex.set_value(i,j,REAL,0);
 	complex.set_value(i,j,IMAG,0);
       }
       else{
 	//	double random = (65000.0*rand()/(double) RAND_MAX);
-	double mag = intensity_sqrt.get(i,j); 
-	complex.set_value(i,j,REAL,mag); 
+	double mag = intensity_sqrt.get(i,j);
+	complex.set_value(i,j,REAL,mag);
 	complex.set_value(i,j,IMAG,0);
       }
     }
@@ -121,30 +121,31 @@ void FresnelCDI_WF::initialise_estimate(int seed){
 
 int FresnelCDI_WF::iterate(){
 
-  //Double_2D result(nx,ny);
-  
-  // complex.get_2d(PHASE,result);
-  // write_ppm("b0.ppm",result);
+
+  Double_2D result(nx,ny);
+
+ // complex.get_2d(PHASE,result);
+//  write_ppm("b0.ppm",result);
 
   propagate_from_detector(complex);
 
-  // complex.get_2d(PHASE,result);
-  // write_ppm("b1.ppm",result);
+ // complex.get_2d(PHASE,result);
+  //write_ppm("b1.ppm",result);
 
   apply_support(complex);
 
-  //  complex.get_2d(PHASE,result);
-  // write_ppm("b3.ppm",result);
-  
+  //complex.get_2d(PHASE,result);
+  //write_ppm("b3.ppm",result);
+
   propagate_to_detector(complex);
 
-  //  complex.get_2d(PHASE,result);
-  // write_ppm("b4.ppm",result);
-  
+ // complex.get_2d(PHASE,result);
+ // write_ppm("b4.ppm",result);
+
   scale_intensity(complex);
 
-  //  complex.get_2d(PHASE,result);
-  // write_ppm("b5.ppm",result);
+  //complex.get_2d(PHASE,result);
+  //write_ppm("b5.ppm",result);
 
   return SUCCESS;
 }
@@ -152,11 +153,11 @@ int FresnelCDI_WF::iterate(){
 void FresnelCDI_WF::propagate_from_detector(Complex_2D & c){
   //go to the focal plane
   c.perform_backward_fft();
-  c.invert(true);  
+  c.invert(true);
   multiply_factors(c, BACKWARD);
   //  c.multiply(backward_coefficient);
 
-  //go back to zone plate plane. 
+  //go back to zone plate plane.
   c.perform_backward_fft();
 
 }
@@ -180,7 +181,7 @@ void FresnelCDI_WF::set_support(double z_diameter, double size){
   double delta_z = (zone_to_focal_length/focal_to_detector_length)*pixel_length;
 
   for(int i=0; i<nx; i++){
-    for(int j=0; j<ny; j++){ 
+    for(int j=0; j<ny; j++){
       //calculate the distance from the center
       double i_ = i-center_pixel;
       double j_ = j-center_pixel;

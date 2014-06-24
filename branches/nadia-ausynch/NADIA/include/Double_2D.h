@@ -1,15 +1,15 @@
-// Copyright 2011 Nadia Davidson for The ARC Centre of Excellence in 
-// Coherent X-ray Science. This program is distributed under the GNU  
-// General Public License. We also ask that you cite this software in 
-// publications where you made use of it for any part of the data     
-// analysis. 
+// Copyright 2011 Nadia Davidson for The ARC Centre of Excellence in
+// Coherent X-ray Science. This program is distributed under the GNU
+// General Public License. We also ask that you cite this software in
+// publications where you made use of it for any part of the data
+// analysis.
 
 /**
  * @file Double_2D.h
  * @class Double_2D
- * @author  Nadia Davidson 
+ * @author  Nadia Davidson
  * @date Last modified on 4/5/2012 by T'Mir D. Julius
- * 
+ *
  *
  * @brief A 2-dimensional array of doubles
  *
@@ -23,7 +23,7 @@
 
 #ifndef DOUBLE_2D_H
 #define DOUBLE_2D_H
-//#define DOUBLE_PRECISION 
+//#define DOUBLE_PRECISION
 
 #include <math.h>
 #include <cstring>
@@ -36,7 +36,7 @@ class Real_2D{
 
   /** the underlying 2-D array */
   T * array;
-  
+
   /** the size in x */
   int nx;
 
@@ -51,34 +51,45 @@ class Real_2D{
    * that memory has not been allocated if this method is used.
    */
   Real_2D():nx(0),ny(0){};
-  
+
   /**
    * Constructor that creates a 2D object with the given dimensions.
-   * 
+   *
    * @param x_size The number of samplings in the horizontal direction
    * @param y_size The number of samplings in the vertical direction
    */
   Real_2D(int x_size, int y_size){
     allocate_memory(x_size,y_size);
   };
-  
+
+  /**
+   * Create a Real_2D from an array ptr but don't copy. Useful for python bindings when
+   * arrays are created and allocated using numpy
+   */
+  Real_2D(T * input_array, int x_size, int y_size){
+    array=input_array;
+    nx=x_size;
+    ny=y_size;
+  };
+
+
   /**
    * Destructor. Memory is deallocated here.
    */
   ~Real_2D(){
     if(nx > 0 ){
       delete [] array;
-    }  
-    
+    }
+
   };
-     
+
   /**
    * Allocate memory for the array. This should only be used if
    * the constructor was called with no parameters!
-   * 
+   *
    * @param x_size The number of samplings in the horizontal direction
    * @param y_size The number of samplings in the vertical direction
-   */ 
+   */
   void allocate_memory(int x_size, int y_size){
     nx = x_size;
     ny = y_size;
@@ -103,18 +114,32 @@ class Real_2D{
   /**
    * Copy the contents of another Real_2D array to this one.  Note
    * that this is a quick copy method and no bounds checking is done.
-   * 
+   *
    * @param other_array The array to copy from
    */
   void copy(const Real_2D<T> & other_array){
     memcpy(array,other_array.array, sizeof(T)*nx*ny);
   };
 
+  void set_array_ptr(void * input_array,int x_size,int y_size){
+  array = static_cast<T*>(input_array);
+  nx=x_size;
+  ny=y_size;
+  };
+
+  /**
+   * for cython wrappers where we use a numpy array pointer so that we don't try to delete the numpy array
+   */
+  void unset_sizes(){
+	  nx=0;
+	  ny=0;
+  }
+
   /**
    * Set the value at positions (x,y) WARNING: no bound checking is
    * done!
    *
-   * @param x The horizontal position 
+   * @param x The horizontal position
    * @param y The vertical position
    * @param value The value to set
    */
@@ -127,7 +152,7 @@ class Real_2D{
    * Get the value at positions (x,y) WARNING: no bound checking is
    * done!
    *
-   * @param x The horizontal position 
+   * @param x The horizontal position
    * @param y The vertical position
    * @return The value at (x,y)
    */
@@ -137,16 +162,16 @@ class Real_2D{
     }
     if(y < 0 || y > ny){
       return(0);
-    } 
+    }
 
     return array[x*ny+y];
   };
 
   /**
    * Get the size in x;
-   * 
+   *
    * @return The number of horizontal points.
-   *  
+   *
    */
   inline int get_size_x() const {
     return nx;
@@ -154,9 +179,9 @@ class Real_2D{
 
   /**
    * Get the size in y;
-   * 
+   *
    * @return The number of vertical points.
-   *  
+   *
    */
   inline int get_size_y() const {
     return ny;
@@ -203,9 +228,9 @@ class Real_2D{
   /**
    * Get the sum of all values in the array. This is useful to
    * determine normalisation values.
-   * 
+   *
    * @return The sum of all values in the array
-   *  
+   *
    */
   T get_sum() const{
     T total = 0;
@@ -217,9 +242,9 @@ class Real_2D{
 
   /**
    * Get the sum of the abolute value of all elements in the array.
-   * 
+   *
    * @return The sum of the absolute values of all elements in the array
-   *  
+   *
    */
   T get_abs_sum() const{
     T total = 0;
@@ -239,15 +264,15 @@ class Real_2D{
    */
   T get_ave() const{
     T sum = get_sum();
-    sum = sum/(get_size_x()*get_size_y()); 
+    sum = sum/(get_size_x()*get_size_y());
     return sum;
   }
 
   /**
-   * Get the maximum of all values in the array. 
-   * 
+   * Get the maximum of all values in the array.
+   *
    * @return The maximum value in the array
-   *  
+   *
    */
   T get_max() const{
     if(nx==0||ny==0)
@@ -265,9 +290,9 @@ class Real_2D{
   };
 
   /**
-   * Get the minimum of all values in the array. 
-   * 
-   * @return The minimum value in the array 
+   * Get the minimum of all values in the array.
+   *
+   * @return The minimum value in the array
    */
   T get_min() const {
     if(nx==0||ny==0)
@@ -298,7 +323,7 @@ class Real_2D{
 
 
   /**
-   * Square all array values in-place. 
+   * Square all array values in-place.
    */
   void square(){
     for(int i=0; i< nx; i++)
@@ -307,7 +332,7 @@ class Real_2D{
   };
 
   /**
-   * Square-root all array values in-place. 
+   * Square-root all array values in-place.
    */
   void sq_root(){
     for(int i=0; i< nx; i++)
@@ -347,7 +372,10 @@ class Real_2D{
        }*/
   };
 
+
 };
+
+
 
 #ifndef DOUBLE_PRECISION
 typedef Real_2D<float> Double_2D;

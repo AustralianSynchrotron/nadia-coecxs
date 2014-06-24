@@ -18,13 +18,12 @@ cdef class PyFresnelCDIWF:
     For more details on the purpose of each function see the documentation in FresnelCDI_WF (or BaseCDI for inherited methods).
     """
     def __cinit__(self, PyComplex2D object_estimate, double beam_wavelength, double zone_focal_length, double focal_detector_length, \
-                    double pixel_size,int n_best=1):
+                    double pixel_size, int n_best=1):
         self.thisptr = new FresnelCDI_WF(deref(object_estimate.thisptr), beam_wavelength, zone_focal_length, focal_detector_length,\
                                          pixel_size, n_best)
         self.nx = object_estimate.thisptr.get_size_x()
         self.ny = object_estimate.thisptr.get_size_y()
-    def __dealloc__(self):
-        del self.thisptr
+
     
     def initialiseEstimate(self, seed=0):
         """!Initialise the estimated diffraction pattern.
@@ -33,10 +32,10 @@ cdef class PyFresnelCDIWF:
         """
         self.thisptr.initialise_estimate(seed)
     def iterate(self):
-        """!Perform one iteration, as implemented in PartialCDI.iterate()
-
+        """!Perform one iteration, as implemented in FresnelCDI_WF.iterate()
         """
         return self.thisptr.iterate()
+        
     def getBestResult(self, double & error, int index=0):
         """! Get the current best result of the reconstruction.
         @return the best result (PyComplex2D).
@@ -44,6 +43,7 @@ cdef class PyFresnelCDIWF:
         result = PyComplex2D(self.nx,self.ny)
         result.thisptr=self.thisptr.get_best_result(error,index)
         return result
+    
     def setSupport(self, z_factor,size=1.01):
         """! Set the support
         @param z_factor (double)
@@ -62,7 +62,7 @@ cdef class PyFresnelCDIWF:
         self.thisptr.set_beam_stop(deref(beamstop.thisptr))
     def getError(self):
         """!Get the error.
-        Returns the difference between the estimated diffraction adn the actual diffraction pattern.
+        Returns the difference between the estimated diffraction and the actual diffraction pattern.
         @return the error metric (double)
         """
         return self.thisptr.get_error()

@@ -7,6 +7,7 @@ from cython.operator cimport dereference as deref
 from libcpp.string cimport string
 from libcpp cimport bool
 import numpy as np
+cimport numpy as np
 
 
 cdef class PyDouble2D:
@@ -17,6 +18,7 @@ cdef class PyDouble2D:
     into this class. See Double_2D documentation for further details on methods.
     
     """
+
     
     def __cinit__(self, int x_size=0, int y_size=0):
         """!The constructor."""
@@ -24,11 +26,23 @@ cdef class PyDouble2D:
             self.thisptr = new Double_2D()
         else:
             self.thisptr = new Double_2D(x_size, y_size)
+        self.numpy_flag=0
         if self.thisptr == NULL:
-            raise MemoryError('Not enough memory.')
+            raise MemoryError('Memory error')
+    
+
     
     def __dealloc__(self):
-        del self.thisptr
+        if self.numpy_flag==1:
+            self.thisptr.unset_sizes()
+        if self.thisptr:
+            del self.thisptr
+    
+#    def set_array_ptr(self,np.ndarray[np.double_t, ndim=2, mode="c"] input):
+    def set_array_ptr(self,double[:,:] input):
+      #  cdef np.ndarray[np.double_t, ndim=2, mode="c"] input_c = input
+        self.numpy_flag=1
+        self.thisptr.set_array_ptr( <void *> &input[0,0],input.shape[0],input.shape[1])
     
     def allocateMemory(self,x_size,y_size):
         """! Allocate memory for the underlying Double_2D
@@ -110,18 +124,7 @@ cdef class PyDouble2D:
         """!Take the square of all items in the array in-place
         """
         self.thisptr.square()
-   # def getArray(self):
-   #     """! Return the 2D array as a numpy array.
-        
-    #    @return Returns a numpy array of shape (nx,ny) containing the data.
-    #    """
-    #    shape = self.getShape()
-    #    arr = np.empty(shape)
-    #    for i in range(0, shape[0]):
-    #        for j in range(0, shape[1]):
-     #           arr[i][j] = self.thisptr.get(i, j)
-   #     cdef * 
-    #    return arr
+
     
     def read_tiff(self, filename):
         """! Read data from a tiff file into a PyDouble2D object.
@@ -227,3 +230,4 @@ cdef class PyDouble2D:
         @return The number of positions in the vertical direction
         """
         return self.thisptr.get_size_y()
+

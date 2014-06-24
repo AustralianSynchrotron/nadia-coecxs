@@ -23,7 +23,7 @@
 #define FFTW_PLAN fftw_plan
 #define FFTW_COMPLEX fftw_complex
 #define FFTW_EXECUTE fftw_execute
-#define FFTW_PLAN_WITH_NTHREADs fftw_plan_with_nthreads
+#define FFTW_PLAN_WITH_NTHREADS fftw_plan_with_nthreads
 #define FFTW_INIT_THREADS fftw_init_threads
 #define FFTW_PLAN_DFT_2D fftw_plan_dft_2d
 #define FFTW_PLAN_DFT_R2C_2D fftw_plan_dft_r2c_2d

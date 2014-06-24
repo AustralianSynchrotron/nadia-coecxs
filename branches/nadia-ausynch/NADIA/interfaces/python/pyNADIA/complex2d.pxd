@@ -1,6 +1,6 @@
 cimport cython
 from double2d cimport Double_2D
-from libcpp cimport bool 
+from libcpp cimport bool
 
 cdef extern from "Complex_2D.h":
     cdef int MAG "MAG"
@@ -11,9 +11,9 @@ cdef extern from "Complex_2D.h":
     cdef int IMAG "IMAG"
     cdef int MAG_SQ "MAG_SQ"
     cdef cppclass ComplexR_2D[T]:
-        #Complex_2D() except+
-        ComplexR_2D(int,int) except+
-        ComplexR_2D(const ComplexR_2D[T]& )
+        ComplexR_2D() except+
+        ComplexR_2D(int x,int y) except+
+        ComplexR_2D(const ComplexR_2D[T]& ) except+
         #Complex_2D& operator=(const Complex_2D& rhs)
         void set_value(int x, int y, int type, T value)
         void set_real(int x, int y, T value)
@@ -23,6 +23,8 @@ cdef extern from "Complex_2D.h":
         T get_mag(int x, int y)
         T get_phase(int x, int y)
         T get_value(int x, int y, int type)
+        void * get_array_ptr() #this is wrong because the array ptr is to a FFTW_COMPLEX array, not a double/float array
+        void set_array_ptr(void * input,int x_size, int y_size)
         int get_size_x()
         int get_size_y()
         void get_2d(int type, Double_2D & result)
@@ -44,6 +46,7 @@ cdef extern from "Complex_2D.h":
         void set_fftw_type(int type)
         ComplexR_2D get_padded(int x_add, int y_add)
         ComplexR_2D get_unpadded(int x_add, int y_add)
+        void unset_sizes()
 IF DOUBLE_PRECISION !='1':
     ctypedef ComplexR_2D[float] Complex_2D
 ELSE:
@@ -52,4 +55,5 @@ ELSE:
 cdef class PyComplex2D:
     cdef Complex_2D *thisptr
     cdef object __weakref__
-    
+    cdef int numpy_flag
+

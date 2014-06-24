@@ -1,15 +1,16 @@
-// Copyright 2011 Nadia Davidson for The ARC Centre of Excellence in 
-// Coherent X-ray Science. This program is distributed under the GNU  
-// General Public License. We also ask that you cite this software in 
-// publications where you made use of it for any part of the data     
-// analysis. 
+// Copyright 2011 Nadia Davidson for The ARC Centre of Excellence in
+// Coherent X-ray Science. This program is distributed under the GNU
+// General Public License. We also ask that you cite this software in
+// publications where you made use of it for any part of the data
+// analysis.
 
-#include <iostream>  
+#include <iostream>
 #include <Complex_2D.h>
 #include <stdlib.h>
 #include <cstring>
 #include <fftw3.h>
 #include <types.h>
+#include <complex>
 
 using namespace std;
 
@@ -30,6 +31,16 @@ ComplexR_2D<T>::ComplexR_2D(int x_size, int y_size){
   f_backward = 0;
   fftw_type = FFTW_MEASURE;
 }
+
+/*
+ * Constructor which doesn't allocate any memory, use with caution.
+ */
+template<class T>
+ComplexR_2D<T>::ComplexR_2D(){
+	f_forward = 0;
+	f_backward = 0;
+	fftw_type = FFTW_MEASURE;
+};
 
 /*Copy Constructor*/
 template<class T>
@@ -66,7 +77,7 @@ ComplexR_2D<T>::ComplexR_2D(const Double_2D& object){
   //set the array size
   nx = object.get_size_x();
   ny = object.get_size_y();
-  
+
   array=(FFTW_COMPLEX*) FFTW_MALLOC(sizeof(FFTW_COMPLEX)*nx*ny);
 
 
@@ -89,7 +100,9 @@ ComplexR_2D<T>::ComplexR_2D(const Double_2D& object){
 template<class T>
 ComplexR_2D<T>::~ComplexR_2D(){
 
-FFTW_FREE(array);
+if (nx>0){
+	FFTW_FREE(array);
+}
 if(f_forward)
   FFTW_DESTROY_PLAN(f_forward);
 if(f_backward)
@@ -122,7 +135,7 @@ void ComplexR_2D<T>::set_value(int x, int y, int component, T value){
     set_phase(x,y,value);
     break;
   default:
-    cout << "Value type in Complex_2D::set_value is unknown: " 
+    cout << "Value type in Complex_2D::set_value is unknown: "
       << component << ". Must be REAL, IMAG, MAG or PHASE" << endl;
     exit(1);
   }
@@ -144,7 +157,7 @@ T ComplexR_2D<T>::get_value(int x, int y, int type) const {
     return get_real(x,y);
   case IMAG:
     return get_imag(x,y);
-  case PHASE: //goes between -pi and pi 
+  case PHASE: //goes between -pi and pi
     return get_phase(x,y);
   case MAG_SQ:
     return pow(get_mag(x,y),2); //the square of the magnitude
@@ -170,7 +183,7 @@ template<class T>
 void ComplexR_2D<T>::scale(T scale_factor){
 
   for(int i=0; i < nx; ++i){
-    for(int j=0; j < ny; ++j){ 
+    for(int j=0; j < ny; ++j){
       array[i*ny + j][REAL]*=scale_factor;
       array[i*ny + j][IMAG]*=scale_factor;
 
@@ -290,7 +303,7 @@ ComplexR_2D<T> * ComplexR_2D<T>::clone() const {
       new_complex->set_real(i,j, get_real(i,j));
       new_complex->set_imag(i,j, get_imag(i,j));
     }
-  } 
+  }
 
   return new_complex;
 }
@@ -333,8 +346,8 @@ void ComplexR_2D<T>::invert(bool scale){
   for(int i=0; i < nx; ++i){
     for(int j=0; j < middle_y; ++j){
 
-      int j_new = j+middle_y; 
-      int i_new = i+middle_x; 
+      int j_new = j+middle_y;
+      int i_new = i+middle_x;
 
       if(i >=  middle_x)
 	i_new = i_new - 2*middle_x;
@@ -400,6 +413,24 @@ int ComplexR_2D<T>::check_bounds(int x, int y) const{
 }
 
 template<class T>
+void * ComplexR_2D<T>::get_array_ptr(){
+	return &array;
+}
+
+template<class T>
+void ComplexR_2D<T>::set_array_ptr(void * input_array, int x_size, int y_size){
+	array = static_cast<FFTW_COMPLEX*>(input_array);
+	nx=x_size;
+	ny=y_size;
+}
+
+template<class T>
+void ComplexR_2D<T>::unset_sizes(){
+	nx=0;
+	ny=0;
+}
+
+template<class T>
 ComplexR_2D<T> ComplexR_2D<T>::get_padded(int x_add, int y_add){
 
   ComplexR_2D<T> padded(nx+2*x_add, ny+2*y_add);
@@ -437,8 +468,8 @@ ComplexR_2D<T> ComplexR_2D<T>::get_padded(int x_add, int y_add){
       padded.set_real(i+x_add, j+y_add, get_real(i, j));
       padded.set_imag(i+x_add, j+y_add, get_imag(i, j));
       //std::cout<<i<<", "<<j<<", "<<x_add<<"\n";
-    } 
-  } 
+    }
+  }
 
   return padded;
 }
@@ -462,24 +493,26 @@ ComplexR_2D<T> ComplexR_2D<T>::get_unpadded(int x_add, int y_add){
 template<class T>
 void ComplexR_2D<T>::initialise_fft(){
 
-#if defined(MULTI_THREADED) 		
-  int numthreads=FFTW_INIT_THREADS(); 		
-  FFTW_PLAN_WITH_NTHREADS(NUM_THREADS); 		
+#if defined(MULTI_THREADED)
+  int numthreads=FFTW_INIT_THREADS();
+  FFTW_PLAN_WITH_NTHREADS(NUM_THREADS);
 #endif
   //creating the plan will erase the content of the array
   //so we need to be a bit tricky here.
   FFTW_COMPLEX *tmp_array;
   tmp_array = (FFTW_COMPLEX*) FFTW_MALLOC(sizeof(FFTW_COMPLEX)*nx*ny);
+  std::memcpy(array,tmp_array,sizeof(FFTW_COMPLEX)*nx*ny);
+  //tmp_array = (FFTW_COMPLEX*) FFTW_MALLOC(sizeof(FFTW_COMPLEX)*nx*ny);
   //make the plans
-  f_backward = FFTW_PLAN_DFT_2D(nx, ny, tmp_array, tmp_array,
+  f_backward = FFTW_PLAN_DFT_2D(nx, ny, array, array,
 				FFTW_BACKWARD, fftw_type);
-  f_forward = FFTW_PLAN_DFT_2D(nx, ny,tmp_array,tmp_array,
+  f_forward = FFTW_PLAN_DFT_2D(nx, ny,array,array,
 			       FFTW_FORWARD, fftw_type);
-  std::memcpy(tmp_array,array,sizeof(FFTW_COMPLEX)*nx*ny);
-  FFTW_FREE(array);
+
+  std::memcpy(array,tmp_array,sizeof(FFTW_COMPLEX)*nx*ny);
+  FFTW_FREE(tmp_array);
 
 
-  array = tmp_array;
 
 }
 
@@ -488,7 +521,7 @@ void ComplexR_2D<T>::perform_forward_fft(){
 
   //make a new forward fft plan if we haven't made one already.
   if(f_forward==0 )
-    initialise_fft();  
+    initialise_fft();
   FFTW_EXECUTE(f_forward);
 
 }
@@ -506,7 +539,7 @@ void ComplexR_2D<T>::perform_backward_fft(){
 //this object is fourier transformed and the result placed in 'result'
 template<class T>
 void ComplexR_2D<T>::perform_backward_fft_real(Double_2D & result){
- 
+
   FFTW_PLAN fftw;
   fftw=FFTW_PLAN_DFT_C2R_2D(nx,ny,array,result.array,FFTW_ESTIMATE);
   FFTW_EXECUTE(fftw);

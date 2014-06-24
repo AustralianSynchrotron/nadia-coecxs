@@ -1,16 +1,16 @@
-// Copyright 2011 Nadia Davidson for The ARC Centre of Excellence in 
-// Coherent X-ray Science. This program is distributed under the GNU  
-// General Public License. We also ask that you cite this software in 
-// publications where you made use of it for any part of the data     
-// analysis. 
+// Copyright 2011 Nadia Davidson for The ARC Centre of Excellence in
+// Coherent X-ray Science. This program is distributed under the GNU
+// General Public License. We also ask that you cite this software in
+// publications where you made use of it for any part of the data
+// analysis.
 
 /**
  * @file Complex_2D.h
  * @class Complex_2D
- * @author Nadia Davidson 
+ * @author Nadia Davidson
  * @date Last Modified on 21/2/2011
  *
- * @brief A 2-dimensional array of complex numbers 
+ * @brief A 2-dimensional array of complex numbers
  *
  * This class represents a 2D complex field. Setter and getter methods
  * are provided along with some other useful functions (add,
@@ -26,6 +26,7 @@
 #include <fftw3.h>
 #include <Double_2D.h>
 #include <types.h>
+#include <complex>
 
 #ifndef NUM_THREADS
 #define NUM_THREADS 1
@@ -50,12 +51,13 @@ class ComplexR_2D{
 
   int malloc_size;
 
-  
+
  public:
 
+  ComplexR_2D();
   /**
    * Constructor that creates a 2D object with the given dimensions.
-   * 
+   *
    * @param x_size The number of samplings in the horizontal direction
    * @param y_size The number of samplings in the vertical direction
    *
@@ -117,7 +119,7 @@ class ComplexR_2D{
   };
 
   /**
-   *Assignment Operator to make a Complex_2D with zero imaginary 
+   *Assignment Operator to make a Complex_2D with zero imaginary
    *component from a Double_2D
    */
 
@@ -131,7 +133,7 @@ class ComplexR_2D{
       FFTW_DESTROY_PLAN(f_forward);
     if(f_backward)
       FFTW_DESTROY_PLAN(f_backward);
- 
+
     malloc_size=sizeof(FFTW_COMPLEX)*rhs.get_size_x()*rhs.get_size_y();
     array=(FFTW_COMPLEX*) FFTW_MALLOC(malloc_size);
 
@@ -154,15 +156,15 @@ class ComplexR_2D{
 
   /**
    * Set the value at point x,y. Note that this is
-   * the slow method. For fast, but unsafe, methods 
+   * the slow method. For fast, but unsafe, methods
    * use set_real or set_imag.
-   * 
+   *
    * @param x The x position
    * @param y The y position
-   * @param type Which component to set. The options are either: 
+   * @param type Which component to set. The options are either:
    * "REAL" or "IMAG"
    * @param value The value which it will be set to
-   *  
+   *
    */
   void set_value(int x, int y, int type, T value);
 
@@ -170,11 +172,11 @@ class ComplexR_2D{
   /**
    * Set the real components at point x,y. Note that this is
    * an unsafe method as no bounds checking is performed.
-   * 
+   *
    * @param x The x position
    * @param y The y position
    * @param value The value which it will be set to
-   *  
+   *
    */
   inline void set_real(int x, int y, T value){
     array[x*ny+y][REAL] = value;
@@ -183,11 +185,11 @@ class ComplexR_2D{
   /**
    * Set the imaginary components at point x,y. Note that this is
    * an unsafe method as no bounds checking is performed.
-   * 
+   *
    * @param x The x position
    * @param y The y position
    * @param value The value which it will be set to
-   *  
+   *
    */
   inline void set_imag(int x, int y, T value){
     array[x*ny+y][IMAG] = value;
@@ -196,11 +198,11 @@ class ComplexR_2D{
   /**
    * Set the magnitude at point x,y, while preserving the phase. Note
    * that this is an unsafe method as no bounds checking is performed.
-   * 
+   *
    * @param x The x position
    * @param y The y position
    * @param value The value which it will be set to
-   *  
+   *
    */
   inline void set_mag(int x, int y, T value){
     double mag = get_mag(x,y);
@@ -217,11 +219,11 @@ class ComplexR_2D{
   /**
    * Set the phase at point x,y, while preserving the magnitude. Note
    * that this is an unsafe method as no bounds checking is performed.
-   * 
+   *
    * @param x The x position
    * @param y The y position
    * @param value The value which it will be set to
-   *  
+   *
    */
   inline void set_phase(int x, int y, T value){
     double mag = get_mag(x,y);
@@ -233,10 +235,10 @@ class ComplexR_2D{
   /**
    * Get the real components at point x,y. Note that this is
    * an unsafe method as no bounds checking is performed.
-   * 
+   *
    * @param x The horizontal position
    * @param y The vertical position
-   * @return The value at (x,y)  
+   * @return The value at (x,y)
    */
   inline T get_real(int x, int y) const{
     return array[x*ny+y][REAL];
@@ -245,10 +247,10 @@ class ComplexR_2D{
   /**
    * Get the imaginary components at point x,y. Note that this is
    * an unsafe method as no bounds checking is performed.
-   * 
+   *
    * @param x The horizontal position
    * @param y The vertical position
-   * @return The value at (x,y)  
+   * @return The value at (x,y)
    */
   inline T get_imag(int x, int y) const{
     return array[x*ny+y][IMAG];
@@ -257,10 +259,10 @@ class ComplexR_2D{
   /**
    * Get the magnitude at point x,y, @f$ \sqrt{\mathrm{real}^2 + \mathrm{imag}^2} @f$
    * Note that this is an unsafe method as no bounds checking is performed.
-   * 
+   *
    * @param x The horizontal position
    * @param y The vertical position
-   * @return The value at (x,y)  
+   * @return The value at (x,y)
    */
   inline T get_mag(int x, int y) const{
     return sqrt(array[x*ny+y][REAL]*array[x*ny+y][REAL]+
@@ -273,10 +275,10 @@ class ComplexR_2D{
    * 0. Hence, if you are setting values in a Complex_2D array for the
    * first time, you must use set_mag and then set_phase.  Also not,
    * this is an unsafe method as no bounds checking is performed.
-   * 
+   *
    * @param x The horizontal position
    * @param y The vertical position
-   * @return The value at (x,y)  
+   * @return The value at (x,y)
    */
 
   inline T get_phase(int x, int y) const{
@@ -292,24 +294,24 @@ class ComplexR_2D{
 
   /**
    * Get the value at point x,y. Note that this is
-   * the slow method. For fast, but unsafe, methods 
+   * the slow method. For fast, but unsafe, methods
    * use get_real, get_imag or get_mag.
-   * 
+   *
    * @param x The x position
    * @param y The y position
-   * @param type Which component to set. The options are either: 
+   * @param type Which component to set. The options are either:
    * "REAL","IMAG","MAG","MAG_SQ" or "PHASE"
    * @return The value
-   *  
+   *
    */
-  T get_value(int x, int y, int type) const; 
+  T get_value(int x, int y, int type) const;
 
 
   /**
    * Get the size in x;
-   * 
+   *
    * @return The number of horizontal points.
-   *  
+   *
    */
   int get_size_x() const{
     return nx;
@@ -317,18 +319,18 @@ class ComplexR_2D{
 
   /**
    * Get the size in y;
-   * 
+   *
    * @return The number of vertical points.
-   *  
+   *
    */
   int get_size_y() const{
     return ny;
   };
 
   /**
-   * Get a 2D array of real numbers. 
-   * 
-   * @param type Which type of value is wanted. The options are either: 
+   * Get a 2D array of real numbers.
+   *
+   * @param type Which type of value is wanted. The options are either:
    * "REAL","IMAG","MAG","MAG_SQ" or "PHASE"
    * @param result A 2D array. The array will be filled with the
    * result. Note: This method does not allocated memory for the array,
@@ -337,8 +339,8 @@ class ComplexR_2D{
   void get_2d(int type, Double_2D & result) const;
 
   /**
-   * Scale the real and imaginary components of the array by a factor. 
-   * 
+   * Scale the real and imaginary components of the array by a factor.
+   *
    * @param scale_factor Number which is multiplied by all components
    * of the field.
    */
@@ -347,12 +349,12 @@ class ComplexR_2D{
   /**
    * Add another Complex_2D to this Complex_2D. The values in this object
    * will be modified.
-   * 
+   *
    * @param c2 The Complex_2D to add.
    * @param scale If this value is non-empty, or not 1, c2 will be
    * scaled before being added to the Complex_2D,
    * @f $\mathrm{this} = \mathrm{this} +
-   * \mathrm{scale} \times \mathrm{c2} $ @f . 
+   * \mathrm{scale} \times \mathrm{c2} $ @f .
    * Using this function is more efficient than
    * calling Complex_2D::scale() followed by Complex_2D:add()
    * separately.
@@ -363,12 +365,12 @@ class ComplexR_2D{
   /**
    * Multiple another Complex_2D to this Complex_2D. The values in this object
    * will be modified.
-   * 
+   *
    * @param c2 The Complex_2D to add.
    * @param scale If this value is non-empty, or not 1, c2 will be
    * scaled before being added to the Complex_2D,
    * @f $\mathrm{this} = \mathrm{this} \times
-   * \mathrm{scale} \times \mathrm{c2} $ @f . 
+   * \mathrm{scale} \times \mathrm{c2} $ @f .
    * Using this function is more efficient than
    * calling Complex_2D::scale() followed by Complex_2D:multiply()
    * separately.
@@ -379,12 +381,12 @@ class ComplexR_2D{
   /**
    * Multiple a Double_2D to this Complex_2D. The values in this object
    * will be modified.
-   * 
+   *
    * @param d2 The Double_2D to multiply.
    * @param scale If this value is non-empty, or not 1, d2 will be
    * scaled before being multiplied with this Complex_2D,
    * @f $\mathrm{this} = \mathrm{this} \times
-   * \mathrm{scale} \times \mathrm{c2} $ @f . 
+   * \mathrm{scale} \times \mathrm{c2} $ @f .
    * Using this function is more efficient than
    * calling Complex_2D::scale() followed by Complex_2D:multiply()
    * separately.
@@ -396,21 +398,26 @@ class ComplexR_2D{
 
   /**
    * Get the norm of this Complex_2D: @f $     $ @f.
-   * 
+   *
    * @return @f $ \sqrt{ \sum_{x,y}{ \mathrm{|C(x,y)|^2} }  } $ @f.
    */
   T get_norm() const;
 
+  void * get_array_ptr();
+
+  void set_array_ptr(void * input, int x_size, int y_size);
+
+  void unset_sizes();
   /**
    * Create a new Complex_2D with the same values as this one.
-   * 
+   *
    * @return The new Complex_2D
    */
   ComplexR_2D * clone() const;
 
   /**
    * Copy the values from another Complex_2D to this one.
-   * 
+   *
    * @param c The Complex_2D which will be copied from.
    */
   void copy(const ComplexR_2D & c);
@@ -419,13 +426,13 @@ class ComplexR_2D{
   /**
    * Rearrange the matrix so that the corners are placed in the
    * center. This is used after fourier transforming. i.e.
-   * if the array is represented by as 4 quadrants: 
+   * if the array is represented by as 4 quadrants:
    * <br> 1 2
    * <br> 3 4
    * <p> It becomes:
    * <br> 4 3
    * <br> 2 1
-   * 
+   *
    * This function may also scale the array while it inverts it,
    * required. This is aimed at reducing the CPU time needed, as both
    * tasks are often performed after fourier transforming.
@@ -441,7 +448,7 @@ class ComplexR_2D{
 
   /**
    * Forward fourier transform the Complex_2D object. The
-   * Complex_2D is not scaled to give the same normalisation as 
+   * Complex_2D is not scaled to give the same normalisation as
    * before the transform. The invert() function can be used to
    * acheive this.
    *
@@ -450,7 +457,7 @@ class ComplexR_2D{
 
   /**
    * Backward fourier transform the Complex_2D object. The
-   * Complex_2D is not scaled to give the same normalisation as 
+   * Complex_2D is not scaled to give the same normalisation as
    * before the transform. The invert() function can be used to
    * acheive this.
    *
@@ -483,7 +490,7 @@ class ComplexR_2D{
   ComplexR_2D get_padded(int x_add, int y_add);
 
   /**
-   * Create the same complex without the some padding. 
+   * Create the same complex without the some padding.
    */
   ComplexR_2D get_unpadded(int x_add, int y_add);
 
@@ -493,7 +500,7 @@ class ComplexR_2D{
 
   /**
    * Check that an (x,y) position is within the bounds of the array
-   * 
+   *
    * @param x The horizontal position to check
    * @param y The vertical position to check
    */

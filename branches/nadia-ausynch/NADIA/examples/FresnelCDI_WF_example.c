@@ -51,8 +51,8 @@ int main(int argc, char * argv[]){
 
   //create the white field (wf) object which will store
   //the reconstucted illumination at the detector plane.
-  Complex_2D wf(nx,nx); 
-  
+  Complex_2D wf(nx,nx);
+
   //make the projection operator
   FresnelCDI_WF proj(wf, //inital estimate
 		     4.892e-10, //wavelength
@@ -60,24 +60,24 @@ int main(int argc, char * argv[]){
 		     0.909513 - 16.353e-3, //focal-to-detector
 		     13.5e-6); //pixel size
 
-  //set the support 
+  //set the support
   //this will set a circular support of diameter 165micro
   proj.set_support(163e-6);
-  
+
   //set the intensity
   proj.set_intensity(data);
-  
+
   //no need to set the algorithm this time.
   //since there is only one for white field reconstruction.
 
-  //initialise the current detector wavefield 
+  //initialise the current detector wavefield
   //check FresnelCDI_WF.h to see what it is initialised to.
   proj.initialise_estimate(0);
-  
+
   /*** run the reconstruction ************/
 
   //make a 2D array and allocate some memory.
-  //This will be used to output the image of the 
+  //This will be used to output the image of the
   //current estimate.
   Double_2D result(nx,nx);
 
@@ -85,10 +85,12 @@ int main(int argc, char * argv[]){
 
     cout << "iteration " << i << endl;
 
-    //apply the iterations  
-    proj.iterate(); 
+    //apply the iterations
+    proj.iterate();
     cout << "Error: " << proj.get_error() << endl;
 
+    cout<<wf.get_value(1000,1000,REAL)<<endl;
+    cout<<wf.get_value(1000,1000,IMAG)<<endl;
     if(i%5==0){
       //output the current estimate at the detector
       //(magnitude and phase)
@@ -103,9 +105,9 @@ int main(int argc, char * argv[]){
       write_ppm(temp_str2.str(),result);
     }
   }
-  
+
   //copy the result back into an array which is 1024x1024
-  Complex_2D wf_(original_nx,original_nx); 
+  Complex_2D wf_(original_nx,original_nx);
   for(int i=0; i<original_nx; i++){
     for(int j=0; j<original_nx; j++){
       wf_.set_real(i,j,wf.get_real(i+padding,j+padding));

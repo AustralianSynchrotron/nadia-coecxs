@@ -8,7 +8,7 @@ all: $(LIB)
 
 $(LIB): $(IDL_O)
 	@CXX@ -shared @CXXFLAGS@ -o $(LIB) $(IDL_O) \
-	-L@BASE@/lib/ -lNADIA \
+	-L@BASE@/lib/ -l@NADIA@ \
 	@LDFLAGS@ @LIBS@
 
 $(IDL_O): $(IDL_SRC)

@@ -8,40 +8,40 @@ from libcpp cimport bool
 
 cdef extern from "FresnelCDI.h":
     cdef cppclass FresnelCDI(BaseCDI):
-         FresnelCDI(Complex_2D & initial_guess) except+
-         FresnelCDI(Complex_2D & initial_guess, int n_best) except+
-         FresnelCDI(Complex_2D & initial_guess,\
-                    Complex_2D & white_field,\
-                    double beam_wavelength, double focal_detector_length,\
-                    double focal_sample_length, double pixel_size) except+
-         FresnelCDI(Complex_2D & initial_guess,\
-                    Complex_2D & white_field,\
-                    double beam_wavelength,double focal_detector_length,\
-                    double focal_sample_length, double pixel_size, double normalisation) except+
-         FresnelCDI(Complex_2D & initial_guess,\
-                    Complex_2D & white_field,\
-                    double beam_wavelength, double focal_detector_length,\
-                    double focal_sample_length, double pixel_size, double normalisation,int n_best)
-         void initialise_estimate() 
-         void initialise_estimate(int seed)
-         void auto_set_norm()
-         int iterate()
-         void get_transmission_function(Complex_2D & result)
-         void get_transmission_function(Complex_2D & result, Complex_2D * esw)
-         void apply_support(Complex_2D & complex)
-         void set_transmission_function(Complex_2D & transmission)
-         void set_transmission_function(Complex_2D & transmission, Complex_2D *esw)
-         void scale_intensity(Complex_2D & c)
-         void propagate_from_detector(Complex_2D & c)
-         void propagate_to_detector(Complex_2D & c)
-         void set_normalisation(double normalisation)
-         void set_experimental_parameters(double beam_wavelength, \
+        FresnelCDI(Complex_2D & initial_guess) except +
+        FresnelCDI(Complex_2D & initial_guess, int n_best) except +
+        FresnelCDI(Complex_2D & initial_guess, \
+                    Complex_2D & white_field, \
+                    double beam_wavelength, double focal_detector_length, \
+                    double focal_sample_length, double pixel_size) except +
+        FresnelCDI(Complex_2D & initial_guess, \
+                    Complex_2D & white_field, \
+                    double beam_wavelength, double focal_detector_length, \
+                    double focal_sample_length, double pixel_size, double normalisation) except +
+        FresnelCDI(Complex_2D & initial_guess, \
+                    Complex_2D & white_field, \
+                    double beam_wavelength, double focal_detector_length, \
+                    double focal_sample_length, double pixel_size, double normalisation, int n_best)
+        void initialise_estimate() 
+        void initialise_estimate(int seed)
+        void auto_set_norm()
+        int iterate()
+        void get_transmission_function(Complex_2D & result)
+        void get_transmission_function(Complex_2D & result, Complex_2D * esw)
+        void apply_support(Complex_2D & complex)
+        void set_transmission_function(Complex_2D & transmission)
+        void set_transmission_function(Complex_2D & transmission, Complex_2D * esw)
+        void scale_intensity(Complex_2D & c)
+        void propagate_from_detector(Complex_2D & c)
+        void propagate_to_detector(Complex_2D & c)
+        void set_normalisation(double normalisation)
+        void set_experimental_parameters(double beam_wavelength, \
                double focal_detector_length, double focal_sample_length, double pixel_size)
-         void set_norm(double new_normalisation)
-         const Complex_2D & get_illumination_at_sample()
-         void set_support(const Double_2D & object_support)
-         void set_support(const Double_2D & object_support, bool soften)
+        void set_norm(double new_normalisation)
+        const Complex_2D & get_illumination_at_sample()
+        void set_support(const Double_2D & object_support)
+        void set_support(const Double_2D & object_support, bool soften)
 cdef class PyFresnelCDI:
-    cdef FresnelCDI *thisptr
+    cdef FresnelCDI * thisptr
     cdef object __weakref__
-    cdef int nx,ny
+    cdef int nx, ny

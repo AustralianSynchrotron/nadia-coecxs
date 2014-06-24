@@ -6,7 +6,8 @@ from complex2d cimport Complex_2D, MAG, IMAG
 from double2d cimport Double_2D, PyDouble2D
 from cython.operator cimport dereference as deref
 from libcpp.string cimport string
-
+import numpy as np
+cimport numpy as np
 
 cdef class PyComplex2D:
     """!A class wrapping the Complex_2D C class. 
@@ -15,13 +16,25 @@ cdef class PyComplex2D:
     of the public methods of the C class. For further details on each method, see the corresponding method in Complex_2D.
     """
     
-    def __cinit__(self, int nx, int ny):
-        self.thisptr = new Complex_2D(nx, ny)
+    def __cinit__(self, int nx=0, int ny=0):
+        if nx==0 and ny ==0:
+            self.thisptr = new Complex_2D()
+        else:
+            self.thisptr = new Complex_2D(nx, ny)
+        self.numpy_flag=0
+
+#    def set_array_ptr(self,np.ndarray[np.complex128_t, ndim=2, mode="c"] input):
+    def set_array_ptr(self,double complex[:,:] input):
+       # cdef np.ndarray[np.complex128_t, ndim=2, mode="c"] input_c = input
+        self.numpy_flag=1
+        self.thisptr.set_array_ptr( <void *> &input[0,0],input.shape[0],input.shape[1])
 
     def copyconstruct(self, PyComplex2D other):
         self.thisptr = new Complex_2D(< Complex_2D > deref(other.thisptr))
 
     def __dealloc__(self):
+        if self.numpy_flag==1:
+            self.thisptr.unset_sizes()
         if self.thisptr:
             del self.thisptr
 

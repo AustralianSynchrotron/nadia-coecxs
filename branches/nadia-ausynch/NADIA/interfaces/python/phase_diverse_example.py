@@ -122,22 +122,22 @@ try:
     #iteration!
         pd.iterate()
 
-    object = PyComplex2D(nx,ny)
-    object=pd.getTransmission()
+    theobject = PyComplex2D(nx,ny)
+    theobject=pd.getTransmission()
     x,y=pd.getFinalXPosition(1), pd.getFinalYPosition(1)
     print x,y
     
-    result=object.get2dMAG()
+    result=theobject.get2dMAG()
     
     #write the magnitude and phase of it to an image file
 
     result.write_image("object_mag_recovered.tiff",False,0.4,1.0)
 
-    result=object.get2dPHASE()
+    result=theobject.get2dPHASE()
     result.write_image("object_phase_recovered.tiff",False, -1.2,0)
     
     #save the transmission function in case we want to use it later.
-    object.write_cplx("trans.cplx")  
+    theobject.write_cplx("trans.cplx")  
 
 except:
     print 'there was an error'
